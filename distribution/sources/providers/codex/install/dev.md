@@ -1,0 +1,45 @@
+# Install HAWP — Codex Provider (Dev Branch)
+
+Development install of HAWP kit plus Codex `AGENTS.md` instructions.
+
+**Source -> target mapping:**
+
+| `core/providers/.codex/` | Your repo |
+|--------------------------|-----------|
+| `AGENTS.md.seed` | `AGENTS.md` |
+
+## Prerequisites
+
+- A repository where you use Codex.
+- `curl` and `tar`.
+
+## Installation Steps
+
+1. Open your target repository root in a terminal.
+2. Run the **Install Command (Copy/Paste)** block below (`REF="dev"`, `PROVIDER="codex"`).
+3. Confirm `.hawp/kit/` and `AGENTS.md` exist.
+
+Optional: `export HAWP_LOCAL_CORE="/absolute/path/to/human-ai-workflow-protocol/core"` for local testing.
+
+## What Was Added
+
+- `.hawp/kit/**` — agent-neutral HAWP kit (always installed).
+- `AGENTS.md` — Codex repo-local instructions, seeded only when missing.
+- `.hawp/work/` scaffold — seeded once when missing.
+
+## What Was NOT Changed
+
+- `.github/**`
+- `.cursor/**`
+- `.continue/**`
+- `.claude/**`
+- Runtime CLI participant adapters.
+- `.hawp/work/**` project records.
+
+## Other guides
+
+- Main branch: `distribution/generated/codex/install/main.md`
+- GitHub/Copilot: `distribution/generated/github/install/dev.md`
+- Cursor: `distribution/generated/cursor/install/dev.md`
+- Continue: `distribution/generated/continue/install/dev.md`
+

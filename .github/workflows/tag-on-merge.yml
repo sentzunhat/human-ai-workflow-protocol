@@ -1,0 +1,50 @@
+name: Tag and release on merge to main
+
+# When dev is merged into main, read the version from version.go and
+# trigger the release workflow via workflow_dispatch. The release workflow
+# creates the tag itself, builds the 6 binaries, and publishes the release.
+#
+# Skips if the release tag already exists — so re-pushing main without
+# bumping the version never double-releases or errors.
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  trigger-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version from version.go
+        id: version
+        run: |
+          version=$(grep 'var Version = ' librarian/src/internal/domain/update/version.go \
+            | sed 's/.*"\(.*\)"/\1/')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if tag already exists
+        id: check
+        run: |
+          if git ls-remote --tags origin "${{ steps.version.outputs.tag }}" | grep -q .; then
+            echo "Tag ${{ steps.version.outputs.tag }} already exists — skipping release."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Trigger release workflow
+        if: steps.check.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run release-librarian-go.yml \
+            --field version="${{ steps.version.outputs.version }}" \
+            --field draft=false

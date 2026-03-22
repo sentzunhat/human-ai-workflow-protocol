@@ -1,0 +1,120 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags (v0.0.1, v0.1.0, etc.)
+  workflow_dispatch:  # Allow manual trigger from Actions tab
+    inputs:
+      version:
+        description: 'Version to release (e.g., 0.0.1)'
+        required: true
+        type: string
+
+jobs:
+  # ========== BUILD MATRIX: 6 PLATFORMS ==========
+  build:
+    name: Build ${{ matrix.os }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.runs-on }}
+    strategy:
+      matrix:
+        include:
+          # Windows builds
+          - os: windows
+            arch: amd64
+            runs-on: windows-latest
+            ext: .exe
+          - os: windows
+            arch: arm64
+            runs-on: windows-latest
+            ext: .exe
+          # macOS builds
+          - os: darwin
+            arch: amd64
+            runs-on: macos-latest  # Intel Macs (latest stable)
+            ext: ''
+          - os: darwin
+            arch: arm64
+            runs-on: macos-14  # Apple Silicon
+            ext: ''
+          # Linux builds
+          - os: linux
+            arch: amd64
+            runs-on: ubuntu-latest
+            ext: ''
+          - os: linux
+            arch: arm64
+            runs-on: ubuntu-latest
+            ext: ''
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      # Run tests first — fail if any fail
+      - name: Run Tests
+        working-directory: librarian/src
+        env:
+          INTEGRATION: "1"
+        run: |
+          go test ./...
+
+      # Compile binary for target OS/arch
+      - name: Build binary
+        working-directory: librarian/src
+        env:
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+          CGO_ENABLED: 0  # Pure Go, no C dependencies
+        run: |
+          go build -o hawp-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} ./cmd/hawp
+
+      # Generate SHA256 for verification (cross-platform via openssl)
+      - name: Generate checksum
+        working-directory: librarian/src
+        run: |
+          openssl dgst -sha256 -r hawp-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} | awk '{print $1 "  " $2}' > hawp-${{ matrix.os }}-${{ matrix.arch }}.sha256
+
+      # Upload artifacts for release job (files created in librarian/src via working-directory above)
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hawp-${{ matrix.os }}-${{ matrix.arch }}
+          path: |
+            librarian/src/hawp-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
+            librarian/src/hawp-${{ matrix.os }}-${{ matrix.arch }}.sha256
+
+  # ========== RELEASE CREATION ==========
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            hawp-windows-amd64/hawp-windows-amd64.exe
+            hawp-windows-amd64/hawp-windows-amd64.sha256
+            hawp-windows-arm64/hawp-windows-arm64.exe
+            hawp-windows-arm64/hawp-windows-arm64.sha256
+            hawp-darwin-amd64/hawp-darwin-amd64
+            hawp-darwin-amd64/hawp-darwin-amd64.sha256
+            hawp-darwin-arm64/hawp-darwin-arm64
+            hawp-darwin-arm64/hawp-darwin-arm64.sha256
+            hawp-linux-amd64/hawp-linux-amd64
+            hawp-linux-amd64/hawp-linux-amd64.sha256
+            hawp-linux-arm64/hawp-linux-arm64
+            hawp-linux-arm64/hawp-linux-arm64.sha256
+          draft: false
+          prerelease: false

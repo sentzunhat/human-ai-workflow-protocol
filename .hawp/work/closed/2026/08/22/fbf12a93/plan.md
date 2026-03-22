@@ -1,0 +1,113 @@
+# vector search and local context building on downloaded ONNX models
+
+**Backlog ID (Legacy):** — (UUID-native item)
+**UUID:** `fbf12a93-7700-4236-b6bb-e7b55b63a622`
+**Type:** feature
+**Reported:** 2026-07-20
+**Risk Level:** medium
+
+---
+
+### Input (what was reported)
+
+> Use the models locally for small vector search and context making, and
+> use it on the CLI for other things — like a transformers.js experience
+> but in the Go CLI, with models loaded from `~/.hawp/`.
+
+---
+
+### Context
+
+Depends on init-time provisioning
+(`e98de8c4-d6be-43f0-a5b6-57c939ddd195`) for the ONNX Runtime and model
+assets, and on the Go-first project decision
+(`56067dc8-1cc6-4dbe-8b6d-dd7ffdfea80c`). The `librarian/go/` roadmap already
+lists lexical search first, then vector search and context building.
+
+---
+
+### Analysis
+
+**Root cause (or most likely cause):**
+_Lexical search alone misses paraphrased or conceptually related work/kit
+records; small local embeddings enable semantic retrieval and compact
+context packs without any external service._
+
+**Directly verified:**
+_No ONNX/model integration exists yet in `librarian/go/`; ingest and lexical
+search are also still pending._
+
+**Inferred (not yet proven):**
+_ONNX Go bindings loading the runtime library from `~/.hawp/` can embed
+kit/work documents fast enough for CLI use, and a simple stored-vector
+index (in the local db) is sufficient at this scale — no vector-db
+dependency needed._
+
+**Scope — what else is affected:**
+_Local db schema (chunks + vectors), embedding pipeline, search command
+UX (hybrid lexical + vector ranking), context-pack output format for
+prompt handoff, model choice and dimension recorded in the `~/.hawp/`
+manifest._
+
+**2026-07-21 scope refinement — folder-level context before embedding:**
+_Embedding raw file chunks in isolation loses the surrounding context
+that makes a `.hawp/kit/` or `.hawp/work/` document meaningful — a
+closed plan chunk without its folder's date/status/type context, or a
+kit usage doc without its place in the `kit/usage/` vs `kit/references/`
+hierarchy, embeds worse and retrieves worse. Before chunking+embedding,
+build a lightweight per-folder context layer:_
+- _`kit/`: each folder's role (start-here, usage, references, standards)
+  and its README/index content prepended to chunks from that folder._
+- _`work/`: each record's structural metadata (type, status, closed
+  date, UUID/legacy ID, backlog row) attached to its chunks, plus the
+  BACKLOG.md row that references it — so a retrieved chunk carries "this
+  is a closed feature from 2026-07-20" context, not just raw prose._
+- _This context layer is pure metadata/text assembly (no model
+  dependency) and can be built and tested independently of the ONNX
+  embedding pipeline — a good first slice of this item to land before
+  the cgo/ONNX inference work._
+
+---
+
+### Recommended Fix
+
+- **Slice 1 (no ONNX dependency, land first):** build the folder-context
+  layer — walk `.hawp/kit/` and `.hawp/work/`, attach folder role +
+  record metadata to each document, and expose it via `hawp index build`
+  (already scaffolded) so the enriched corpus is inspectable before any
+  embedding work begins.
+- **Slice 2:** load ONNX Runtime and the embedding model from `~/.hawp/`
+  at runtime; embed the context-enriched chunks; fail soft to
+  lexical-only when assets are missing.
+- Store vectors in the local db; brute-force cosine at this scale before
+  considering any index structure.
+- Define the context-building output: compact, decision-useful context
+  packs for handing to agents/prompts, carrying the folder metadata
+  through to the final result (not just raw chunk text).
+- `hawp search <query>` should be hybrid: lexical first (already fast,
+  no dependency), semantic as a ranking/recall boost when models exist.
+
+**What to verify after:**
+
+- [ ] Folder-context layer attaches correct metadata for a sample of
+      kit/ and work/ documents (manual spot-check + unit tests)
+- [ ] Semantic query returns relevant kit/work records that lexical misses
+- [ ] Retrieved results carry their folder context (type/status/date),
+      not just raw text
+- [ ] Embedding + search latency acceptable for interactive CLI use
+- [ ] Lexical-only fallback works when models are absent
+
+---
+
+## Outcome (filled at close)
+
+_Pending._
+
+## Verification (filled at close)
+
+_Pending._
+
+## Close Checklist
+
+- [x] Work shipped in 0.0.1 release
+- [x] Archived to closed/2026/08/22/v001-shipped-cleanup/

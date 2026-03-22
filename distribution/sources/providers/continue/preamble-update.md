@@ -1,0 +1,1 @@
+> **Agent instruction:** Update HAWP with the **Continue provider** in this repository. Run the bash command block in the **Update Command (Copy/Paste)** section in a terminal from the repository root. Do not report "already current" based on content inspection alone — execute the script and report terminal output with `Source:`, `Provider:`, and `Source mode:` lines as proof.

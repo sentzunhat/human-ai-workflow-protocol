@@ -1,0 +1,14 @@
+# TASK-047 normalization map
+date=2026-05-14T22:03:15-0500
+
+## active duplicate removals
+removed .hawp/work/active/TASK-027.md (duplicate of closed record)
+removed .hawp/work/active/TASK-040.md (duplicate of closed record)
+
+## untyped post-cutoff moves
+.hawp/work/closed/2026/05/12/0007.md -> .hawp/work/notes/2026/05/12/0007.md
+.hawp/work/closed/2026/05/12/0008-CLARIFICATION-exact-paths.md -> .hawp/work/notes/2026/05/12/0008-CLARIFICATION-exact-paths.md
+.hawp/work/closed/2026/05/12/0008-install-update-distribution-review.md -> .hawp/work/notes/2026/05/12/0008-install-update-distribution-review.md
+.hawp/work/closed/2026/05/12/HAWP-BACKLOG-VALIDATE-PLAN.md -> .hawp/work/notes/2026/05/12/HAWP-BACKLOG-VALIDATE-PLAN.md
+.hawp/work/closed/2026/05/13/0007.md -> .hawp/work/notes/2026/05/13/0007.md
+.hawp/work/closed/2026/05/13/HAWP-BACKLOG-VALIDATE-PLAN.md -> .hawp/work/notes/2026/05/13/HAWP-BACKLOG-VALIDATE-PLAN.md

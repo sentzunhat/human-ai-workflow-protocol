@@ -1,0 +1,35 @@
+{
+  "name": "@hawp/librarian",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=26",
+    "npm": ">=11.17.0"
+  },
+  "packageManager": "npm@11.17.0",
+  "scripts": {
+    "test": "node --test --import tsx $(find scripts -type f -name '*.test.ts' | sort)",
+    "check:markdown-links": "../.hawp/bin/hawp links check",
+    "uuid": "node -e \"console.log(crypto.randomUUID())\"",
+    "hawp:check": "../.hawp/bin/hawp check",
+    "kit:validate": "../.hawp/bin/hawp kit validate",
+    "kit:normalize": "../.hawp/bin/hawp kit normalize",
+    "providers:materialize": "tsx scripts/librarian/providers/materialize/build/index.ts",
+    "providers:validate": "tsx scripts/librarian/providers/materialize/validate/index.ts",
+    "providers:sync": "npm run providers:materialize && npm run providers:validate",
+    "distribution:build": "tsx scripts/librarian/distribution/build/index.ts",
+    "distribution:validate": "tsx scripts/librarian/distribution/validate/index.ts",
+    "distribution:sync": "npm run providers:sync && npm run distribution:build && npm run distribution:validate",
+    "work:validate": "../.hawp/bin/hawp work validate",
+    "work:normalize:cli": "../.hawp/bin/hawp work normalize",
+    "work:normalize": "npm run work:normalize:cli",
+    "validate": "npm run typecheck && npm test && npm run distribution:sync && ../.hawp/bin/hawp check",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.0",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
+  }
+}
