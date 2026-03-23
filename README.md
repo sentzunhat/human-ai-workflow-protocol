@@ -38,6 +38,9 @@ human-ai-workflow-protocol/
     copilot-instructions.md — Copilot instructions template (uses repo-root hawp/ paths)
     instructions/           — scoped intake instructions for the overlay
     prompts/                — status report prompt for the overlay
+  benchmark/
+    README.md               — benchmark purpose and install note
+    benchmark-prompt.md     — guide for running a HAWP vs no-HAWP comparison
 ```
 
 ## Using HAWP
@@ -47,6 +50,13 @@ human-ai-workflow-protocol/
 3. See `human-ai-workflow-protocol/hawp/examples/` for concrete filled-shape examples.
 4. Read `human-ai-workflow-protocol/hawp/usage/INIT.md` for how this repo uses HAWP in practice.
 
-## GitHub Copilot integration
+## Installing HAWP into another repository
 
-To add HAWP-aware Copilot behavior to a target repository that already has a `hawp/` folder, follow `human-ai-workflow-protocol/github/install.md`.
+To install HAWP into a target repository, copy only these two folders into `human-ai-workflow-protocol/`:
+
+- `github/` — GitHub Copilot overlay files
+- `hawp/` — protocol docs, authoring patterns, examples, and usage guidance
+
+The `benchmark/` folder is reference material for evaluating HAWP's practical value. Copy it into a target repository only if you intend to use it there. It is not required for HAWP to function.
+
+For GitHub Copilot integration setup, follow `human-ai-workflow-protocol/github/install.md`.

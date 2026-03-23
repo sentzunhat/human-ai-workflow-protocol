@@ -2,6 +2,19 @@
 
 Use this package when the target repository already has a repo-root `hawp/` folder and you want to add the matching GitHub Copilot integration under `.github/`.
 
+## Scope Clarification
+
+This document covers only the GitHub Copilot overlay installation (`.github/` integration).
+
+For minimal HAWP installation in the nested project layout, copy only:
+
+- `github/`
+- `hawp/`
+
+into `human-ai-workflow-protocol/`.
+
+The `benchmark/` folder is optional reference material and is not part of the minimal install pair unless explicitly needed.
+
 ## What This Package Installs
 
 Install these files into the target repository's `.github/` folder:
