@@ -6,7 +6,7 @@ Use this when you already installed HAWP in a target repository and want the lat
 
 This refreshes only HAWP-managed files:
 
-- `human-ai-workflow-protocol/hawp/**`
+- `hawp/**`
 - `.github/instructions/*.instructions.md`
 - `.github/prompts/*.prompt.md`
 
@@ -18,11 +18,10 @@ It does not overwrite an existing `.github/copilot-instructions.md` file.
 Update this repository's HAWP kit from the latest github main branch of human-ai-workflow-protocol.
 
 Requirements:
-- refresh human-ai-workflow-protocol/hawp/**
+- refresh hawp/**
 - refresh .github/instructions/*.instructions.md
 - refresh .github/prompts/*.prompt.md
 - do not overwrite .github/copilot-instructions.md if it already exists
-- if path layout differs, adapt references accordingly
 - provide a final summary of changed files and any manual merge points
 
 Source:
@@ -47,9 +46,9 @@ curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz
 SRC="$TMP_DIR/${REPO}-${REF}/human-ai-workflow-protocol"
 
 # Refresh HAWP protocol content
-rm -rf human-ai-workflow-protocol/hawp
-mkdir -p human-ai-workflow-protocol
-cp -R "$SRC/hawp" human-ai-workflow-protocol/
+rm -rf hawp
+cp -R "$SRC/hawp" .
+mkdir -p hawp/usage/status
 
 # Refresh overlay files
 mkdir -p .github/instructions .github/prompts
@@ -66,7 +65,7 @@ rm -rf "$TMP_DIR"
 
 ## Post-Update Checklist
 
-1. Confirm `.github/copilot-instructions.md` still points to your actual HAWP path layout.
+1. Confirm `.github/copilot-instructions.md` references `hawp/usage/INIT.md` and `hawp/usage/STATUS_REPORT.md`.
 2. Confirm expected prompt files exist under `.github/prompts/`.
 3. Confirm expected instruction files exist under `.github/instructions/`.
 4. Review git diff before committing.
@@ -75,4 +74,4 @@ rm -rf "$TMP_DIR"
 ## Notes
 
 - This update flow is conservative and keeps local Copilot instruction customizations.
-- If your target repo uses repo-root `hawp/` instead of `human-ai-workflow-protocol/hawp/`, adapt paths accordingly.
+- `hawp/` is always installed flat at the repository root.
