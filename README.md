@@ -35,9 +35,10 @@ human-ai-workflow-protocol/
       status/               — saved status reports
   github/
     install.md              — instructions for installing the GitHub Copilot overlay
+    update.md               — instructions for updating HAWP from GitHub main
     copilot-instructions.md — Copilot instructions template (uses repo-root hawp/ paths)
     instructions/           — scoped intake instructions for the overlay
-    prompts/                — status report prompt for the overlay
+    prompts/                — curated prompt pack for handoff, status, and docs alignment
   benchmark/
     README.md               — benchmark purpose and install note
     benchmark-prompt.md     — guide for running a HAWP vs no-HAWP comparison
@@ -60,3 +61,45 @@ To install HAWP into a target repository, copy only these two folders into `huma
 The `benchmark/` folder is reference material for evaluating HAWP's practical value. Copy it into a target repository only if you intend to use it there. It is not required for HAWP to function.
 
 For GitHub Copilot integration setup, follow `human-ai-workflow-protocol/github/install.md`.
+
+To refresh an already-installed setup from upstream `main`, use `human-ai-workflow-protocol/github/update.md`.
+
+## Quick install + usage (copy/paste)
+
+If you want a single copy/paste flow in a target repo, use this:
+
+```bash
+# From the target repository root
+OWNER="sentzunhat"
+REPO="human-ai-workflow-protocol"
+REF="main"
+
+TMP_DIR="$(mktemp -d)"
+curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
+  | tar -xz -C "$TMP_DIR"
+
+SRC="$TMP_DIR/${REPO}-${REF}/human-ai-workflow-protocol"
+
+mkdir -p human-ai-workflow-protocol .github/instructions .github/prompts
+cp -R "$SRC/hawp" human-ai-workflow-protocol/
+cp "$SRC/github/instructions/"*.instructions.md \
+  .github/instructions/
+cp "$SRC/github/prompts/"*.prompt.md \
+  .github/prompts/
+
+# If .github/copilot-instructions.md does not exist, seed it.
+# If it already exists, merge HAWP guidance instead of overwriting.
+if [ ! -f .github/copilot-instructions.md ]; then
+  cp "$SRC/github/copilot-instructions.md" .github/copilot-instructions.md
+fi
+
+rm -rf "$TMP_DIR"
+```
+
+Then do this minimal usage wiring:
+
+1. Ensure `.github/copilot-instructions.md` references `human-ai-workflow-protocol/hawp/usage/INIT.md` and `human-ai-workflow-protocol/hawp/usage/STATUS_REPORT.md`.
+2. Use `human-ai-workflow-protocol/hawp/START_HERE.md` to shape a task.
+3. Use `human-ai-workflow-protocol/hawp/usage/STATUS_REPORT.md` when you need a checkpoint/context-transfer artifact.
+
+If your target repo uses repo-root `hawp/` instead of `human-ai-workflow-protocol/hawp/`, adapt paths in the installed `.github/` files accordingly.
