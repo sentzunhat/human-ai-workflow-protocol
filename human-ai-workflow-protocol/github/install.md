@@ -17,9 +17,9 @@ curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz
 
 SRC="$TMP_DIR/${REPO}-${REF}/human-ai-workflow-protocol"
 
-# Install protocol content under human-ai-workflow-protocol/
-mkdir -p human-ai-workflow-protocol
-cp -R "$SRC/hawp" human-ai-workflow-protocol/
+# Install protocol content at repo root
+cp -R "$SRC/hawp" .
+mkdir -p hawp/usage/status
 
 # Install Copilot overlay into .github/
 mkdir -p .github/instructions .github/prompts
@@ -38,22 +38,15 @@ rm -rf "$TMP_DIR"
 
 Quick usage after install:
 
-1. In `.github/copilot-instructions.md`, ensure HAWP references point to your actual layout (`human-ai-workflow-protocol/hawp/...` or `hawp/...`).
-2. Start task shaping from `human-ai-workflow-protocol/hawp/START_HERE.md` (or `hawp/START_HERE.md` in repo-root layout).
-3. Save context-transfer artifacts under `.../hawp/usage/status/` using `.../hawp/usage/STATUS_REPORT.md`.
+1. In `.github/copilot-instructions.md`, ensure HAWP references point to `hawp/usage/INIT.md` and `hawp/usage/STATUS_REPORT.md`.
+2. Start task shaping from `hawp/START_HERE.md`.
+3. Save context-transfer artifacts under `hawp/usage/status/` using `hawp/usage/STATUS_REPORT.md`.
 
 ## Scope Clarification
 
-This document covers only the GitHub Copilot overlay installation (`.github/` integration).
+This document covers the full HAWP installation: `hawp/` at the repo root plus the GitHub Copilot overlay under `.github/`.
 
-For minimal HAWP installation in the nested project layout, copy only:
-
-- `github/`
-- `hawp/`
-
-into `human-ai-workflow-protocol/`.
-
-The `benchmark/` folder is optional reference material and is not part of the minimal install pair unless explicitly needed.
+The `benchmark/` folder is optional reference material and is not installed by this script.
 
 ## What This Package Installs
 
@@ -178,12 +171,6 @@ After installation, confirm all of the following are true:
 
 This package is a modular overlay. It adds HAWP-aware Copilot behavior without replacing the target repository's baseline instruction set.
 
-## Path Adaptation Note
+## Path Note
 
-The package source files (`github/copilot-instructions.md`, `github/instructions/`, `github/prompts/`) use portable `hawp/...` paths. These assume `hawp/` sits at the target repository root.
-
-When the target repository stores HAWP content at a nested path — for example, `human-ai-workflow-protocol/hawp/` — the installer must adapt all `hawp/...` path references in the installed `.github/` files to match the actual layout.
-
-The `human-ai-workflow-protocol` repository itself is an example of this: its installed `.github/` files use `human-ai-workflow-protocol/hawp/...` paths rather than the portable `hawp/...` defaults, because HAWP content lives under a subdirectory rather than at the repo root.
-
-If you are comparing the package source files against installed `.github/` files and see path differences, they are intentional path adaptation — not unintended drift.
+All installed `.github/` files use `hawp/...` paths that assume `hawp/` sits at the target repository root. No path adaptation is required when using this install script.

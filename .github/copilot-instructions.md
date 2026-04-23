@@ -2,12 +2,12 @@ This repository uses HAWP as a lightweight workflow method.
 
 Follow the repo-local HAWP guidance in:
 
-- human-ai-workflow-protocol/hawp/usage/INIT.md
-- human-ai-workflow-protocol/hawp/usage/STATUS_REPORT.md
+- hawp/usage/INIT.md
+- hawp/usage/STATUS_REPORT.md
 
-Use human-ai-workflow-protocol/hawp/usage/INIT.md as the operating guide for how this repo applies HAWP in practice.
+Use hawp/usage/INIT.md as the operating guide for how this repo applies HAWP in practice.
 
-Use human-ai-workflow-protocol/hawp/usage/STATUS_REPORT.md when the user asks for a:
+Use hawp/usage/STATUS_REPORT.md when the user asks for a:
 
 - status report
 - checkpoint summary
@@ -16,7 +16,7 @@ Use human-ai-workflow-protocol/hawp/usage/STATUS_REPORT.md when the user asks fo
 
 Saved status reports belong in:
 
-- human-ai-workflow-protocol/hawp/usage/status/
+- hawp/usage/status/
 
 Keep the repo-local HAWP layer lean.
 
