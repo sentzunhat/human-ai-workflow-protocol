@@ -12,6 +12,8 @@ This refreshes only HAWP-managed files:
 
 It does not overwrite an existing `.github/copilot-instructions.md` file.
 
+Because `hawp/**` is refreshed, `hawp/LICENSE` is refreshed too.
+
 ## Prompt You Can Paste Into GitHub Copilot Chat
 
 ```text
@@ -66,12 +68,14 @@ rm -rf "$TMP_DIR"
 ## Post-Update Checklist
 
 1. Confirm `.github/copilot-instructions.md` references `hawp/usage/INIT.md` and `hawp/usage/STATUS_REPORT.md`.
-2. Confirm expected prompt files exist under `.github/prompts/`.
-3. Confirm expected instruction files exist under `.github/instructions/`.
-4. Review git diff before committing.
-5. Run your repo checks (lint/test/typecheck) if your workflow requires it.
+2. Confirm `hawp/LICENSE` exists and contains the Apache 2.0 text.
+3. Confirm expected prompt files exist under `.github/prompts/`.
+4. Confirm expected instruction files exist under `.github/instructions/`.
+5. Review git diff before committing.
+6. Run your repo checks (lint/test/typecheck) if your workflow requires it.
 
 ## Notes
 
 - This update flow is conservative and keeps local Copilot instruction customizations.
 - `hawp/` is always installed flat at the repository root.
+- The Apache 2.0 kit license now travels with `hawp/LICENSE` and is refreshed by this update flow.

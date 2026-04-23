@@ -19,7 +19,7 @@ This folder is part of this repository's content and is not part of the minimal 
 When installing HAWP into a target repository, copy only:
 
 - `github/`
-- `hawp/`
+- `hawp/` (includes `hawp/LICENSE` with the Apache 2.0 text)
 
 into `human-ai-workflow-protocol/`.
 

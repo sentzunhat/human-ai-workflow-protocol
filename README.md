@@ -24,6 +24,7 @@ It is not a runtime engine, memory system, validator, or orchestration framework
 ```
 human-ai-workflow-protocol/
   hawp/
+    LICENSE                 — Apache 2.0 license text copied with the kit
     README.md               — what HAWP is and why it exists
     SPEC.md                 — v0.1 field semantics and pipeline draft
     AUTHORING_PATTERNS.md   — compact authoring guidance for recurring task types
@@ -56,7 +57,7 @@ human-ai-workflow-protocol/
 To install HAWP into a target repository, copy only these two folders into `human-ai-workflow-protocol/`:
 
 - `github/` — GitHub Copilot overlay files
-- `hawp/` — protocol docs, authoring patterns, examples, and usage guidance
+- `hawp/` — protocol docs, authoring patterns, examples, usage guidance, and `hawp/LICENSE`
 
 The `benchmark/` folder is reference material for evaluating HAWP's practical value. Copy it into a target repository only if you intend to use it there. It is not required for HAWP to function.
 
@@ -95,6 +96,8 @@ fi
 
 rm -rf "$TMP_DIR"
 ```
+
+That copy brings along `human-ai-workflow-protocol/hawp/LICENSE`, so the installed HAWP folder carries the Apache 2.0 license text with it.
 
 Then do this minimal usage wiring:
 

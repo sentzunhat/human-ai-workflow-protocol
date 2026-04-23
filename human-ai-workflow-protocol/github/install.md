@@ -40,11 +40,12 @@ Quick usage after install:
 
 1. In `.github/copilot-instructions.md`, ensure HAWP references point to `hawp/usage/INIT.md` and `hawp/usage/STATUS_REPORT.md`.
 2. Start task shaping from `hawp/START_HERE.md`.
-3. Save context-transfer artifacts under `hawp/usage/status/` using `hawp/usage/STATUS_REPORT.md`.
+3. Use `hawp/LICENSE` as the installed Apache 2.0 license text for the HAWP kit content.
+4. Save context-transfer artifacts under `hawp/usage/status/` using `hawp/usage/STATUS_REPORT.md`.
 
 ## Scope Clarification
 
-This document covers the full HAWP installation: `hawp/` at the repo root plus the GitHub Copilot overlay under `.github/`.
+This document covers the full HAWP installation: `hawp/` at the repo root, including `hawp/LICENSE`, plus the GitHub Copilot overlay under `.github/`.
 
 The `benchmark/` folder is optional reference material and is not installed by this script.
 
@@ -63,6 +64,8 @@ Install these files into the target repository's `.github/` folder:
 
 These files assume the target repository resolves HAWP content from repo-root paths such as `hawp/usage/INIT.md`.
 
+The installed `hawp/` content also includes `hawp/LICENSE` with the Apache 2.0 text.
+
 ## Preconditions
 
 Before installing this overlay, confirm the target repository contains:
@@ -70,6 +73,7 @@ Before installing this overlay, confirm the target repository contains:
 - `hawp/README.md`
 - `hawp/SPEC.md`
 - `hawp/AUTHORING_PATTERNS.md`
+- `hawp/LICENSE`
 - `hawp/usage/INIT.md`
 - `hawp/usage/STATUS_REPORT.md`
 
@@ -157,6 +161,7 @@ After installation, confirm all of the following are true:
 - `.github/prompts/human-ai-workflow-protocol-docs-alignment-deterministic.prompt.md` exists
 - `.github/prompts/human-ai-workflow-protocol-docs-alignment-simplicity.prompt.md` exists
 - `.github/prompts/human-ai-workflow-protocol-conservative-docs-drift-cleanup.prompt.md` exists
+- `hawp/LICENSE` exists and contains the Apache 2.0 text
 - the referenced `hawp/usage/status/` directory exists in the target repository
 - no temporary `github/` overlay folder remains in the target repository unless the user is intentionally keeping the kit source there
 
