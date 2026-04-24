@@ -6,13 +6,15 @@ Use this when you already installed HAWP in a target repository and want the lat
 
 This refreshes only HAWP-managed files:
 
-- `hawp/**`
+- `.hawp/**`
 - `.github/instructions/*.instructions.md`
 - `.github/prompts/*.prompt.md`
 
+If a legacy `hawp/` directory exists as a real directory (not a symlink), it is removed so `.hawp/` is the only active kit root.
+
 It does not overwrite an existing `.github/copilot-instructions.md` file.
 
-Because `hawp/**` is refreshed, `hawp/LICENSE` is refreshed too.
+Because `.hawp/**` is refreshed, `.hawp/LICENSE` is refreshed too.
 
 ## Prompt You Can Paste Into GitHub Copilot Chat
 
@@ -20,9 +22,10 @@ Because `hawp/**` is refreshed, `hawp/LICENSE` is refreshed too.
 Update this repository's HAWP kit from the latest github main branch of human-ai-workflow-protocol.
 
 Requirements:
-- refresh hawp/**
+- refresh .hawp/**
 - refresh .github/instructions/*.instructions.md
 - refresh .github/prompts/*.prompt.md
+- remove legacy hawp/ if it exists as a real directory (not symlink)
 - do not overwrite .github/copilot-instructions.md if it already exists
 - provide a final summary of changed files and any manual merge points
 
@@ -45,21 +48,27 @@ TMP_DIR="$(mktemp -d)"
 curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
   | tar -xz -C "$TMP_DIR"
 
-SRC="$TMP_DIR/${REPO}-${REF}/human-ai-workflow-protocol"
+SRC="$TMP_DIR/${REPO}-${REF}/core"
 
 # Refresh HAWP protocol content
-rm -rf hawp
-cp -R "$SRC/hawp" .
-mkdir -p hawp/usage/status
+rm -rf .hawp
+cp -R "$SRC/.hawp" .
+mkdir -p .hawp/usage/status
 
 # Refresh overlay files
 mkdir -p .github/instructions .github/prompts
-cp "$SRC/github/instructions/"*.instructions.md .github/instructions/
-cp "$SRC/github/prompts/"*.prompt.md .github/prompts/
+cp "$SRC/.github/instructions/"*.instructions.md .github/instructions/
+cp "$SRC/.github/prompts/"*.prompt.md .github/prompts/
 
 # Seed only when missing (do not overwrite local custom instructions)
 if [ ! -f .github/copilot-instructions.md ]; then
-  cp "$SRC/github/copilot-instructions.md" .github/copilot-instructions.md
+  cp "$SRC/.github/copilot-instructions.md" .github/copilot-instructions.md
+fi
+
+# Safety: remove only a real legacy hawp/ directory so updates are deterministic
+# and .hawp/ remains the single active kit root. Never remove symlinks.
+if [ -d "hawp" ] && [ ! -L "hawp" ]; then
+  rm -rf hawp
 fi
 
 rm -rf "$TMP_DIR"
@@ -67,15 +76,17 @@ rm -rf "$TMP_DIR"
 
 ## Post-Update Checklist
 
-1. Confirm `.github/copilot-instructions.md` references `hawp/usage/INIT.md` and `hawp/usage/STATUS_REPORT.md`.
-2. Confirm `hawp/LICENSE` exists and contains the Apache 2.0 text.
+1. Confirm `.github/copilot-instructions.md` references `.hawp/usage/INIT.md` and `.hawp/usage/STATUS_REPORT.md`.
+2. Confirm `.hawp/LICENSE` exists and contains the Apache 2.0 text.
 3. Confirm expected prompt files exist under `.github/prompts/`.
 4. Confirm expected instruction files exist under `.github/instructions/`.
-5. Review git diff before committing.
-6. Run your repo checks (lint/test/typecheck) if your workflow requires it.
+5. If legacy `hawp/` existed as a real directory, confirm it was removed; if `hawp` is a symlink, confirm it was left untouched.
+6. Review git diff before committing.
+7. Run your repo checks (lint/test/typecheck) if your workflow requires it.
 
 ## Notes
 
 - This update flow is conservative and keeps local Copilot instruction customizations.
-- `hawp/` is always installed flat at the repository root.
-- The Apache 2.0 kit license now travels with `hawp/LICENSE` and is refreshed by this update flow.
+- `.hawp/` is always installed flat at the repository root.
+- Legacy `hawp/` cleanup is guarded: only real directories are removed, and symlinks are preserved.
+- The Apache 2.0 kit license now travels with `.hawp/LICENSE` and is refreshed by this update flow.

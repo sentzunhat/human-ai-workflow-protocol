@@ -8,7 +8,7 @@ The HAWP v0.1 protocol definition lives in:
 
 - [README.md](../README.md)
 - [SPEC.md](../SPEC.md)
-- [src/shape.ts](../src/shape.ts)
+- [types/shape.ts](../types/shape.ts)
 - [AUTHORING_PATTERNS.md](../AUTHORING_PATTERNS.md)
 
 Use those documents as the protocol source of truth.

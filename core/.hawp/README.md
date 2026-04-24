@@ -73,7 +73,7 @@ HAWP is intentionally:
 
 - START_HERE.md: fastest on-ramp — copy-paste template and first-use notes.
 - SPEC.md: v0.1 semantics, pipeline draft, principles, and non-goals.
-- src/shape.ts: locked TypeScript shape for v0.1.
+- types/shape.ts: locked TypeScript shape for v0.1.
 - AUTHORING_PATTERNS.md: compact guidance for recurring task types using the same six fields.
 - examples/: concrete examples of applying the shape to real requests.
 

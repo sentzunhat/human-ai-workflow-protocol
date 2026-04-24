@@ -1,6 +1,6 @@
 # Install HAWP GitHub Overlay
 
-Use this package when the target repository already has a repo-root `hawp/` folder and you want to add the matching GitHub Copilot integration under `.github/`.
+Use this package when the target repository already has a repo-root `.hawp/` folder and you want to add the matching GitHub Copilot integration under `.github/`.
 
 ## One-shot install + usage quickstart
 
@@ -15,22 +15,22 @@ TMP_DIR="$(mktemp -d)"
 curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
   | tar -xz -C "$TMP_DIR"
 
-SRC="$TMP_DIR/${REPO}-${REF}/human-ai-workflow-protocol"
+SRC="$TMP_DIR/${REPO}-${REF}/core"
 
 # Install protocol content at repo root
-cp -R "$SRC/hawp" .
-mkdir -p hawp/usage/status
+cp -R "$SRC/.hawp" .
+mkdir -p .hawp/usage/status
 
 # Install Copilot overlay into .github/
 mkdir -p .github/instructions .github/prompts
-cp "$SRC/github/instructions/"*.instructions.md \
+cp "$SRC/.github/instructions/"*.instructions.md \
   .github/instructions/
-cp "$SRC/github/prompts/"*.prompt.md \
+cp "$SRC/.github/prompts/"*.prompt.md \
   .github/prompts/
 
 # Seed instructions only when missing. If present, merge instead of overwrite.
 if [ ! -f .github/copilot-instructions.md ]; then
-  cp "$SRC/github/copilot-instructions.md" .github/copilot-instructions.md
+  cp "$SRC/.github/copilot-instructions.md" .github/copilot-instructions.md
 fi
 
 rm -rf "$TMP_DIR"
@@ -38,14 +38,14 @@ rm -rf "$TMP_DIR"
 
 Quick usage after install:
 
-1. In `.github/copilot-instructions.md`, ensure HAWP references point to `hawp/usage/INIT.md` and `hawp/usage/STATUS_REPORT.md`.
-2. Start task shaping from `hawp/START_HERE.md`.
-3. Use `hawp/LICENSE` as the installed Apache 2.0 license text for the HAWP kit content.
-4. Save context-transfer artifacts under `hawp/usage/status/` using `hawp/usage/STATUS_REPORT.md`.
+1. In `.github/copilot-instructions.md`, ensure HAWP references point to `.hawp/usage/INIT.md` and `.hawp/usage/STATUS_REPORT.md`.
+2. Start task shaping from `.hawp/START_HERE.md`.
+3. Use `.hawp/LICENSE` as the installed Apache 2.0 license text for the HAWP kit content.
+4. Save context-transfer artifacts under `.hawp/usage/status/` using `.hawp/usage/STATUS_REPORT.md`.
 
 ## Scope Clarification
 
-This document covers the full HAWP installation: `hawp/` at the repo root, including `hawp/LICENSE`, plus the GitHub Copilot overlay under `.github/`.
+This document covers the full HAWP installation: `.hawp/` at the repo root, including `.hawp/LICENSE`, plus the GitHub Copilot overlay under `.github/`.
 
 The `benchmark/` folder is optional reference material and is not installed by this script.
 
@@ -62,26 +62,26 @@ Install these files into the target repository's `.github/` folder:
 - `prompts/human-ai-workflow-protocol-docs-alignment-simplicity.prompt.md`
 - `prompts/human-ai-workflow-protocol-conservative-docs-drift-cleanup.prompt.md`
 
-These files assume the target repository resolves HAWP content from repo-root paths such as `hawp/usage/INIT.md`.
+These files assume the target repository resolves HAWP content from repo-root paths such as `.hawp/usage/INIT.md`.
 
-The installed `hawp/` content also includes `hawp/LICENSE` with the Apache 2.0 text.
+The installed `.hawp/` content also includes `.hawp/LICENSE` with the Apache 2.0 text.
 
 ## Preconditions
 
 Before installing this overlay, confirm the target repository contains:
 
-- `hawp/README.md`
-- `hawp/SPEC.md`
-- `hawp/AUTHORING_PATTERNS.md`
-- `hawp/LICENSE`
-- `hawp/usage/INIT.md`
-- `hawp/usage/STATUS_REPORT.md`
+- `.hawp/README.md`
+- `.hawp/SPEC.md`
+- `.hawp/AUTHORING_PATTERNS.md`
+- `.hawp/LICENSE`
+- `.hawp/usage/INIT.md`
+- `.hawp/usage/STATUS_REPORT.md`
 
-If `hawp/` is missing, install or copy the HAWP folder first. Do not install this `.github/` overlay against a repository that does not have the expected repo-root `hawp/` paths.
+If `.hawp/` is missing, install or copy the HAWP folder first. Do not install this `.github/` overlay against a repository that does not have the expected repo-root `.hawp/` paths.
 
 ## Install Procedure
 
-1. Check that the target repository has a repo-root `hawp/` directory.
+1. Check that the target repository has a repo-root `.hawp/` directory.
 2. Check whether the target repository already has a `.github/` directory. Create it if missing.
 3. Copy all `instructions/*.instructions.md` files into `.github/instructions/`, replacing existing versions. These instruction files are HAWP-managed and safe to overwrite.
 4. Copy all `prompts/*.prompt.md` files into `.github/prompts/`, replacing existing versions. These prompt files are HAWP-managed and safe to overwrite during reinstall.
@@ -105,9 +105,9 @@ After the overlay files are installed, remove packaging leftovers that are not p
 
 Clean up these cases:
 
-- If you copied this package as a temporary `github/` folder, remove that temporary folder after its files have been merged into `.github/`.
-- Remove duplicate overlay files that were copied outside `.github/`, such as an extra `github/copilot-instructions.md`, `github/instructions/`, or `github/prompts/` tree left in the target repo.
-- Keep only the repo-root `hawp/` folder and the target repo's `.github/` integration files. The target steady state should not require a sibling `github/` package folder.
+- If you copied this package as a temporary `core/` folder, remove that temporary folder after its files have been merged into the target layout.
+- Remove duplicate overlay files that were copied outside the target `.github/` folder.
+- Keep only the repo-root `.hawp/` folder and the target repo's `.github/` integration files. The target steady state should not require a sibling package source folder.
 - Do not remove existing non-HAWP `.github/` files that belong to the target repository.
 
 ## HAWP Block For Existing Copilot Instructions
@@ -119,12 +119,12 @@ This repository uses HAWP as a lightweight workflow method.
 
 Follow the repo-local HAWP guidance in:
 
-- hawp/usage/INIT.md
-- hawp/usage/STATUS_REPORT.md
+- .hawp/usage/INIT.md
+- .hawp/usage/STATUS_REPORT.md
 
-Use hawp/usage/INIT.md as the operating guide for how this repo applies HAWP in practice.
+Use .hawp/usage/INIT.md as the operating guide for how this repo applies HAWP in practice.
 
-Use hawp/usage/STATUS_REPORT.md when the user asks for a:
+Use .hawp/usage/STATUS_REPORT.md when the user asks for a:
 
 - status report
 - checkpoint summary
@@ -133,7 +133,7 @@ Use hawp/usage/STATUS_REPORT.md when the user asks for a:
 
 Saved status reports belong in:
 
-- hawp/usage/status/
+- .hawp/usage/status/
 
 Keep the repo-local HAWP layer lean.
 
@@ -152,8 +152,8 @@ Prefer compact, decision-useful outputs.
 
 After installation, confirm all of the following are true:
 
-- `.github/copilot-instructions.md` references `hawp/usage/INIT.md`
-- `.github/copilot-instructions.md` references `hawp/usage/STATUS_REPORT.md`
+- `.github/copilot-instructions.md` references `.hawp/usage/INIT.md`
+- `.github/copilot-instructions.md` references `.hawp/usage/STATUS_REPORT.md`
 - `.github/instructions/human-ai-workflow-protocol-intake.instructions.md` exists
 - `.github/instructions/human-ai-workflow-protocol-docs-alignment.instructions.md` exists
 - `.github/prompts/human-ai-workflow-protocol-status-report.prompt.md` exists
@@ -161,16 +161,16 @@ After installation, confirm all of the following are true:
 - `.github/prompts/human-ai-workflow-protocol-docs-alignment-deterministic.prompt.md` exists
 - `.github/prompts/human-ai-workflow-protocol-docs-alignment-simplicity.prompt.md` exists
 - `.github/prompts/human-ai-workflow-protocol-conservative-docs-drift-cleanup.prompt.md` exists
-- `hawp/LICENSE` exists and contains the Apache 2.0 text
-- the referenced `hawp/usage/status/` directory exists in the target repository
-- no temporary `github/` overlay folder remains in the target repository unless the user is intentionally keeping the kit source there
+- `.hawp/LICENSE` exists and contains the Apache 2.0 text
+- the referenced `.hawp/usage/status/` directory exists in the target repository
+- no temporary `.github/` overlay folder remains in the target repository unless the user is intentionally keeping the kit source there
 
 ## Failure Cases
 
-- Missing `hawp/` folder: stop and install the HAWP content first.
+- Missing `.hawp/` folder: stop and install the HAWP content first.
 - Missing `.github/` folder: create it before copying the overlay files.
 - Existing `.github/copilot-instructions.md` with unrelated repo rules: merge carefully and do not replace project-specific instructions.
-- Temporary package files left in the target repository: remove the extra `github/` overlay folder and keep only the installed `.github/` files.
+- Temporary package files left in the target repository: remove the extra package source folder and keep only the installed `.github/` files.
 
 ## Intent
 
@@ -178,4 +178,4 @@ This package is a modular overlay. It adds HAWP-aware Copilot behavior without r
 
 ## Path Note
 
-All installed `.github/` files use `hawp/...` paths that assume `hawp/` sits at the target repository root. No path adaptation is required when using this install script.
+All installed `.github/` files use `.hawp/...` paths that assume `.hawp/` sits at the target repository root. No path adaptation is required when using this install script.
