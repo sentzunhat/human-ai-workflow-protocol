@@ -31,11 +31,15 @@ core/
     README.md               — what HAWP is and why it exists
     SPEC.md                 — v0.1 field semantics and pipeline draft
     AUTHORING_PATTERNS.md   — compact authoring guidance for recurring task types
+    templates/              — optional starter templates for common HAWP artifacts
+    patterns/               — optional evidence/reporting patterns
+    reviews/                — optional project review checklists
     types/shape.ts          — locked TypeScript type for v0.1
     examples/               — concrete filled-shape examples
     usage/
       INIT.md               — repo-local operating guide
       STATUS_REPORT.md      — status report format and rules
+      GUARDRAIL_ADR.md      — guardrail ADR for improvement without schema expansion
       status/               — saved status reports
   .github/
     install.md              — instructions for installing the GitHub Copilot overlay
@@ -51,6 +55,8 @@ core/
 2. Use `core/.hawp/AUTHORING_PATTERNS.md` to fill the shape for your task type.
 3. See `core/.hawp/examples/` for concrete filled-shape examples.
 4. Read `core/.hawp/usage/INIT.md` for how this repo uses HAWP in practice.
+
+Templates and patterns are optional usage aids. They do not expand the HAWP core protocol.
 
 ## Installing HAWP into another repository
 
