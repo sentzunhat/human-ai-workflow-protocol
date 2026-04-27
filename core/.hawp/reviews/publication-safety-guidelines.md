@@ -43,3 +43,9 @@ When a file is not clearly public-safe, classify it as one of:
 - rewrite
 - move to private overlay
 - remove
+
+## Public Distribution Metadata
+
+Public repo owner names, package names, install URLs, and license references may remain when they are necessary for installation or attribution. They should not be treated as private leakage by default.
+
+If the repository is forked or mirrored internally, install and update snippets should explain how to replace the upstream `OWNER`, `REPO`, and `REF` values with the appropriate fork or mirror coordinates.
