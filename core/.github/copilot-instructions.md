@@ -2,12 +2,12 @@ This repository uses HAWP as a lightweight workflow method.
 
 Follow the repo-local HAWP guidance in:
 
-- .hawp/usage/INIT.md
-- .hawp/usage/STATUS_REPORT.md
+- .hawp/START_HERE.md
+- .hawp/templates/status-report.md
 
-Use .hawp/usage/INIT.md as the operating guide for how this repo applies HAWP in practice.
+Use .hawp/START_HERE.md as the operating guide for how this repo applies HAWP in practice.
 
-Use .hawp/usage/STATUS_REPORT.md when the user asks for a:
+Use .hawp/templates/status-report.md when the user asks for a:
 
 - status report
 - checkpoint summary
@@ -16,7 +16,7 @@ Use .hawp/usage/STATUS_REPORT.md when the user asks for a:
 
 Saved status reports belong in:
 
-- .hawp/usage/status/
+- .hawp/status/ (or your repo's preferred status folder)
 
 Keep the repo-local HAWP layer lean.
 
