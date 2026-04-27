@@ -18,6 +18,7 @@ type Shape = {
 ```
 
 It is not a runtime engine, memory system, validator, or orchestration framework. It is a lean shaping protocol.
+Public examples in this repository are intended to stay fictional or clearly generic so the core remains portable across projects.
 
 ## Repository layout
 
@@ -57,6 +58,7 @@ core/
 4. Read `core/.hawp/usage/INIT.md` for how this repo uses HAWP in practice.
 
 Templates and patterns are optional usage aids. They do not expand the HAWP core protocol.
+Publication-safety guidance lives in `core/.hawp/usage/PUBLICATION_SAFETY_ADR.md` and `core/.hawp/reviews/public-safety-checklist.md`.
 
 ## Installing HAWP into another repository
 

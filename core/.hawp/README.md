@@ -80,8 +80,10 @@ HAWP is intentionally:
 - reviews/: optional review artifacts for HAWP maintenance and scope checks.
 - examples/: concrete examples of applying the shape to real requests.
 - usage/GUARDRAIL_ADR.md: guardrail decision for improving HAWP without expanding core scope.
+- usage/PUBLICATION_SAFETY_ADR.md: publication-safety decision for keeping the public core generic and privacy-safe.
 
 Templates and patterns are optional usage aids. They do not expand the HAWP core protocol.
+Examples in the public core should stay fictional or clearly generic so the protocol remains reusable across projects.
 
 ## Current status and non-goals
 
