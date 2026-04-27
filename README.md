@@ -58,18 +58,22 @@ Publication-safety guidance lives in `core/.hawp/reviews/public-safety-checklist
 
 ## Installing HAWP into another repository
 
-To install HAWP into a target repository, copy only these two folders into `core/`:
+To install HAWP into a target repository, install the reusable `.hawp/` kit files and the `.github/` Copilot overlay. The default install flow uses an allowlist and does not copy `core/.hawp/usage/`.
+
+Installed by default:
 
 - `.github/` — GitHub Copilot overlay files
-- `.hawp/` — protocol docs, authoring patterns, examples, templates/reviews/patterns, and `.hawp/LICENSE`
+- selected `.hawp/` public-kit files — protocol docs, authoring patterns, templates, reviews, patterns, examples, types, and `.hawp/LICENSE`
+
+Not installed by default:
+
+- `core/.hawp/usage/` — source-repo operating notes, maintenance ADRs, and status artifacts
 
 The root-level `benchmark/` folder is reference material for evaluating HAWP's practical value. Copy it into a target repository only if you intend to use it there. It is not required for HAWP to function.
 
 For GitHub Copilot integration setup, follow `core/install.md`.
 
 To refresh an already-installed setup from upstream `main`, use `core/update.md`.
-
-Install boundary note: `core/.hawp/usage/` is source-repo operating material and maintainer history. Default install/update flows skip it. Reusable guidance ships through `templates/`, `patterns/`, `reviews/`, and `examples/`.
 
 ## Quick install + usage (copy/paste)
 
