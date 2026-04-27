@@ -10,7 +10,7 @@ A user asks: "what is this project about?"
 const shape: Shape = {
   input: "what is this project about?",
   context:
-    "Repository is infra-as-code for Sentzunhat; includes Kubernetes manifests, ArgoCD configs, and platform service folders.",
+    "Repository is infrastructure-as-code for a multi-service platform; it includes Kubernetes manifests, ArgoCD configs, and service folders.",
   mission:
     "Produce a concise project summary that explains purpose, main components, and operational model.",
   constraints:

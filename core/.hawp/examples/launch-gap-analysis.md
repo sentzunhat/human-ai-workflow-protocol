@@ -2,7 +2,7 @@
 
 ## Scenario
 
-A user asks for a Tekit-style launch readiness gap analysis before a production launch.
+A user asks for a launch readiness gap analysis for a generic SaaS release before production rollout.
 
 ## Filled HAWP Shape
 
@@ -10,7 +10,7 @@ A user asks for a Tekit-style launch readiness gap analysis before a production 
 const shape: Shape = {
   input: "run a launch readiness gap analysis for the next production release",
   context:
-    "Infra repo includes deployment manifests, CI/CD flows, and multiple platform service areas. Team needs a practical pre-launch risk view.",
+    "The service repo includes deployment manifests, CI/CD flows, and multiple platform service areas. The team needs a practical pre-launch risk view.",
   mission:
     "Identify launch-critical gaps across reliability, security, observability, rollback readiness, and ownership.",
   checkpoint:
