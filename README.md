@@ -4,7 +4,7 @@ A minimal protocol for reliable human-AI collaboration. HAWP reduces task drift 
 
 ## What it is
 
-HAWP is a six-field carrier for intent and task framing:
+HAWP is a compact task-shaping protocol with five required fields and one optional checkpoint field:
 
 ```ts
 type Shape = {
