@@ -77,6 +77,8 @@ To refresh an already-installed setup from upstream `main`, use `core/update.md`
 
 If you want a single copy/paste flow in a target repo, use this:
 
+> Replace `OWNER`, `REPO`, and `REF` if installing from a fork, internal mirror, or pinned release branch.
+
 ```bash
 # From the target repository root
 OWNER="sentzunhat"
