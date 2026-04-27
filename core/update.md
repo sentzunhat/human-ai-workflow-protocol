@@ -6,15 +6,17 @@ Use this when you already installed HAWP in a target repository and want the lat
 
 This refreshes only HAWP-managed files:
 
-- `.hawp/**`
+- installable `.hawp/` public kit files and folders
 - `.github/instructions/*.instructions.md`
 - `.github/prompts/*.prompt.md`
+
+Update boundary: source-repo maintenance paths under `.hawp/usage/` (including `.hawp/usage/status/`) are intentionally excluded from this default update flow.
 
 If a legacy `hawp/` directory exists as a real directory (not a symlink), it is removed so `.hawp/` is the only active kit root.
 
 It does not overwrite an existing `.github/copilot-instructions.md` file.
 
-Because `.hawp/**` is refreshed, `.hawp/LICENSE` is refreshed too.
+Because `.hawp/` is rebuilt from the public kit allowlist, `.hawp/LICENSE` is refreshed too.
 
 ## Prompt You Can Paste Into GitHub Copilot Chat
 
@@ -52,8 +54,17 @@ SRC="$TMP_DIR/${REPO}-${REF}/core"
 
 # Refresh HAWP protocol content
 rm -rf .hawp
-cp -R "$SRC/.hawp" .
-mkdir -p .hawp/usage/status
+mkdir -p .hawp
+cp "$SRC/.hawp/README.md" .hawp/
+cp "$SRC/.hawp/START_HERE.md" .hawp/
+cp "$SRC/.hawp/SPEC.md" .hawp/
+cp "$SRC/.hawp/AUTHORING_PATTERNS.md" .hawp/
+cp "$SRC/.hawp/LICENSE" .hawp/
+cp -R "$SRC/.hawp/templates" .hawp/
+cp -R "$SRC/.hawp/patterns" .hawp/
+cp -R "$SRC/.hawp/reviews" .hawp/
+cp -R "$SRC/.hawp/examples" .hawp/
+cp -R "$SRC/.hawp/types" .hawp/
 
 # Refresh overlay files
 mkdir -p .github/instructions .github/prompts
@@ -76,7 +87,7 @@ rm -rf "$TMP_DIR"
 
 ## Post-Update Checklist
 
-1. Confirm `.github/copilot-instructions.md` references `.hawp/usage/INIT.md` and `.hawp/usage/STATUS_REPORT.md`.
+1. Confirm `.github/copilot-instructions.md` references `.hawp/START_HERE.md` and `.hawp/templates/status-report.md`.
 2. Confirm `.hawp/LICENSE` exists and contains the Apache 2.0 text.
 3. Confirm expected prompt files exist under `.github/prompts/`.
 4. Confirm expected instruction files exist under `.github/instructions/`.

@@ -37,11 +37,7 @@ core/
     reviews/                — optional project review checklists
     types/shape.ts          — locked TypeScript type for v0.1
     examples/               — concrete filled-shape examples
-    usage/
-      INIT.md               — repo-local operating guide
-      STATUS_REPORT.md      — status report format and rules
-      GUARDRAIL_ADR.md      — guardrail ADR for improvement without schema expansion
-      status/               — saved status reports
+    usage/                  — source-repo maintenance docs and status artifacts (not copied by default install)
   .github/
     install.md              — instructions for installing the GitHub Copilot overlay
     update.md               — instructions for updating HAWP from GitHub main
@@ -55,23 +51,25 @@ core/
 1. Read `core/.hawp/README.md` to understand the protocol.
 2. Use `core/.hawp/AUTHORING_PATTERNS.md` to fill the shape for your task type.
 3. See `core/.hawp/examples/` for concrete filled-shape examples.
-4. Read `core/.hawp/usage/INIT.md` for how this repo uses HAWP in practice.
+4. Start from `core/.hawp/START_HERE.md` for task shaping and `core/.hawp/templates/status-report.md` for continuity reports.
 
 Templates and patterns are optional usage aids. They do not expand the HAWP core protocol.
-Publication-safety guidance lives in `core/.hawp/usage/PUBLICATION_SAFETY_ADR.md` and `core/.hawp/reviews/public-safety-checklist.md`.
+Publication-safety guidance lives in `core/.hawp/reviews/public-safety-checklist.md` and `core/.hawp/reviews/publication-safety-guidelines.md`.
 
 ## Installing HAWP into another repository
 
 To install HAWP into a target repository, copy only these two folders into `core/`:
 
 - `.github/` — GitHub Copilot overlay files
-- `.hawp/` — protocol docs, authoring patterns, examples, usage guidance, and `.hawp/LICENSE`
+- `.hawp/` — protocol docs, authoring patterns, examples, templates/reviews/patterns, and `.hawp/LICENSE`
 
 The root-level `benchmark/` folder is reference material for evaluating HAWP's practical value. Copy it into a target repository only if you intend to use it there. It is not required for HAWP to function.
 
 For GitHub Copilot integration setup, follow `core/install.md`.
 
 To refresh an already-installed setup from upstream `main`, use `core/update.md`.
+
+Install boundary note: `core/.hawp/usage/` is source-repo operating material and maintainer history. Default install/update flows skip it. Reusable guidance ships through `templates/`, `patterns/`, `reviews/`, and `examples/`.
 
 ## Quick install + usage (copy/paste)
 
@@ -93,7 +91,19 @@ curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz
 SRC="$TMP_DIR/${REPO}-${REF}/core"
 
 mkdir -p "$KIT_DIR" .github/instructions .github/prompts
-cp -R "$SRC/.hawp" "$KIT_DIR"/
+mkdir -p "$KIT_DIR/.hawp"
+
+cp "$SRC/.hawp/README.md" "$KIT_DIR/.hawp/"
+cp "$SRC/.hawp/START_HERE.md" "$KIT_DIR/.hawp/"
+cp "$SRC/.hawp/SPEC.md" "$KIT_DIR/.hawp/"
+cp "$SRC/.hawp/AUTHORING_PATTERNS.md" "$KIT_DIR/.hawp/"
+cp "$SRC/.hawp/LICENSE" "$KIT_DIR/.hawp/"
+
+cp -R "$SRC/.hawp/templates" "$KIT_DIR/.hawp/"
+cp -R "$SRC/.hawp/patterns" "$KIT_DIR/.hawp/"
+cp -R "$SRC/.hawp/reviews" "$KIT_DIR/.hawp/"
+cp -R "$SRC/.hawp/examples" "$KIT_DIR/.hawp/"
+cp -R "$SRC/.hawp/types" "$KIT_DIR/.hawp/"
 cp "$SRC/.github/instructions/"*.instructions.md \
   .github/instructions/
 cp "$SRC/.github/prompts/"*.prompt.md \
@@ -112,9 +122,9 @@ That copy brings along `$KIT_DIR/.hawp/LICENSE`, so the installed HAWP folder ca
 
 Then do this minimal usage wiring:
 
-1. Ensure `.github/copilot-instructions.md` references `$KIT_DIR/.hawp/usage/INIT.md` and `$KIT_DIR/.hawp/usage/STATUS_REPORT.md`.
+1. Ensure `.github/copilot-instructions.md` references `$KIT_DIR/.hawp/START_HERE.md` and `$KIT_DIR/.hawp/templates/status-report.md`.
 2. Use `$KIT_DIR/.hawp/START_HERE.md` to shape a task.
-3. Use `$KIT_DIR/.hawp/usage/STATUS_REPORT.md` when you need a checkpoint/context-transfer artifact.
+3. Use `$KIT_DIR/.hawp/templates/status-report.md` when you need a checkpoint/context-transfer artifact.
 
 If your target repo uses repo-root `.hawp/` instead of `$KIT_DIR/.hawp/`, adapt paths in the installed `.github/` files accordingly.
 
