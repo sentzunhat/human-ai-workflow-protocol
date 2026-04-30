@@ -29,7 +29,7 @@ You can drop work in natural language, for example:
 
 I will:
 
-- Assign a backlog ID and add a row to [BACKLOG.md](BACKLOG.md) with status `inbox`
+- Assign a backlog ID and add a row to [../../work/BACKLOG.md](../../work/BACKLOG.md) with status `inbox`
 - Move to analysis immediately unless you say "just log it"
 
 ---
@@ -50,7 +50,7 @@ Analysis covers:
 
 ## Step 3 — Plan
 
-I write a plan file to `usage/status/<date>-<id>-<slug>.md`.
+I write a plan file to `work/status/<date>-<id>-<slug>.md`.
 The backlog row moves to `plan-ready` and links to the plan file.
 
 The plan includes:

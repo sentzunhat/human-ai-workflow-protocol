@@ -1,6 +1,6 @@
 # Work Intake — Plan Template
 
-Use this template for plan files saved to `usage/status/<date>-<id>-<slug>.md`.
+Use this template for plan files saved to `work/status/<date>-<id>-<slug>.md`.
 
 ---
 

@@ -5,7 +5,7 @@ Goal: reduce conflicting edits and unclear ownership while keeping HAWP lean.
 
 ## Guardrails
 
-1. Check active work first in `usage/BACKLOG.md` before planning or implementing.
+1. Check active work first in `work/BACKLOG.md` before planning or implementing.
 2. Use one backlog ID and one plan file per item.
 3. Record owner and overlapping files in the plan before implementation.
 4. If overlap touches the same file as another in-progress item, default to hold.

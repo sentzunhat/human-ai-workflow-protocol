@@ -79,12 +79,13 @@ HAWP is intentionally:
 - patterns/: optional quick-reference patterns for evidence discipline and non-findings.
 - reviews/: optional review artifacts for HAWP maintenance and scope checks.
 - examples/: concrete examples of applying the shape to real requests.
+- usage/: reusable workflow guides (`INIT.md`, `INTAKE_WORKFLOW.md`, `STATUS_REPORT.md`) that downstream installs can copy and adopt.
 - reviews/project-review-checklist.md: review checklist for improving HAWP without expanding core scope.
 - reviews/public-safety-checklist.md and reviews/publication-safety-guidelines.md: publication-safety guidance for keeping the public core generic and privacy-safe.
 
 Templates and patterns are optional usage aids. They do not expand the HAWP core protocol.
 Examples in the public core should stay fictional or clearly generic so the protocol remains reusable across projects.
-usage/ is source-repo operating material and is not part of the default downstream install kit.
+Repo-local backlog, ADRs, status reports, and evidence live in `../work/` and are not part of the install kit.
 
 ## Current status and non-goals
 
