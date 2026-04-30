@@ -18,6 +18,12 @@ Saved status reports belong in:
 
 - core/.hawp/usage/status/
 
+For bug reports, tasks, and improvement work in this repo:
+
+- Follow the intake loop in core/.hawp/usage/INTAKE_WORKFLOW.md
+- Track all open and completed work in core/.hawp/usage/BACKLOG.md
+- Write plan files using core/.hawp/templates/intake-plan.md
+
 Keep the repo-local HAWP layer lean.
 
 HAWP in this repository is a practical workflow layer, not a runtime engine, compiler, validator, orchestrator, or memory system.
