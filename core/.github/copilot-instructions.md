@@ -16,7 +16,7 @@ Use .hawp/kit/templates/status-report.md when the user asks for a:
 
 Saved status reports belong in:
 
-- .hawp/status/ (or your repo's preferred status folder)
+- .hawp/work/status/
 
 Keep the repo-local HAWP layer lean.
 

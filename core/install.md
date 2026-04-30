@@ -4,7 +4,16 @@ Use this package when the target repository already has a repo-root `.hawp/` fol
 
 ## One-shot install + usage quickstart
 
-If you want a single copy/paste installation flow, run this from the target repository root:
+If you want a single copy/paste installation flow, run this from the target repository root.
+
+This script is **safe to re-run** and is **safe on a repo that already has `hawp/` or `.hawp/`**. It will:
+
+- Migrate a legacy `hawp/` directory to `.hawp/`, preserving any `hawp/work/` content.
+- Migrate a legacy `.hawp/status/` folder (pre-`work/` layout) into `.hawp/work/status/`.
+- Refresh `.hawp/kit/` and `.hawp/LICENSE` from the package.
+- Leave every existing file under `.hawp/work/` untouched (BACKLOG, ADRs, status plans, evidence).
+- Refresh `.github/instructions/*.instructions.md` and `.github/prompts/*.prompt.md`.
+- Seed `.github/copilot-instructions.md` only if it does not already exist.
 
 ```bash
 OWNER="sentzunhat"
@@ -17,8 +26,30 @@ curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz
 
 SRC="$TMP_DIR/${REPO}-${REF}/core"
 
-# Install protocol content at repo root
-# Layout: .hawp/LICENSE + .hawp/kit/ (reusable HAWP material)
+# --- Migration: legacy hawp/ -> .hawp/ (preserves hawp/work/) ---
+# Only acts on a real directory; symlinks are left alone.
+if [ -d "hawp" ] && [ ! -L "hawp" ]; then
+  mkdir -p .hawp
+  # Move work/ contents first so they survive the kit refresh below.
+  if [ -d "hawp/work" ]; then
+    mkdir -p .hawp/work
+    # Use -n to avoid clobbering anything already in .hawp/work/
+    cp -Rn hawp/work/. .hawp/work/ 2>/dev/null || true
+  fi
+  # Carry forward LICENSE if .hawp/LICENSE is missing (kit step refreshes it anyway).
+  [ -f hawp/LICENSE ] && [ ! -f .hawp/LICENSE ] && cp hawp/LICENSE .hawp/LICENSE
+  rm -rf hawp
+fi
+
+# --- Migration: pre-work/ layout (.hawp/status/ at root) -> .hawp/work/status/ ---
+if [ -d ".hawp/status" ] && [ ! -d ".hawp/work/status" ]; then
+  mkdir -p .hawp/work/status
+  cp -Rn .hawp/status/. .hawp/work/status/ 2>/dev/null || true
+  rm -rf .hawp/status
+fi
+
+# --- Refresh .hawp/kit/ deterministically (preserves .hawp/work/ and root LICENSE) ---
+rm -rf .hawp/kit
 mkdir -p .hawp/kit
 cp "$SRC/.hawp/LICENSE" .hawp/
 cp "$SRC/.hawp/kit/README.md" .hawp/kit/
@@ -32,22 +63,20 @@ cp -R "$SRC/.hawp/kit/examples" .hawp/kit/
 cp -R "$SRC/.hawp/kit/types" .hawp/kit/
 cp -R "$SRC/.hawp/kit/usage" .hawp/kit/
 
-# Scaffold work/ area (seed only; never overwrite existing repo content)
+# --- Scaffold work/ area (seed only; never overwrite existing repo content) ---
 mkdir -p .hawp/work/adrs .hawp/work/status .hawp/work/evidence
-[ ! -f .hawp/work/README.md ] && cp "$SRC/.hawp/work/README.md" .hawp/work/README.md
-[ ! -f .hawp/work/BACKLOG.md ] && cp "$SRC/.hawp/kit/templates/backlog.md" .hawp/work/BACKLOG.md
-[ ! -f .hawp/work/adrs/README.md ] && cp "$SRC/.hawp/work/adrs/README.md" .hawp/work/adrs/README.md
-[ ! -f .hawp/work/status/README.md ] && cp "$SRC/.hawp/work/status/README.md" .hawp/work/status/README.md
+[ ! -f .hawp/work/README.md ]          && cp "$SRC/.hawp/work/README.md" .hawp/work/README.md
+[ ! -f .hawp/work/BACKLOG.md ]         && cp "$SRC/.hawp/kit/templates/backlog.md" .hawp/work/BACKLOG.md
+[ ! -f .hawp/work/adrs/README.md ]     && cp "$SRC/.hawp/work/adrs/README.md" .hawp/work/adrs/README.md
+[ ! -f .hawp/work/status/README.md ]   && cp "$SRC/.hawp/work/status/README.md" .hawp/work/status/README.md
 [ ! -f .hawp/work/evidence/README.md ] && cp "$SRC/.hawp/work/evidence/README.md" .hawp/work/evidence/README.md
 
-# Install Copilot overlay into .github/
+# --- Install Copilot overlay into .github/ ---
 mkdir -p .github/instructions .github/prompts
-cp "$SRC/.github/instructions/"*.instructions.md \
-  .github/instructions/
-cp "$SRC/.github/prompts/"*.prompt.md \
-  .github/prompts/
+cp "$SRC/.github/instructions/"*.instructions.md .github/instructions/
+cp "$SRC/.github/prompts/"*.prompt.md .github/prompts/
 
-# Seed instructions only when missing. If present, merge instead of overwrite.
+# Seed copilot-instructions only when missing. If present, merge HAWP block manually (see below).
 if [ ! -f .github/copilot-instructions.md ]; then
   cp "$SRC/.github/copilot-instructions.md" .github/copilot-instructions.md
 fi
@@ -101,7 +130,9 @@ All `work/` files are seeded once and left untouched on subsequent updates.
 
 ## Preconditions
 
-Before installing this overlay, confirm the target repository contains:
+This package is **self-bootstrapping**. The one-shot script above creates `.hawp/` from scratch if it does not exist. There is no requirement that `.hawp/` already be present.
+
+If you are running the manual install procedure (below) instead of the one-shot script, you should already have a repo-root `.hawp/kit/` populated with at least:
 
 - `.hawp/LICENSE`
 - `.hawp/kit/README.md`
@@ -110,7 +141,17 @@ Before installing this overlay, confirm the target repository contains:
 - `.hawp/kit/START_HERE.md`
 - `.hawp/kit/templates/status-report.md`
 
-If `.hawp/` is missing, install or copy the HAWP folder first. Do not install this `.github/` overlay against a repository that does not have the expected repo-root `.hawp/kit/` paths.
+## Upgrading An Existing Install
+
+If the target repo already has `hawp/` (legacy, no dot prefix) or `.hawp/`, the one-shot script handles the upgrade safely. Specifically:
+
+- **Legacy `hawp/` → `.hawp/` migration.** A real `hawp/` directory (not a symlink) is moved to `.hawp/`. Any `hawp/work/` content (BACKLOG, ADRs, status plans, evidence) is copied into `.hawp/work/` first using `cp -Rn` so existing `.hawp/work/` files are never clobbered. The legacy `hawp/` directory is then removed.
+- **Pre-`work/` layout migration.** If a legacy `.hawp/status/` folder exists at the kit root (older layout where status reports lived outside `work/`), its contents are moved into `.hawp/work/status/` and the old folder is removed.
+- **`.hawp/kit/` refresh.** The `.hawp/kit/` directory is removed and rewritten from the package allowlist. Nothing under `.hawp/work/` is touched by this step.
+- **`.hawp/work/` preservation.** Every existing file under `.hawp/work/` (including BACKLOG.md, ADRs, status plans, evidence artifacts) is left exactly as-is. The scaffold seeders use `[ ! -f ... ]` guards and only create missing scaffold READMEs.
+- **`.github/` overlay refresh.** Instruction and prompt files are HAWP-managed and are always replaced. `.github/copilot-instructions.md` is seeded only when missing — if it already exists, merge the HAWP block manually.
+
+If you only want to refresh kit content from upstream (no install steps), use [`update.md`](./update.md).
 
 ## Install Procedure
 
@@ -206,9 +247,10 @@ After installation, confirm all of the following are true:
 
 ## Failure Cases
 
-- Missing `.hawp/` folder: stop and install the HAWP content first.
+- Missing `.hawp/` folder when running the manual install procedure: use the one-shot script instead, or copy the HAWP content first.
 - Missing `.github/` folder: create it before copying the overlay files.
 - Existing `.github/copilot-instructions.md` with unrelated repo rules: merge carefully and do not replace project-specific instructions.
+- Legacy `hawp/` exists as a symlink: the migration step intentionally skips symlinks. Resolve the symlink manually before running the script.
 - Temporary package files left in the target repository: remove the extra package source folder and keep only the installed `.github/` files.
 
 ## Intent
