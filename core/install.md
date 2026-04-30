@@ -103,7 +103,7 @@ find .hawp -name .gitkeep -type f -delete 2>/dev/null || true
 # --- 6. Seed .hawp/work/ scaffold (only when missing; never overwrites) ---
 mkdir -p .hawp/work/adrs .hawp/work/status .hawp/work/evidence
 copy_file_no_clobber "$SRC/.hawp/work/README.md"           ".hawp/work/README.md"
-copy_file_no_clobber "$SRC/.hawp/kit/templates/backlog.md" ".hawp/work/BACKLOG.md"
+copy_file_no_clobber "$SRC/.hawp/work/BACKLOG.md"           ".hawp/work/BACKLOG.md"
 copy_file_no_clobber "$SRC/.hawp/work/adrs/README.md"      ".hawp/work/adrs/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/status/README.md"    ".hawp/work/status/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/evidence/README.md"  ".hawp/work/evidence/README.md"
@@ -131,13 +131,13 @@ Quick usage after install:
 2. Start task shaping from `.hawp/kit/START_HERE.md`.
 3. Use `.hawp/LICENSE` as the installed Apache 2.0 license text for the HAWP kit content.
 4. Use `.hawp/kit/templates/status-report.md` for context-transfer artifacts.
-5. A starter `.hawp/work/` area is scaffolded automatically: `BACKLOG.md` (from `kit/templates/backlog.md`), `README.md`, and `README.md` files in `adrs/`, `status/`, and `evidence/`. These are seeded once and owned by your repo from that point on.
+5. A starter `.hawp/work/` area is scaffolded automatically: `BACKLOG.md`, `README.md`, and `README.md` files in `adrs/`, `status/`, and `evidence/` (all seeded from the source repo's `.hawp/work/` scaffold). These are seeded once and owned by your repo from that point on.
 
 ## Scope Clarification
 
 This document covers the full HAWP installation: `.hawp/` at the repo root, including `.hawp/LICENSE`, plus the GitHub Copilot overlay under `.github/`.
 
-Install boundary: the source repository's historical `core/.hawp/work/` content (ADR files, status plan files, and evidence artifacts) is intentionally excluded. The install seeds a clean `work/` scaffold — `README.md`, a starter `BACKLOG.md` (from `kit/templates/backlog.md`), and `README.md` files in `adrs/`, `status/`, and `evidence/` — but never copies the HAWP source repo's own backlog items or decision records into downstream repos.
+Install boundary: the source repository's own operating state lives at root `.work/` (ADRs, status plans, evidence, real BACKLOG) and is never installed downstream. The install seeds a clean `work/` scaffold — `README.md`, a starter `BACKLOG.md`, and `README.md` files in `adrs/`, `status/`, and `evidence/` — sourced from `core/.hawp/work/` in the kit repo. Downstream repos never receive the HAWP source repo's own backlog items or decision records.
 
 The `benchmark/` folder is optional reference material and is not installed by this script.
 
@@ -162,7 +162,7 @@ The installed `.hawp/` content also includes:
 
 - `.hawp/LICENSE` — Apache 2.0 text
 - `.hawp/work/README.md` — work area overview
-- `.hawp/work/BACKLOG.md` — starter backlog (seeded from `kit/templates/backlog.md`)
+- `.hawp/work/BACKLOG.md` — starter backlog (seeded from the source repo's `.hawp/work/BACKLOG.md` scaffold)
 - `.hawp/work/adrs/README.md` — ADR folder description
 - `.hawp/work/status/README.md` — status/plan folder description
 - `.hawp/work/evidence/README.md` — evidence folder description

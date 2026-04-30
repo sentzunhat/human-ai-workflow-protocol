@@ -11,7 +11,7 @@ This refreshes only HAWP-managed files:
 - `.github/instructions/*.instructions.md`
 - `.github/prompts/*.prompt.md`
 
-**Update boundary.** The source repository's historical `core/.hawp/work/` content (ADR files, status plan files, evidence artifacts) is intentionally excluded. Only `.hawp/LICENSE`, `.hawp/kit/`, and the `.github/` overlay are refreshed. Every existing file under `.hawp/work/**` — including BACKLOG, ADRs, status plans, evidence artifacts, and the scaffold seeded by install — is left untouched.
+**Update boundary.** The source repository's own operating state lives at root `.work/` (real BACKLOG, ADRs, status plans, evidence) and is never refreshed by this flow. Only `.hawp/LICENSE`, `.hawp/kit/`, the `.github/` overlay, and missing `.hawp/work/` scaffold files are touched. Every existing file under your `.hawp/work/**` is left untouched.
 
 **Migration support.** This flow safely upgrades repos coming from older HAWP layouts:
 
@@ -137,7 +137,7 @@ find .hawp -name .gitkeep -type f -delete 2>/dev/null || true
 # --- 6. Seed .hawp/work/ scaffold (only when missing; never overwrites) ---
 mkdir -p .hawp/work/adrs .hawp/work/status .hawp/work/evidence
 copy_file_no_clobber "$SRC/.hawp/work/README.md"           ".hawp/work/README.md"
-copy_file_no_clobber "$SRC/.hawp/kit/templates/backlog.md" ".hawp/work/BACKLOG.md"
+copy_file_no_clobber "$SRC/.hawp/work/BACKLOG.md"           ".hawp/work/BACKLOG.md"
 copy_file_no_clobber "$SRC/.hawp/work/adrs/README.md"      ".hawp/work/adrs/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/status/README.md"    ".hawp/work/status/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/evidence/README.md"  ".hawp/work/evidence/README.md"
