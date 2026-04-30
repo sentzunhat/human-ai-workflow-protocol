@@ -18,7 +18,8 @@ This refreshes only HAWP-managed files:
 - A legacy `hawp/` directory (no dot prefix, real directory only — symlinks are skipped) is migrated into `.hawp/`. Its `work/`, `usage/`, and `status/` contents are copied into `.hawp/work/...` with `cp -Rn` so existing `.hawp/work/` files always win.
 - A legacy `.hawp/usage/` layout is migrated: `BACKLOG.md` → `.hawp/work/BACKLOG.md`, `status/*` → `.hawp/work/status/*`, `*_ADR.md` → `.hawp/work/adrs/*`.
 - A legacy `.hawp/status/` folder (pre-`work/` layout) is moved into `.hawp/work/status/`.
-- After `.hawp/kit/**` is refreshed, legacy root-level kit folders are removed: `.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`.
+- After `.hawp/kit/**` is refreshed, legacy root-level kit folders are removed: `.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`. Stale top-level docs that now live under `kit/` are also removed: `.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`.
+- Any `.gitkeep` files under `.hawp/` are removed (the kit no longer ships placeholder files).
 - Stale legacy overlay files named `.github/instructions/human-ai-workflow-protocol-*.instructions.md` and `.github/prompts/human-ai-workflow-protocol-*.prompt.md` are removed; current overlays use the `hawp-*` and `intake.*` naming.
 - `.github/copilot-instructions.md` is never overwritten.
 - Missing `.hawp/work/` scaffold files are seeded only when absent (`README.md`, `BACKLOG.md`, `adrs/README.md`, `status/README.md`, `evidence/README.md`).
@@ -33,7 +34,8 @@ Requirements:
 - migrate legacy .hawp/usage/ (BACKLOG.md, status/, *_ADR.md) into .hawp/work/
 - migrate legacy .hawp/status/ into .hawp/work/status/
 - refresh .hawp/LICENSE and .hawp/kit/** (leave .hawp/work/ untouched)
-- remove old root-level kit folders (.hawp/templates, .hawp/patterns, .hawp/reviews, .hawp/examples, .hawp/types, .hawp/usage) after kit refresh
+- remove old root-level kit folders (.hawp/templates, .hawp/patterns, .hawp/reviews, .hawp/examples, .hawp/types, .hawp/usage) and stale top-level kit docs (.hawp/README.md, .hawp/SPEC.md, .hawp/START_HERE.md, .hawp/AUTHORING_PATTERNS.md) after kit refresh
+- remove any .gitkeep files under .hawp/
 - seed .hawp/work/ scaffold files only when missing
 - refresh .github/instructions/*.instructions.md and .github/prompts/*.prompt.md
 - remove stale .github/instructions/human-ai-workflow-protocol-*.instructions.md and .github/prompts/human-ai-workflow-protocol-*.prompt.md
@@ -123,10 +125,14 @@ cp -R "$SRC/.hawp/kit/examples"  .hawp/kit/
 cp -R "$SRC/.hawp/kit/types"     .hawp/kit/
 cp -R "$SRC/.hawp/kit/usage"     .hawp/kit/
 
-# --- 5. Cleanup: remove legacy root-level kit folders (now under .hawp/kit/) ---
+# --- 5. Cleanup: remove legacy root-level kit folders and stray docs (now under .hawp/kit/) ---
 # Safe because their reusable content has been rewritten under .hawp/kit/ and
 # any repo-local items have already been migrated into .hawp/work/.
 rm -rf .hawp/templates .hawp/patterns .hawp/reviews .hawp/examples .hawp/types .hawp/usage
+rm -f .hawp/README.md .hawp/SPEC.md .hawp/START_HERE.md .hawp/AUTHORING_PATTERNS.md
+
+# --- 5b. Cleanup: remove any .gitkeep files under .hawp/ (kit no longer ships them) ---
+find .hawp -name .gitkeep -type f -delete 2>/dev/null || true
 
 # --- 6. Seed .hawp/work/ scaffold (only when missing; never overwrites) ---
 mkdir -p .hawp/work/adrs .hawp/work/status .hawp/work/evidence
@@ -165,7 +171,7 @@ echo "Preserved: .hawp/work/** (untouched), .github/copilot-instructions.md (if 
 4. Confirm expected instruction files exist under `.github/instructions/` — including `intake.instructions.md`.
 5. Confirm no `human-ai-workflow-protocol-*` named files remain under `.github/instructions/` or `.github/prompts/`.
 6. If a legacy `hawp/`, `.hawp/usage/`, or `.hawp/status/` directory existed, confirm it has been migrated and removed, and that `.hawp/work/` retains every file you had previously.
-7. Confirm legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) are gone — they live under `.hawp/kit/` now.
+7. Confirm legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`) are gone — they live under `.hawp/kit/` now. Confirm no `.gitkeep` files remain under `.hawp/`.
 8. Review git diff before committing — pay special attention to anything inside `.hawp/work/` (should be a clean migration with no deletions).
 9. Run your repo checks (lint/test/typecheck) if your workflow requires it.
 

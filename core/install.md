@@ -12,7 +12,8 @@ This script is **safe to re-run** and is **safe on a repo that already has `hawp
 - Migrate a legacy `.hawp/usage/` layout into `.hawp/work/` (BACKLOG, status, ADRs).
 - Migrate a legacy `.hawp/status/` folder (pre-`work/` layout) into `.hawp/work/status/`.
 - Refresh `.hawp/kit/` and `.hawp/LICENSE` from the package.
-- Remove legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) after the new `.hawp/kit/` is in place.
+- Remove legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`) after the new `.hawp/kit/` is in place.
+- Remove any `.gitkeep` files under `.hawp/` (the kit no longer ships placeholders).
 - Leave every existing file under `.hawp/work/` untouched (BACKLOG, ADRs, status plans, evidence).
 - Seed missing `.hawp/work/` scaffold files only when they do not exist.
 - Refresh `.github/instructions/*.instructions.md` and `.github/prompts/*.prompt.md`.
@@ -92,8 +93,12 @@ cp -R "$SRC/.hawp/kit/examples"  .hawp/kit/
 cp -R "$SRC/.hawp/kit/types"     .hawp/kit/
 cp -R "$SRC/.hawp/kit/usage"     .hawp/kit/
 
-# --- 5. Cleanup: remove legacy root-level kit folders (now under .hawp/kit/) ---
+# --- 5. Cleanup: remove legacy root-level kit folders and stray docs (now under .hawp/kit/) ---
 rm -rf .hawp/templates .hawp/patterns .hawp/reviews .hawp/examples .hawp/types .hawp/usage
+rm -f .hawp/README.md .hawp/SPEC.md .hawp/START_HERE.md .hawp/AUTHORING_PATTERNS.md
+
+# --- 5b. Cleanup: remove any .gitkeep files under .hawp/ (kit no longer ships them) ---
+find .hawp -name .gitkeep -type f -delete 2>/dev/null || true
 
 # --- 6. Seed .hawp/work/ scaffold (only when missing; never overwrites) ---
 mkdir -p .hawp/work/adrs .hawp/work/status .hawp/work/evidence
@@ -185,7 +190,7 @@ If the target repo already has `hawp/` (legacy, no dot prefix) or `.hawp/` from 
 - **Legacy `.hawp/usage/` migration.** `BACKLOG.md`, `status/*`, and `*_ADR.md` files are copied into `.hawp/work/BACKLOG.md`, `.hawp/work/status/`, and `.hawp/work/adrs/` respectively. Existing files in `.hawp/work/` always win.
 - **Pre-`work/` layout migration.** A legacy `.hawp/status/` folder at the kit root is copied into `.hawp/work/status/`.
 - **`.hawp/kit/` refresh.** The `.hawp/kit/` directory is removed and rewritten from the package allowlist. Nothing under `.hawp/work/` is touched by this step.
-- **Legacy root-level kit cleanup.** After kit refresh, the script removes `.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, and `.hawp/usage`. Their reusable content now lives under `.hawp/kit/...` and any repo-local items have already been migrated into `.hawp/work/`.
+- **Legacy root-level kit cleanup.** After kit refresh, the script removes `.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, and `.hawp/usage`, plus stale top-level kit docs `.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, and `.hawp/AUTHORING_PATTERNS.md`. Their reusable content now lives under `.hawp/kit/...` and any repo-local items have already been migrated into `.hawp/work/`. Any `.gitkeep` files under `.hawp/` are also removed.
 - **`.hawp/work/` preservation.** Every existing file under `.hawp/work/` (BACKLOG.md, ADRs, status plans, evidence artifacts) is left exactly as-is. Scaffold seeders only create missing files.
 - **`.github/` overlay refresh.** Instruction and prompt files are HAWP-managed and are always replaced. Stale legacy-named overlay files matching `human-ai-workflow-protocol-*.instructions.md` and `human-ai-workflow-protocol-*.prompt.md` are removed. `.github/copilot-instructions.md` is seeded only when missing — if it already exists, merge the HAWP block manually.
 
