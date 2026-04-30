@@ -28,8 +28,10 @@ _No active work._
 
 ## Done
 
-| ID  | Type | Title | Closed | Plan |
-| --- | ---- | ----- | ------ | ---- |
+| ID       | Type        | Title                           | Closed     | Plan                                                                                                              |
+| -------- | ----------- | ------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------- |
+| TASK-001 | improvement | ADR: Parallel Work Guardrails   | 2026-04-30 | [2026-04-30-task-001-parallel-work-guardrails-adr.md](status/2026-04-30-task-001-parallel-work-guardrails-adr.md) |
+| TASK-002 | improvement | ADR: Intake Template Refinement | 2026-04-30 | [2026-04-30-task-002-intake-template-adr.md](status/2026-04-30-task-002-intake-template-adr.md)                   |
 
 ---
 
