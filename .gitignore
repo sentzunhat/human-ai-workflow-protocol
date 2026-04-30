@@ -9,14 +9,27 @@ Thumbs.db
 dist/
 
 # Local/private HAWP operating artifacts
-core/.hawp/usage/private/
-core/.hawp/usage/local/
-core/.hawp/usage/tmp/
-core/.hawp/usage/logs/
-core/.hawp/usage/status/private/
-core/.hawp/usage/status/local/
-# Repo-local status artifacts (keep folder placeholder only)
-core/.hawp/usage/status/*.md
+core/.hawp/work/private/
+core/.hawp/work/local/
+core/.hawp/work/tmp/
+core/.hawp/work/logs/
+core/.hawp/work/status/private/
+core/.hawp/work/status/local/
+core/.hawp/work/evidence/private/
+core/.hawp/work/evidence/local/
+
+# Repo-local adrs files (track folder shape via README anchor only)
+core/.hawp/work/adr/*.md
+!core/.hawp/work/adr/README.md
+
+# Repo-local status report files (track folder shape via README anchor only)
+core/.hawp/work/status/*.md
+!core/.hawp/work/status/README.md
+
+# Repo-local evidence files (track folder shape via README anchor only)
+core/.hawp/work/evidence/*
+!core/.hawp/work/evidence/README.md
+
 *.local.md
 *.private.md
 
