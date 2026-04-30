@@ -38,12 +38,26 @@ core/
     types/shape.ts          — locked TypeScript type for v0.1
     examples/               — concrete filled-shape examples
     usage/                  — source-repo maintenance docs and status artifacts (not copied by default install)
+      INIT.md               — operating guide for HAWP in this repo
+      STATUS_REPORT.md      — status report guidance
+      INTAKE_WORKFLOW.md    — intake loop for bugs, tasks, and improvements
+      BACKLOG.md            — single source of truth for all open and completed work
+      GUARDRAIL_ADR.md      — guardrail decision for scope-safe improvements
   .github/
     install.md              — instructions for installing the GitHub Copilot overlay
     update.md               — instructions for updating HAWP from GitHub main
     copilot-instructions.md — Copilot instructions template (uses repo-root .hawp/ paths)
-    instructions/           — scoped intake instructions for the overlay
-    prompts/                — curated prompt pack for handoff, status, and docs alignment
+    instructions/           — scoped intake and docs-alignment instructions
+      intake.instructions.md                              — ambient intake trigger (auto-activates on bug/task reports)
+      human-ai-workflow-protocol-intake.instructions.md  — HAWP modular intake overlay
+      human-ai-workflow-protocol-docs-alignment.instructions.md — docs alignment overlay
+    prompts/                — curated prompt pack for intake, handoff, status, and docs alignment
+      intake.prompt.md                                           — explicit intake loop trigger
+      human-ai-workflow-protocol-status-report.prompt.md
+      human-ai-workflow-protocol-intent-first-handoff.prompt.md
+      human-ai-workflow-protocol-docs-alignment-deterministic.prompt.md
+      human-ai-workflow-protocol-docs-alignment-simplicity.prompt.md
+      human-ai-workflow-protocol-conservative-docs-drift-cleanup.prompt.md
 ```
 
 ## Using HAWP

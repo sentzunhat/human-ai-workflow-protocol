@@ -67,11 +67,13 @@ Install these files into the target repository's `.github/` folder:
 - `copilot-instructions.md`
 - `instructions/human-ai-workflow-protocol-intake.instructions.md`
 - `instructions/human-ai-workflow-protocol-docs-alignment.instructions.md`
+- `instructions/intake.instructions.md`
 - `prompts/human-ai-workflow-protocol-status-report.prompt.md`
 - `prompts/human-ai-workflow-protocol-intent-first-handoff.prompt.md`
 - `prompts/human-ai-workflow-protocol-docs-alignment-deterministic.prompt.md`
 - `prompts/human-ai-workflow-protocol-docs-alignment-simplicity.prompt.md`
 - `prompts/human-ai-workflow-protocol-conservative-docs-drift-cleanup.prompt.md`
+- `prompts/intake.prompt.md`
 
 These files assume the target repository resolves HAWP content from repo-root paths such as `.hawp/START_HERE.md`.
 
@@ -167,11 +169,13 @@ After installation, confirm all of the following are true:
 - `.github/copilot-instructions.md` references `.hawp/templates/status-report.md`
 - `.github/instructions/human-ai-workflow-protocol-intake.instructions.md` exists
 - `.github/instructions/human-ai-workflow-protocol-docs-alignment.instructions.md` exists
+- `.github/instructions/intake.instructions.md` exists
 - `.github/prompts/human-ai-workflow-protocol-status-report.prompt.md` exists
 - `.github/prompts/human-ai-workflow-protocol-intent-first-handoff.prompt.md` exists
 - `.github/prompts/human-ai-workflow-protocol-docs-alignment-deterministic.prompt.md` exists
 - `.github/prompts/human-ai-workflow-protocol-docs-alignment-simplicity.prompt.md` exists
 - `.github/prompts/human-ai-workflow-protocol-conservative-docs-drift-cleanup.prompt.md` exists
+- `.github/prompts/intake.prompt.md` exists
 - `.hawp/LICENSE` exists and contains the Apache 2.0 text
 - no temporary `.github/` overlay folder remains in the target repository unless the user is intentionally keeping the kit source there
 

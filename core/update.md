@@ -89,8 +89,8 @@ rm -rf "$TMP_DIR"
 
 1. Confirm `.github/copilot-instructions.md` references `.hawp/START_HERE.md` and `.hawp/templates/status-report.md`.
 2. Confirm `.hawp/LICENSE` exists and contains the Apache 2.0 text.
-3. Confirm expected prompt files exist under `.github/prompts/`.
-4. Confirm expected instruction files exist under `.github/instructions/`.
+3. Confirm expected prompt files exist under `.github/prompts/` — including `intake.prompt.md`.
+4. Confirm expected instruction files exist under `.github/instructions/` — including `intake.instructions.md`.
 5. If legacy `hawp/` existed as a real directory, confirm it was removed; if `hawp` is a symlink, confirm it was left untouched.
 6. Review git diff before committing.
 7. Run your repo checks (lint/test/typecheck) if your workflow requires it.
