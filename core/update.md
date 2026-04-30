@@ -10,7 +10,7 @@ This refreshes only HAWP-managed files:
 - `.github/instructions/*.instructions.md`
 - `.github/prompts/*.prompt.md`
 
-Update boundary: source-repo maintenance paths under `.hawp/usage/` (including `.hawp/usage/status/`) are intentionally excluded from this default update flow.
+Update boundary: the source repository's historical `core/.hawp/work/` content (ADR files, status plan files, and evidence artifacts) is intentionally excluded from this default update flow. Only `.hawp/LICENSE` and `.hawp/kit/` are refreshed. Any local `.hawp/work/` in the target repo — including files you have created or the scaffold seeded by install — is left completely untouched.
 
 If a legacy `hawp/` directory exists as a real directory (not a symlink), it is removed so `.hawp/` is the only active kit root.
 
@@ -52,19 +52,20 @@ curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz
 
 SRC="$TMP_DIR/${REPO}-${REF}/core"
 
-# Refresh HAWP protocol content
-rm -rf .hawp
-mkdir -p .hawp
-cp "$SRC/.hawp/README.md" .hawp/
-cp "$SRC/.hawp/START_HERE.md" .hawp/
-cp "$SRC/.hawp/SPEC.md" .hawp/
-cp "$SRC/.hawp/AUTHORING_PATTERNS.md" .hawp/
+# Refresh HAWP kit content (preserve LICENSE at root and any local work/)
+rm -rf .hawp/kit
+mkdir -p .hawp/kit
 cp "$SRC/.hawp/LICENSE" .hawp/
-cp -R "$SRC/.hawp/templates" .hawp/
-cp -R "$SRC/.hawp/patterns" .hawp/
-cp -R "$SRC/.hawp/reviews" .hawp/
-cp -R "$SRC/.hawp/examples" .hawp/
-cp -R "$SRC/.hawp/types" .hawp/
+cp "$SRC/.hawp/kit/README.md" .hawp/kit/
+cp "$SRC/.hawp/kit/START_HERE.md" .hawp/kit/
+cp "$SRC/.hawp/kit/SPEC.md" .hawp/kit/
+cp "$SRC/.hawp/kit/AUTHORING_PATTERNS.md" .hawp/kit/
+cp -R "$SRC/.hawp/kit/templates" .hawp/kit/
+cp -R "$SRC/.hawp/kit/patterns" .hawp/kit/
+cp -R "$SRC/.hawp/kit/reviews" .hawp/kit/
+cp -R "$SRC/.hawp/kit/examples" .hawp/kit/
+cp -R "$SRC/.hawp/kit/types" .hawp/kit/
+cp -R "$SRC/.hawp/kit/usage" .hawp/kit/
 
 # Refresh overlay files
 mkdir -p .github/instructions .github/prompts
@@ -87,7 +88,7 @@ rm -rf "$TMP_DIR"
 
 ## Post-Update Checklist
 
-1. Confirm `.github/copilot-instructions.md` references `.hawp/START_HERE.md` and `.hawp/templates/status-report.md`.
+1. Confirm `.github/copilot-instructions.md` references `.hawp/kit/START_HERE.md` and `.hawp/kit/templates/status-report.md`.
 2. Confirm `.hawp/LICENSE` exists and contains the Apache 2.0 text.
 3. Confirm expected prompt files exist under `.github/prompts/` — including `intake.prompt.md`.
 4. Confirm expected instruction files exist under `.github/instructions/` — including `intake.instructions.md`.
@@ -98,6 +99,7 @@ rm -rf "$TMP_DIR"
 ## Notes
 
 - This update flow is conservative and keeps local Copilot instruction customizations.
-- `.hawp/` is always installed flat at the repository root.
+- `.hawp/` is laid out flat at the repository root with `.hawp/LICENSE` and `.hawp/kit/`.
+- `.hawp/work/` (if present) is repo-local operating state and is left completely untouched by this flow. The scaffold README files and `BACKLOG.md` seeded by install are treated as repo-owned content and are never overwritten.
 - Legacy `hawp/` cleanup is guarded: only real directories are removed, and symlinks are preserved.
 - The Apache 2.0 kit license now travels with `.hawp/LICENSE` and is refreshed by this update flow.

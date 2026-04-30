@@ -18,17 +18,27 @@ curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz
 SRC="$TMP_DIR/${REPO}-${REF}/core"
 
 # Install protocol content at repo root
-mkdir -p .hawp
-cp "$SRC/.hawp/README.md" .hawp/
-cp "$SRC/.hawp/START_HERE.md" .hawp/
-cp "$SRC/.hawp/SPEC.md" .hawp/
-cp "$SRC/.hawp/AUTHORING_PATTERNS.md" .hawp/
+# Layout: .hawp/LICENSE + .hawp/kit/ (reusable HAWP material)
+mkdir -p .hawp/kit
 cp "$SRC/.hawp/LICENSE" .hawp/
-cp -R "$SRC/.hawp/templates" .hawp/
-cp -R "$SRC/.hawp/patterns" .hawp/
-cp -R "$SRC/.hawp/reviews" .hawp/
-cp -R "$SRC/.hawp/examples" .hawp/
-cp -R "$SRC/.hawp/types" .hawp/
+cp "$SRC/.hawp/kit/README.md" .hawp/kit/
+cp "$SRC/.hawp/kit/START_HERE.md" .hawp/kit/
+cp "$SRC/.hawp/kit/SPEC.md" .hawp/kit/
+cp "$SRC/.hawp/kit/AUTHORING_PATTERNS.md" .hawp/kit/
+cp -R "$SRC/.hawp/kit/templates" .hawp/kit/
+cp -R "$SRC/.hawp/kit/patterns" .hawp/kit/
+cp -R "$SRC/.hawp/kit/reviews" .hawp/kit/
+cp -R "$SRC/.hawp/kit/examples" .hawp/kit/
+cp -R "$SRC/.hawp/kit/types" .hawp/kit/
+cp -R "$SRC/.hawp/kit/usage" .hawp/kit/
+
+# Scaffold work/ area (seed only; never overwrite existing repo content)
+mkdir -p .hawp/work/adrs .hawp/work/status .hawp/work/evidence
+[ ! -f .hawp/work/README.md ] && cp "$SRC/.hawp/work/README.md" .hawp/work/README.md
+[ ! -f .hawp/work/BACKLOG.md ] && cp "$SRC/.hawp/kit/templates/backlog.md" .hawp/work/BACKLOG.md
+[ ! -f .hawp/work/adrs/README.md ] && cp "$SRC/.hawp/work/adrs/README.md" .hawp/work/adrs/README.md
+[ ! -f .hawp/work/status/README.md ] && cp "$SRC/.hawp/work/status/README.md" .hawp/work/status/README.md
+[ ! -f .hawp/work/evidence/README.md ] && cp "$SRC/.hawp/work/evidence/README.md" .hawp/work/evidence/README.md
 
 # Install Copilot overlay into .github/
 mkdir -p .github/instructions .github/prompts
@@ -47,16 +57,17 @@ rm -rf "$TMP_DIR"
 
 Quick usage after install:
 
-1. In `.github/copilot-instructions.md`, ensure HAWP references point to `.hawp/START_HERE.md` and `.hawp/templates/status-report.md`.
-2. Start task shaping from `.hawp/START_HERE.md`.
+1. In `.github/copilot-instructions.md`, ensure HAWP references point to `.hawp/kit/START_HERE.md` and `.hawp/kit/templates/status-report.md`.
+2. Start task shaping from `.hawp/kit/START_HERE.md`.
 3. Use `.hawp/LICENSE` as the installed Apache 2.0 license text for the HAWP kit content.
-4. Use `.hawp/templates/status-report.md` for context-transfer artifacts.
+4. Use `.hawp/kit/templates/status-report.md` for context-transfer artifacts.
+5. A starter `.hawp/work/` area is scaffolded automatically: `BACKLOG.md` (from `kit/templates/backlog.md`), `README.md`, and `README.md` files in `adrs/`, `status/`, and `evidence/`. These are seeded once and owned by your repo from that point on.
 
 ## Scope Clarification
 
 This document covers the full HAWP installation: `.hawp/` at the repo root, including `.hawp/LICENSE`, plus the GitHub Copilot overlay under `.github/`.
 
-Install boundary: source-repo maintenance paths under `.hawp/usage/` (including `.hawp/usage/status/`) are intentionally excluded from this default install flow.
+Install boundary: the source repository's historical `core/.hawp/work/` content (ADR files, status plan files, and evidence artifacts) is intentionally excluded. The install seeds a clean `work/` scaffold — `README.md`, a starter `BACKLOG.md` (from `kit/templates/backlog.md`), and `README.md` files in `adrs/`, `status/`, and `evidence/` — but never copies the HAWP source repo's own backlog items or decision records into downstream repos.
 
 The `benchmark/` folder is optional reference material and is not installed by this script.
 
@@ -75,22 +86,31 @@ Install these files into the target repository's `.github/` folder:
 - `prompts/human-ai-workflow-protocol-conservative-docs-drift-cleanup.prompt.md`
 - `prompts/intake.prompt.md`
 
-These files assume the target repository resolves HAWP content from repo-root paths such as `.hawp/START_HERE.md`.
+These files assume the target repository resolves HAWP content from repo-root paths such as `.hawp/kit/START_HERE.md`.
 
-The installed `.hawp/` content also includes `.hawp/LICENSE` with the Apache 2.0 text.
+The installed `.hawp/` content also includes:
+
+- `.hawp/LICENSE` — Apache 2.0 text
+- `.hawp/work/README.md` — work area overview
+- `.hawp/work/BACKLOG.md` — starter backlog (seeded from `kit/templates/backlog.md`)
+- `.hawp/work/adrs/README.md` — ADR folder description
+- `.hawp/work/status/README.md` — status/plan folder description
+- `.hawp/work/evidence/README.md` — evidence folder description
+
+All `work/` files are seeded once and left untouched on subsequent updates.
 
 ## Preconditions
 
 Before installing this overlay, confirm the target repository contains:
 
-- `.hawp/README.md`
-- `.hawp/SPEC.md`
-- `.hawp/AUTHORING_PATTERNS.md`
 - `.hawp/LICENSE`
-- `.hawp/START_HERE.md`
-- `.hawp/templates/status-report.md`
+- `.hawp/kit/README.md`
+- `.hawp/kit/SPEC.md`
+- `.hawp/kit/AUTHORING_PATTERNS.md`
+- `.hawp/kit/START_HERE.md`
+- `.hawp/kit/templates/status-report.md`
 
-If `.hawp/` is missing, install or copy the HAWP folder first. Do not install this `.github/` overlay against a repository that does not have the expected repo-root `.hawp/` paths.
+If `.hawp/` is missing, install or copy the HAWP folder first. Do not install this `.github/` overlay against a repository that does not have the expected repo-root `.hawp/kit/` paths.
 
 ## Install Procedure
 
@@ -132,12 +152,12 @@ This repository uses HAWP as a lightweight workflow method.
 
 Follow the repo-local HAWP guidance in:
 
-- .hawp/START_HERE.md
-- .hawp/templates/status-report.md
+- .hawp/kit/START_HERE.md
+- .hawp/kit/templates/status-report.md
 
-Use .hawp/START_HERE.md as the operating guide for how this repo applies HAWP in practice.
+Use .hawp/kit/START_HERE.md as the operating guide for how this repo applies HAWP in practice.
 
-Use .hawp/templates/status-report.md when the user asks for a:
+Use .hawp/kit/templates/status-report.md when the user asks for a:
 
 - status report
 - checkpoint summary
@@ -146,7 +166,7 @@ Use .hawp/templates/status-report.md when the user asks for a:
 
 Saved status reports belong in:
 
-- .hawp/status/ (or your repo's preferred status folder)
+- .hawp/work/status/
 
 Keep the repo-local HAWP layer lean.
 
@@ -165,8 +185,8 @@ Prefer compact, decision-useful outputs.
 
 After installation, confirm all of the following are true:
 
-- `.github/copilot-instructions.md` references `.hawp/START_HERE.md`
-- `.github/copilot-instructions.md` references `.hawp/templates/status-report.md`
+- `.github/copilot-instructions.md` references `.hawp/kit/START_HERE.md`
+- `.github/copilot-instructions.md` references `.hawp/kit/templates/status-report.md`
 - `.github/instructions/human-ai-workflow-protocol-intake.instructions.md` exists
 - `.github/instructions/human-ai-workflow-protocol-docs-alignment.instructions.md` exists
 - `.github/instructions/intake.instructions.md` exists
@@ -177,6 +197,11 @@ After installation, confirm all of the following are true:
 - `.github/prompts/human-ai-workflow-protocol-conservative-docs-drift-cleanup.prompt.md` exists
 - `.github/prompts/intake.prompt.md` exists
 - `.hawp/LICENSE` exists and contains the Apache 2.0 text
+- `.hawp/work/README.md` exists
+- `.hawp/work/BACKLOG.md` exists
+- `.hawp/work/adrs/README.md` exists
+- `.hawp/work/status/README.md` exists
+- `.hawp/work/evidence/README.md` exists
 - no temporary `.github/` overlay folder remains in the target repository unless the user is intentionally keeping the kit source there
 
 ## Failure Cases

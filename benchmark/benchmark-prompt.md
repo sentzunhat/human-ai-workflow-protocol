@@ -60,7 +60,7 @@ const shape: Shape = {
 
 Use the filled shape as the prompt. Capture the output.
 
-For authoring guidance on specific task types, see [.hawp/AUTHORING_PATTERNS.md](../core/.hawp/AUTHORING_PATTERNS.md).
+For authoring guidance on specific task types, see [.hawp/kit/AUTHORING_PATTERNS.md](../core/.hawp/kit/AUTHORING_PATTERNS.md).
 
 ### Step 4: Compare on scoring dimensions
 
@@ -143,6 +143,6 @@ Run it with real tasks from your own work context. The more realistic the task, 
 
 ## Related docs
 
-- [.hawp/AUTHORING_PATTERNS.md](../core/.hawp/AUTHORING_PATTERNS.md) — how to fill the shape for specific task types
-- [.hawp/examples/](../core/.hawp/examples/) — concrete filled-shape examples
-- [.hawp/SPEC.md](../core/.hawp/SPEC.md) — field semantics and evidence discipline rules
+- [.hawp/kit/AUTHORING_PATTERNS.md](../core/.hawp/kit/AUTHORING_PATTERNS.md) — how to fill the shape for specific task types
+- [.hawp/kit/examples/](../core/.hawp/kit/examples/) — concrete filled-shape examples
+- [.hawp/kit/SPEC.md](../core/.hawp/kit/SPEC.md) — field semantics and evidence discipline rules
