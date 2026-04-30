@@ -8,7 +8,7 @@ You are running the work intake loop for this repository.
 Read `kit/usage/INTAKE_WORKFLOW.md` for the full operating loop before proceeding.
 Read `work/BACKLOG.md` to find the next available backlog ID.
 
-Adapt paths to the local install: `core/.hawp/` in the HAWP source repo, `.hawp/` in downstream projects.
+Adapt paths to the local layout: `.hawp/work/` in downstream projects, root `.work/` in the HAWP source repo.
 
 ## Your job
 

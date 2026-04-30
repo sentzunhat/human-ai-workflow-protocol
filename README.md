@@ -1,10 +1,23 @@
-# human-ai-workflow-protocol
+# human-ai-workflow-protocol (HAWP)
 
-A minimal protocol for reliable human-AI collaboration. HAWP reduces task drift by giving work a small, durable shape before execution begins.
+> A minimal protocol for reliable human–AI collaboration. Shape the work **before** execution begins — and stop drifting.
 
-## What it is
+## Get started
 
-HAWP is a compact task-shaping protocol with five required fields and one optional checkpoint field:
+| You want to…                              | Open this                                    |
+| ----------------------------------------- | -------------------------------------------- |
+| **Install HAWP** into a repo (copy/paste) | → [core/install.md](core/install.md)         |
+| **Update HAWP** to latest `main`          | → [core/update.md](core/update.md)           |
+| Shape your first task                     | → `.hawp/kit/START_HERE.md` (after install)  |
+| Run the HAWP vs no-HAWP comparison        | → [benchmark/README.md](benchmark/README.md) |
+
+Both install and update are single copy/paste shell blocks. Safe to re-run. They never overwrite your `.hawp/work/` content or your `.github/copilot-instructions.md`.
+
+---
+
+## What HAWP is
+
+A compact task-shaping protocol — five required fields, one optional checkpoint:
 
 ```ts
 type Shape = {
@@ -17,152 +30,40 @@ type Shape = {
 };
 ```
 
-It is not a runtime engine, memory system, validator, or orchestration framework. It is a lean shaping protocol.
-Public examples in this repository are intended to stay fictional or clearly generic so the core remains portable across projects.
+That's the whole core. Templates, patterns, examples, and the GitHub Copilot overlay are optional usage aids around it.
 
-## Repository layout
+HAWP is **not** a runtime engine, memory system, validator, or orchestration framework. It is a lean shaping protocol intended to stay portable across projects. Public examples in this repo are kept fictional or clearly generic on purpose.
 
-```
-benchmark/
-  README.md               — benchmark purpose and install note
-  benchmark-prompt.md     — guide for running a HAWP vs no-HAWP comparison
-core/
-  .hawp/
-    LICENSE                       — Apache 2.0 license text copied with the kit
-    kit/                          — reusable HAWP material (installed downstream)
-      README.md                   — what HAWP is and why it exists
-      START_HERE.md               — fastest on-ramp / minimal template
-      SPEC.md                     — v0.1 field semantics and pipeline draft
-      AUTHORING_PATTERNS.md       — compact authoring guidance for recurring task types
-      templates/                  — optional starter templates (includes empty backlog template)
-      patterns/                   — optional evidence/reporting patterns
-      reviews/                    — optional project review checklists
-      examples/                   — concrete filled-shape examples
-      types/shape.ts              — locked TypeScript type for v0.1
-      usage/                      — reusable workflow guides
-        INIT.md                   — operating guide for HAWP in a repo
-        INTAKE_WORKFLOW.md        — intake loop for bugs, tasks, and improvements
-        STATUS_REPORT.md          — status report guidance
-    work/                         — repo-local operating state (not installed downstream)
-      README.md                   — explains BACKLOG/adrs/status/evidence
-      BACKLOG.md                  — single source of truth for open and completed work
-      adrs/                       — repo-local ADRs (e.g. guardrail, install boundary)
-      status/                     — plan files and status reports per backlog item
-      evidence/                   — verification artifacts referenced from plans
-  .github/
-    install.md              — instructions for installing the GitHub Copilot overlay
-    update.md               — instructions for updating HAWP from GitHub main
-    copilot-instructions.md — Copilot instructions template (uses repo-root .hawp/ paths)
-    instructions/           — scoped intake and docs-alignment instructions
-      intake.instructions.md                              — ambient intake trigger (auto-activates on bug/task reports)
-      hawp-intake.instructions.md  — HAWP modular intake overlay
-      hawp-docs-alignment.instructions.md — docs alignment overlay
-    prompts/                — curated prompt pack for intake, handoff, status, and docs alignment
-      intake.prompt.md                                           — explicit intake loop trigger
-      hawp-status-report.prompt.md
-      hawp-intent-first-handoff.prompt.md
-      hawp-docs-alignment-deterministic.prompt.md
-      hawp-docs-alignment-simplicity.prompt.md
-      hawp-conservative-docs-drift-cleanup.prompt.md
-```
+## Why use it
 
-## Using HAWP
+- **Less drift.** A filled shape locks intent before the first tool call.
+- **Cheap handoffs.** The same five fields work as a context-transfer artifact between humans, between agents, and across sessions.
+- **No lock-in.** Plain Markdown + one TypeScript type. No runtime, no service, no database.
+- **Optional everything.** Use just `START_HERE.md`, or layer in the intake loop, status reports, ADRs, and Copilot overlay as you need them.
 
-1. Read `core/.hawp/kit/README.md` to understand the protocol.
-2. Use `core/.hawp/kit/AUTHORING_PATTERNS.md` to fill the shape for your task type.
-3. See `core/.hawp/kit/examples/` for concrete filled-shape examples.
-4. Start from `core/.hawp/kit/START_HERE.md` for task shaping and `core/.hawp/kit/templates/status-report.md` for continuity reports.
+## Using HAWP after install
 
-Templates and patterns are optional usage aids. They do not expand the HAWP core protocol.
-Publication-safety guidance lives in `core/.hawp/kit/reviews/public-safety-checklist.md` and `core/.hawp/kit/reviews/publication-safety-guidelines.md`.
+1. Read `.hawp/kit/README.md` to understand the protocol.
+2. Use `.hawp/kit/START_HERE.md` to shape a task.
+3. Use `.hawp/kit/AUTHORING_PATTERNS.md` for recurring task-shape recipes.
+4. For bugs/tasks, follow `.hawp/kit/usage/INTAKE_WORKFLOW.md` and track in `.hawp/work/BACKLOG.md`.
+5. For checkpoints / context handoffs, use `.hawp/kit/templates/status-report.md`.
+6. See `.hawp/kit/examples/` for concrete filled shapes.
 
-## Installing HAWP into another repository
+Publication-safety guidance lives under `.hawp/kit/reviews/`.
 
-To install HAWP into a target repository, install the reusable `.hawp/` kit files and the `.github/` Copilot overlay. The default install flow uses an allowlist and does not copy `core/.hawp/work/`.
+## Repo layout (source)
 
-Installed by default:
+- `core/install.md` — install script + boundary notes
+- `core/update.md` — update script + migration notes
+- `core/.hawp/kit/` — the reusable kit (docs, templates, patterns, reviews, examples, types, usage guides)
+- `core/.hawp/work/` — clean install scaffold seeded into downstream `.hawp/work/` (READMEs + starter `BACKLOG.md`)
+- `.work/` — this repo's own operating state: backlog, ADRs, status plans, evidence (not installed downstream)
+- `.github/` — Copilot instructions + prompt pack (intake, status, handoff, docs alignment)
+- `benchmark/` — optional HAWP vs no-HAWP comparison harness
 
-- `.github/` — GitHub Copilot overlay files
-- `.hawp/LICENSE` and `.hawp/kit/` — protocol docs, authoring patterns, templates, reviews, patterns, examples, types, and reusable workflow guides under `kit/usage/`
-- `.hawp/work/` scaffold — `README.md`, starter `BACKLOG.md`, and `README.md` files in `adrs/`, `status/`, and `evidence/`; seeded once and owned by the target repo from that point on
-
-Not installed:
-
-- This repo's historical `core/.hawp/work/adrs/*.md`, `core/.hawp/work/status/*.md`, and `core/.hawp/work/evidence/*` content — those are HAWP project history, not installable artifacts
-
-The root-level `benchmark/` folder is reference material for evaluating HAWP's practical value. Copy it into a target repository only if you intend to use it there. It is not required for HAWP to function.
-
-For GitHub Copilot integration setup, follow `core/install.md`.
-
-To refresh an already-installed setup from upstream `main`, use `core/update.md`.
-
-## Quick install + usage (copy/paste)
-
-If you want a single copy/paste flow in a target repo, use this:
-
-> Replace `OWNER`, `REPO`, and `REF` if installing from a fork, internal mirror, or pinned release branch.
-
-```bash
-# From the target repository root
-OWNER="sentzunhat"
-REPO="human-ai-workflow-protocol"
-REF="main"
-KIT_DIR="core"  # optional: set to any folder name you prefer
-
-TMP_DIR="$(mktemp -d)"
-curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
-  | tar -xz -C "$TMP_DIR"
-
-SRC="$TMP_DIR/${REPO}-${REF}/core"
-
-mkdir -p "$KIT_DIR" .github/instructions .github/prompts
-mkdir -p "$KIT_DIR/.hawp/kit"
-
-cp "$SRC/.hawp/LICENSE" "$KIT_DIR/.hawp/"
-cp "$SRC/.hawp/kit/README.md" "$KIT_DIR/.hawp/kit/"
-cp "$SRC/.hawp/kit/START_HERE.md" "$KIT_DIR/.hawp/kit/"
-cp "$SRC/.hawp/kit/SPEC.md" "$KIT_DIR/.hawp/kit/"
-cp "$SRC/.hawp/kit/AUTHORING_PATTERNS.md" "$KIT_DIR/.hawp/kit/"
-
-cp -R "$SRC/.hawp/kit/templates" "$KIT_DIR/.hawp/kit/"
-cp -R "$SRC/.hawp/kit/patterns" "$KIT_DIR/.hawp/kit/"
-cp -R "$SRC/.hawp/kit/reviews" "$KIT_DIR/.hawp/kit/"
-cp -R "$SRC/.hawp/kit/examples" "$KIT_DIR/.hawp/kit/"
-cp -R "$SRC/.hawp/kit/types" "$KIT_DIR/.hawp/kit/"
-cp -R "$SRC/.hawp/kit/usage" "$KIT_DIR/.hawp/kit/"
-
-# Scaffold work/ area (seed only; never overwrite existing repo content)
-mkdir -p "$KIT_DIR/.hawp/work/adrs" "$KIT_DIR/.hawp/work/status" "$KIT_DIR/.hawp/work/evidence"
-[ ! -f "$KIT_DIR/.hawp/work/README.md" ] && cp "$SRC/.hawp/work/README.md" "$KIT_DIR/.hawp/work/README.md"
-[ ! -f "$KIT_DIR/.hawp/work/BACKLOG.md" ] && cp "$SRC/.hawp/kit/templates/backlog.md" "$KIT_DIR/.hawp/work/BACKLOG.md"
-[ ! -f "$KIT_DIR/.hawp/work/adrs/README.md" ] && cp "$SRC/.hawp/work/adrs/README.md" "$KIT_DIR/.hawp/work/adrs/README.md"
-[ ! -f "$KIT_DIR/.hawp/work/status/README.md" ] && cp "$SRC/.hawp/work/status/README.md" "$KIT_DIR/.hawp/work/status/README.md"
-[ ! -f "$KIT_DIR/.hawp/work/evidence/README.md" ] && cp "$SRC/.hawp/work/evidence/README.md" "$KIT_DIR/.hawp/work/evidence/README.md"
-
-cp "$SRC/.github/instructions/"*.instructions.md \
-  .github/instructions/
-cp "$SRC/.github/prompts/"*.prompt.md \
-  .github/prompts/
-
-# If .github/copilot-instructions.md does not exist, seed it.
-# If it already exists, merge HAWP guidance instead of overwriting.
-if [ ! -f .github/copilot-instructions.md ]; then
-  cp "$SRC/.github/copilot-instructions.md" .github/copilot-instructions.md
-fi
-
-rm -rf "$TMP_DIR"
-```
-
-That copy brings along `$KIT_DIR/.hawp/LICENSE`, so the installed HAWP folder carries the Apache 2.0 license text with it.
-
-Then do this minimal usage wiring:
-
-1. Ensure `.github/copilot-instructions.md` references `$KIT_DIR/.hawp/kit/START_HERE.md` and `$KIT_DIR/.hawp/kit/templates/status-report.md`.
-2. Use `$KIT_DIR/.hawp/kit/START_HERE.md` to shape a task.
-3. Use `$KIT_DIR/.hawp/kit/templates/status-report.md` when you need a checkpoint/context-transfer artifact.
-
-If your target repo uses repo-root `.hawp/` instead of `$KIT_DIR/.hawp/`, adapt paths in the installed `.github/` files accordingly.
+Downstream installs flatten `core/.hawp/` to repo-root `.hawp/`. The install allowlist seeds a clean `.hawp/work/` from `core/.hawp/work/` (READMEs + starter `BACKLOG.md`); this repo's own operating state lives at root `.work/` and never ships.
 
 ## License
 
-Licensed under the Apache License, Version 2.0. See [LICENSE](./LICENSE).
+Apache 2.0 — see [LICENSE](./LICENSE). The installed kit ships its own `.hawp/LICENSE` copy.

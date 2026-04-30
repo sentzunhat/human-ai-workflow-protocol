@@ -18,7 +18,7 @@ Treat any of these as a work intake:
 
 ## Operating Rules
 
-1. **Check the backlog first.** Read `BACKLOG.md` (in the active `.hawp/work/` or `core/.hawp/work/` path) before starting any work.
+1. **Check the backlog first.** Read `BACKLOG.md` (in the active `.hawp/work/` or `.work/` path) before starting any work.
    Assign the next sequential ID. Never start on an ID already marked `in-progress`.
 
 2. **Write a plan file** for all non-trivial work before implementing.
@@ -41,4 +41,4 @@ For full loop detail, read in order:
 2. `work/BACKLOG.md`
 3. `kit/templates/intake-plan.md`
 
-Adapt paths to match the local install: `core/.hawp/` in the HAWP source repo, `.hawp/` in downstream projects.
+Adapt paths to match the local layout: `.hawp/work/` in downstream projects, root `.work/` in the HAWP source repo.
