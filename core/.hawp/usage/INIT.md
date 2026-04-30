@@ -71,6 +71,12 @@ When writing a status report, capture:
 
 Save reports over time in [status](status).
 
+## Intake Workflow
+
+When using HAWP for active task or bug tracking, [INTAKE_WORKFLOW.md](INTAKE_WORKFLOW.md) describes the operating loop: intake → analyze → plan → review gate → implement → verify → close.
+Track open and completed work in [BACKLOG.md](BACKLOG.md). Use [../templates/intake-plan.md](../templates/intake-plan.md) for plan files saved to `status/`.
+This is optional. Not all HAWP usage requires tracked work items.
+
 ## Guardrail ADR
 
 For improvement work that should preserve HAWP's lean scope, use [GUARDRAIL_ADR.md](GUARDRAIL_ADR.md).
