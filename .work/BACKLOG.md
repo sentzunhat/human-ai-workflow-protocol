@@ -34,6 +34,7 @@ _No active work._
 | TASK-001 | improvement | ADR: Parallel Work Guardrails                       | 2026-04-30 | [2026-04-30-task-001-parallel-work-guardrails-adr.md](status/2026-04-30-task-001-parallel-work-guardrails-adr.md)     |
 | TASK-002 | improvement | ADR: Intake Template Refinement                     | 2026-04-30 | [2026-04-30-task-002-intake-template-adr.md](status/2026-04-30-task-002-intake-template-adr.md)                       |
 | TASK-003 | improvement | ADR: Restructure `.hawp` into `kit`/`work`          | 2026-04-30 | [2026-04-30-task-003-kit-work-restructure-adr.md](status/2026-04-30-task-003-kit-work-restructure-adr.md)             |
+| TASK-004 | improvement | Root README UX refactor (concise install/update)    | 2026-04-30 | [2026-04-30-task-004-readme-ux-refactor.md](status/2026-04-30-task-004-readme-ux-refactor.md)                         |
 
 ---
 

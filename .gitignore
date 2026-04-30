@@ -12,24 +12,8 @@ dist/
 *.local.md
 *.private.md
 
-# Local/private HAWP operating artifacts
-core/.hawp/work/private/
-core/.hawp/work/local/
-core/.hawp/work/tmp/
-core/.hawp/work/logs/
-core/.hawp/work/status/private/
-core/.hawp/work/status/local/
-core/.hawp/work/evidence/private/
-core/.hawp/work/evidence/local/
-
-# Repo-local ADR files (track folder shape via README anchor only)
-core/.hawp/work/adrs/*.md
-!core/.hawp/work/adrs/README.md
-
-# Repo-local status plan files (track folder shape via README anchor only)
-core/.hawp/work/status/*.md
-!core/.hawp/work/status/README.md
-
-# Repo-local evidence files (track folder shape via README anchor only)
-core/.hawp/work/evidence/*
-!core/.hawp/work/evidence/README.md
+# Scratch space inside .work/ (non-markdown artifacts)
+.work/tmp/
+.work/logs/
+.work/**/private/
+.work/**/local/
