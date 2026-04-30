@@ -8,6 +8,10 @@ Thumbs.db
 *.tsbuildinfo
 dist/
 
+# Portable private/local markers (any file in the repo)
+*.local.md
+*.private.md
+
 # Local/private HAWP operating artifacts
 core/.hawp/work/private/
 core/.hawp/work/local/
@@ -18,19 +22,14 @@ core/.hawp/work/status/local/
 core/.hawp/work/evidence/private/
 core/.hawp/work/evidence/local/
 
-# Repo-local adrs files (track folder shape via README anchor only)
-core/.hawp/work/adr/*.md
-!core/.hawp/work/adr/README.md
+# Repo-local ADR files (track folder shape via README anchor only)
+core/.hawp/work/adrs/*.md
+!core/.hawp/work/adrs/README.md
 
-# Repo-local status report files (track folder shape via README anchor only)
+# Repo-local status plan files (track folder shape via README anchor only)
 core/.hawp/work/status/*.md
 !core/.hawp/work/status/README.md
 
 # Repo-local evidence files (track folder shape via README anchor only)
 core/.hawp/work/evidence/*
 !core/.hawp/work/evidence/README.md
-
-*.local.md
-*.private.md
-
-
