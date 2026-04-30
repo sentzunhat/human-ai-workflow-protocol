@@ -5,8 +5,8 @@ description: Run the full work intake loop — analyze, plan, implement or hold 
 
 You are running the work intake loop for this repository.
 
-Read `usage/INTAKE_WORKFLOW.md` for the full operating loop before proceeding.
-Read `usage/BACKLOG.md` to find the next available backlog ID.
+Read `kit/usage/INTAKE_WORKFLOW.md` for the full operating loop before proceeding.
+Read `work/BACKLOG.md` to find the next available backlog ID.
 
 Adapt paths to the local install: `core/.hawp/` in the HAWP source repo, `.hawp/` in downstream projects.
 
@@ -17,7 +17,7 @@ Given the bug or task the user described, execute steps 1–4 of the workflow:
 ### 1. Assign & log
 
 - Pick the next backlog ID (`TASK-XXX`)
-- Add a row to `usage/BACKLOG.md` with status `analyzing`
+- Add a row to `work/BACKLOG.md` with status `analyzing`
 
 ### 2. Investigate
 
@@ -28,8 +28,8 @@ Given the bug or task the user described, execute steps 1–4 of the workflow:
 
 ### 3. Write the plan
 
-- Use `templates/intake-plan.md` as the template
-- Save to `usage/status/YYYY-MM-DD-<id>-<slug>.md`
+- Use `kit/templates/intake-plan.md` as the template
+- Save to `work/status/YYYY-MM-DD-<id>-<slug>.md`
 - Update the BACKLOG.md row to `plan-ready` with a link to the plan file
 
 ### 4. Apply the review gate

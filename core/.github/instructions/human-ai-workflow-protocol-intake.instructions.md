@@ -16,9 +16,9 @@ Use this as a scoped, drop-in instruction when integrating HAWP into repos that 
 
 When a task asks for status, handoff, bounded review, audit, planning, or comparison output, resolve HAWP guidance in this order:
 
-1. `.hawp/START_HERE.md` and `.hawp/templates/status-report.md` (installable operating layer)
-2. `.hawp/README.md`, `.hawp/SPEC.md`, and `.hawp/AUTHORING_PATTERNS.md` (protocol reference)
-3. `.hawp/usage/INIT.md` and `.hawp/usage/STATUS_REPORT.md` only when present as repo-local extensions
+1. `.hawp/kit/START_HERE.md` and `.hawp/kit/templates/status-report.md` (installable operating layer)
+2. `.hawp/kit/README.md`, `.hawp/kit/SPEC.md`, and `.hawp/kit/AUTHORING_PATTERNS.md` (protocol reference)
+3. `.hawp/kit/usage/INIT.md` and `.hawp/kit/usage/STATUS_REPORT.md` only when present as repo-local extensions
 
 If a higher-priority path is missing, continue to the next source without failing.
 

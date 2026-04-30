@@ -16,8 +16,8 @@ Use this as a scoped, drop-in instruction when integrating HAWP into repos that 
 
 When a task asks for status, handoff, bounded review, audit, planning, or comparison output, resolve HAWP guidance in this order:
 
-1. `core/.hawp/usage/INIT.md` and `core/.hawp/usage/STATUS_REPORT.md` (repo-local operating layer)
-2. `core/.hawp/README.md`, `core/.hawp/SPEC.md`, and `core/.hawp/AUTHORING_PATTERNS.md` (protocol reference)
+1. `core/.hawp/kit/usage/INIT.md` and `core/.hawp/kit/usage/STATUS_REPORT.md` (repo-local operating layer)
+2. `core/.hawp/kit/README.md`, `core/.hawp/kit/SPEC.md`, and `core/.hawp/kit/AUTHORING_PATTERNS.md` (protocol reference)
 
 If a higher-priority path is missing, continue to the next source without failing.
 
