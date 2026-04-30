@@ -65,7 +65,7 @@ HAWP is a **shaping protocol**, not a runtime. Better results come from stronger
 
 ## Optional Resources
 
-- Templates: [templates/micro-hawp.md](templates/micro-hawp.md), [templates/standard-hawp.md](templates/standard-hawp.md), [templates/status-report.md](templates/status-report.md), [templates/audit-report.md](templates/audit-report.md)
+- Templates: [templates/micro-hawp.md](templates/micro-hawp.md), [templates/standard-hawp.md](templates/standard-hawp.md), [templates/work-intake.md](templates/work-intake.md), [templates/bug-plan.md](templates/bug-plan.md), [templates/status-report.md](templates/status-report.md), [templates/audit-report.md](templates/audit-report.md)
 - Patterns: [patterns/evidence-discipline.md](patterns/evidence-discipline.md), [patterns/non-findings.md](patterns/non-findings.md)
 - Review checklist: [reviews/project-review-checklist.md](reviews/project-review-checklist.md)
 - Authoring guidance: [AUTHORING_PATTERNS.md](AUTHORING_PATTERNS.md)
