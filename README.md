@@ -84,10 +84,11 @@ Installed by default:
 
 - `.github/` — GitHub Copilot overlay files
 - `.hawp/LICENSE` and `.hawp/kit/` — protocol docs, authoring patterns, templates, reviews, patterns, examples, types, and reusable workflow guides under `kit/usage/`
+- `.hawp/work/` scaffold — `README.md`, starter `BACKLOG.md`, and `README.md` files in `adrs/`, `status/`, and `evidence/`; seeded once and owned by the target repo from that point on
 
-Not installed by default:
+Not installed:
 
-- `core/.hawp/work/` — source-repo backlog, ADRs, status reports, and evidence
+- This repo's historical `core/.hawp/work/adrs/*.md`, `core/.hawp/work/status/*.md`, and `core/.hawp/work/evidence/*` content — those are HAWP project history, not installable artifacts
 
 The root-level `benchmark/` folder is reference material for evaluating HAWP's practical value. Copy it into a target repository only if you intend to use it there. It is not required for HAWP to function.
 
@@ -129,6 +130,15 @@ cp -R "$SRC/.hawp/kit/reviews" "$KIT_DIR/.hawp/kit/"
 cp -R "$SRC/.hawp/kit/examples" "$KIT_DIR/.hawp/kit/"
 cp -R "$SRC/.hawp/kit/types" "$KIT_DIR/.hawp/kit/"
 cp -R "$SRC/.hawp/kit/usage" "$KIT_DIR/.hawp/kit/"
+
+# Scaffold work/ area (seed only; never overwrite existing repo content)
+mkdir -p "$KIT_DIR/.hawp/work/adrs" "$KIT_DIR/.hawp/work/status" "$KIT_DIR/.hawp/work/evidence"
+[ ! -f "$KIT_DIR/.hawp/work/README.md" ] && cp "$SRC/.hawp/work/README.md" "$KIT_DIR/.hawp/work/README.md"
+[ ! -f "$KIT_DIR/.hawp/work/BACKLOG.md" ] && cp "$SRC/.hawp/kit/templates/backlog.md" "$KIT_DIR/.hawp/work/BACKLOG.md"
+[ ! -f "$KIT_DIR/.hawp/work/adrs/README.md" ] && cp "$SRC/.hawp/work/adrs/README.md" "$KIT_DIR/.hawp/work/adrs/README.md"
+[ ! -f "$KIT_DIR/.hawp/work/status/README.md" ] && cp "$SRC/.hawp/work/status/README.md" "$KIT_DIR/.hawp/work/status/README.md"
+[ ! -f "$KIT_DIR/.hawp/work/evidence/README.md" ] && cp "$SRC/.hawp/work/evidence/README.md" "$KIT_DIR/.hawp/work/evidence/README.md"
+
 cp "$SRC/.github/instructions/"*.instructions.md \
   .github/instructions/
 cp "$SRC/.github/prompts/"*.prompt.md \
