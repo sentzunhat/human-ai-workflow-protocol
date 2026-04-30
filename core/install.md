@@ -105,14 +105,14 @@ The `benchmark/` folder is optional reference material and is not installed by t
 Install these files into the target repository's `.github/` folder:
 
 - `copilot-instructions.md`
-- `instructions/human-ai-workflow-protocol-intake.instructions.md`
-- `instructions/human-ai-workflow-protocol-docs-alignment.instructions.md`
+- `instructions/hawp-intake.instructions.md`
+- `instructions/hawp-docs-alignment.instructions.md`
 - `instructions/intake.instructions.md`
-- `prompts/human-ai-workflow-protocol-status-report.prompt.md`
-- `prompts/human-ai-workflow-protocol-intent-first-handoff.prompt.md`
-- `prompts/human-ai-workflow-protocol-docs-alignment-deterministic.prompt.md`
-- `prompts/human-ai-workflow-protocol-docs-alignment-simplicity.prompt.md`
-- `prompts/human-ai-workflow-protocol-conservative-docs-drift-cleanup.prompt.md`
+- `prompts/hawp-status-report.prompt.md`
+- `prompts/hawp-intent-first-handoff.prompt.md`
+- `prompts/hawp-docs-alignment-deterministic.prompt.md`
+- `prompts/hawp-docs-alignment-simplicity.prompt.md`
+- `prompts/hawp-conservative-docs-drift-cleanup.prompt.md`
 - `prompts/intake.prompt.md`
 
 These files assume the target repository resolves HAWP content from repo-root paths such as `.hawp/kit/START_HERE.md`.
@@ -228,14 +228,14 @@ After installation, confirm all of the following are true:
 
 - `.github/copilot-instructions.md` references `.hawp/kit/START_HERE.md`
 - `.github/copilot-instructions.md` references `.hawp/kit/templates/status-report.md`
-- `.github/instructions/human-ai-workflow-protocol-intake.instructions.md` exists
-- `.github/instructions/human-ai-workflow-protocol-docs-alignment.instructions.md` exists
+- `.github/instructions/hawp-intake.instructions.md` exists
+- `.github/instructions/hawp-docs-alignment.instructions.md` exists
 - `.github/instructions/intake.instructions.md` exists
-- `.github/prompts/human-ai-workflow-protocol-status-report.prompt.md` exists
-- `.github/prompts/human-ai-workflow-protocol-intent-first-handoff.prompt.md` exists
-- `.github/prompts/human-ai-workflow-protocol-docs-alignment-deterministic.prompt.md` exists
-- `.github/prompts/human-ai-workflow-protocol-docs-alignment-simplicity.prompt.md` exists
-- `.github/prompts/human-ai-workflow-protocol-conservative-docs-drift-cleanup.prompt.md` exists
+- `.github/prompts/hawp-status-report.prompt.md` exists
+- `.github/prompts/hawp-intent-first-handoff.prompt.md` exists
+- `.github/prompts/hawp-docs-alignment-deterministic.prompt.md` exists
+- `.github/prompts/hawp-docs-alignment-simplicity.prompt.md` exists
+- `.github/prompts/hawp-conservative-docs-drift-cleanup.prompt.md` exists
 - `.github/prompts/intake.prompt.md` exists
 - `.hawp/LICENSE` exists and contains the Apache 2.0 text
 - `.hawp/work/README.md` exists

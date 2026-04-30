@@ -55,15 +55,15 @@ core/
     copilot-instructions.md — Copilot instructions template (uses repo-root .hawp/ paths)
     instructions/           — scoped intake and docs-alignment instructions
       intake.instructions.md                              — ambient intake trigger (auto-activates on bug/task reports)
-      human-ai-workflow-protocol-intake.instructions.md  — HAWP modular intake overlay
-      human-ai-workflow-protocol-docs-alignment.instructions.md — docs alignment overlay
+      hawp-intake.instructions.md  — HAWP modular intake overlay
+      hawp-docs-alignment.instructions.md — docs alignment overlay
     prompts/                — curated prompt pack for intake, handoff, status, and docs alignment
       intake.prompt.md                                           — explicit intake loop trigger
-      human-ai-workflow-protocol-status-report.prompt.md
-      human-ai-workflow-protocol-intent-first-handoff.prompt.md
-      human-ai-workflow-protocol-docs-alignment-deterministic.prompt.md
-      human-ai-workflow-protocol-docs-alignment-simplicity.prompt.md
-      human-ai-workflow-protocol-conservative-docs-drift-cleanup.prompt.md
+      hawp-status-report.prompt.md
+      hawp-intent-first-handoff.prompt.md
+      hawp-docs-alignment-deterministic.prompt.md
+      hawp-docs-alignment-simplicity.prompt.md
+      hawp-conservative-docs-drift-cleanup.prompt.md
 ```
 
 ## Using HAWP
