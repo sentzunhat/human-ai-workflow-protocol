@@ -41,6 +41,22 @@ _Other files, routes, or modules touched by this._
 
 ---
 
+### Work Coordination
+
+**Owner:** human | agent | unassigned
+**Implementation status:** not-started | in-progress | blocked | done
+**Overlapping files:**
+
+- `path/to/file`
+
+**Parallel work risk:** low | medium | high
+**Can implement now:** yes | no | only after approval
+
+**Coordination note:**
+_Explain whether another active item touches the same files._
+
+---
+
 ### Options
 
 #### Option A — [Name]

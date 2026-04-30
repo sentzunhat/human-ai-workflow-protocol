@@ -86,6 +86,8 @@ I make the changes. The backlog row moves to `in-progress`.
 
 I use the smallest correct fix — no refactoring beyond scope unless it is the root cause.
 
+Before editing files, confirm the plan's overlap check shows `Can implement now: yes` or explicit user approval for overlap.
+
 ---
 
 ## Step 6 — Verify
