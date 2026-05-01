@@ -25,6 +25,7 @@ The issue is in the published one-shot update command in `core/update.md`. The c
 The migration steps for `.hawp/work/adrs` and `.hawp/work/status` use no-clobber copy helpers but never remove the old folders after copy succeeds.
 
 **Directly verified:**
+
 - `core/update.md` migration step 3b copies `.hawp/work/adrs` into `.hawp/work/decisions/$MDATE`.
 - `core/update.md` migration step 3c copies `.hawp/work/status` into `.hawp/work/active`.
 - Neither step removes the legacy source folder.
@@ -33,6 +34,7 @@ The migration steps for `.hawp/work/adrs` and `.hawp/work/status` use no-clobber
 Downstream repos that had these legacy folders will show duplicate trees after update unless they manually remove legacy folders.
 
 **Scope — what else is affected:**
+
 - `core/update.md` command block and surrounding migration checklist/notes wording.
 
 ---
