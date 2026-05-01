@@ -18,8 +18,8 @@ This refreshes only HAWP-managed files:
 - A legacy `hawp/` directory (no dot prefix, real directory only — symlinks are skipped) is migrated into `.hawp/`. Its `work/`, `usage/`, and `status/` contents are copied into `.hawp/work/...` with `cp -Rn` so existing `.hawp/work/` files always win.
 - A legacy `.hawp/usage/` layout is migrated: `BACKLOG.md` → `.hawp/work/BACKLOG.md`, `status/*` → `.hawp/work/active/`, `*_ADR.md` → `.hawp/work/decisions/YYYY/MM/DD/`.
 - A legacy `.hawp/status/` folder (pre-`work/` layout) is copied into `.hawp/work/notes/YYYY/MM/DD/`; `STATUS.md` is promoted to `.hawp/work/STATUS.md`.
-- A current `.hawp/work/adrs/` folder is migrated to `.hawp/work/decisions/YYYY/MM/DD/`.
-- A current `.hawp/work/status/` folder is migrated to `.hawp/work/active/`.
+- A current `.hawp/work/adrs/` folder is migrated to `.hawp/work/decisions/YYYY/MM/DD/`, then the legacy `.hawp/work/adrs/` folder is removed.
+- A current `.hawp/work/status/` folder is migrated to `.hawp/work/active/`, then the legacy `.hawp/work/status/` folder is removed.
 - Any existing `.hawp/work/parked/` content is preserved as-is.
 - After `.hawp/kit/**` is refreshed, legacy root-level kit folders are removed: `.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`. Stale top-level docs that now live under `kit/` are also removed: `.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`.
 - Any `.gitkeep` files under `.hawp/` are removed (the kit no longer ships placeholder files).
@@ -36,8 +36,8 @@ Requirements:
 - migrate legacy hawp/ to .hawp/ if present, preserving hawp/work/ contents
 - migrate legacy .hawp/usage/ (BACKLOG.md → work/BACKLOG.md, status/ → work/active/, *_ADR.md → work/decisions/YYYY/MM/DD/) into .hawp/work/
 - migrate legacy .hawp/status/ into .hawp/work/notes/YYYY/MM/DD/; promote STATUS.md to .hawp/work/STATUS.md
-- migrate .hawp/work/adrs/ into .hawp/work/decisions/YYYY/MM/DD/
-- migrate .hawp/work/status/ into .hawp/work/active/
+- migrate .hawp/work/adrs/ into .hawp/work/decisions/YYYY/MM/DD/ and remove legacy .hawp/work/adrs/
+- migrate .hawp/work/status/ into .hawp/work/active/ and remove legacy .hawp/work/status/
 - preserve any existing .hawp/work/parked/ content as-is
 - refresh .hawp/LICENSE and .hawp/kit/** (leave .hawp/work/ untouched)
 - remove old root-level kit folders (.hawp/templates, .hawp/patterns, .hawp/reviews, .hawp/examples, .hawp/types, .hawp/usage) and stale top-level kit docs (.hawp/README.md, .hawp/SPEC.md, .hawp/START_HERE.md, .hawp/AUTHORING_PATTERNS.md) after kit refresh
@@ -125,13 +125,17 @@ fi
 # --- 3b. Migration: current .hawp/work/adrs/ -> .hawp/work/decisions/YYYY/MM/DD/ ---
 if [ -d ".hawp/work/adrs" ]; then
   mkdir -p ".hawp/work/decisions/$MDATE"
-  copy_dir_no_clobber ".hawp/work/adrs" ".hawp/work/decisions/$MDATE"
+  if cp -Rn .hawp/work/adrs/. ".hawp/work/decisions/$MDATE"/ 2>/dev/null; then
+    rm -rf .hawp/work/adrs
+  fi
 fi
 
 # --- 3c. Migration: current .hawp/work/status/ -> .hawp/work/active/ ---
 if [ -d ".hawp/work/status" ]; then
   mkdir -p ".hawp/work/active"
-  copy_dir_no_clobber ".hawp/work/status" ".hawp/work/active"
+  if cp -Rn .hawp/work/status/. .hawp/work/active/ 2>/dev/null; then
+    rm -rf .hawp/work/status
+  fi
 fi
 
 # --- 4. Refresh .hawp/LICENSE and .hawp/kit/** (preserves .hawp/work/) ---
@@ -200,9 +204,10 @@ echo "Preserved: .hawp/work/** (untouched), .github/copilot-instructions.md (if 
 5. Confirm no `human-ai-workflow-protocol-*` named files remain under `.github/instructions/` or `.github/prompts/`.
 6. Confirm `.hawp/work/parked/README.md` exists when the scaffold is seeded.
 7. If a legacy `hawp/`, `.hawp/usage/`, `.hawp/status/`, `.hawp/work/adrs/`, or `.hawp/work/status/` directory existed, confirm it has been migrated and its content preserved in `.hawp/work/active/`, `.hawp/work/decisions/YYYY/MM/DD/`, or `.hawp/work/notes/YYYY/MM/DD/` as appropriate.
-8. Confirm legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`) are gone — they live under `.hawp/kit/` now. Confirm no `.gitkeep` files remain under `.hawp/`.
-9. Review git diff before committing — pay special attention to anything inside `.hawp/work/` (should be a clean migration with no deletions).
-10. Run your repo checks (lint/test/typecheck) if your workflow requires it.
+8. Confirm legacy `.hawp/work/adrs/` and `.hawp/work/status/` folders are no longer present after migration.
+9. Confirm legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`) are gone — they live under `.hawp/kit/` now. Confirm no `.gitkeep` files remain under `.hawp/`.
+10. Review git diff before committing — pay special attention to anything inside `.hawp/work/` (should be a clean migration with expected legacy-folder removals only).
+11. Run your repo checks (lint/test/typecheck) if your workflow requires it.
 
 ## Notes
 
@@ -210,6 +215,7 @@ echo "Preserved: .hawp/work/** (untouched), .github/copilot-instructions.md (if 
 - `.hawp/` is laid out flat at the repository root with `.hawp/LICENSE`, `.hawp/kit/`, and `.hawp/work/`.
 - `.hawp/work/` is repo-owned operating state and is never overwritten. Scaffold files are seeded only when missing, including `parked/README.md`.
 - Legacy migrations use `cp -Rn` everywhere so any existing `.hawp/work/` file always wins.
+- Legacy `.hawp/work/adrs/` and `.hawp/work/status/` are removed only after a successful no-clobber migration copy.
 - Legacy root-level kit folders are removed only after `.hawp/kit/**` has been rewritten from source.
 - Symlinks named `hawp` are skipped on purpose to keep updates deterministic.
 - The Apache 2.0 kit license travels with `.hawp/LICENSE` and is refreshed by this update flow.
