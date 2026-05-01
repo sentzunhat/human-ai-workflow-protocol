@@ -69,15 +69,15 @@ When writing a status report, capture:
 - help wanted
 - suggested next step
 
-Save reports over time in [../../work/status](../../work/status).
+Save reports over time in [../../work/active](../../work/active) (open) or `../../work/closed/YYYY/MM/DD/` (archived).
 
 ## Intake Workflow
 
 When using HAWP for active task or bug tracking, [INTAKE_WORKFLOW.md](INTAKE_WORKFLOW.md) describes the operating loop: intake → analyze → plan → review gate → implement → verify → close.
-Track open and completed work in [../../work/BACKLOG.md](../../work/BACKLOG.md). Use [../templates/intake-plan.md](../templates/intake-plan.md) for plan files saved to `../../work/status/`.
+Track open and completed work in [../../work/BACKLOG.md](../../work/BACKLOG.md). Use [../templates/intake-plan.md](../templates/intake-plan.md) for plan files saved to `../../work/active/`.
 This is optional. Not all HAWP usage requires tracked work items.
 
 ## Guardrail ADR
 
-For improvement work that should preserve HAWP's lean scope, see [../../work/adrs/GUARDRAIL_ADR.md](../../work/adrs/GUARDRAIL_ADR.md).
+For improvement work that should preserve HAWP's lean scope, see `../../work/decisions/` for the Guardrail ADR.
 It frames review and adoption improvements as optional patterns, examples, and workflow discipline rather than schema expansion.

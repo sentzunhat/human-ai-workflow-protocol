@@ -50,8 +50,10 @@ Analysis covers:
 
 ## Step 3 — Plan
 
-I write a plan file to `work/status/<date>-<id>-<slug>.md`.
+I write a plan file to `work/active/<ID>.md`.
 The backlog row moves to `plan-ready` and links to the plan file.
+
+On close, the file moves to `work/closed/YYYY/MM/DD/<ID>.md`.
 
 The plan includes:
 
@@ -100,6 +102,7 @@ I note what is directly verified vs what requires a live environment to confirm.
 ## Step 7 — Close
 
 The backlog row moves to `done`.
+The plan file moves from `work/active/<ID>.md` to `work/closed/YYYY/MM/DD/<ID>.md`.
 A status report is saved if:
 
 - The item was non-trivial
@@ -111,8 +114,7 @@ A status report is saved if:
 ## Parallel Safety
 
 - The backlog is the single source of truth — check it before starting a new item
-- Each work item has one plan file — never two agents working the same ID
-- If you start something outside this loop, add a row so it is visible
+  - Each work item has one plan file in `work/active/` — never two agents working the same ID
 
 ---
 
