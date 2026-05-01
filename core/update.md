@@ -11,7 +11,7 @@ This refreshes only HAWP-managed files:
 - `.github/instructions/*.instructions.md`
 - `.github/prompts/*.prompt.md`
 
-**Update boundary.** The source repository's own operating state lives at root `.work/` (real BACKLOG, ADRs, status plans, evidence) and is never refreshed by this flow. Only `.hawp/LICENSE`, `.hawp/kit/`, the `.github/` overlay, and missing `.hawp/work/` scaffold files are touched. Every existing file under your `.hawp/work/**` is left untouched.
+**Update boundary.** The source repository's own operating state lives at root `.work/` (real BACKLOG, ADRs, status plans, evidence) and is never refreshed by this flow. Only `.hawp/LICENSE`, `.hawp/kit/`, the `.github/` overlay, and missing `.hawp/work/` scaffold files are touched. Existing `.hawp/work/**` files are never overwritten; as housekeeping, files in `.hawp/work/active/` that are already listed as `Done` in `.hawp/work/BACKLOG.md` can be moved to their linked `closed/...` paths.
 
 **Migration support.** This flow safely upgrades repos coming from older HAWP layouts:
 
@@ -20,6 +20,7 @@ This refreshes only HAWP-managed files:
 - A legacy `.hawp/status/` folder (pre-`work/` layout) is copied into `.hawp/work/notes/YYYY/MM/DD/`; `STATUS.md` is promoted to `.hawp/work/STATUS.md`.
 - A current `.hawp/work/adrs/` folder is migrated to `.hawp/work/decisions/YYYY/MM/DD/`, then the legacy `.hawp/work/adrs/` folder is removed.
 - A current `.hawp/work/status/` folder is migrated to `.hawp/work/active/`, then the legacy `.hawp/work/status/` folder is removed.
+- A closed-plan reconciliation pass can move stale files from `.hawp/work/active/` to `.hawp/work/closed/...` when `.hawp/work/BACKLOG.md` `Done` links point to `closed/...` targets.
 - Any existing `.hawp/work/parked/` content is preserved as-is.
 - After `.hawp/kit/**` is refreshed, legacy root-level kit folders are removed: `.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`. Stale top-level docs that now live under `kit/` are also removed: `.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`.
 - Any `.gitkeep` files under `.hawp/` are removed (the kit no longer ships placeholder files).
@@ -38,8 +39,9 @@ Requirements:
 - migrate legacy .hawp/status/ into .hawp/work/notes/YYYY/MM/DD/; promote STATUS.md to .hawp/work/STATUS.md
 - migrate .hawp/work/adrs/ into .hawp/work/decisions/YYYY/MM/DD/ and remove legacy .hawp/work/adrs/
 - migrate .hawp/work/status/ into .hawp/work/active/ and remove legacy .hawp/work/status/
+- reconcile closed plan files by moving matching `.hawp/work/active/*.md` files to `.hawp/work/closed/...` when `Done` links in `.hawp/work/BACKLOG.md` point to `closed/...`
 - preserve any existing .hawp/work/parked/ content as-is
-- refresh .hawp/LICENSE and .hawp/kit/** (leave .hawp/work/ untouched)
+- refresh .hawp/LICENSE and .hawp/kit/** (never overwrite .hawp/work/; allow backlog-based active→closed reconciliation)
 - remove old root-level kit folders (.hawp/templates, .hawp/patterns, .hawp/reviews, .hawp/examples, .hawp/types, .hawp/usage) and stale top-level kit docs (.hawp/README.md, .hawp/SPEC.md, .hawp/START_HERE.md, .hawp/AUTHORING_PATTERNS.md) after kit refresh
 - remove any .gitkeep files under .hawp/
 - seed .hawp/work/ scaffold files only when missing
@@ -84,6 +86,34 @@ copy_file_no_clobber() {
     mkdir -p "$(dirname "$dest")"
     cp "$src" "$dest"
   fi
+}
+reconcile_closed_plans_from_backlog() {
+  backlog=".hawp/work/BACKLOG.md"
+  [ -f "$backlog" ] || return 0
+
+  awk '
+    /^## Done/ { in_done=1; next }
+    /^## / && in_done { in_done=0 }
+    in_done { print }
+  ' "$backlog" \
+    | sed -nE 's/.*\[[^]]+\]\(([^)]+)\).*/\1/p' \
+    | while IFS= read -r link_path; do
+        case "$link_path" in
+          closed/*) dest_rel="$link_path" ;;
+          work/closed/*) dest_rel="${link_path#work/}" ;;
+          .hawp/work/closed/*) dest_rel="${link_path#.hawp/work/}" ;;
+          *) continue ;;
+        esac
+
+        plan_name="$(basename "$dest_rel")"
+        src=".hawp/work/active/$plan_name"
+        dest=".hawp/work/$dest_rel"
+
+        if [ -f "$src" ] && [ ! -e "$dest" ]; then
+          mkdir -p "$(dirname "$dest")"
+          mv "$src" "$dest"
+        fi
+      done
 }
 
 # --- 1. Migration: legacy hawp/ -> .hawp/ (preserves hawp/work/, hawp/usage/, hawp/status/) ---
@@ -137,6 +167,9 @@ if [ -d ".hawp/work/status" ]; then
     rm -rf .hawp/work/status
   fi
 fi
+
+# --- 3d. Reconcile closed plans from backlog (active -> closed/...) ---
+reconcile_closed_plans_from_backlog
 
 # --- 4. Refresh .hawp/LICENSE and .hawp/kit/** (preserves .hawp/work/) ---
 rm -rf .hawp/kit
@@ -192,7 +225,8 @@ rm -rf "$TMP_DIR"
 
 echo "HAWP update complete."
 echo "Refreshed: .hawp/LICENSE, .hawp/kit/**, .github/instructions/*, .github/prompts/*"
-echo "Preserved: .hawp/work/** (untouched), .github/copilot-instructions.md (if present)"
+echo "Preserved: .hawp/work/** (no-overwrite), .github/copilot-instructions.md (if present)"
+echo "Reconciled: backlog-linked closed plans moved from .hawp/work/active/ when eligible"
 ```
 
 ## Post-Update Checklist
@@ -205,15 +239,16 @@ echo "Preserved: .hawp/work/** (untouched), .github/copilot-instructions.md (if 
 6. Confirm `.hawp/work/parked/README.md` exists when the scaffold is seeded.
 7. If a legacy `hawp/`, `.hawp/usage/`, `.hawp/status/`, `.hawp/work/adrs/`, or `.hawp/work/status/` directory existed, confirm it has been migrated and its content preserved in `.hawp/work/active/`, `.hawp/work/decisions/YYYY/MM/DD/`, or `.hawp/work/notes/YYYY/MM/DD/` as appropriate.
 8. Confirm legacy `.hawp/work/adrs/` and `.hawp/work/status/` folders are no longer present after migration.
-9. Confirm legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`) are gone — they live under `.hawp/kit/` now. Confirm no `.gitkeep` files remain under `.hawp/`.
-10. Review git diff before committing — pay special attention to anything inside `.hawp/work/` (should be a clean migration with expected legacy-folder removals only).
-11. Run your repo checks (lint/test/typecheck) if your workflow requires it.
+9. Confirm done items linked to `closed/...` in `.hawp/work/BACKLOG.md` were moved out of `.hawp/work/active/` when source files existed and destination files were missing.
+10. Confirm legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`) are gone — they live under `.hawp/kit/` now. Confirm no `.gitkeep` files remain under `.hawp/`.
+11. Review git diff before committing — pay special attention to anything inside `.hawp/work/` (expected changes are migration copies, legacy-folder removals, and optional active→closed reconciliations only).
+12. Run your repo checks (lint/test/typecheck) if your workflow requires it.
 
 ## Notes
 
 - This update flow is conservative and keeps local Copilot instruction customizations.
 - `.hawp/` is laid out flat at the repository root with `.hawp/LICENSE`, `.hawp/kit/`, and `.hawp/work/`.
-- `.hawp/work/` is repo-owned operating state and is never overwritten. Scaffold files are seeded only when missing, including `parked/README.md`.
+- `.hawp/work/` is repo-owned operating state and is never overwritten. Scaffold files are seeded only when missing, including `parked/README.md`. Closed-plan reconciliation may move files from `active/` to `closed/...` when the backlog already marks them done.
 - Legacy migrations use `cp -Rn` everywhere so any existing `.hawp/work/` file always wins.
 - Legacy `.hawp/work/adrs/` and `.hawp/work/status/` are removed only after a successful no-clobber migration copy.
 - Legacy root-level kit folders are removed only after `.hawp/kit/**` has been rewritten from source.

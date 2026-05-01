@@ -11,12 +11,13 @@ This script is **safe to re-run** and is **safe on a repo that already has `hawp
 - Migrate a legacy `hawp/` directory to `.hawp/`, preserving any `hawp/work/`, `hawp/usage/`, and `hawp/status/` content.
 - Migrate a legacy `.hawp/usage/` layout into `.hawp/work/` (BACKLOG → `work/BACKLOG.md`, status → `work/active/`, ADRs → `work/decisions/YYYY/MM/DD/`).
 - Migrate a legacy `.hawp/status/` folder (pre-`work/` layout) into `.hawp/work/notes/YYYY/MM/DD/` and promote `STATUS.md` to `.hawp/work/STATUS.md`.
-- Migrate an existing `.hawp/work/adrs/` into `.hawp/work/decisions/YYYY/MM/DD/`.
-- Migrate an existing `.hawp/work/status/` into `.hawp/work/active/`.
+- Migrate an existing `.hawp/work/adrs/` into `.hawp/work/decisions/YYYY/MM/DD/`, then remove legacy `.hawp/work/adrs/`.
+- Migrate an existing `.hawp/work/status/` into `.hawp/work/active/`, then remove legacy `.hawp/work/status/`.
+- Reconcile closed plan files by moving matching `.hawp/work/active/*.md` files to `.hawp/work/closed/...` when `Done` links in `.hawp/work/BACKLOG.md` point to `closed/...`.
 - Refresh `.hawp/kit/` and `.hawp/LICENSE` from the package.
 - Remove legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`) after the new `.hawp/kit/` is in place.
 - Remove any `.gitkeep` files under `.hawp/` (the kit no longer ships placeholders).
-- Leave every existing file under `.hawp/work/` untouched (BACKLOG, active items, parked items, decisions, evidence, notes).
+- Never overwrite existing files under `.hawp/work/` (BACKLOG, active items, parked items, decisions, evidence, notes). During reconciliation, eligible plan files may be moved from `active/` to `closed/...`.
 - Seed missing `.hawp/work/` scaffold files only when they do not exist.
 - Refresh `.github/instructions/*.instructions.md` and `.github/prompts/*.prompt.md`.
 - Remove stale `.github/instructions/human-ai-workflow-protocol-*.instructions.md` and `.github/prompts/human-ai-workflow-protocol-*.prompt.md` overlay files.
@@ -47,6 +48,34 @@ copy_file_no_clobber() {
     mkdir -p "$(dirname "$dest")"
     cp "$src" "$dest"
   fi
+}
+reconcile_closed_plans_from_backlog() {
+  backlog=".hawp/work/BACKLOG.md"
+  [ -f "$backlog" ] || return 0
+
+  awk '
+    /^## Done/ { in_done=1; next }
+    /^## / && in_done { in_done=0 }
+    in_done { print }
+  ' "$backlog" \
+    | sed -nE 's/.*\[[^]]+\]\(([^)]+)\).*/\1/p' \
+    | while IFS= read -r link_path; do
+        case "$link_path" in
+          closed/*) dest_rel="$link_path" ;;
+          work/closed/*) dest_rel="${link_path#work/}" ;;
+          .hawp/work/closed/*) dest_rel="${link_path#.hawp/work/}" ;;
+          *) continue ;;
+        esac
+
+        plan_name="$(basename "$dest_rel")"
+        src=".hawp/work/active/$plan_name"
+        dest=".hawp/work/$dest_rel"
+
+        if [ -f "$src" ] && [ ! -e "$dest" ]; then
+          mkdir -p "$(dirname "$dest")"
+          mv "$src" "$dest"
+        fi
+      done
 }
 
 MDATE="$(date +%Y/%m/%d)"
@@ -90,14 +119,21 @@ fi
 # --- 3b. Migration: current .hawp/work/adrs/ -> .hawp/work/decisions/YYYY/MM/DD/ ---
 if [ -d ".hawp/work/adrs" ]; then
   mkdir -p ".hawp/work/decisions/$MDATE"
-  copy_dir_no_clobber ".hawp/work/adrs" ".hawp/work/decisions/$MDATE"
+  if cp -Rn .hawp/work/adrs/. ".hawp/work/decisions/$MDATE"/ 2>/dev/null; then
+    rm -rf .hawp/work/adrs
+  fi
 fi
 
 # --- 3c. Migration: current .hawp/work/status/ -> .hawp/work/active/ ---
 if [ -d ".hawp/work/status" ]; then
   mkdir -p ".hawp/work/active"
-  copy_dir_no_clobber ".hawp/work/status" ".hawp/work/active"
+  if cp -Rn .hawp/work/status/. .hawp/work/active/ 2>/dev/null; then
+    rm -rf .hawp/work/status
+  fi
 fi
+
+# --- 3d. Reconcile closed plans from backlog (active -> closed/...) ---
+reconcile_closed_plans_from_backlog
 
 # --- 4. Refresh .hawp/LICENSE and .hawp/kit/** (preserves .hawp/work/) ---
 rm -rf .hawp/kit
@@ -196,7 +232,7 @@ The installed `.hawp/` content also includes:
 - `.hawp/work/evidence/README.md` — evidence folder description
 - `.hawp/work/notes/README.md` — notes folder description
 
-All `work/` files are seeded once and left untouched on subsequent updates.
+`work/` files are seeded once and never overwritten on subsequent updates. When backlog links already mark plans as closed, reconciliation may move matching files from `active/` to `closed/...`.
 
 ## Preconditions
 
@@ -218,11 +254,12 @@ If the target repo already has `hawp/` (legacy, no dot prefix) or `.hawp/` from 
 - **Legacy `hawp/` → `.hawp/` migration.** A real `hawp/` directory (not a symlink) is moved to `.hawp/`. Any `hawp/work/`, `hawp/usage/`, and `hawp/status/` content is copied into `.hawp/work/...` first using `cp -Rn` so existing `.hawp/work/` files are never clobbered. The legacy `hawp/` directory is then removed.
 - **Legacy `.hawp/usage/` migration.** `BACKLOG.md` → `.hawp/work/BACKLOG.md`, `status/*` → `.hawp/work/active/`, `*_ADR.md` → `.hawp/work/decisions/YYYY/MM/DD/`. Existing files in `.hawp/work/` always win.
 - **Pre-`work/` layout migration.** A legacy `.hawp/status/` folder at the kit root is copied to `.hawp/work/notes/YYYY/MM/DD/`; `STATUS.md` is promoted to `.hawp/work/STATUS.md`.
-- **Current `.hawp/work/adrs/` migration.** ADR files are copied to `.hawp/work/decisions/YYYY/MM/DD/`.
-- **Current `.hawp/work/status/` migration.** Plan files are copied to `.hawp/work/active/`.
+- **Current `.hawp/work/adrs/` migration.** ADR files are copied to `.hawp/work/decisions/YYYY/MM/DD/`, then the legacy `.hawp/work/adrs/` folder is removed.
+- **Current `.hawp/work/status/` migration.** Plan files are copied to `.hawp/work/active/`, then the legacy `.hawp/work/status/` folder is removed.
+- **Closed-plan reconciliation.** If `.hawp/work/BACKLOG.md` has `Done` plan links that target `closed/...`, the script moves matching files from `.hawp/work/active/` into those closed paths when safe (source exists and destination does not).
 - **`.hawp/kit/` refresh.** The `.hawp/kit/` directory is removed and rewritten from the package allowlist. Nothing under `.hawp/work/` is touched by this step.
 - **Legacy root-level kit cleanup.** After kit refresh, the script removes `.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, and `.hawp/usage`, plus stale top-level kit docs `.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, and `.hawp/AUTHORING_PATTERNS.md`. Their reusable content now lives under `.hawp/kit/...` and any repo-local items have already been migrated into `.hawp/work/`. Any `.gitkeep` files under `.hawp/` are also removed.
-- **`.hawp/work/` preservation.** Every existing file under `.hawp/work/` (BACKLOG.md, active items, parked items, closed archives, decisions, evidence artifacts, notes) is left exactly as-is. Scaffold seeders only create missing files.
+- **`.hawp/work/` preservation.** Existing `.hawp/work/` files are never overwritten. Scaffold seeders only create missing files; reconciliation may move already-closed plans from `active/` to `closed/...`.
 - **`.github/` overlay refresh.** Instruction and prompt files are HAWP-managed and are always replaced. Stale legacy-named overlay files matching `human-ai-workflow-protocol-*.instructions.md` and `human-ai-workflow-protocol-*.prompt.md` are removed. `.github/copilot-instructions.md` is seeded only when missing — if it already exists, merge the HAWP block manually.
 
 If you only want to refresh kit content from upstream (no install steps), use [`update.md`](./update.md).
@@ -323,6 +360,8 @@ After installation, confirm all of the following are true:
 - `.hawp/work/decisions/README.md` exists
 - `.hawp/work/evidence/README.md` exists
 - `.hawp/work/notes/README.md` exists
+- legacy `.hawp/work/adrs/` and `.hawp/work/status/` folders are absent after migration
+- done items linked to `closed/...` in `.hawp/work/BACKLOG.md` are not left behind in `.hawp/work/active/` when reconcilable
 - no temporary `.github/` overlay folder remains in the target repository unless the user is intentionally keeping the kit source there
 
 ## Failure Cases
