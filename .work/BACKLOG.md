@@ -32,6 +32,7 @@ _No active work._
 | ID       | Type        | Title                                               | Closed     | Plan                                                                            |
 | -------- | ----------- | --------------------------------------------------- | ---------- | ------------------------------------------------------------------------------- |
 | BUG-001  | bug         | update migrates old `.hawp/usage` into `.hawp/work` | 2026-04-30 | [plan](closed/2026/04/30/2026-04-30-bug-001-update-flow-migrate-old-layouts.md) |
+| BUG-002  | bug         | update flow cleans up legacy work folders after migration | 2026-05-01 | [plan](closed/2026/05/01/2026-05-01-bug-002-update-flow-clean-legacy-work-folders.md) |
 | TASK-001 | improvement | ADR: Parallel Work Guardrails                       | 2026-04-30 | [plan](closed/2026/04/30/2026-04-30-task-001-parallel-work-guardrails-adr.md)   |
 | TASK-002 | improvement | ADR: Intake Template Refinement                     | 2026-04-30 | [plan](closed/2026/04/30/2026-04-30-task-002-intake-template-adr.md)            |
 | TASK-003 | improvement | ADR: Restructure `.hawp` into `kit`/`work`          | 2026-04-30 | [plan](closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md)       |
