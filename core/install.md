@@ -16,7 +16,7 @@ This script is **safe to re-run** and is **safe on a repo that already has `hawp
 - Refresh `.hawp/kit/` and `.hawp/LICENSE` from the package.
 - Remove legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`) after the new `.hawp/kit/` is in place.
 - Remove any `.gitkeep` files under `.hawp/` (the kit no longer ships placeholders).
-- Leave every existing file under `.hawp/work/` untouched (BACKLOG, ADRs, status plans, evidence).
+- Leave every existing file under `.hawp/work/` untouched (BACKLOG, active items, parked items, decisions, evidence, notes).
 - Seed missing `.hawp/work/` scaffold files only when they do not exist.
 - Refresh `.github/instructions/*.instructions.md` and `.github/prompts/*.prompt.md`.
 - Remove stale `.github/instructions/human-ai-workflow-protocol-*.instructions.md` and `.github/prompts/human-ai-workflow-protocol-*.prompt.md` overlay files.
@@ -122,11 +122,12 @@ rm -f .hawp/README.md .hawp/SPEC.md .hawp/START_HERE.md .hawp/AUTHORING_PATTERNS
 find .hawp -name .gitkeep -type f -delete 2>/dev/null || true
 
 # --- 6. Seed .hawp/work/ scaffold (only when missing; never overwrites) ---
-mkdir -p .hawp/work/active .hawp/work/closed .hawp/work/decisions .hawp/work/evidence .hawp/work/notes
+mkdir -p .hawp/work/active .hawp/work/parked .hawp/work/closed .hawp/work/decisions .hawp/work/evidence .hawp/work/notes
 copy_file_no_clobber "$SRC/.hawp/work/README.md"               ".hawp/work/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/STATUS.md"               ".hawp/work/STATUS.md"
 copy_file_no_clobber "$SRC/.hawp/work/BACKLOG.md"              ".hawp/work/BACKLOG.md"
 copy_file_no_clobber "$SRC/.hawp/work/active/README.md"        ".hawp/work/active/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/parked/README.md"        ".hawp/work/parked/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/closed/README.md"        ".hawp/work/closed/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/decisions/README.md"     ".hawp/work/decisions/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/evidence/README.md"      ".hawp/work/evidence/README.md"
@@ -155,13 +156,13 @@ Quick usage after install:
 2. Start task shaping from `.hawp/kit/START_HERE.md`.
 3. Use `.hawp/LICENSE` as the installed Apache 2.0 license text for the HAWP kit content.
 4. Use `.hawp/kit/templates/status-report.md` for context-transfer artifacts.
-5. A starter `.hawp/work/` area is scaffolded automatically: `STATUS.md`, `BACKLOG.md`, `README.md`, and `README.md` files in `active/`, `closed/`, `decisions/`, `evidence/`, and `notes/` (all seeded from the source repo's `.hawp/work/` scaffold). These are seeded once and owned by your repo from that point on.
+5. A starter `.hawp/work/` area is scaffolded automatically: `STATUS.md`, `BACKLOG.md`, `README.md`, and `README.md` files in `active/`, `parked/`, `closed/`, `decisions/`, `evidence/`, and `notes/` (all seeded from the source repo's `.hawp/work/` scaffold). These are seeded once and owned by your repo from that point on.
 
 ## Scope Clarification
 
 This document covers the full HAWP installation: `.hawp/` at the repo root, including `.hawp/LICENSE`, plus the GitHub Copilot overlay under `.github/`.
 
-Install boundary: the source repository's own operating state lives at root `.work/` (decisions, active/closed work, evidence, real BACKLOG) and is never installed downstream. The install seeds a clean `work/` scaffold — `README.md`, `STATUS.md`, a starter `BACKLOG.md`, and `README.md` files in `active/`, `closed/`, `decisions/`, `evidence/`, and `notes/` — sourced from `core/.hawp/work/` in the kit repo. Downstream repos never receive the HAWP source repo's own backlog items or decision records.
+Install boundary: the source repository's own operating state lives at root `.work/` (active work, parked work, closed work, decisions, evidence, real BACKLOG) and is never installed downstream. The install seeds a clean `work/` scaffold — `README.md`, `STATUS.md`, a starter `BACKLOG.md`, and `README.md` files in `active/`, `parked/`, `closed/`, `decisions/`, `evidence/`, and `notes/` — sourced from `core/.hawp/work/` in the kit repo. Downstream repos never receive the HAWP source repo's own backlog items or decision records.
 
 The `benchmark/` folder is optional reference material and is not installed by this script.
 
@@ -189,6 +190,7 @@ The installed `.hawp/` content also includes:
 - `.hawp/work/STATUS.md` — current state dashboard
 - `.hawp/work/BACKLOG.md` — starter backlog (seeded from the source repo's `.hawp/work/BACKLOG.md` scaffold)
 - `.hawp/work/active/README.md` — active work folder description
+- `.hawp/work/parked/README.md` — parked/deferred work folder description
 - `.hawp/work/closed/README.md` — closed work archive description
 - `.hawp/work/decisions/README.md` — decisions/ADR folder description
 - `.hawp/work/evidence/README.md` — evidence folder description
@@ -220,7 +222,7 @@ If the target repo already has `hawp/` (legacy, no dot prefix) or `.hawp/` from 
 - **Current `.hawp/work/status/` migration.** Plan files are copied to `.hawp/work/active/`.
 - **`.hawp/kit/` refresh.** The `.hawp/kit/` directory is removed and rewritten from the package allowlist. Nothing under `.hawp/work/` is touched by this step.
 - **Legacy root-level kit cleanup.** After kit refresh, the script removes `.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, and `.hawp/usage`, plus stale top-level kit docs `.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, and `.hawp/AUTHORING_PATTERNS.md`. Their reusable content now lives under `.hawp/kit/...` and any repo-local items have already been migrated into `.hawp/work/`. Any `.gitkeep` files under `.hawp/` are also removed.
-- **`.hawp/work/` preservation.** Every existing file under `.hawp/work/` (BACKLOG.md, active plan files, closed archives, decisions, evidence artifacts) is left exactly as-is. Scaffold seeders only create missing files.
+- **`.hawp/work/` preservation.** Every existing file under `.hawp/work/` (BACKLOG.md, active items, parked items, closed archives, decisions, evidence artifacts, notes) is left exactly as-is. Scaffold seeders only create missing files.
 - **`.github/` overlay refresh.** Instruction and prompt files are HAWP-managed and are always replaced. Stale legacy-named overlay files matching `human-ai-workflow-protocol-*.instructions.md` and `human-ai-workflow-protocol-*.prompt.md` are removed. `.github/copilot-instructions.md` is seeded only when missing — if it already exists, merge the HAWP block manually.
 
 If you only want to refresh kit content from upstream (no install steps), use [`update.md`](./update.md).
@@ -281,7 +283,7 @@ Saved status reports belong in:
 
 - .hawp/work/active/
 
-For bugs/tasks, track in .hawp/work/BACKLOG.md. Active plan files go in .hawp/work/active/. Close by moving to .hawp/work/closed/YYYY/MM/DD/.
+For bugs/tasks, track in .hawp/work/BACKLOG.md. Active plan files go in .hawp/work/active/. Deferred items can live in .hawp/work/parked/. Close by moving to .hawp/work/closed/YYYY/MM/DD/.
 
 Keep the repo-local HAWP layer lean.
 
@@ -316,6 +318,7 @@ After installation, confirm all of the following are true:
 - `.hawp/work/STATUS.md` exists
 - `.hawp/work/BACKLOG.md` exists
 - `.hawp/work/active/README.md` exists
+- `.hawp/work/parked/README.md` exists
 - `.hawp/work/closed/README.md` exists
 - `.hawp/work/decisions/README.md` exists
 - `.hawp/work/evidence/README.md` exists
