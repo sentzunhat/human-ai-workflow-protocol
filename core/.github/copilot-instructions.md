@@ -3,11 +3,11 @@ This repository uses HAWP as a lightweight workflow method.
 Follow the repo-local HAWP guidance in:
 
 - .hawp/kit/start-here.md
-- .hawp/kit/templates/status-report.md
+- .hawp/kit/usage/status-report.md
 
 Use .hawp/kit/start-here.md as the operating guide for how this repo applies HAWP in practice.
 
-Use .hawp/kit/templates/status-report.md when the user asks for a:
+Use .hawp/kit/usage/status-report.md when the user asks for a:
 
 - status report
 - checkpoint summary

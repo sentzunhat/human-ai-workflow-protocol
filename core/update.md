@@ -364,7 +364,7 @@ echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .haw
 
 ## Post-Update Checklist
 
-1. Confirm `.github/copilot-instructions.md` references `.hawp/kit/start-here.md` and `.hawp/kit/templates/status-report.md`.
+1. Confirm `.github/copilot-instructions.md` references `.hawp/kit/start-here.md` and `.hawp/kit/usage/status-report.md`.
 2. Confirm `.hawp/LICENSE` exists and contains the Apache 2.0 text.
 3. Confirm expected prompt files exist under `.github/prompts/` — including `intake.prompt.md`.
 4. Confirm expected instruction files exist under `.github/instructions/` — including `intake.instructions.md`.
@@ -375,8 +375,9 @@ echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .haw
 9. Confirm done items were moved out of `.hawp/work/active/` using `.hawp/work/BACKLOG.md` Done rows and Active Work rows with `done`/`wont-fix` status (closed links when present, otherwise ID + Closed date fallback, then filename date prefix, then today), when source files existed and destination files were missing.
 10. Confirm any orphan active files (no matching BACKLOG ID or plan-link) were retired to `closed/...` when the backlog had at least one data row (see `retired (orphan):` lines above).
 11. Confirm legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/spec.md`, `.hawp/start-here.md`, `.hawp/authoring-patterns.md`) are gone — they live under `.hawp/kit/` now. Confirm no `.gitkeep` files remain under `.hawp/`.
-12. Review git diff before committing — pay special attention to anything inside `.hawp/work/` (expected changes are migration copies, legacy-folder removals, and optional active→closed reconciliations only).
-13. Run your repo checks (lint/test/typecheck) if your workflow requires it.
+12. Confirm backlog plan links resolve correctly after reconciliation (especially Done-row links to `closed/...` files and no stale `active/...` link targets for closed items).
+13. Review git diff before committing — pay special attention to anything inside `.hawp/work/` (expected changes are migration copies, legacy-folder removals, and optional active→closed reconciliations only).
+14. Run your repo checks (lint/test/typecheck) if your workflow requires it.
 
 ## Notes
 
