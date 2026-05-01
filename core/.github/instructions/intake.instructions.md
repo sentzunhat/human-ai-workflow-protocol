@@ -22,7 +22,7 @@ Treat any of these as a work intake:
    Assign the next sequential ID. Never start on an ID already marked `in-progress`.
 
 2. **Write a plan file** for all non-trivial work before implementing.
-   Use `kit/templates/intake-plan.md`. Save to `work/status/<date>-<id>-<slug>.md`.
+   Use `kit/templates/intake-plan.md`. Save to `work/active/<id>.md`.
 
 3. **Respect the review gate** defined in `kit/usage/INTAKE_WORKFLOW.md`.
    Do not implement medium or high risk changes without explicit user approval.

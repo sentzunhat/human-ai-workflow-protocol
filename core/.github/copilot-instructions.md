@@ -16,7 +16,9 @@ Use .hawp/kit/templates/status-report.md when the user asks for a:
 
 Saved status reports belong in:
 
-- .hawp/work/status/
+- .hawp/work/active/
+
+For bugs/tasks, track in .hawp/work/BACKLOG.md. Active plan files go in .hawp/work/active/. Deferred items can live in .hawp/work/parked/. Close by moving to .hawp/work/closed/YYYY/MM/DD/.
 
 Keep the repo-local HAWP layer lean.
 

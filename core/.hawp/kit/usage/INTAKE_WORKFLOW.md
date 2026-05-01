@@ -99,6 +99,13 @@ I note what is directly verified vs what requires a live environment to confirm.
 
 ---
 
+## Parked / Deferred
+
+To defer an item without closing it, move the plan file to `work/parked/<ID>.md` and mark the backlog row `parked`.
+When it becomes active again, move it back to `work/active/<ID>.md` and update the backlog row.
+
+---
+
 ## Step 7 — Close
 
 The backlog row moves to `done`.

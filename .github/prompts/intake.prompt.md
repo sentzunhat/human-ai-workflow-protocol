@@ -29,7 +29,7 @@ Given the bug or task the user described, execute steps 1–4 of the workflow:
 ### 3. Write the plan
 
 - Use `kit/templates/intake-plan.md` as the template
-- Save to `work/status/YYYY-MM-DD-<id>-<slug>.md`
+- Save to `work/active/<ID>.md`
 - Update the BACKLOG.md row to `plan-ready` with a link to the plan file
 
 ### 4. Apply the review gate
