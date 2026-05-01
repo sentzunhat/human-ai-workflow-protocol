@@ -28,5 +28,5 @@ The `benchmark/` folder is a reference resource for teams who want to evaluate H
 ## Related docs
 
 - [.hawp/kit/README.md](../core/.hawp/kit/README.md) — what HAWP is
-- [.hawp/kit/AUTHORING_PATTERNS.md](../core/.hawp/kit/AUTHORING_PATTERNS.md) — guidance for specific task types
+- [.hawp/kit/authoring-patterns.md](../core/.hawp/kit/authoring-patterns.md) — guidance for specific task types
 - [.hawp/kit/examples/](../core/.hawp/kit/examples/) — concrete filled-shape examples

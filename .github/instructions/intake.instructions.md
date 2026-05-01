@@ -24,7 +24,7 @@ Treat any of these as a work intake:
 2. **Write a plan file** for all non-trivial work before implementing.
    Use `kit/templates/intake-plan.md`. Save to `work/active/<id>.md`.
 
-3. **Respect the review gate** defined in `kit/usage/INTAKE_WORKFLOW.md`.
+3. **Respect the review gate** defined in `kit/usage/intake-workflow.md`.
    Do not implement medium or high risk changes without explicit user approval.
 
 4. **Keep scope tight.** Fix the reported issue only. Do not refactor adjacent code unless it is the direct root cause.
@@ -37,7 +37,7 @@ Treat any of these as a work intake:
 
 For full loop detail, read in order:
 
-1. `kit/usage/INTAKE_WORKFLOW.md`
+1. `kit/usage/intake-workflow.md`
 2. `work/BACKLOG.md`
 3. `kit/templates/intake-plan.md`
 

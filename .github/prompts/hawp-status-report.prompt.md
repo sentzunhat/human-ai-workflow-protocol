@@ -3,7 +3,7 @@ name: status-report
 description: Generate a HAWP-style status report for the current work
 ---
 
-Follow `core/.hawp/kit/usage/STATUS_REPORT.md`.
+Follow `core/.hawp/kit/usage/status-report.md`.
 
 Using the current chat, workspace context, and any relevant open files, produce a status report that:
 

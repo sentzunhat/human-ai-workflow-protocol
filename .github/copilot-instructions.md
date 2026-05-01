@@ -2,12 +2,12 @@ This repository uses HAWP as a lightweight workflow method.
 
 Follow the repo-local HAWP guidance in:
 
-- core/.hawp/kit/usage/INIT.md
-- core/.hawp/kit/usage/STATUS_REPORT.md
+- core/.hawp/kit/usage/init.md
+- core/.hawp/kit/usage/status-report.md
 
-Use core/.hawp/kit/usage/INIT.md as the operating guide for how this repo applies HAWP in practice.
+Use core/.hawp/kit/usage/init.md as the operating guide for how this repo applies HAWP in practice.
 
-Use core/.hawp/kit/usage/STATUS_REPORT.md when the user asks for a:
+Use core/.hawp/kit/usage/status-report.md when the user asks for a:
 
 - status report
 - checkpoint summary
@@ -20,7 +20,7 @@ Saved status reports belong in:
 
 For bug reports, tasks, and improvement work in this repo:
 
-- Follow the intake loop in core/.hawp/kit/usage/INTAKE_WORKFLOW.md
+- Follow the intake loop in core/.hawp/kit/usage/intake-workflow.md
 - Track all open and completed work in .work/BACKLOG.md
 - Write plan files using core/.hawp/kit/templates/intake-plan.md
 - Active plan files go in .work/active/

@@ -8,7 +8,7 @@
 | ----------------------------------------- | -------------------------------------------- |
 | **Install HAWP** into a repo (copy/paste) | → [core/install.md](core/install.md)         |
 | **Update HAWP** to latest `main`          | → [core/update.md](core/update.md)           |
-| Shape your first task                     | → `.hawp/kit/START_HERE.md` (after install)  |
+| Shape your first task                     | → `.hawp/kit/start-here.md` (after install)  |
 | Run the HAWP vs no-HAWP comparison        | → [benchmark/README.md](benchmark/README.md) |
 
 Both install and update are single copy/paste shell blocks. Safe to re-run. They never overwrite your `.hawp/work/` content or your `.github/copilot-instructions.md`.
@@ -39,14 +39,14 @@ HAWP is **not** a runtime engine, memory system, validator, or orchestration fra
 - **Less drift.** A filled shape locks intent before the first tool call.
 - **Cheap handoffs.** The same five fields work as a context-transfer artifact between humans, between agents, and across sessions.
 - **No lock-in.** Plain Markdown + one TypeScript type. No runtime, no service, no database.
-- **Optional everything.** Use just `START_HERE.md`, or layer in the intake loop, status reports, ADRs, and Copilot overlay as you need them.
+- **Optional everything.** Use just `start-here.md`, or layer in the intake loop, status reports, ADRs, and Copilot overlay as you need them.
 
 ## Using HAWP after install
 
 1. Read `.hawp/kit/README.md` to understand the protocol.
-2. Use `.hawp/kit/START_HERE.md` to shape a task.
-3. Use `.hawp/kit/AUTHORING_PATTERNS.md` for recurring task-shape recipes.
-4. For bugs/tasks, follow `.hawp/kit/usage/INTAKE_WORKFLOW.md` and track in `.hawp/work/BACKLOG.md`.
+2. Use `.hawp/kit/start-here.md` to shape a task.
+3. Use `.hawp/kit/authoring-patterns.md` for recurring task-shape recipes.
+4. For bugs/tasks, follow `.hawp/kit/usage/intake-workflow.md` and track in `.hawp/work/BACKLOG.md`.
 5. For checkpoints / context handoffs, use `.hawp/kit/templates/status-report.md`.
 6. See `.hawp/kit/examples/` for concrete filled shapes.
 

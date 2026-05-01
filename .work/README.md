@@ -26,9 +26,9 @@ Never overwrite project truth.
 
 The reusable workflow guides (operating loop, status report shape, repo-local init) live with the kit:
 
-- `../kit/usage/INIT.md`
-- `../kit/usage/INTAKE_WORKFLOW.md`
-- `../kit/usage/STATUS_REPORT.md`
+- `../kit/usage/init.md`
+- `../kit/usage/intake-workflow.md`
+- `../kit/usage/status-report.md`
 
 ## Distinction from `kit/`
 
