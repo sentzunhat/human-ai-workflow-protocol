@@ -9,8 +9,10 @@ If you want a single copy/paste installation flow, run this from the target repo
 This script is **safe to re-run** and is **safe on a repo that already has `hawp/` or `.hawp/` from any earlier layout**. It will:
 
 - Migrate a legacy `hawp/` directory to `.hawp/`, preserving any `hawp/work/`, `hawp/usage/`, and `hawp/status/` content.
-- Migrate a legacy `.hawp/usage/` layout into `.hawp/work/` (BACKLOG, status, ADRs).
-- Migrate a legacy `.hawp/status/` folder (pre-`work/` layout) into `.hawp/work/status/`.
+- Migrate a legacy `.hawp/usage/` layout into `.hawp/work/` (BACKLOG → `work/BACKLOG.md`, status → `work/active/`, ADRs → `work/decisions/YYYY/MM/DD/`).
+- Migrate a legacy `.hawp/status/` folder (pre-`work/` layout) into `.hawp/work/notes/YYYY/MM/DD/` and promote `STATUS.md` to `.hawp/work/STATUS.md`.
+- Migrate an existing `.hawp/work/adrs/` into `.hawp/work/decisions/YYYY/MM/DD/`.
+- Migrate an existing `.hawp/work/status/` into `.hawp/work/active/`.
 - Refresh `.hawp/kit/` and `.hawp/LICENSE` from the package.
 - Remove legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`) after the new `.hawp/kit/` is in place.
 - Remove any `.gitkeep` files under `.hawp/` (the kit no longer ships placeholders).
@@ -47,6 +49,8 @@ copy_file_no_clobber() {
   fi
 }
 
+MDATE="$(date +%Y/%m/%d)"
+
 # --- 1. Migration: legacy hawp/ -> .hawp/ (preserves hawp/work/, hawp/usage/, hawp/status/) ---
 # Only acts on a real directory; symlinks named hawp are left untouched.
 if [ -d "hawp" ] && [ ! -L "hawp" ]; then
@@ -54,12 +58,14 @@ if [ -d "hawp" ] && [ ! -L "hawp" ]; then
   copy_dir_no_clobber "hawp/work" ".hawp/work"
   if [ -d "hawp/usage" ]; then
     copy_file_no_clobber "hawp/usage/BACKLOG.md" ".hawp/work/BACKLOG.md"
-    copy_dir_no_clobber  "hawp/usage/status"     ".hawp/work/status"
+    copy_dir_no_clobber  "hawp/usage/status"     ".hawp/work/active"
+    mkdir -p ".hawp/work/decisions/$MDATE"
     for f in hawp/usage/*_ADR.md; do
-      [ -f "$f" ] && copy_file_no_clobber "$f" ".hawp/work/adrs/$(basename "$f")"
+      [ -f "$f" ] && copy_file_no_clobber "$f" ".hawp/work/decisions/$MDATE/$(basename "$f")"
     done
   fi
-  copy_dir_no_clobber "hawp/status" ".hawp/work/status"
+  mkdir -p ".hawp/work/notes/$MDATE"
+  copy_dir_no_clobber "hawp/status" ".hawp/work/notes/$MDATE"
   copy_file_no_clobber "hawp/LICENSE" ".hawp/LICENSE"
   rm -rf hawp
 fi
@@ -67,15 +73,30 @@ fi
 # --- 2. Migration: legacy .hawp/usage/ -> .hawp/work/ ---
 if [ -d ".hawp/usage" ]; then
   copy_file_no_clobber ".hawp/usage/BACKLOG.md" ".hawp/work/BACKLOG.md"
-  copy_dir_no_clobber  ".hawp/usage/status"     ".hawp/work/status"
+  copy_dir_no_clobber  ".hawp/usage/status"     ".hawp/work/active"
+  mkdir -p ".hawp/work/decisions/$MDATE"
   for f in .hawp/usage/*_ADR.md; do
-    [ -f "$f" ] && copy_file_no_clobber "$f" ".hawp/work/adrs/$(basename "$f")"
+    [ -f "$f" ] && copy_file_no_clobber "$f" ".hawp/work/decisions/$MDATE/$(basename "$f")"
   done
 fi
 
-# --- 3. Migration: pre-work/ layout (.hawp/status/) -> .hawp/work/status/ ---
+# --- 3. Migration: pre-work/ layout (.hawp/status/) -> .hawp/work/notes/YYYY/MM/DD/ ---
 if [ -d ".hawp/status" ]; then
-  copy_dir_no_clobber ".hawp/status" ".hawp/work/status"
+  mkdir -p ".hawp/work/notes/$MDATE"
+  copy_file_no_clobber ".hawp/status/STATUS.md" ".hawp/work/STATUS.md"
+  copy_dir_no_clobber ".hawp/status" ".hawp/work/notes/$MDATE"
+fi
+
+# --- 3b. Migration: current .hawp/work/adrs/ -> .hawp/work/decisions/YYYY/MM/DD/ ---
+if [ -d ".hawp/work/adrs" ]; then
+  mkdir -p ".hawp/work/decisions/$MDATE"
+  copy_dir_no_clobber ".hawp/work/adrs" ".hawp/work/decisions/$MDATE"
+fi
+
+# --- 3c. Migration: current .hawp/work/status/ -> .hawp/work/active/ ---
+if [ -d ".hawp/work/status" ]; then
+  mkdir -p ".hawp/work/active"
+  copy_dir_no_clobber ".hawp/work/status" ".hawp/work/active"
 fi
 
 # --- 4. Refresh .hawp/LICENSE and .hawp/kit/** (preserves .hawp/work/) ---
@@ -101,12 +122,15 @@ rm -f .hawp/README.md .hawp/SPEC.md .hawp/START_HERE.md .hawp/AUTHORING_PATTERNS
 find .hawp -name .gitkeep -type f -delete 2>/dev/null || true
 
 # --- 6. Seed .hawp/work/ scaffold (only when missing; never overwrites) ---
-mkdir -p .hawp/work/adrs .hawp/work/status .hawp/work/evidence
-copy_file_no_clobber "$SRC/.hawp/work/README.md"           ".hawp/work/README.md"
-copy_file_no_clobber "$SRC/.hawp/work/BACKLOG.md"           ".hawp/work/BACKLOG.md"
-copy_file_no_clobber "$SRC/.hawp/work/adrs/README.md"      ".hawp/work/adrs/README.md"
-copy_file_no_clobber "$SRC/.hawp/work/status/README.md"    ".hawp/work/status/README.md"
-copy_file_no_clobber "$SRC/.hawp/work/evidence/README.md"  ".hawp/work/evidence/README.md"
+mkdir -p .hawp/work/active .hawp/work/closed .hawp/work/decisions .hawp/work/evidence .hawp/work/notes
+copy_file_no_clobber "$SRC/.hawp/work/README.md"               ".hawp/work/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/STATUS.md"               ".hawp/work/STATUS.md"
+copy_file_no_clobber "$SRC/.hawp/work/BACKLOG.md"              ".hawp/work/BACKLOG.md"
+copy_file_no_clobber "$SRC/.hawp/work/active/README.md"        ".hawp/work/active/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/closed/README.md"        ".hawp/work/closed/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/decisions/README.md"     ".hawp/work/decisions/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/evidence/README.md"      ".hawp/work/evidence/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/notes/README.md"         ".hawp/work/notes/README.md"
 
 # --- 7. Install Copilot overlay into .github/ ---
 mkdir -p .github/instructions .github/prompts
@@ -131,13 +155,13 @@ Quick usage after install:
 2. Start task shaping from `.hawp/kit/START_HERE.md`.
 3. Use `.hawp/LICENSE` as the installed Apache 2.0 license text for the HAWP kit content.
 4. Use `.hawp/kit/templates/status-report.md` for context-transfer artifacts.
-5. A starter `.hawp/work/` area is scaffolded automatically: `BACKLOG.md`, `README.md`, and `README.md` files in `adrs/`, `status/`, and `evidence/` (all seeded from the source repo's `.hawp/work/` scaffold). These are seeded once and owned by your repo from that point on.
+5. A starter `.hawp/work/` area is scaffolded automatically: `STATUS.md`, `BACKLOG.md`, `README.md`, and `README.md` files in `active/`, `closed/`, `decisions/`, `evidence/`, and `notes/` (all seeded from the source repo's `.hawp/work/` scaffold). These are seeded once and owned by your repo from that point on.
 
 ## Scope Clarification
 
 This document covers the full HAWP installation: `.hawp/` at the repo root, including `.hawp/LICENSE`, plus the GitHub Copilot overlay under `.github/`.
 
-Install boundary: the source repository's own operating state lives at root `.work/` (ADRs, status plans, evidence, real BACKLOG) and is never installed downstream. The install seeds a clean `work/` scaffold — `README.md`, a starter `BACKLOG.md`, and `README.md` files in `adrs/`, `status/`, and `evidence/` — sourced from `core/.hawp/work/` in the kit repo. Downstream repos never receive the HAWP source repo's own backlog items or decision records.
+Install boundary: the source repository's own operating state lives at root `.work/` (decisions, active/closed work, evidence, real BACKLOG) and is never installed downstream. The install seeds a clean `work/` scaffold — `README.md`, `STATUS.md`, a starter `BACKLOG.md`, and `README.md` files in `active/`, `closed/`, `decisions/`, `evidence/`, and `notes/` — sourced from `core/.hawp/work/` in the kit repo. Downstream repos never receive the HAWP source repo's own backlog items or decision records.
 
 The `benchmark/` folder is optional reference material and is not installed by this script.
 
@@ -162,10 +186,13 @@ The installed `.hawp/` content also includes:
 
 - `.hawp/LICENSE` — Apache 2.0 text
 - `.hawp/work/README.md` — work area overview
+- `.hawp/work/STATUS.md` — current state dashboard
 - `.hawp/work/BACKLOG.md` — starter backlog (seeded from the source repo's `.hawp/work/BACKLOG.md` scaffold)
-- `.hawp/work/adrs/README.md` — ADR folder description
-- `.hawp/work/status/README.md` — status/plan folder description
+- `.hawp/work/active/README.md` — active work folder description
+- `.hawp/work/closed/README.md` — closed work archive description
+- `.hawp/work/decisions/README.md` — decisions/ADR folder description
 - `.hawp/work/evidence/README.md` — evidence folder description
+- `.hawp/work/notes/README.md` — notes folder description
 
 All `work/` files are seeded once and left untouched on subsequent updates.
 
@@ -187,11 +214,13 @@ If you are running the manual install procedure (below) instead of the one-shot 
 If the target repo already has `hawp/` (legacy, no dot prefix) or `.hawp/` from any earlier layout, the one-shot script handles the upgrade safely. Specifically:
 
 - **Legacy `hawp/` → `.hawp/` migration.** A real `hawp/` directory (not a symlink) is moved to `.hawp/`. Any `hawp/work/`, `hawp/usage/`, and `hawp/status/` content is copied into `.hawp/work/...` first using `cp -Rn` so existing `.hawp/work/` files are never clobbered. The legacy `hawp/` directory is then removed.
-- **Legacy `.hawp/usage/` migration.** `BACKLOG.md`, `status/*`, and `*_ADR.md` files are copied into `.hawp/work/BACKLOG.md`, `.hawp/work/status/`, and `.hawp/work/adrs/` respectively. Existing files in `.hawp/work/` always win.
-- **Pre-`work/` layout migration.** A legacy `.hawp/status/` folder at the kit root is copied into `.hawp/work/status/`.
+- **Legacy `.hawp/usage/` migration.** `BACKLOG.md` → `.hawp/work/BACKLOG.md`, `status/*` → `.hawp/work/active/`, `*_ADR.md` → `.hawp/work/decisions/YYYY/MM/DD/`. Existing files in `.hawp/work/` always win.
+- **Pre-`work/` layout migration.** A legacy `.hawp/status/` folder at the kit root is copied to `.hawp/work/notes/YYYY/MM/DD/`; `STATUS.md` is promoted to `.hawp/work/STATUS.md`.
+- **Current `.hawp/work/adrs/` migration.** ADR files are copied to `.hawp/work/decisions/YYYY/MM/DD/`.
+- **Current `.hawp/work/status/` migration.** Plan files are copied to `.hawp/work/active/`.
 - **`.hawp/kit/` refresh.** The `.hawp/kit/` directory is removed and rewritten from the package allowlist. Nothing under `.hawp/work/` is touched by this step.
 - **Legacy root-level kit cleanup.** After kit refresh, the script removes `.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, and `.hawp/usage`, plus stale top-level kit docs `.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, and `.hawp/AUTHORING_PATTERNS.md`. Their reusable content now lives under `.hawp/kit/...` and any repo-local items have already been migrated into `.hawp/work/`. Any `.gitkeep` files under `.hawp/` are also removed.
-- **`.hawp/work/` preservation.** Every existing file under `.hawp/work/` (BACKLOG.md, ADRs, status plans, evidence artifacts) is left exactly as-is. Scaffold seeders only create missing files.
+- **`.hawp/work/` preservation.** Every existing file under `.hawp/work/` (BACKLOG.md, active plan files, closed archives, decisions, evidence artifacts) is left exactly as-is. Scaffold seeders only create missing files.
 - **`.github/` overlay refresh.** Instruction and prompt files are HAWP-managed and are always replaced. Stale legacy-named overlay files matching `human-ai-workflow-protocol-*.instructions.md` and `human-ai-workflow-protocol-*.prompt.md` are removed. `.github/copilot-instructions.md` is seeded only when missing — if it already exists, merge the HAWP block manually.
 
 If you only want to refresh kit content from upstream (no install steps), use [`update.md`](./update.md).
@@ -250,7 +279,9 @@ Use .hawp/kit/templates/status-report.md when the user asks for a:
 
 Saved status reports belong in:
 
-- .hawp/work/status/
+- .hawp/work/active/
+
+For bugs/tasks, track in .hawp/work/BACKLOG.md. Active plan files go in .hawp/work/active/. Close by moving to .hawp/work/closed/YYYY/MM/DD/.
 
 Keep the repo-local HAWP layer lean.
 
@@ -282,10 +313,13 @@ After installation, confirm all of the following are true:
 - `.github/prompts/intake.prompt.md` exists
 - `.hawp/LICENSE` exists and contains the Apache 2.0 text
 - `.hawp/work/README.md` exists
+- `.hawp/work/STATUS.md` exists
 - `.hawp/work/BACKLOG.md` exists
-- `.hawp/work/adrs/README.md` exists
-- `.hawp/work/status/README.md` exists
+- `.hawp/work/active/README.md` exists
+- `.hawp/work/closed/README.md` exists
+- `.hawp/work/decisions/README.md` exists
 - `.hawp/work/evidence/README.md` exists
+- `.hawp/work/notes/README.md` exists
 - no temporary `.github/` overlay folder remains in the target repository unless the user is intentionally keeping the kit source there
 
 ## Failure Cases

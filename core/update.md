@@ -16,13 +16,15 @@ This refreshes only HAWP-managed files:
 **Migration support.** This flow safely upgrades repos coming from older HAWP layouts:
 
 - A legacy `hawp/` directory (no dot prefix, real directory only — symlinks are skipped) is migrated into `.hawp/`. Its `work/`, `usage/`, and `status/` contents are copied into `.hawp/work/...` with `cp -Rn` so existing `.hawp/work/` files always win.
-- A legacy `.hawp/usage/` layout is migrated: `BACKLOG.md` → `.hawp/work/BACKLOG.md`, `status/*` → `.hawp/work/status/*`, `*_ADR.md` → `.hawp/work/adrs/*`.
-- A legacy `.hawp/status/` folder (pre-`work/` layout) is moved into `.hawp/work/status/`.
+- A legacy `.hawp/usage/` layout is migrated: `BACKLOG.md` → `.hawp/work/BACKLOG.md`, `status/*` → `.hawp/work/active/`, `*_ADR.md` → `.hawp/work/decisions/YYYY/MM/DD/`.
+- A legacy `.hawp/status/` folder (pre-`work/` layout) is copied into `.hawp/work/notes/YYYY/MM/DD/`; `STATUS.md` is promoted to `.hawp/work/STATUS.md`.
+- A current `.hawp/work/adrs/` folder is migrated to `.hawp/work/decisions/YYYY/MM/DD/`.
+- A current `.hawp/work/status/` folder is migrated to `.hawp/work/active/`.
 - After `.hawp/kit/**` is refreshed, legacy root-level kit folders are removed: `.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`. Stale top-level docs that now live under `kit/` are also removed: `.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`.
 - Any `.gitkeep` files under `.hawp/` are removed (the kit no longer ships placeholder files).
 - Stale legacy overlay files named `.github/instructions/human-ai-workflow-protocol-*.instructions.md` and `.github/prompts/human-ai-workflow-protocol-*.prompt.md` are removed; current overlays use the `hawp-*` and `intake.*` naming.
 - `.github/copilot-instructions.md` is never overwritten.
-- Missing `.hawp/work/` scaffold files are seeded only when absent (`README.md`, `BACKLOG.md`, `adrs/README.md`, `status/README.md`, `evidence/README.md`).
+- Missing `.hawp/work/` scaffold files are seeded only when absent (`README.md`, `STATUS.md`, `BACKLOG.md`, `active/README.md`, `closed/README.md`, `decisions/README.md`, `evidence/README.md`, `notes/README.md`).
 
 ## Prompt You Can Paste Into GitHub Copilot Chat
 
@@ -31,8 +33,10 @@ Update this repository's HAWP kit from the latest github main branch of human-ai
 
 Requirements:
 - migrate legacy hawp/ to .hawp/ if present, preserving hawp/work/ contents
-- migrate legacy .hawp/usage/ (BACKLOG.md, status/, *_ADR.md) into .hawp/work/
-- migrate legacy .hawp/status/ into .hawp/work/status/
+- migrate legacy .hawp/usage/ (BACKLOG.md → work/BACKLOG.md, status/ → work/active/, *_ADR.md → work/decisions/YYYY/MM/DD/) into .hawp/work/
+- migrate legacy .hawp/status/ into .hawp/work/notes/YYYY/MM/DD/; promote STATUS.md to .hawp/work/STATUS.md
+- migrate .hawp/work/adrs/ into .hawp/work/decisions/YYYY/MM/DD/
+- migrate .hawp/work/status/ into .hawp/work/active/
 - refresh .hawp/LICENSE and .hawp/kit/** (leave .hawp/work/ untouched)
 - remove old root-level kit folders (.hawp/templates, .hawp/patterns, .hawp/reviews, .hawp/examples, .hawp/types, .hawp/usage) and stale top-level kit docs (.hawp/README.md, .hawp/SPEC.md, .hawp/START_HERE.md, .hawp/AUTHORING_PATTERNS.md) after kit refresh
 - remove any .gitkeep files under .hawp/
@@ -62,6 +66,7 @@ curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz
   | tar -xz -C "$TMP_DIR"
 
 SRC="$TMP_DIR/${REPO}-${REF}/core"
+MDATE="$(date +%Y/%m/%d)"
 
 # --- Helpers (no-clobber copy; never overwrite repo-owned files) ---
 copy_dir_no_clobber() {
@@ -86,12 +91,14 @@ if [ -d "hawp" ] && [ ! -L "hawp" ]; then
   copy_dir_no_clobber "hawp/work" ".hawp/work"
   if [ -d "hawp/usage" ]; then
     copy_file_no_clobber "hawp/usage/BACKLOG.md" ".hawp/work/BACKLOG.md"
-    copy_dir_no_clobber  "hawp/usage/status"     ".hawp/work/status"
+    copy_dir_no_clobber  "hawp/usage/status"     ".hawp/work/active"
+    mkdir -p ".hawp/work/decisions/$MDATE"
     for f in hawp/usage/*_ADR.md; do
-      [ -f "$f" ] && copy_file_no_clobber "$f" ".hawp/work/adrs/$(basename "$f")"
+      [ -f "$f" ] && copy_file_no_clobber "$f" ".hawp/work/decisions/$MDATE/$(basename "$f")"
     done
   fi
-  copy_dir_no_clobber "hawp/status" ".hawp/work/status"
+  mkdir -p ".hawp/work/notes/$MDATE"
+  copy_dir_no_clobber "hawp/status" ".hawp/work/notes/$MDATE"
   copy_file_no_clobber "hawp/LICENSE" ".hawp/LICENSE"
   rm -rf hawp
 fi
@@ -99,15 +106,30 @@ fi
 # --- 2. Migration: legacy .hawp/usage/ -> .hawp/work/ ---
 if [ -d ".hawp/usage" ]; then
   copy_file_no_clobber ".hawp/usage/BACKLOG.md" ".hawp/work/BACKLOG.md"
-  copy_dir_no_clobber  ".hawp/usage/status"     ".hawp/work/status"
+  copy_dir_no_clobber  ".hawp/usage/status"     ".hawp/work/active"
+  mkdir -p ".hawp/work/decisions/$MDATE"
   for f in .hawp/usage/*_ADR.md; do
-    [ -f "$f" ] && copy_file_no_clobber "$f" ".hawp/work/adrs/$(basename "$f")"
+    [ -f "$f" ] && copy_file_no_clobber "$f" ".hawp/work/decisions/$MDATE/$(basename "$f")"
   done
 fi
 
-# --- 3. Migration: pre-work/ layout (.hawp/status/) -> .hawp/work/status/ ---
+# --- 3. Migration: pre-work/ layout (.hawp/status/) -> .hawp/work/notes/YYYY/MM/DD/ ---
 if [ -d ".hawp/status" ]; then
-  copy_dir_no_clobber ".hawp/status" ".hawp/work/status"
+  mkdir -p ".hawp/work/notes/$MDATE"
+  copy_file_no_clobber ".hawp/status/STATUS.md" ".hawp/work/STATUS.md"
+  copy_dir_no_clobber ".hawp/status" ".hawp/work/notes/$MDATE"
+fi
+
+# --- 3b. Migration: current .hawp/work/adrs/ -> .hawp/work/decisions/YYYY/MM/DD/ ---
+if [ -d ".hawp/work/adrs" ]; then
+  mkdir -p ".hawp/work/decisions/$MDATE"
+  copy_dir_no_clobber ".hawp/work/adrs" ".hawp/work/decisions/$MDATE"
+fi
+
+# --- 3c. Migration: current .hawp/work/status/ -> .hawp/work/active/ ---
+if [ -d ".hawp/work/status" ]; then
+  mkdir -p ".hawp/work/active"
+  copy_dir_no_clobber ".hawp/work/status" ".hawp/work/active"
 fi
 
 # --- 4. Refresh .hawp/LICENSE and .hawp/kit/** (preserves .hawp/work/) ---
@@ -135,12 +157,15 @@ rm -f .hawp/README.md .hawp/SPEC.md .hawp/START_HERE.md .hawp/AUTHORING_PATTERNS
 find .hawp -name .gitkeep -type f -delete 2>/dev/null || true
 
 # --- 6. Seed .hawp/work/ scaffold (only when missing; never overwrites) ---
-mkdir -p .hawp/work/adrs .hawp/work/status .hawp/work/evidence
-copy_file_no_clobber "$SRC/.hawp/work/README.md"           ".hawp/work/README.md"
-copy_file_no_clobber "$SRC/.hawp/work/BACKLOG.md"           ".hawp/work/BACKLOG.md"
-copy_file_no_clobber "$SRC/.hawp/work/adrs/README.md"      ".hawp/work/adrs/README.md"
-copy_file_no_clobber "$SRC/.hawp/work/status/README.md"    ".hawp/work/status/README.md"
-copy_file_no_clobber "$SRC/.hawp/work/evidence/README.md"  ".hawp/work/evidence/README.md"
+mkdir -p .hawp/work/active .hawp/work/closed .hawp/work/decisions .hawp/work/evidence .hawp/work/notes
+copy_file_no_clobber "$SRC/.hawp/work/README.md"               ".hawp/work/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/STATUS.md"               ".hawp/work/STATUS.md"
+copy_file_no_clobber "$SRC/.hawp/work/BACKLOG.md"              ".hawp/work/BACKLOG.md"
+copy_file_no_clobber "$SRC/.hawp/work/active/README.md"        ".hawp/work/active/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/closed/README.md"        ".hawp/work/closed/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/decisions/README.md"     ".hawp/work/decisions/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/evidence/README.md"      ".hawp/work/evidence/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/notes/README.md"         ".hawp/work/notes/README.md"
 
 # --- 7. Refresh overlay files (HAWP-managed; safe to overwrite) ---
 mkdir -p .github/instructions .github/prompts
@@ -170,7 +195,7 @@ echo "Preserved: .hawp/work/** (untouched), .github/copilot-instructions.md (if 
 3. Confirm expected prompt files exist under `.github/prompts/` — including `intake.prompt.md`.
 4. Confirm expected instruction files exist under `.github/instructions/` — including `intake.instructions.md`.
 5. Confirm no `human-ai-workflow-protocol-*` named files remain under `.github/instructions/` or `.github/prompts/`.
-6. If a legacy `hawp/`, `.hawp/usage/`, or `.hawp/status/` directory existed, confirm it has been migrated and removed, and that `.hawp/work/` retains every file you had previously.
+6. If a legacy `hawp/`, `.hawp/usage/`, `.hawp/status/`, `.hawp/work/adrs/`, or `.hawp/work/status/` directory existed, confirm it has been migrated and its content preserved in `.hawp/work/active/`, `.hawp/work/decisions/YYYY/MM/DD/`, or `.hawp/work/notes/YYYY/MM/DD/` as appropriate.
 7. Confirm legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`) are gone — they live under `.hawp/kit/` now. Confirm no `.gitkeep` files remain under `.hawp/`.
 8. Review git diff before committing — pay special attention to anything inside `.hawp/work/` (should be a clean migration with no deletions).
 9. Run your repo checks (lint/test/typecheck) if your workflow requires it.
