@@ -16,13 +16,16 @@ Use core/.hawp/kit/usage/STATUS_REPORT.md when the user asks for a:
 
 Saved status reports belong in:
 
-- .work/status/
+- .work/active/
 
 For bug reports, tasks, and improvement work in this repo:
 
 - Follow the intake loop in core/.hawp/kit/usage/INTAKE_WORKFLOW.md
 - Track all open and completed work in .work/BACKLOG.md
 - Write plan files using core/.hawp/kit/templates/intake-plan.md
+- Active plan files go in .work/active/
+- Close by moving to .work/closed/YYYY/MM/DD/
+- ADRs and decisions go in .work/decisions/YYYY/MM/DD/
 
 Keep the repo-local HAWP layer lean.
 
