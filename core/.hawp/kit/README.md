@@ -71,10 +71,10 @@ HAWP is intentionally:
 
 ## Repo layout
 
-- START_HERE.md: fastest on-ramp — copy-paste template and first-use notes.
-- SPEC.md: v0.1 semantics, pipeline draft, principles, and non-goals.
+- start-here.md: fastest on-ramp — copy-paste template and first-use notes.
+- spec.md: v0.1 semantics, pipeline draft, principles, and non-goals.
 - types/shape.ts: locked TypeScript shape for v0.1.
-- AUTHORING_PATTERNS.md: compact guidance for recurring task types using the five required fields and optional checkpoint.
+- authoring-patterns.md: compact guidance for recurring task types using the five required fields and optional checkpoint.
 - templates/: optional starter templates for micro tasks, standard shaping, intake/bug planning, status reports, and audits.
 - patterns/: optional quick-reference patterns for evidence discipline and non-findings.
 - reviews/: optional review artifacts for HAWP maintenance and scope checks.

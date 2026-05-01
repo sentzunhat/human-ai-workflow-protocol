@@ -7,9 +7,9 @@ This repository uses HAWP as a structured workflow protocol for shaping work.
 The HAWP v0.1 protocol definition lives in:
 
 - [README.md](../README.md)
-- [SPEC.md](../SPEC.md)
+- [spec.md](../spec.md)
 - [types/shape.ts](../types/shape.ts)
-- [AUTHORING_PATTERNS.md](../AUTHORING_PATTERNS.md)
+- [authoring-patterns.md](../authoring-patterns.md)
 
 Use those documents as the protocol source of truth.
 This repo-local setup is downstream usage guidance, not a protocol redesign.
@@ -73,7 +73,7 @@ Save reports over time in [../../work/active](../../work/active) (open) or `../.
 
 ## Intake Workflow
 
-When using HAWP for active task or bug tracking, [INTAKE_WORKFLOW.md](INTAKE_WORKFLOW.md) describes the operating loop: intake → analyze → plan → review gate → implement → verify → close.
+When using HAWP for active task or bug tracking, [intake-workflow.md](intake-workflow.md) describes the operating loop: intake → analyze → plan → review gate → implement → verify → close.
 Track open and completed work in [../../work/BACKLOG.md](../../work/BACKLOG.md). Use [../templates/intake-plan.md](../templates/intake-plan.md) for plan files saved to `../../work/active/`.
 This is optional. Not all HAWP usage requires tracked work items.
 
