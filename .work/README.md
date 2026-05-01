@@ -1,13 +1,28 @@
-# `.hawp/work/` — Repo-Local Work State
+# `.work/` — Repo-Local Work State
 
-This folder holds this repository's HAWP operating state: the backlog, decisions, plan files, and verification artifacts.
+This folder holds this repository's HAWP operating state: the backlog, decisions, plan files, notes, and verification artifacts.
 
 ## Layout
 
-- `BACKLOG.md` — single source of truth for active and completed work in this repo.
-- `adrs/` — repo-local ADRs (project decisions about HAWP itself).
-- `status/` — plan files and status reports per backlog item.
-- `evidence/` — verification artifacts referenced from plans (only when needed; never fabricated).
+```
+work/
+	BACKLOG.md          — single source of truth for all work items
+	active/             — open bugs and tasks (flat, easy to find)
+	parked/             — deferred or icebox items (not active, not closed)
+	closed/YYYY/MM/DD/  — archived closed work, filed by date
+	decisions/YYYY/MM/DD/ — ADRs and significant project decisions
+	evidence/YYYY/MM/DD/  — verification artifacts (only when real)
+	notes/YYYY/MM/DD/   — session notes, scratch pads, migration records
+```
+
+## Core Rule
+
+```
+Read from kit.
+Write to work.
+Archive by date.
+Never overwrite project truth.
+```
 
 The reusable workflow guides (operating loop, status report shape, repo-local init) live with the kit:
 

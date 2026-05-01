@@ -14,6 +14,7 @@ Each row links to its plan file when one exists.
 | `plan-ready`  | Plan written, awaiting review       |
 | `approved`    | Plan approved, ready to implement   |
 | `in-progress` | Being implemented                   |
+| `parked`      | Deferred without closing            |
 | `done`        | Implemented and verified            |
 | `blocked`     | Blocked — reason noted in plan file |
 | `wont-fix`    | Decided not to fix — reason noted   |
@@ -43,6 +44,7 @@ _No active work._
 
 - Check this file before starting any new item.
 - Active plan files go in `active/`. Close by moving to `closed/YYYY/MM/DD/`.
+- Deferred items can live in `parked/` without being closed.
 - ADRs and decisions go in `decisions/YYYY/MM/DD/`.
 - Each item gets one plan file — no two agents on the same ID.
 - Work started outside this loop should still get a row added for visibility.

@@ -32,6 +32,10 @@ HAWP will use this folder model:
       BUG-001.md
       TASK-002.md
 
+    parked/
+      IDEA-001.md
+      TASK-005.md
+
     closed/
       YYYY/
         MM/
@@ -90,6 +94,24 @@ Examples:
 
 Active work should not be buried under date folders.
 
+## Parked Work Rule
+
+Parked work is deferred or icebox — not active, not closed:
+
+```txt
+.hawp/work/parked/
+```
+
+Examples:
+
+```txt
+.hawp/work/parked/IDEA-001.md
+.hawp/work/parked/TASK-005.md
+```
+
+When a parked item becomes active, move it to `active/`.
+When a parked item is cancelled, move it to `closed/YYYY/MM/DD/`.
+
 ## Closed Work Rule
 
 Closed work moves into date-based archive folders:
@@ -130,6 +152,7 @@ It may create:
 .hawp/work/STATUS.md
 .hawp/work/BACKLOG.md
 .hawp/work/active/
+.hawp/work/parked/
 .hawp/work/closed/
 .hawp/work/decisions/
 .hawp/work/evidence/
