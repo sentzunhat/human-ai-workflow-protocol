@@ -1,6 +1,16 @@
 # Verification Evidence
 
-Optional verification artifacts referenced from plan files in `../status/`.
+Date-based archive of optional verification artifacts referenced from plan files.
+
+Layout:
+
+```
+evidence/
+  YYYY/
+    MM/
+      DD/
+        BUG-001-smoke-check.md
+```
 
 Discipline:
 

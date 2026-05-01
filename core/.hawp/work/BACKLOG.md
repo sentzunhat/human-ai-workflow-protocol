@@ -35,5 +35,6 @@ _No completed work yet._
 ## Notes
 
 - Check this file before starting any new item.
-- Each item gets one plan file under `work/status/` — no two agents on the same ID.
+- Each item gets one plan file under `work/active/` — no two agents on the same ID.
+- On close, move the plan file to `work/closed/YYYY/MM/DD/`.
 - Work started outside this loop should still get a row added for visibility.
