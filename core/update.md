@@ -27,6 +27,7 @@ This refreshes only HAWP-managed files:
 - Stale legacy overlay files named `.github/instructions/human-ai-workflow-protocol-*.instructions.md` and `.github/prompts/human-ai-workflow-protocol-*.prompt.md` are removed; current overlays use the `hawp-*` and `intake.*` naming.
 - `.github/copilot-instructions.md` is never overwritten.
 - Missing `.hawp/work/` scaffold files are seeded only when absent (`README.md`, `STATUS.md`, `BACKLOG.md`, `active/README.md`, `parked/README.md`, `closed/README.md`, `decisions/README.md`, `evidence/README.md`, `notes/README.md`).
+- Files in `.hawp/work/active/` with no matching entry in `.hawp/work/BACKLOG.md` (no ID pattern match and no plan-link match) are automatically retired to `closed/YYYY/MM/DD/` using the filename date prefix. This pass only runs when the backlog has at least one data row, so fresh installs are unaffected.
 
 ## Prompt You Can Paste Into GitHub Copilot Chat
 
@@ -40,6 +41,7 @@ Requirements:
 - migrate .hawp/work/adrs/ into .hawp/work/decisions/YYYY/MM/DD/ and remove legacy .hawp/work/adrs/
 - migrate .hawp/work/status/ into .hawp/work/active/ and remove legacy .hawp/work/status/
 - reconcile closed plan files by using `.hawp/work/BACKLOG.md` Done rows to move matching `.hawp/work/active/*.md` files into `.hawp/work/closed/...` (prefer closed plan links; fall back to ID + Closed date); also reconcile `## Active Work` rows whose status is `done` or `wont-fix`; derive closed date from filename prefix when not present in backlog; fall back to today as last resort
+- retire orphan active items — files in `.hawp/work/active/` with no matching BACKLOG ID or plan-link — to `closed/YYYY/MM/DD/` using filename date prefix; only when the backlog has at least one data row
 - preserve any existing .hawp/work/parked/ content as-is
 - refresh .hawp/LICENSE and .hawp/kit/** (never overwrite .hawp/work/; allow backlog-based active→closed reconciliation via Done rows)
 - remove old root-level kit folders (.hawp/templates, .hawp/patterns, .hawp/reviews, .hawp/examples, .hawp/types, .hawp/usage) and stale top-level kit docs (.hawp/README.md, .hawp/spec.md, .hawp/start-here.md, .hawp/authoring-patterns.md) after kit refresh
@@ -177,6 +179,73 @@ reconcile_closed_plans_from_backlog() {
   done
 }
 
+retire_orphan_active_items() {
+  # Moves .hawp/work/active/ files that have no matching row in
+  # .hawp/work/BACKLOG.md (no ID pattern match and no plan-link match) to
+  # .hawp/work/closed/YYYY/MM/DD/. Skips when the backlog is absent or has
+  # no data rows so fresh installs are never affected.
+  backlog=".hawp/work/BACKLOG.md"
+  [ -f "$backlog" ] || return 0
+
+  known_ids="$(awk -F'|' '
+    function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
+    /^\|/ {
+      id = trim($2)
+      if (id == "" || id ~ /^-+$/ || id == "ID") next
+      print id
+    }
+  ' "$backlog")"
+  [ -n "$known_ids" ] || return 0
+
+  known_links="$(awk -F'|' '
+    function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
+    /^\|/ {
+      for (i = 2; i <= NF; i++) {
+        cell = trim($i)
+        if (match(cell, /\(([^)]+\.md[^)]*)\)/)) {
+          link = substr(cell, RSTART + 1, RLENGTH - 2)
+          n = split(link, parts, "/")
+          gsub(/#.*$/, "", parts[n])
+          if (parts[n] != "") print parts[n]
+        }
+      }
+    }
+  ' "$backlog" 2>/dev/null)"
+
+  find .hawp/work/active -maxdepth 1 -type f -name '*.md' ! -name 'README.md' | while IFS= read -r src; do
+    fname="$(basename "$src")"
+    matched=0
+    while IFS= read -r id; do
+      [ -n "$id" ] || continue
+      case "$fname" in
+        *"-${id}-"*|*"-${id}.md") matched=1; break ;;
+      esac
+    done <<< "$known_ids"
+    if [ "$matched" -eq 0 ] && [ -n "$known_links" ]; then
+      while IFS= read -r link_name; do
+        [ -n "$link_name" ] || continue
+        [ "$fname" = "$link_name" ] && { matched=1; break; }
+      done <<< "$known_links"
+    fi
+    [ "$matched" -eq 1 ] && continue
+    case "$fname" in
+      [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-*)
+        file_date="${fname:0:10}"
+        closed_dir="${file_date//-//}"
+        ;;
+      *)
+        closed_dir="$(date +%Y/%m/%d)"
+        ;;
+    esac
+    dest=".hawp/work/closed/$closed_dir/$fname"
+    if [ ! -e "$dest" ]; then
+      mkdir -p "$(dirname "$dest")"
+      mv "$src" "$dest"
+      echo "  retired (orphan): $fname"
+    fi
+  done
+}
+
 # --- 1. Migration: legacy hawp/ -> .hawp/ (preserves hawp/work/, hawp/usage/, hawp/status/) ---
 # Only acts on a real directory; symlinks named hawp are left untouched.
 if [ -d "hawp" ] && [ ! -L "hawp" ]; then
@@ -231,6 +300,9 @@ fi
 
 # --- 3d. Reconcile closed plans from backlog (active -> closed/...) ---
 reconcile_closed_plans_from_backlog
+
+# --- 3e. Retire orphan active items (no matching BACKLOG entry) ---
+retire_orphan_active_items
 
 # --- 4. Refresh .hawp/LICENSE and .hawp/kit/** (preserves .hawp/work/) ---
 rm -rf .hawp/kit
@@ -301,15 +373,17 @@ echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .haw
 7. If a legacy `hawp/`, `.hawp/usage/`, `.hawp/status/`, `.hawp/work/adrs/`, or `.hawp/work/status/` directory existed, confirm it has been migrated and its content preserved in `.hawp/work/active/`, `.hawp/work/decisions/YYYY/MM/DD/`, or `.hawp/work/notes/YYYY/MM/DD/` as appropriate.
 8. Confirm legacy `.hawp/work/adrs/` and `.hawp/work/status/` folders are no longer present after migration.
 9. Confirm done items were moved out of `.hawp/work/active/` using `.hawp/work/BACKLOG.md` Done rows and Active Work rows with `done`/`wont-fix` status (closed links when present, otherwise ID + Closed date fallback, then filename date prefix, then today), when source files existed and destination files were missing.
-10. Confirm legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/spec.md`, `.hawp/start-here.md`, `.hawp/authoring-patterns.md`) are gone — they live under `.hawp/kit/` now. Confirm no `.gitkeep` files remain under `.hawp/`.
-11. Review git diff before committing — pay special attention to anything inside `.hawp/work/` (expected changes are migration copies, legacy-folder removals, and optional active→closed reconciliations only).
-12. Run your repo checks (lint/test/typecheck) if your workflow requires it.
+10. Confirm any orphan active files (no matching BACKLOG ID or plan-link) were retired to `closed/...` when the backlog had at least one data row (see `retired (orphan):` lines above).
+11. Confirm legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/spec.md`, `.hawp/start-here.md`, `.hawp/authoring-patterns.md`) are gone — they live under `.hawp/kit/` now. Confirm no `.gitkeep` files remain under `.hawp/`.
+12. Review git diff before committing — pay special attention to anything inside `.hawp/work/` (expected changes are migration copies, legacy-folder removals, and optional active→closed reconciliations only).
+13. Run your repo checks (lint/test/typecheck) if your workflow requires it.
 
 ## Notes
 
 - This update flow is conservative and keeps local Copilot instruction customizations.
 - `.hawp/` is laid out flat at the repository root with `.hawp/LICENSE`, `.hawp/kit/`, and `.hawp/work/`.
 - `.hawp/work/` is repo-owned operating state and is never overwritten. Scaffold files are seeded only when missing, including `parked/README.md`. Closed-plan reconciliation may move files from `active/` to `closed/...` when Done rows in the backlog indicate the item is closed, and also when Active Work rows carry a `done` or `wont-fix` status. The closed date is resolved in order: backlog Closed column → filename `YYYY-MM-DD` prefix → today. Reconciliation prints each file it moves so results are visible in the update log.
+- Orphan active-item retirement moves `.hawp/work/active/` files with no matching BACKLOG entry to `closed/...`. The pass only runs when the backlog has at least one data row, so fresh installs and repos that do not yet use the backlog are unaffected. Each retired file is printed as `retired (orphan): <filename>`.
 - Legacy migrations use `cp -Rn` everywhere so any existing `.hawp/work/` file always wins.
 - Legacy `.hawp/work/adrs/` and `.hawp/work/status/` are removed only after a successful no-clobber migration copy.
 - Legacy root-level kit folders are removed only after `.hawp/kit/**` has been rewritten from source.
