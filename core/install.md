@@ -13,7 +13,7 @@ This script is **safe to re-run** and is **safe on a repo that already has `hawp
 - Migrate a legacy `.hawp/status/` folder (pre-`work/` layout) into `.hawp/work/notes/YYYY/MM/DD/` and promote `STATUS.md` to `.hawp/work/STATUS.md`.
 - Migrate an existing `.hawp/work/adrs/` into `.hawp/work/decisions/YYYY/MM/DD/`, then remove legacy `.hawp/work/adrs/`.
 - Migrate an existing `.hawp/work/status/` into `.hawp/work/active/`, then remove legacy `.hawp/work/status/`.
-- Reconcile closed plan files by using `.hawp/work/BACKLOG.md` Done rows to move matching `.hawp/work/active/*.md` files into `.hawp/work/closed/...` (prefer closed plan links; fall back to ID + Closed date).
+- Reconcile closed plan files by using `.hawp/work/BACKLOG.md` Done rows and `## Active Work` rows marked `done`/`wont-fix` to move matching `.hawp/work/active/*.md` files into `.hawp/work/closed/...` (prefer closed plan links; fall back to ID + Closed date, then filename date prefix, then today).
 - Retire orphan active items — files in `.hawp/work/active/` with no matching BACKLOG ID or plan-link — to `closed/YYYY/MM/DD/` using the filename date prefix. This pass only runs when the backlog has at least one data row.
 - Refresh `.hawp/kit/` and `.hawp/LICENSE` from the package.
 - Remove legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/spec.md`, `.hawp/start-here.md`, `.hawp/authoring-patterns.md`) after the new `.hawp/kit/` is in place.
@@ -54,18 +54,33 @@ reconcile_closed_plans_from_backlog() {
   backlog=".hawp/work/BACKLOG.md"
   [ -f "$backlog" ] || return 0
 
+  # Scans both ## Done rows (col5=Closed date) and ## Active Work rows where
+  # status signals completion (done/wont-fix), so reconciliation works even
+  # when items have not yet been reformatted into the Done section.
   awk -F'|' '
     function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
-    /^## Done/ { in_done=1; next }
-    /^## / && in_done { in_done=0 }
-    in_done && /^\|/ {
-      id = trim($2)
-      closed = trim($5)
-      plan = trim($6)
-      if (id == "" || id ~ /^-+$/) next
+    /^## Done/        { section="done";   next }
+    /^## Active/      { section="active"; next }
+    /^## /            { section="";       next }
+    section != "" && /^\|/ {
+      id   = trim($2)
+      col5 = trim($5)
+      col6 = trim($6)
+      if (id == "" || id ~ /^-+$/ || id == "ID") next
+      if (section == "done") {
+        closed = col5
+        plan   = col6
+      } else {
+        # Active Work: col5=Status — only reconcile when status signals done
+        if (col5 !~ /^(done|wont-fix)$/ && col5 !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) next
+        closed = (col5 ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) ? col5 : ""
+        plan   = col6
+      }
       link = ""
       if (match(plan, /\(([^)]+)\)/)) {
         link = substr(plan, RSTART + 1, RLENGTH - 2)
+      } else {
+        link = plan
       }
       print id "\t" closed "\t" link
     }
@@ -87,21 +102,39 @@ reconcile_closed_plans_from_backlog() {
       if [ -f "$src" ] && [ ! -e "$dest" ]; then
         mkdir -p "$(dirname "$dest")"
         mv "$src" "$dest"
+        echo "  reconciled (link): $(basename "$src")"
       fi
       continue
     fi
 
+    # Derive closed_dir: prefer explicit date from backlog, then from filename
+    # prefix, then fall back to today so nothing is silently skipped.
+    # Uses case-glob matching to stay portable (avoids grep -E / rg aliases).
     case "$closed" in
-      ????-??-??) closed_dir="${closed//-//}" ;;
-      *) continue ;;
+      [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) closed_dir="${closed//-//}" ;;
+      *) closed_dir="" ;;
     esac
 
     find .hawp/work/active -maxdepth 1 -type f -name "*-${id}-*.md" | while IFS= read -r src; do
       [ -n "$src" ] || continue
-      dest=".hawp/work/closed/$closed_dir/$(basename "$src")"
+      local_dir="$closed_dir"
+      if [ -z "$local_dir" ]; then
+        fname="$(basename "$src")"
+        case "$fname" in
+          [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-*)
+            file_date="${fname:0:10}"
+            local_dir="${file_date//-//}"
+            ;;
+          *)
+            local_dir="$(date +%Y/%m/%d)"
+            ;;
+        esac
+      fi
+      dest=".hawp/work/closed/$local_dir/$(basename "$src")"
       if [ ! -e "$dest" ]; then
         mkdir -p "$(dirname "$dest")"
         mv "$src" "$dest"
+        echo "  reconciled (id-fallback): $(basename "$src")"
       fi
     done
   done
@@ -286,10 +319,10 @@ rm -rf "$TMP_DIR"
 
 Quick usage after install:
 
-1. In `.github/copilot-instructions.md`, ensure HAWP references point to `.hawp/kit/start-here.md` and `.hawp/kit/templates/status-report.md`.
+1. In `.github/copilot-instructions.md`, ensure HAWP references point to `.hawp/kit/start-here.md` and `.hawp/kit/usage/status-report.md`.
 2. Start task shaping from `.hawp/kit/start-here.md`.
 3. Use `.hawp/LICENSE` as the installed Apache 2.0 license text for the HAWP kit content.
-4. Use `.hawp/kit/templates/status-report.md` for context-transfer artifacts.
+4. Use `.hawp/kit/usage/status-report.md` for context-transfer artifacts.
 5. A starter `.hawp/work/` area is scaffolded automatically: `STATUS.md`, `BACKLOG.md`, `README.md`, and `README.md` files in `active/`, `parked/`, `closed/`, `decisions/`, `evidence/`, and `notes/` (all seeded from the source repo's `.hawp/work/` scaffold). These are seeded once and owned by your repo from that point on.
 
 ## Scope Clarification
@@ -330,7 +363,7 @@ The installed `.hawp/` content also includes:
 - `.hawp/work/evidence/README.md` — evidence folder description
 - `.hawp/work/notes/README.md` — notes folder description
 
-`work/` files are seeded once and never overwritten on subsequent updates. When Done rows mark plans as closed, reconciliation may move matching files from `active/` to `closed/...`.
+`work/` files are seeded once and never overwritten on subsequent updates. Reconciliation may move matching files from `active/` to `closed/...` when Done rows indicate closure or when Active Work rows are marked `done`/`wont-fix`.
 
 ## Preconditions
 
@@ -343,7 +376,7 @@ If you are running the manual install procedure (below) instead of the one-shot 
 - `.hawp/kit/spec.md`
 - `.hawp/kit/authoring-patterns.md`
 - `.hawp/kit/start-here.md`
-- `.hawp/kit/templates/status-report.md`
+- `.hawp/kit/usage/status-report.md`
 
 ## Upgrading An Existing Install
 
@@ -354,7 +387,7 @@ If the target repo already has `hawp/` (legacy, no dot prefix) or `.hawp/` from 
 - **Pre-`work/` layout migration.** A legacy `.hawp/status/` folder at the kit root is copied to `.hawp/work/notes/YYYY/MM/DD/`; `STATUS.md` is promoted to `.hawp/work/STATUS.md`.
 - **Current `.hawp/work/adrs/` migration.** ADR files are copied to `.hawp/work/decisions/YYYY/MM/DD/`, then the legacy `.hawp/work/adrs/` folder is removed.
 - **Current `.hawp/work/status/` migration.** Plan files are copied to `.hawp/work/active/`, then the legacy `.hawp/work/status/` folder is removed.
-- **Closed-plan reconciliation.** The script reads `.hawp/work/BACKLOG.md` Done rows and moves matching files from `.hawp/work/active/` into `closed/...` when safe (source exists and destination does not). It prefers explicit closed plan links and falls back to ID + Closed date.
+- **Closed-plan reconciliation.** The script reads `.hawp/work/BACKLOG.md` Done rows and Active Work rows with `done`/`wont-fix` status and moves matching files from `.hawp/work/active/` into `closed/...` when safe (source exists and destination does not). It prefers explicit closed plan links and falls back to ID + Closed date, then filename date prefix, then today.
 - **Orphan active-item retirement.** After reconciliation, any `.hawp/work/active/` file (excluding `README.md`) with no matching BACKLOG ID or plan-link is retired to `closed/YYYY/MM/DD/` using the filename date prefix. This pass only runs when the backlog has at least one data row, so fresh installs are safe.
 - **`.hawp/kit/` refresh.** The `.hawp/kit/` directory is removed and rewritten from the package allowlist. Nothing under `.hawp/work/` is touched by this step.
 - **Legacy root-level kit cleanup.** After kit refresh, the script removes `.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, and `.hawp/usage`, plus stale top-level kit docs `.hawp/README.md`, `.hawp/spec.md`, `.hawp/start-here.md`, and `.hawp/authoring-patterns.md`. Their reusable content now lives under `.hawp/kit/...` and any repo-local items have already been migrated into `.hawp/work/`. Any `.gitkeep` files under `.hawp/` are also removed.
@@ -404,11 +437,11 @@ This repository uses HAWP as a lightweight workflow method.
 Follow the repo-local HAWP guidance in:
 
 - .hawp/kit/start-here.md
-- .hawp/kit/templates/status-report.md
+- .hawp/kit/usage/status-report.md
 
 Use .hawp/kit/start-here.md as the operating guide for how this repo applies HAWP in practice.
 
-Use .hawp/kit/templates/status-report.md when the user asks for a:
+Use .hawp/kit/usage/status-report.md when the user asks for a:
 
 - status report
 - checkpoint summary
@@ -439,7 +472,7 @@ Prefer compact, decision-useful outputs.
 After installation, confirm all of the following are true:
 
 - `.github/copilot-instructions.md` references `.hawp/kit/start-here.md`
-- `.github/copilot-instructions.md` references `.hawp/kit/templates/status-report.md`
+- `.github/copilot-instructions.md` references `.hawp/kit/usage/status-report.md`
 - `.github/instructions/hawp-intake.instructions.md` exists
 - `.github/instructions/hawp-docs-alignment.instructions.md` exists
 - `.github/instructions/intake.instructions.md` exists
@@ -460,7 +493,8 @@ After installation, confirm all of the following are true:
 - `.hawp/work/evidence/README.md` exists
 - `.hawp/work/notes/README.md` exists
 - legacy `.hawp/work/adrs/` and `.hawp/work/status/` folders are absent after migration
-- done items are not left behind in `.hawp/work/active/` when `.hawp/work/BACKLOG.md` Done rows provide reconcilable data (closed link or ID + Closed date)
+- done items are not left behind in `.hawp/work/active/` when `.hawp/work/BACKLOG.md` Done rows and Active Work `done`/`wont-fix` rows provide reconcilable data (closed link, then ID + Closed date, then filename date prefix, then today)
+- backlog plan links resolve to existing files (especially `closed/...` paths referenced from Done rows)
 - no temporary `.github/` overlay folder remains in the target repository unless the user is intentionally keeping the kit source there
 
 ## Failure Cases
