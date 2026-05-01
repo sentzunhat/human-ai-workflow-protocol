@@ -3,9 +3,9 @@ name: status-report
 description: Generate a HAWP-style status report for the current work
 ---
 
-Follow `.hawp/kit/templates/status-report.md`.
+Follow `.hawp/kit/usage/status-report.md`.
 
-If `.hawp/kit/usage/status-report.md` exists in this repository, treat it as an optional repo-local supplement.
+If `.hawp/kit/usage/status-report.md` is not present in this repository, fall back to `.hawp/kit/templates/status-report.md`.
 
 Using the current chat, workspace context, and any relevant open files, produce a status report that:
 
