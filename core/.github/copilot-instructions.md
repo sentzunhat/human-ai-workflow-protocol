@@ -2,10 +2,10 @@ This repository uses HAWP as a lightweight workflow method.
 
 Follow the repo-local HAWP guidance in:
 
-- .hawp/kit/START_HERE.md
+- .hawp/kit/start-here.md
 - .hawp/kit/templates/status-report.md
 
-Use .hawp/kit/START_HERE.md as the operating guide for how this repo applies HAWP in practice.
+Use .hawp/kit/start-here.md as the operating guide for how this repo applies HAWP in practice.
 
 Use .hawp/kit/templates/status-report.md when the user asks for a:
 

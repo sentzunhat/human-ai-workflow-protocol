@@ -15,7 +15,7 @@ This script is **safe to re-run** and is **safe on a repo that already has `hawp
 - Migrate an existing `.hawp/work/status/` into `.hawp/work/active/`, then remove legacy `.hawp/work/status/`.
 - Reconcile closed plan files by using `.hawp/work/BACKLOG.md` Done rows to move matching `.hawp/work/active/*.md` files into `.hawp/work/closed/...` (prefer closed plan links; fall back to ID + Closed date).
 - Refresh `.hawp/kit/` and `.hawp/LICENSE` from the package.
-- Remove legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, `.hawp/AUTHORING_PATTERNS.md`) after the new `.hawp/kit/` is in place.
+- Remove legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/spec.md`, `.hawp/start-here.md`, `.hawp/authoring-patterns.md`) after the new `.hawp/kit/` is in place.
 - Remove any `.gitkeep` files under `.hawp/` (the kit no longer ships placeholders).
 - Never overwrite existing files under `.hawp/work/` (BACKLOG, active items, parked items, decisions, evidence, notes). During reconciliation, eligible done plan files may be moved from `active/` to `closed/...`.
 - Seed missing `.hawp/work/` scaffold files only when they do not exist.
@@ -168,9 +168,9 @@ rm -rf .hawp/kit
 mkdir -p .hawp/kit
 cp "$SRC/.hawp/LICENSE" .hawp/
 cp "$SRC/.hawp/kit/README.md"             .hawp/kit/
-cp "$SRC/.hawp/kit/START_HERE.md"         .hawp/kit/
-cp "$SRC/.hawp/kit/SPEC.md"               .hawp/kit/
-cp "$SRC/.hawp/kit/AUTHORING_PATTERNS.md" .hawp/kit/
+cp "$SRC/.hawp/kit/start-here.md"         .hawp/kit/
+cp "$SRC/.hawp/kit/spec.md"               .hawp/kit/
+cp "$SRC/.hawp/kit/authoring-patterns.md" .hawp/kit/
 cp -R "$SRC/.hawp/kit/templates" .hawp/kit/
 cp -R "$SRC/.hawp/kit/patterns"  .hawp/kit/
 cp -R "$SRC/.hawp/kit/reviews"   .hawp/kit/
@@ -180,7 +180,7 @@ cp -R "$SRC/.hawp/kit/usage"     .hawp/kit/
 
 # --- 5. Cleanup: remove legacy root-level kit folders and stray docs (now under .hawp/kit/) ---
 rm -rf .hawp/templates .hawp/patterns .hawp/reviews .hawp/examples .hawp/types .hawp/usage
-rm -f .hawp/README.md .hawp/SPEC.md .hawp/START_HERE.md .hawp/AUTHORING_PATTERNS.md
+rm -f .hawp/README.md .hawp/spec.md .hawp/start-here.md .hawp/authoring-patterns.md
 
 # --- 5b. Cleanup: remove any .gitkeep files under .hawp/ (kit no longer ships them) ---
 find .hawp -name .gitkeep -type f -delete 2>/dev/null || true
@@ -216,8 +216,8 @@ rm -rf "$TMP_DIR"
 
 Quick usage after install:
 
-1. In `.github/copilot-instructions.md`, ensure HAWP references point to `.hawp/kit/START_HERE.md` and `.hawp/kit/templates/status-report.md`.
-2. Start task shaping from `.hawp/kit/START_HERE.md`.
+1. In `.github/copilot-instructions.md`, ensure HAWP references point to `.hawp/kit/start-here.md` and `.hawp/kit/templates/status-report.md`.
+2. Start task shaping from `.hawp/kit/start-here.md`.
 3. Use `.hawp/LICENSE` as the installed Apache 2.0 license text for the HAWP kit content.
 4. Use `.hawp/kit/templates/status-report.md` for context-transfer artifacts.
 5. A starter `.hawp/work/` area is scaffolded automatically: `STATUS.md`, `BACKLOG.md`, `README.md`, and `README.md` files in `active/`, `parked/`, `closed/`, `decisions/`, `evidence/`, and `notes/` (all seeded from the source repo's `.hawp/work/` scaffold). These are seeded once and owned by your repo from that point on.
@@ -245,7 +245,7 @@ Install these files into the target repository's `.github/` folder:
 - `prompts/hawp-conservative-docs-drift-cleanup.prompt.md`
 - `prompts/intake.prompt.md`
 
-These files assume the target repository resolves HAWP content from repo-root paths such as `.hawp/kit/START_HERE.md`.
+These files assume the target repository resolves HAWP content from repo-root paths such as `.hawp/kit/start-here.md`.
 
 The installed `.hawp/` content also includes:
 
@@ -270,9 +270,9 @@ If you are running the manual install procedure (below) instead of the one-shot 
 
 - `.hawp/LICENSE`
 - `.hawp/kit/README.md`
-- `.hawp/kit/SPEC.md`
-- `.hawp/kit/AUTHORING_PATTERNS.md`
-- `.hawp/kit/START_HERE.md`
+- `.hawp/kit/spec.md`
+- `.hawp/kit/authoring-patterns.md`
+- `.hawp/kit/start-here.md`
 - `.hawp/kit/templates/status-report.md`
 
 ## Upgrading An Existing Install
@@ -286,7 +286,7 @@ If the target repo already has `hawp/` (legacy, no dot prefix) or `.hawp/` from 
 - **Current `.hawp/work/status/` migration.** Plan files are copied to `.hawp/work/active/`, then the legacy `.hawp/work/status/` folder is removed.
 - **Closed-plan reconciliation.** The script reads `.hawp/work/BACKLOG.md` Done rows and moves matching files from `.hawp/work/active/` into `closed/...` when safe (source exists and destination does not). It prefers explicit closed plan links and falls back to ID + Closed date.
 - **`.hawp/kit/` refresh.** The `.hawp/kit/` directory is removed and rewritten from the package allowlist. Nothing under `.hawp/work/` is touched by this step.
-- **Legacy root-level kit cleanup.** After kit refresh, the script removes `.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, and `.hawp/usage`, plus stale top-level kit docs `.hawp/README.md`, `.hawp/SPEC.md`, `.hawp/START_HERE.md`, and `.hawp/AUTHORING_PATTERNS.md`. Their reusable content now lives under `.hawp/kit/...` and any repo-local items have already been migrated into `.hawp/work/`. Any `.gitkeep` files under `.hawp/` are also removed.
+- **Legacy root-level kit cleanup.** After kit refresh, the script removes `.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, and `.hawp/usage`, plus stale top-level kit docs `.hawp/README.md`, `.hawp/spec.md`, `.hawp/start-here.md`, and `.hawp/authoring-patterns.md`. Their reusable content now lives under `.hawp/kit/...` and any repo-local items have already been migrated into `.hawp/work/`. Any `.gitkeep` files under `.hawp/` are also removed.
 - **`.hawp/work/` preservation.** Existing `.hawp/work/` files are never overwritten. Scaffold seeders only create missing files; reconciliation may move already-closed plans from `active/` to `closed/...`.
 - **`.github/` overlay refresh.** Instruction and prompt files are HAWP-managed and are always replaced. Stale legacy-named overlay files matching `human-ai-workflow-protocol-*.instructions.md` and `human-ai-workflow-protocol-*.prompt.md` are removed. `.github/copilot-instructions.md` is seeded only when missing — if it already exists, merge the HAWP block manually.
 
@@ -332,10 +332,10 @@ This repository uses HAWP as a lightweight workflow method.
 
 Follow the repo-local HAWP guidance in:
 
-- .hawp/kit/START_HERE.md
+- .hawp/kit/start-here.md
 - .hawp/kit/templates/status-report.md
 
-Use .hawp/kit/START_HERE.md as the operating guide for how this repo applies HAWP in practice.
+Use .hawp/kit/start-here.md as the operating guide for how this repo applies HAWP in practice.
 
 Use .hawp/kit/templates/status-report.md when the user asks for a:
 
@@ -367,7 +367,7 @@ Prefer compact, decision-useful outputs.
 
 After installation, confirm all of the following are true:
 
-- `.github/copilot-instructions.md` references `.hawp/kit/START_HERE.md`
+- `.github/copilot-instructions.md` references `.hawp/kit/start-here.md`
 - `.github/copilot-instructions.md` references `.hawp/kit/templates/status-report.md`
 - `.github/instructions/hawp-intake.instructions.md` exists
 - `.github/instructions/hawp-docs-alignment.instructions.md` exists
