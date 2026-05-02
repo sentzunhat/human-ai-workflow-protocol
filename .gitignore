@@ -12,8 +12,8 @@ dist/
 *.local.md
 *.private.md
 
-# Scratch space inside .work/ (non-markdown artifacts)
-.work/tmp/
-.work/logs/
-.work/**/private/
-.work/**/local/
+# Scratch space inside .hawp/work/ (non-markdown artifacts)
+.hawp/work/tmp/
+.hawp/work/logs/
+.hawp/work/**/private/
+.hawp/work/**/local/

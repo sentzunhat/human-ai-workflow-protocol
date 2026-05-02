@@ -1,17 +1,19 @@
-# `.work/` — Repo-Local Work State
+# `.hawp/work/` — Repo-Local Work State
 
 This folder holds this repository's HAWP operating state: the backlog, decisions, plan files, notes, and verification artifacts.
 
 ## Layout
 
 ```
-work/
-	BACKLOG.md          — single source of truth for all work items
+
+.hawp/work/
+	BACKLOG.md          — compact active index (not permanent history)
 	active/             — open bugs and tasks (flat, easy to find)
 	parked/             — deferred or icebox items (not active, not closed)
 	closed/YYYY/MM/DD/  — archived closed work, filed by date
 	decisions/YYYY/MM/DD/ — ADRs and significant project decisions
 	evidence/YYYY/MM/DD/  — verification artifacts (only when real)
+	status/YYYY/MM/DD/  — checkpoint summaries and manager reviews
 	notes/YYYY/MM/DD/   — session notes, scratch pads, migration records
 ```
 
