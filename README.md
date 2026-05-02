@@ -58,11 +58,11 @@ Publication-safety guidance lives under `.hawp/kit/reviews/`.
 - `core/update.md` — update script + migration notes
 - `core/.hawp/kit/` — the reusable kit (docs, templates, patterns, reviews, examples, types, usage guides)
 - `core/.hawp/work/` — clean install scaffold seeded into downstream `.hawp/work/` (READMEs + starter `BACKLOG.md`)
-- `.work/` — this repo's own operating state: backlog, active work, parked work, closed work, decisions, evidence, notes (not installed downstream)
+- `.hawp/work/` — this repo's own operating state: backlog, active work, parked work, closed work, decisions, evidence, notes (project-owned; not installed downstream)
 - `.github/` — Copilot instructions + prompt pack (intake, status, handoff, docs alignment)
 - `benchmark/` — optional HAWP vs no-HAWP comparison harness
 
-Downstream installs flatten `core/.hawp/` to repo-root `.hawp/`. The install allowlist seeds a clean `.hawp/work/` from `core/.hawp/work/` (READMEs + starter `BACKLOG.md`, including `parked/README.md`); this repo's own operating state lives at root `.work/` and never ships.
+Downstream installs flatten `core/.hawp/` to repo-root `.hawp/`. Install/update seed target `.hawp/work/` only from `core/.hawp/work/` scaffold files (READMEs + starter `BACKLOG.md`, including `parked/README.md`) and never overwrite project-owned target work records. This source repo's own operating state lives at repo-root `.hawp/work/` and is never part of downstream install/update payload.
 
 ## License
 

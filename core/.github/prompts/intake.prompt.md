@@ -8,7 +8,13 @@ You are running the work intake loop for this repository.
 Read `kit/usage/intake-workflow.md` for the full operating loop before proceeding.
 Read `work/BACKLOG.md` to find the next available backlog ID.
 
-Adapt paths to the local layout: `.hawp/work/` in downstream projects, root `.work/` in the HAWP source repo.
+Adapt paths to the local layout: `.hawp/work/` in downstream projects, repo-root `.hawp/work/` in the HAWP source repo.
+For this repo, write project work to `.hawp/work/`; do not write repo work into `core/.hawp/work/`.
+Treat `core/.hawp/work/` as downstream scaffold source only, and `core/.hawp/kit/` as reusable package source only.
+Do not append completed work endlessly to `BACKLOG.md`; move closed work to `.hawp/work/closed/YYYY/MM/DD/` and keep the backlog compact.
+When `BACKLOG.md` has many Done rows, create a work item titled `Compact BACKLOG.md and archive closed work.` before adding more Done entries.
+Apply `.github/instructions/hawp-backlog-alignment.instructions.md` while handling backlog updates.
+Use `.github/prompts/hawp-backlog-alignment.prompt.md` when the user asks for explicit backlog review or compaction.
 
 ## Your job
 

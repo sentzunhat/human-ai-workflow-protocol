@@ -4,6 +4,8 @@ description: Generate a HAWP-style status report for the current work
 ---
 
 Follow `.hawp/kit/usage/status-report.md`.
+When reporting on backlog/workflow health, apply `.github/instructions/hawp-backlog-alignment.instructions.md`.
+For explicit backlog review/compaction requests, use `.github/prompts/hawp-backlog-alignment.prompt.md`.
 
 If `.hawp/kit/usage/status-report.md` is not present in this repository, fall back to `.hawp/kit/templates/status-report.md`.
 

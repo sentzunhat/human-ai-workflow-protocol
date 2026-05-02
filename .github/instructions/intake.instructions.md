@@ -18,7 +18,7 @@ Treat any of these as a work intake:
 
 ## Operating Rules
 
-1. **Check the backlog first.** Read `BACKLOG.md` (in the active `.work/` or `.hawp/work/` path) before starting any work.
+1. **Check the backlog first.** Read `BACKLOG.md` in `.hawp/work/` before starting any work.
    Assign the next sequential ID. Never start on an ID already marked `in-progress`.
 
 2. **Write a plan file** for all non-trivial work before implementing.
@@ -33,6 +33,18 @@ Treat any of these as a work intake:
 
 6. **Separate evidence from inference** in every plan. Never present an inference as a confirmed fact.
 
+7. **For this repo, write project work to `.hawp/work/`.** Do not write repo work into `core/.hawp/work/`.
+
+8. **Treat `core/.hawp/work/` as downstream scaffold source only.**
+
+9. **Treat `core/.hawp/kit/` as reusable package source only.**
+
+10. **Keep `BACKLOG.md` compact.** Do not append completed work endlessly; move closed work to `.hawp/work/closed/YYYY/MM/DD/`.
+
+11. **When Done rows grow large, create a compaction item first.** Add a work item titled `Compact BACKLOG.md and archive closed work.` before adding more Done rows.
+
+12. **Apply backlog alignment guardrails.** Follow `.github/instructions/hawp-backlog-alignment.instructions.md`; use `.github/prompts/hawp-backlog-alignment.prompt.md` for explicit review/compaction requests.
+
 ## Source Resolution
 
 For full loop detail, read in order:
@@ -41,4 +53,4 @@ For full loop detail, read in order:
 2. `work/BACKLOG.md`
 3. `kit/templates/intake-plan.md`
 
-Adapt paths to match the local layout: root `.work/` in the HAWP source repo, `.hawp/work/` in downstream projects.
+Adapt paths to match the local layout: repo-root `.hawp/work/` in the HAWP source repo, `.hawp/work/` in downstream projects.

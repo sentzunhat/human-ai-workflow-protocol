@@ -16,17 +16,24 @@ Use core/.hawp/kit/usage/status-report.md when the user asks for a:
 
 Saved status reports belong in:
 
-- .work/active/
+- .hawp/work/status/YYYY/MM/DD/
 
 For bug reports, tasks, and improvement work in this repo:
 
 - Follow the intake loop in core/.hawp/kit/usage/intake-workflow.md
-- Track all open and completed work in .work/BACKLOG.md
+- Track all open and completed work in .hawp/work/BACKLOG.md
 - Write plan files using core/.hawp/kit/templates/intake-plan.md
-- Active plan files go in .work/active/
-- Deferred items can go in .work/parked/
-- Close by moving to .work/closed/YYYY/MM/DD/
-- ADRs and decisions go in .work/decisions/YYYY/MM/DD/
+- Active plan files go in .hawp/work/active/
+- Deferred items can go in .hawp/work/parked/
+- Close by moving to .hawp/work/closed/YYYY/MM/DD/
+- ADRs and decisions go in .hawp/work/decisions/YYYY/MM/DD/
+- For this repo, write project work to .hawp/work/. Do not write repo work into core/.hawp/work/.
+- Treat core/.hawp/work/ as downstream scaffold source only.
+- Treat core/.hawp/kit/ as reusable package source only.
+- Do not append completed work endlessly to BACKLOG.md. Move closed work to .hawp/work/closed/YYYY/MM/DD/ and keep BACKLOG.md compact.
+- When BACKLOG.md has many Done rows, create a work item titled "Compact BACKLOG.md and archive closed work." before adding more Done entries.
+- Follow backlog compaction guardrails in .github/instructions/hawp-backlog-alignment.instructions.md.
+- Use .github/prompts/hawp-backlog-alignment.prompt.md when asked to review or compact a backlog.
 
 Keep the repo-local HAWP layer lean.
 

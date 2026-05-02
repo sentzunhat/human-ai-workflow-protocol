@@ -1,6 +1,7 @@
 # Backlog
 
-Single source of truth for all open bugs, tasks, and improvement work in this repository.
+Active index for current open work in this repository.
+Closed history belongs under `work/closed/YYYY/MM/DD/` and should not accumulate forever here.
 Each row links to its plan file when one exists.
 
 ---
@@ -27,9 +28,20 @@ _No active work._
 
 ---
 
-## Done
+## Recently Closed
 
-_No completed work yet._
+Keep this section short (for example last 5-10 items or last 14-30 days).
+
+_No recently closed items._
+
+---
+
+## Archive
+
+- Closed work: `work/closed/`
+- Status reports: `work/status/`
+- Evidence: `work/evidence/`
+- Decisions: `work/decisions/`
 
 ---
 
@@ -39,4 +51,5 @@ _No completed work yet._
 - Each item gets one plan file under `work/active/` — no two agents on the same ID.
 - Deferred items can move to `work/parked/` without being closed.
 - On close, move the plan file to `work/closed/YYYY/MM/DD/`.
+- Keep Recently Closed capped; do not append completed history forever.
 - Work started outside this loop should still get a row added for visibility.

@@ -16,9 +16,13 @@ Use .hawp/kit/usage/status-report.md when the user asks for a:
 
 Saved status reports belong in:
 
-- .hawp/work/active/
+- .hawp/work/status/YYYY/MM/DD/
 
 For bugs/tasks, track in .hawp/work/BACKLOG.md. Active plan files go in .hawp/work/active/. Deferred items can live in .hawp/work/parked/. Close by moving to .hawp/work/closed/YYYY/MM/DD/.
+Do not append completed work endlessly to BACKLOG.md. Move closed work to .hawp/work/closed/YYYY/MM/DD/ and keep BACKLOG.md compact.
+When BACKLOG.md has many Done rows, create a work item titled "Compact BACKLOG.md and archive closed work." before adding more Done entries.
+Follow backlog compaction guardrails in .github/instructions/hawp-backlog-alignment.instructions.md.
+Use .github/prompts/hawp-backlog-alignment.prompt.md when asked to review or compact a backlog.
 
 Keep the repo-local HAWP layer lean.
 
