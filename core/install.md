@@ -24,6 +24,13 @@ This script is **safe to re-run** and is **safe on a repo that already has `hawp
 - Remove stale `.github/instructions/human-ai-workflow-protocol-*.instructions.md` and `.github/prompts/human-ai-workflow-protocol-*.prompt.md` overlay files.
 - Seed `.github/copilot-instructions.md` only if it does not already exist.
 
+Trust boundary notes:
+
+- Install copies target `.hawp/` content from package source `core/.hawp/`.
+- Install seeds target `.hawp/work/` only from `core/.hawp/work/` scaffold files.
+- Install never copies the source repository's repo-root `.hawp/work/` operating state into downstream repositories.
+- Existing target `.hawp/work/` files are project-owned and must not be overwritten.
+
 ```bash
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
@@ -289,7 +296,7 @@ rm -f .hawp/README.md .hawp/spec.md .hawp/start-here.md .hawp/authoring-patterns
 find .hawp -name .gitkeep -type f -delete 2>/dev/null || true
 
 # --- 6. Seed .hawp/work/ scaffold (only when missing; never overwrites) ---
-mkdir -p .hawp/work/active .hawp/work/parked .hawp/work/closed .hawp/work/decisions .hawp/work/evidence .hawp/work/notes
+mkdir -p .hawp/work/active .hawp/work/parked .hawp/work/closed .hawp/work/decisions .hawp/work/evidence .hawp/work/status .hawp/work/notes
 copy_file_no_clobber "$SRC/.hawp/work/README.md"               ".hawp/work/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/STATUS.md"               ".hawp/work/STATUS.md"
 copy_file_no_clobber "$SRC/.hawp/work/BACKLOG.md"              ".hawp/work/BACKLOG.md"
@@ -298,6 +305,7 @@ copy_file_no_clobber "$SRC/.hawp/work/parked/README.md"        ".hawp/work/parke
 copy_file_no_clobber "$SRC/.hawp/work/closed/README.md"        ".hawp/work/closed/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/decisions/README.md"     ".hawp/work/decisions/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/evidence/README.md"      ".hawp/work/evidence/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/status/README.md"        ".hawp/work/status/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/notes/README.md"         ".hawp/work/notes/README.md"
 
 # --- 7. Install Copilot overlay into .github/ ---
@@ -323,13 +331,14 @@ Quick usage after install:
 2. Start task shaping from `.hawp/kit/start-here.md`.
 3. Use `.hawp/LICENSE` as the installed Apache 2.0 license text for the HAWP kit content.
 4. Use `.hawp/kit/usage/status-report.md` for context-transfer artifacts.
-5. A starter `.hawp/work/` area is scaffolded automatically: `STATUS.md`, `BACKLOG.md`, `README.md`, and `README.md` files in `active/`, `parked/`, `closed/`, `decisions/`, `evidence/`, and `notes/` (all seeded from the source repo's `.hawp/work/` scaffold). These are seeded once and owned by your repo from that point on.
+5. A starter `.hawp/work/` area is scaffolded automatically: `STATUS.md`, `BACKLOG.md`, `README.md`, and `README.md` files in `active/`, `parked/`, `closed/`, `decisions/`, `evidence/`, `status/`, and `notes/` (all seeded from the source repo's `.hawp/work/` scaffold). These are seeded once and owned by your repo from that point on.
+6. Backlog alignment guidance is shipped in `.github/instructions/hawp-backlog-alignment.instructions.md` and `.github/prompts/hawp-backlog-alignment.prompt.md`.
 
 ## Scope Clarification
 
 This document covers the full HAWP installation: `.hawp/` at the repo root, including `.hawp/LICENSE`, plus the GitHub Copilot overlay under `.github/`.
 
-Install boundary: the source repository's own operating state lives at root `.work/` (active work, parked work, closed work, decisions, evidence, real BACKLOG) and is never installed downstream. The install seeds a clean `work/` scaffold — `README.md`, `STATUS.md`, a starter `BACKLOG.md`, and `README.md` files in `active/`, `parked/`, `closed/`, `decisions/`, `evidence/`, and `notes/` — sourced from `core/.hawp/work/` in the kit repo. Downstream repos never receive the HAWP source repo's own backlog items or decision records.
+Install boundary: the source repository's own operating state lives at repo-root `.hawp/work/` (active work, parked work, closed work, decisions, evidence, real BACKLOG) and is never installed downstream. The install seeds a clean target `work/` scaffold — `README.md`, `STATUS.md`, a starter `BACKLOG.md`, and `README.md` files in `active/`, `parked/`, `closed/`, `decisions/`, `evidence/`, `status/`, and `notes/` — sourced only from `core/.hawp/work/` in the package source. Downstream repos never receive the HAWP source repo's own backlog items or decision records.
 
 The `benchmark/` folder is optional reference material and is not installed by this script.
 
@@ -339,9 +348,11 @@ Install these files into the target repository's `.github/` folder:
 
 - `copilot-instructions.md`
 - `instructions/hawp-intake.instructions.md`
+- `instructions/hawp-backlog-alignment.instructions.md`
 - `instructions/hawp-docs-alignment.instructions.md`
 - `instructions/intake.instructions.md`
 - `prompts/hawp-status-report.prompt.md`
+- `prompts/hawp-backlog-alignment.prompt.md`
 - `prompts/hawp-intent-first-handoff.prompt.md`
 - `prompts/hawp-docs-alignment-deterministic.prompt.md`
 - `prompts/hawp-docs-alignment-simplicity.prompt.md`
@@ -361,6 +372,7 @@ The installed `.hawp/` content also includes:
 - `.hawp/work/closed/README.md` — closed work archive description
 - `.hawp/work/decisions/README.md` — decisions/ADR folder description
 - `.hawp/work/evidence/README.md` — evidence folder description
+- `.hawp/work/status/README.md` — status/checkpoint folder description
 - `.hawp/work/notes/README.md` — notes folder description
 
 `work/` files are seeded once and never overwritten on subsequent updates. Reconciliation may move matching files from `active/` to `closed/...` when Done rows indicate closure or when Active Work rows are marked `done`/`wont-fix`.
@@ -410,7 +422,7 @@ If you only want to refresh kit content from upstream (no install steps), use [`
 
 Reinstalling is safe. The procedure is the same as a fresh install with the following notes:
 
-- Steps 3 and 4 (intake instructions and status-report prompt): always replace the existing files. They are entirely HAWP-managed. No user content will be lost.
+- Steps 3 and 4 (overlay instructions/prompts, including backlog alignment files): always replace the existing files. They are entirely HAWP-managed. No user content will be lost.
 - Step 7 (copilot-instructions.md merge): if the file was previously merged, re-check that the HAWP block still matches the current package version. If the HAWP block content has changed, update it in place without disturbing unrelated repo instructions.
 - After reinstalling, re-run the Validation Checklist to confirm the installed state is correct.
 
@@ -474,9 +486,11 @@ After installation, confirm all of the following are true:
 - `.github/copilot-instructions.md` references `.hawp/kit/start-here.md`
 - `.github/copilot-instructions.md` references `.hawp/kit/usage/status-report.md`
 - `.github/instructions/hawp-intake.instructions.md` exists
+- `.github/instructions/hawp-backlog-alignment.instructions.md` exists
 - `.github/instructions/hawp-docs-alignment.instructions.md` exists
 - `.github/instructions/intake.instructions.md` exists
 - `.github/prompts/hawp-status-report.prompt.md` exists
+- `.github/prompts/hawp-backlog-alignment.prompt.md` exists
 - `.github/prompts/hawp-intent-first-handoff.prompt.md` exists
 - `.github/prompts/hawp-docs-alignment-deterministic.prompt.md` exists
 - `.github/prompts/hawp-docs-alignment-simplicity.prompt.md` exists
@@ -491,6 +505,7 @@ After installation, confirm all of the following are true:
 - `.hawp/work/closed/README.md` exists
 - `.hawp/work/decisions/README.md` exists
 - `.hawp/work/evidence/README.md` exists
+- `.hawp/work/status/README.md` exists
 - `.hawp/work/notes/README.md` exists
 - legacy `.hawp/work/adrs/` and `.hawp/work/status/` folders are absent after migration
 - done items are not left behind in `.hawp/work/active/` when `.hawp/work/BACKLOG.md` Done rows and Active Work `done`/`wont-fix` rows provide reconcilable data (closed link, then ID + Closed date, then filename date prefix, then today)

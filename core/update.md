@@ -11,7 +11,7 @@ This refreshes only HAWP-managed files:
 - `.github/instructions/*.instructions.md`
 - `.github/prompts/*.prompt.md`
 
-**Update boundary.** The source repository's own operating state lives at root `.work/` (real BACKLOG, ADRs, status plans, evidence) and is never refreshed by this flow. Only `.hawp/LICENSE`, `.hawp/kit/`, the `.github/` overlay, and missing `.hawp/work/` scaffold files are touched. Existing `.hawp/work/**` files are never overwritten; as housekeeping, files in `.hawp/work/active/` that are already listed as `Done` in `.hawp/work/BACKLOG.md` can be moved to `closed/...` using Done-row metadata (plan link when usable, otherwise ID + Closed date fallback).
+**Update boundary.** The source repository's own operating state lives at repo-root `.hawp/work/` (real BACKLOG, ADRs, status plans, evidence) and is never copied to downstream repositories by this flow. Only `.hawp/LICENSE`, `.hawp/kit/`, the `.github/` overlay, and missing `.hawp/work/` scaffold files are touched in the target repository. Existing `.hawp/work/**` files are never overwritten; as housekeeping, files in `.hawp/work/active/` that are already listed as `Done` in `.hawp/work/BACKLOG.md` can be moved to `closed/...` using Done-row metadata (plan link when usable, otherwise ID + Closed date fallback).
 
 **Migration support.** This flow safely upgrades repos coming from older HAWP layouts:
 
@@ -26,7 +26,7 @@ This refreshes only HAWP-managed files:
 - Any `.gitkeep` files under `.hawp/` are removed (the kit no longer ships placeholder files).
 - Stale legacy overlay files named `.github/instructions/human-ai-workflow-protocol-*.instructions.md` and `.github/prompts/human-ai-workflow-protocol-*.prompt.md` are removed; current overlays use the `hawp-*` and `intake.*` naming.
 - `.github/copilot-instructions.md` is never overwritten.
-- Missing `.hawp/work/` scaffold files are seeded only when absent (`README.md`, `STATUS.md`, `BACKLOG.md`, `active/README.md`, `parked/README.md`, `closed/README.md`, `decisions/README.md`, `evidence/README.md`, `notes/README.md`).
+- Missing `.hawp/work/` scaffold files are seeded only when absent (`README.md`, `STATUS.md`, `BACKLOG.md`, `active/README.md`, `parked/README.md`, `closed/README.md`, `decisions/README.md`, `evidence/README.md`, `status/README.md`, `notes/README.md`).
 - Files in `.hawp/work/active/` with no matching entry in `.hawp/work/BACKLOG.md` (no ID pattern match and no plan-link match) are automatically retired to `closed/YYYY/MM/DD/` using the filename date prefix. This pass only runs when the backlog has at least one data row, so fresh installs are unaffected.
 
 ## Prompt You Can Paste Into GitHub Copilot Chat
@@ -329,7 +329,7 @@ rm -f .hawp/README.md .hawp/spec.md .hawp/start-here.md .hawp/authoring-patterns
 find .hawp -name .gitkeep -type f -delete 2>/dev/null || true
 
 # --- 6. Seed .hawp/work/ scaffold (only when missing; never overwrites) ---
-mkdir -p .hawp/work/active .hawp/work/parked .hawp/work/closed .hawp/work/decisions .hawp/work/evidence .hawp/work/notes
+mkdir -p .hawp/work/active .hawp/work/parked .hawp/work/closed .hawp/work/decisions .hawp/work/evidence .hawp/work/status .hawp/work/notes
 copy_file_no_clobber "$SRC/.hawp/work/README.md"               ".hawp/work/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/STATUS.md"               ".hawp/work/STATUS.md"
 copy_file_no_clobber "$SRC/.hawp/work/BACKLOG.md"              ".hawp/work/BACKLOG.md"
@@ -338,6 +338,7 @@ copy_file_no_clobber "$SRC/.hawp/work/parked/README.md"        ".hawp/work/parke
 copy_file_no_clobber "$SRC/.hawp/work/closed/README.md"        ".hawp/work/closed/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/decisions/README.md"     ".hawp/work/decisions/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/evidence/README.md"      ".hawp/work/evidence/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/status/README.md"        ".hawp/work/status/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/notes/README.md"         ".hawp/work/notes/README.md"
 
 # --- 7. Refresh overlay files (HAWP-managed; safe to overwrite) ---
@@ -368,16 +369,17 @@ echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .haw
 2. Confirm `.hawp/LICENSE` exists and contains the Apache 2.0 text.
 3. Confirm expected prompt files exist under `.github/prompts/` — including `intake.prompt.md`.
 4. Confirm expected instruction files exist under `.github/instructions/` — including `intake.instructions.md`.
-5. Confirm no `human-ai-workflow-protocol-*` named files remain under `.github/instructions/` or `.github/prompts/`.
-6. Confirm `.hawp/work/parked/README.md` exists when the scaffold is seeded.
-7. If a legacy `hawp/`, `.hawp/usage/`, `.hawp/status/`, `.hawp/work/adrs/`, or `.hawp/work/status/` directory existed, confirm it has been migrated and its content preserved in `.hawp/work/active/`, `.hawp/work/decisions/YYYY/MM/DD/`, or `.hawp/work/notes/YYYY/MM/DD/` as appropriate.
-8. Confirm legacy `.hawp/work/adrs/` and `.hawp/work/status/` folders are no longer present after migration.
-9. Confirm done items were moved out of `.hawp/work/active/` using `.hawp/work/BACKLOG.md` Done rows and Active Work rows with `done`/`wont-fix` status (closed links when present, otherwise ID + Closed date fallback, then filename date prefix, then today), when source files existed and destination files were missing.
-10. Confirm any orphan active files (no matching BACKLOG ID or plan-link) were retired to `closed/...` when the backlog had at least one data row (see `retired (orphan):` lines above).
-11. Confirm legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/spec.md`, `.hawp/start-here.md`, `.hawp/authoring-patterns.md`) are gone — they live under `.hawp/kit/` now. Confirm no `.gitkeep` files remain under `.hawp/`.
-12. Confirm backlog plan links resolve correctly after reconciliation (especially Done-row links to `closed/...` files and no stale `active/...` link targets for closed items).
-13. Review git diff before committing — pay special attention to anything inside `.hawp/work/` (expected changes are migration copies, legacy-folder removals, and optional active→closed reconciliations only).
-14. Run your repo checks (lint/test/typecheck) if your workflow requires it.
+5. Confirm backlog alignment overlay files exist: `.github/instructions/hawp-backlog-alignment.instructions.md` and `.github/prompts/hawp-backlog-alignment.prompt.md`.
+6. Confirm no `human-ai-workflow-protocol-*` named files remain under `.github/instructions/` or `.github/prompts/`.
+7. Confirm `.hawp/work/parked/README.md` exists when the scaffold is seeded.
+8. If a legacy `hawp/`, `.hawp/usage/`, `.hawp/status/`, `.hawp/work/adrs/`, or `.hawp/work/status/` directory existed, confirm it has been migrated and its content preserved in `.hawp/work/active/`, `.hawp/work/decisions/YYYY/MM/DD/`, or `.hawp/work/notes/YYYY/MM/DD/` as appropriate.
+9. Confirm legacy `.hawp/work/adrs/` and `.hawp/work/status/` folders are no longer present after migration.
+10. Confirm done items were moved out of `.hawp/work/active/` using `.hawp/work/BACKLOG.md` Done rows and Active Work rows with `done`/`wont-fix` status (closed links when present, otherwise ID + Closed date fallback, then filename date prefix, then today), when source files existed and destination files were missing.
+11. Confirm any orphan active files (no matching BACKLOG ID or plan-link) were retired to `closed/...` when the backlog had at least one data row (see `retired (orphan):` lines above).
+12. Confirm legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/spec.md`, `.hawp/start-here.md`, `.hawp/authoring-patterns.md`) are gone — they live under `.hawp/kit/` now. Confirm no `.gitkeep` files remain under `.hawp/`.
+13. Confirm backlog plan links resolve correctly after reconciliation (especially Done-row links to `closed/...` files and no stale `active/...` link targets for closed items).
+14. Review git diff before committing — pay special attention to anything inside `.hawp/work/` (expected changes are migration copies, legacy-folder removals, and optional active→closed reconciliations only).
+15. Run your repo checks (lint/test/typecheck) if your workflow requires it.
 
 ## Notes
 
