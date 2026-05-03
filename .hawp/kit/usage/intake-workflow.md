@@ -120,7 +120,7 @@ A status report is saved if:
 
 ## Parallel Safety
 
-- The backlog is the single source of truth — check it before starting a new item
+- The backlog is the active coordination index - check it before starting a new item
   - Each work item has one plan file in `work/active/` — never two agents working the same ID
 
 ---
