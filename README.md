@@ -63,6 +63,7 @@ Publication-safety guidance lives under `.hawp/kit/reviews/`.
 - `benchmark/` — optional HAWP vs no-HAWP comparison harness
 
 Downstream installs flatten `core/.hawp/` to repo-root `.hawp/`. Install/update seed target `.hawp/work/` only from `core/.hawp/work/` scaffold files (READMEs + starter `BACKLOG.md`, including `parked/README.md`) and never overwrite project-owned target work records. This source repo's own operating state lives at repo-root `.hawp/work/` and is never part of downstream install/update payload.
+Legacy root `.work/` is retired in this repo and kept only as historical references inside archived records.
 
 ## License
 
