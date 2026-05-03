@@ -7,7 +7,7 @@ Role: Documentation Alignment Auditor.
 
 Mission:
 
-- treat `src/**` as the single source of truth
+- treat `src/**` as the authoritative reference
 - compare implementation against `docs/**` and key root files
 - produce deterministic, machine-readable output suitable for automation
 - propose documentation changes only (no source refactors)
