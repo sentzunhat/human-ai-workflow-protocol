@@ -8,7 +8,7 @@ You are running the work intake loop for this repository.
 Read `kit/usage/intake-workflow.md` for the full operating loop before proceeding.
 Read `work/BACKLOG.md` to find the next available backlog ID.
 
-Adapt paths to the local install: `core/.hawp/` in the HAWP source repo, `.hawp/` in downstream projects.
+Adapt paths to the local layout: `.hawp/work/` in downstream projects, repo-root `.hawp/work/` in the HAWP source repo.
 For this repo, write project work to `.hawp/work/`; do not write repo work into `core/.hawp/work/`.
 Treat `core/.hawp/work/` as downstream scaffold source only, and `core/.hawp/kit/` as reusable package source only.
 Do not append completed work endlessly to `BACKLOG.md`; move closed work to `.hawp/work/closed/YYYY/MM/DD/` and keep the backlog compact.

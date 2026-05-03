@@ -53,4 +53,4 @@ For full loop detail, read in order:
 2. `work/BACKLOG.md`
 3. `kit/templates/intake-plan.md`
 
-Adapt paths to match the local layout: repo-root `.hawp/work/` in the HAWP source repo, `.hawp/work/` in downstream projects.
+Adapt paths to match the local layout: `.hawp/work/` in downstream projects, repo-root `.hawp/work/` in the HAWP source repo.

@@ -285,8 +285,9 @@ cp -R "$SRC/.hawp/kit/templates" .hawp/kit/
 cp -R "$SRC/.hawp/kit/patterns"  .hawp/kit/
 cp -R "$SRC/.hawp/kit/reviews"   .hawp/kit/
 cp -R "$SRC/.hawp/kit/examples"  .hawp/kit/
-cp -R "$SRC/.hawp/kit/types"     .hawp/kit/
-cp -R "$SRC/.hawp/kit/usage"     .hawp/kit/
+cp -R "$SRC/.hawp/kit/types"      .hawp/kit/
+cp -R "$SRC/.hawp/kit/usage"      .hawp/kit/
+cp -R "$SRC/.hawp/kit/references" .hawp/kit/
 
 # --- 5. Cleanup: remove legacy root-level kit folders and stray docs (now under .hawp/kit/) ---
 rm -rf .hawp/templates .hawp/patterns .hawp/reviews .hawp/examples .hawp/types .hawp/usage

@@ -18,7 +18,7 @@ Check whether `.hawp/work/BACKLOG.md` follows compact active-index rules.
 
 Reference:
 
-- `core/.hawp/kit/references/backlog-alignment.md` (canonical policy)
+- `.hawp/kit/references/backlog-alignment.md` (canonical policy)
 
 ## Review checks
 

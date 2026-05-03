@@ -19,4 +19,4 @@ Rules:
 
 Reference:
 
-- `core/.hawp/kit/references/backlog-alignment.md` (canonical policy)
+- `.hawp/kit/references/backlog-alignment.md` (canonical policy)

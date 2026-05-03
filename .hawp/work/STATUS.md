@@ -8,4 +8,5 @@ _No active work._
 
 ## Last Closed
 
-_None yet._
+TASK-008 — Compact BACKLOG.md and archive closed work — closed 2026-05-02
+[plan](closed/2026/05/02/TASK-008.md)
