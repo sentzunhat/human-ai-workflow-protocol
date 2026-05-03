@@ -15,7 +15,7 @@ This script is **safe to re-run** and is **safe on a repo that already has `hawp
 - Migrate an existing `.hawp/work/status/` into `.hawp/work/active/`, then remove legacy `.hawp/work/status/`.
 - Reconcile closed plan files by using `.hawp/work/BACKLOG.md` Done rows and `## Active Work` rows marked `done`/`wont-fix` to move matching `.hawp/work/active/*.md` files into `.hawp/work/closed/...` (prefer closed plan links; fall back to ID + Closed date, then filename date prefix, then today).
 - Retire orphan active items — files in `.hawp/work/active/` with no matching BACKLOG ID or plan-link — to `closed/YYYY/MM/DD/` using the filename date prefix. This pass only runs when the backlog has at least one data row.
-- Refresh `.hawp/kit/` and `.hawp/LICENSE` from the package.
+- Refresh `.hawp/kit/` (including `.hawp/kit/references/`) and `.hawp/LICENSE` from the package.
 - Remove legacy root-level kit folders (`.hawp/templates`, `.hawp/patterns`, `.hawp/reviews`, `.hawp/examples`, `.hawp/types`, `.hawp/usage`) and stale top-level kit docs (`.hawp/README.md`, `.hawp/spec.md`, `.hawp/start-here.md`, `.hawp/authoring-patterns.md`) after the new `.hawp/kit/` is in place.
 - Remove any `.gitkeep` files under `.hawp/` (the kit no longer ships placeholders).
 - Never overwrite existing files under `.hawp/work/` (BACKLOG, active items, parked items, decisions, evidence, notes). During reconciliation, eligible done plan files may be moved from `active/` to `closed/...`.

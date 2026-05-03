@@ -7,7 +7,7 @@ Use this when you already installed HAWP in a target repository and want the lat
 This refreshes only HAWP-managed files:
 
 - `.hawp/LICENSE`
-- `.hawp/kit/**`
+- `.hawp/kit/**` (including `.hawp/kit/references/**`)
 - `.github/instructions/*.instructions.md`
 - `.github/prompts/*.prompt.md`
 
