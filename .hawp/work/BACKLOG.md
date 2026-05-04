@@ -39,6 +39,7 @@ Limited to the last 10 items.
 
 | ID       | Type        | Title                                                                 | Closed     | Detail                                                                                     |
 | -------- | ----------- | --------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------ |
+| TASK-010 | task        | remove legacy root .work cleanup and alignment verification           | 2026-05-03 | [plan](closed/2026/05/03/TASK-010.md)                                                      |
 | TASK-009 | task        | fix active main-branch HAWP alignment drift                           | 2026-05-02 | [plan](closed/2026/05/02/TASK-009.md)                                                      |
 | TASK-008 | task        | Compact BACKLOG.md and archive closed work.                           | 2026-05-02 | [plan](closed/2026/05/02/TASK-008.md)                                                      |
 | TASK-007 | improvement | expose backlog alignment as agent-facing prompt and instruction       | 2026-05-02 | [plan](closed/2026/05/02/TASK-007.md)                                                      |
@@ -48,7 +49,6 @@ Limited to the last 10 items.
 | BUG-004  | bug         | reconcile done active plans using backlog IDs and closed dates        | 2026-05-01 | [plan](closed/2026/05/01/2026-05-01-bug-004-reconcile-done-active-plans-by-id-and-date.md) |
 | BUG-003  | bug         | reconcile closed plans during update/install flow and docs sync       | 2026-05-01 | [plan](closed/2026/05/01/2026-05-01-bug-003-closed-plan-reconciliation-and-doc-sync.md)    |
 | BUG-002  | bug         | update flow cleans up legacy work folders after migration             | 2026-05-01 | [plan](closed/2026/05/01/2026-05-01-bug-002-update-flow-clean-legacy-work-folders.md)      |
-| ADR-004  | decision    | Date-based work folder structure + safe migration                     | 2026-05-01 | [decision](decisions/2026/05/01/ADR-004-date-based-work-folder-structure.md)               |
 
 ---
 
