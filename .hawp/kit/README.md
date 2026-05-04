@@ -76,6 +76,7 @@ HAWP is intentionally:
 - types/shape.ts: locked TypeScript shape for v0.1.
 - authoring-patterns.md: compact guidance for recurring task types using the five required fields and optional checkpoint.
 - templates/: optional starter templates for micro tasks, standard shaping, intake/bug planning, status reports, and audits.
+- references/: canonical policy references for recurring operational passes (for example backlog alignment and docs alignment).
 - patterns/: optional quick-reference patterns for evidence discipline and non-findings.
 - reviews/: optional review artifacts for HAWP maintenance and scope checks.
 - examples/: concrete examples of applying the shape to real requests.
