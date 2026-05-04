@@ -14,6 +14,8 @@ Use .hawp/kit/usage/status-report.md when the user asks for a:
 - context transfer summary
 - second-brain review artifact
 
+Use .github/prompts/hawp-change-review-and-reference-sync.prompt.md when the user asks to review recent changes and synchronize HAWP/docs references.
+
 Saved status reports belong in:
 
 - .hawp/work/status/YYYY/MM/DD/
