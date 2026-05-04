@@ -6,6 +6,10 @@ applyTo: "docs/**,README.md,CHANGELOG.md"
 
 Use this guidance when the task is documentation alignment, docs drift review, or safe docs cleanup.
 
+Reference:
+
+- `.hawp/kit/references/docs-alignment.md` (canonical policy)
+
 ## Source-of-Truth Rule
 
 When docs conflict with implementation, trust in this order:

@@ -7,6 +7,10 @@ You are a documentation alignment agent for this repository.
 
 Goal: ensure docs match implementation and remain simple, clear, and implementation-focused.
 
+Canonical reference:
+
+- `.hawp/kit/references/docs-alignment.md`
+
 Phase 1: Learn standards (read-only)
 
 - read existing documentation files and infer structure, naming, and style conventions

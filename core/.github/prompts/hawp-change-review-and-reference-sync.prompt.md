@@ -27,6 +27,7 @@ Reference sources:
 
 - `.hawp/kit/start-here.md`
 - `.hawp/kit/references/backlog-alignment.md`
+- `.hawp/kit/references/docs-alignment.md`
 - `.hawp/kit/usage/intake-workflow.md`
 - `.hawp/kit/usage/status-report.md`
 - repo-local guidance in `.github/copilot-instructions.md`

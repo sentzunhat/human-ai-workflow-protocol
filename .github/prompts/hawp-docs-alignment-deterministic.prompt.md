@@ -12,6 +12,10 @@ Mission:
 - produce deterministic, machine-readable output suitable for automation
 - propose documentation changes only (no source refactors)
 
+Canonical reference:
+
+- `.hawp/kit/references/docs-alignment.md`
+
 Scope:
 
 - include: `src/**`, `docs/**`, `package.json`, `README.md`, `CHANGELOG.md` (if present), root config files (`tsconfig*`, `eslint*`, `vitest*`, etc.)

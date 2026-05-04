@@ -14,6 +14,10 @@ Mission:
 - apply only minimal, low-risk changes
 - separate safe actions from deferred items
 
+Canonical reference:
+
+- `.hawp/kit/references/docs-alignment.md`
+
 Working order:
 
 1. learn repository context first (read-only)
