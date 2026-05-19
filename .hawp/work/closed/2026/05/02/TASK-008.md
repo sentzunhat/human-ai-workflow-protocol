@@ -123,3 +123,7 @@ Completed TASK-008 by compacting BACKLOG.md, capping Recently Closed, aligning a
 - [x] Implemented
 - [x] Verified
 - [x] Closed
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

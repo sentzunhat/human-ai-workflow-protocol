@@ -19,7 +19,8 @@ Define the official compact-backlog model for HAWP projects.
 Use this structure as the default operating model:
 
 - `.hawp/work/BACKLOG.md` - compact active index only
-- `.hawp/work/active/` - open work item detail files
+- `.hawp/work/active/` - open work item detail files (actively moving)
+- `.hawp/work/parked/` - intentionally paused work item detail files (move back to `active/` to resume)
 - `.hawp/work/closed/YYYY/MM/DD/` - completed work item detail files, archived by close date
 - `.hawp/work/status/YYYY/MM/DD/` - daily or checkpoint status summaries
 - `.hawp/work/evidence/YYYY/MM/DD/` - verification notes, command output summaries, screenshots, smoke-test notes, review evidence

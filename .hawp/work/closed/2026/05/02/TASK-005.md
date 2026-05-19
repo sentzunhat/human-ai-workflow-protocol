@@ -105,3 +105,7 @@ Created `core/BACKLOG_ALIGNMENT.md` with a compact backlog policy that defines a
 - [x] Implemented
 - [x] Verified
 - [x] Closed
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

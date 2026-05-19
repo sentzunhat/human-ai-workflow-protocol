@@ -131,3 +131,7 @@ Added dedicated backlog-alignment instruction and prompt files in both root and 
 - [x] Implemented
 - [x] Verified
 - [x] Closed
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

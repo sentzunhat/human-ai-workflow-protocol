@@ -4,11 +4,24 @@ HAWP outputs should distinguish what is known from what is inferred.
 
 This is an optional usage aid. It does not expand the HAWP core shape.
 
+## Principle
+
+Documentation should stay linked to current, verifiable evidence and be clearly
+separated from future intent.
+
+## Applies To
+
+- Status and checkpoint summaries
+- Planning and implementation notes
+- Standards, boundaries, and architecture guidance
+- Verification and audit-oriented artifacts
+
 ## Evidence Levels
 
 ### Direct Evidence
 
-Observed directly in code, docs, tests, logs, screenshots, user-provided files, or explicit user instructions.
+Observed directly in code, docs, tests, logs, screenshots, user-provided files,
+or explicit user instructions.
 
 ### Inference
 
@@ -25,6 +38,22 @@ Something that cannot be claimed from available evidence.
 ## Rule
 
 Do not present inference, assumption, or unknowns as direct evidence.
+
+## Documentation Guidance
+
+- State implemented and verifiable behavior as direct evidence.
+- Label conclusions as inference when they are not directly observed.
+- Label unverified working beliefs as assumptions.
+- Call out unknowns instead of filling gaps with certainty.
+- Keep planned follow-up work separate from current-state reporting.
+- Link claims to concrete evidence artifacts whenever available.
+
+## Does Not Include
+
+- Framework-specific implementation assumptions
+- Product or project roadmaps presented as current behavior
+- Runtime claims that cannot be tied to direct evidence
+- Internal-only details that are out of scope for the artifact
 
 ## Security Reminder
 

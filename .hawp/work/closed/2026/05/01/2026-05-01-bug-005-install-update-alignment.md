@@ -86,3 +86,15 @@ Keep changes conservative and idempotent. Preserve no-clobber behavior and only 
 - [x] Implemented
 - [x] Verified
 - [x] Closed
+
+## Outcome
+
+_Legacy normalization scaffold added._
+
+## Verification
+
+_Legacy normalization scaffold added._
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

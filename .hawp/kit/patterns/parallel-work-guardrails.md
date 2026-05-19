@@ -5,12 +5,14 @@ Goal: reduce conflicting edits and unclear ownership while keeping HAWP lean.
 
 ## Guardrails
 
-1. Check active work first in `work/BACKLOG.md` before planning or implementing.
+1. Check active work first in `.hawp/work/BACKLOG.md` before planning or implementing.
 2. Use one backlog ID and one plan file per item.
 3. Record owner and overlapping files in the plan before implementation.
 4. If overlap touches the same file as another in-progress item, default to hold.
 5. Only proceed with overlapping edits when the user explicitly approves.
 6. Keep coordination notes in the plan file, not in a separate lock system.
+7. Treat unrelated working-tree changes as lane boundaries and leave them untouched.
+8. In path-sensitive work, list overlapping files as exact repo-relative paths from repository root; basename-only lists are unsafe.
 
 ## Minimal Coordination Block
 
@@ -37,3 +39,5 @@ Explain whether another active item touches the same files.
 - Set `Can implement now: only after approval` in TASK-015 plan and wait.
 
 This pattern is markdown-first and file-first. It does not add runtime locking, tooling, or schema changes.
+
+If basename/path collapse happens twice on the same task, stop and restart with a fresh path-locked pass.

@@ -69,12 +69,12 @@ When writing a status report, capture:
 - help wanted
 - suggested next step
 
-Save reports over time in [../../work/active](../../work/active) (open) or `../../work/closed/YYYY/MM/DD/` (archived).
+Save reports over time in [../../work/status](../../work/status) using the dated layout `../../work/status/YYYY/MM/DD/`.
 
 ## Intake Workflow
 
 When using HAWP for active task or bug tracking, [intake-workflow.md](intake-workflow.md) describes the operating loop: intake → analyze → plan → review gate → implement → verify → close.
-Track open and completed work in [../../work/BACKLOG.md](../../work/BACKLOG.md). Use [../templates/intake-plan.md](../templates/intake-plan.md) for plan files saved to `../../work/active/`.
+Track active and recently closed coordination in [../../work/BACKLOG.md](../../work/BACKLOG.md), and keep full history in `../../work/closed/YYYY/MM/DD/`. Use [../templates/intake-plan.md](../templates/intake-plan.md) for plan files saved to `../../work/active/`.
 This is optional. Not all HAWP usage requires tracked work items.
 
 ## Guardrail ADR

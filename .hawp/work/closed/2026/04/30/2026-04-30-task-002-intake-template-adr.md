@@ -1,3 +1,5 @@
+**Backlog ID:** TASK-002
+
 ## ADR: Intake Template Refinement for Bug/Task Work
 
 ### Title
@@ -179,3 +181,11 @@ Confirmed unchanged by this implementation:
 3. Apply minimal navigation links in core/.hawp/START_HERE.md and core/.hawp/README.md, and README.md only if needed.
 4. Run a docs consistency pass to ensure optional/non-runtime language is preserved.
 5. Stop at review gate and request approval before any further scope expansion.
+
+## Outcome
+
+_Legacy normalization scaffold added._
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

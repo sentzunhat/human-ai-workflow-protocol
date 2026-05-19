@@ -1,5 +1,7 @@
 # TASK-004 — Root README UX refactor
 
+**Backlog ID:** TASK-004
+
 ## Input
 
 User: "refactor the root readme for better ux ... simple install and update steps and some context of the project ... dont refactor too much ... as simple as using install or update readmes you can get started as simple as copy and paste".
@@ -40,3 +42,15 @@ Low. Docs-only change in a single file. No code paths touched. Reversible by git
 
 - Evidence: `README.md`, `core/install.md`, `core/update.md` already read in this session.
 - Inference: a shorter README improves agent + human discoverability. Not measured.
+
+## Outcome
+
+_Legacy normalization scaffold added._
+
+## Verification
+
+_Legacy normalization scaffold added._
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

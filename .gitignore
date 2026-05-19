@@ -8,6 +8,14 @@ Thumbs.db
 *.tsbuildinfo
 dist/
 
+# Node.js artifacts
+node_modules/
+librarian/node_modules/
+librarian/build-src-esm/
+librarian/coverage/
+librarian/.tsx-cache/
+librarian/.turbo/
+
 # Portable private/local markers (any file in the repo)
 *.local.md
 *.private.md

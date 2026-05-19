@@ -80,7 +80,7 @@ HAWP is intentionally:
 - patterns/: optional quick-reference patterns for evidence discipline and non-findings.
 - reviews/: optional review artifacts for HAWP maintenance and scope checks.
 - examples/: concrete examples of applying the shape to real requests.
-- usage/: reusable workflow guides (`INIT.md`, `INTAKE_WORKFLOW.md`, `STATUS_REPORT.md`) that downstream installs can copy and adopt.
+- usage/: reusable workflow guides (`init.md`, `intake-workflow.md`, `status-report.md`) that downstream installs can copy and adopt.
 - reviews/project-review-checklist.md: review checklist for improving HAWP without expanding core scope.
 - reviews/public-safety-checklist.md and reviews/publication-safety-guidelines.md: publication-safety guidance for keeping the public core generic and privacy-safe.
 
@@ -99,7 +99,7 @@ Non-goals: no rules engine, no checkpoint schema, no runtime orchestration frame
 
 HAWP audit quality is improved through authoring guidance and examples, not schema changes.
 
-`AUTHORING_PATTERNS.md` contains the authoritative guidance for evidence discipline, audit taxonomy,
+`authoring-patterns.md` contains the authoritative guidance for evidence discipline, audit taxonomy,
 confidence labeling, standard proof requirements, non-finding format, anti-overreach boundaries,
 and the closing operational sequence.
 

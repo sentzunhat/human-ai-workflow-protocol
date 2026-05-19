@@ -111,3 +111,15 @@ Verification performed:
 - [x] Implemented
 - [x] Verified
 - [x] Closed
+
+## Outcome
+
+_Legacy normalization scaffold added._
+
+## Verification
+
+_Legacy normalization scaffold added._
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

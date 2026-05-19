@@ -1,5 +1,7 @@
 # Bug: update.md does not migrate old `.hawp/usage` layouts into `.hawp/work`
 
+**Backlog ID:** BUG-001
+
 - ID: BUG-001
 - Date: 2026-04-30
 - Status: Approved (user-provided intake spec)
@@ -80,3 +82,15 @@ copy_file_no_clobber() { src="$1"; dest="$2"; [ -f "$src" ] && [ ! -f "$dest" ] 
 - [x] Implemented
 - [x] Verified (Cases C + E migration; Case B re-run preserves `.hawp/work/BACKLOG.md`)
 - [x] Closed
+
+## Outcome
+
+_Legacy normalization scaffold added._
+
+## Verification
+
+_Legacy normalization scaffold added._
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

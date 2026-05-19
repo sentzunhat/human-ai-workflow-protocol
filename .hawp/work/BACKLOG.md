@@ -22,7 +22,10 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 ## Active Work
 
-_No active work._
+| UUID | Legacy ID | Type | Title | Status | Owner | Plan File | Updated |
+| ---- | --------- | ---- | ----- | ------ | ----- | --------- | ------- |
+
+_(empty)_
 
 ---
 
@@ -31,24 +34,26 @@ _No active work._
 | ID  | Type | Title | Reason | Detail | Updated |
 | --- | ---- | ----- | ------ | ------ | ------- |
 
+_(empty)_
+
 ---
 
 ## Recently Closed
 
 Limited to the last 10 items.
 
-| ID       | Type        | Title                                                                 | Closed     | Detail                                                                                     |
-| -------- | ----------- | --------------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------ |
-| TASK-010 | task        | remove legacy root .work cleanup and alignment verification           | 2026-05-03 | [plan](closed/2026/05/03/TASK-010.md)                                                      |
-| TASK-009 | task        | fix active main-branch HAWP alignment drift                           | 2026-05-02 | [plan](closed/2026/05/02/TASK-009.md)                                                      |
-| TASK-008 | task        | Compact BACKLOG.md and archive closed work.                           | 2026-05-02 | [plan](closed/2026/05/02/TASK-008.md)                                                      |
-| TASK-007 | improvement | expose backlog alignment as agent-facing prompt and instruction       | 2026-05-02 | [plan](closed/2026/05/02/TASK-007.md)                                                      |
-| TASK-006 | improvement | dogfood repo work state under repo-root .hawp/work                    | 2026-05-02 | [plan](closed/2026/05/02/TASK-006.md)                                                      |
-| TASK-005 | improvement | add core backlog alignment guidance for compact active management     | 2026-05-02 | [plan](closed/2026/05/02/TASK-005.md)                                                      |
-| BUG-005  | bug         | align install/update flow with validated migration and reconciliation | 2026-05-01 | [plan](closed/2026/05/01/2026-05-01-bug-005-install-update-alignment.md)                   |
-| BUG-004  | bug         | reconcile done active plans using backlog IDs and closed dates        | 2026-05-01 | [plan](closed/2026/05/01/2026-05-01-bug-004-reconcile-done-active-plans-by-id-and-date.md) |
-| BUG-003  | bug         | reconcile closed plans during update/install flow and docs sync       | 2026-05-01 | [plan](closed/2026/05/01/2026-05-01-bug-003-closed-plan-reconciliation-and-doc-sync.md)    |
-| BUG-002  | bug         | update flow cleans up legacy work folders after migration             | 2026-05-01 | [plan](closed/2026/05/01/2026-05-01-bug-002-update-flow-clean-legacy-work-folders.md)      |
+| ID       | Type             | Title                                                                     | Closed     | Detail                                |
+| -------- | ---------------- | ------------------------------------------------------------------------- | ---------- | ------------------------------------- |
+| TASK-068 | improvement      | Automate closed-record section scaffolding and date-folder reconciliation | 2026-05-17 | [plan](closed/2026/05/17/TASK-068.md) |
+| TASK-067 | task             | Audit and align all closed work items to current close-record standards   | 2026-05-17 | [plan](closed/2026/05/17/TASK-067.md) |
+| TASK-066 | task             | Normalize remaining legacy closed records flagged by validator warnings   | 2026-05-17 | [plan](closed/2026/05/17/TASK-066.md) |
+| TASK-065 | task             | Verify GitHub-hosted distribution auto-sync run (TASK-036 evidence gap)   | 2026-05-15 | [plan](closed/2026/05/15/TASK-065.md) |
+| TASK-064 | task             | Compact BACKLOG.md and archive closed work                                | 2026-05-15 | [plan](closed/2026/05/15/TASK-064.md) |
+| TASK-054 | task             | Review shared standards and absorb public-safe guidance                   | 2026-05-15 | [plan](closed/2026/05/15/TASK-054.md) |
+| TASK-053 | task             | Audit and consolidate opinionated standards folder layout                 | 2026-05-15 | [plan](closed/2026/05/15/TASK-053.md) |
+| TASK-060 | governance       | Handle project-specific standards boundaries (Tekit/Mictlan/Zacatl)       | 2026-05-15 | [plan](closed/2026/05/15/TASK-060.md) |
+| TASK-059 | governance       | Review and retain private standards lane boundaries                       | 2026-05-15 | [plan](closed/2026/05/15/TASK-059.md) |
+| TASK-063 | standards-update | Extract generalized standards from Zacatl adaptation candidates           | 2026-05-15 | [plan](closed/2026/05/15/TASK-063.md) |
 
 ---
 
@@ -59,8 +64,6 @@ Limited to the last 10 items.
 - Evidence: `evidence/`
 - Decisions: `decisions/`
 
----
-
 ## Notes
 
 - Check this file before starting any new item.
@@ -70,3 +73,7 @@ Limited to the last 10 items.
 - Each item gets one plan file — no two agents on the same ID.
 - Work started outside this loop should still get a row added for visibility.
 - Keep `Recently Closed` capped; archive history lives in `closed/`.
+
+## Future Improvements
+
+- **UUID-based work item IDs** (TASK-013): Move from sequential type-prefixed IDs (TASK-001, BUG-001) to UUIDs for parallel-safe work item creation. Depends on validation script (TASK-012) to surface all ID references in workflow.

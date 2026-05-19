@@ -1,5 +1,7 @@
 # ADR: Restructure `.hawp` into `kit/` and `work/`
 
+**Backlog ID:** TASK-003
+
 - ID: TASK-003
 - Date: 2026-04-30
 - Status: Approved (user pre-approved Option B in intake prompt)
@@ -225,3 +227,11 @@ Goal: track folder shape (so the structure is copyable from git) without `.gitke
 8. Update intra-repo cross-references in moved files (`work/INIT.md`, `work/INTAKE_WORKFLOW.md`, etc.).
 9. Run grep verification.
 10. Mark backlog row `done`.
+
+## Outcome
+
+_Legacy normalization scaffold added._
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

@@ -37,6 +37,10 @@ output: |
 - **constraints** — state what must not happen as clearly as what must.
 - **output** — describe the artifact form, not just "an answer."
 - **checkpoint** — omit unless you need a handoff or pause anchor.
+- For path-sensitive work, reference files using exact repo-relative paths from repository root.
+- Basename-only file mentions are unsafe for path-sensitive work unless the file is truly at repository root and explicitly marked as such.
+- Capture repo-root proof (`pwd`, `git rev-parse --show-toplevel`, `git rev-parse --show-prefix`, `git status --short`) before path-sensitive edits.
+- Do not persist machine-local absolute paths in artifacts; if proof output includes host-local prefixes, redact only the machine-local prefix with a placeholder such as `<repo-root-abs>`.
 
 ---
 
@@ -63,22 +67,69 @@ output: |
 
 HAWP is a **shaping protocol**, not a runtime. Better results come from stronger authoring, not more fields. The shape is locked to v0.1; quality improvements are achieved through guidance and examples.
 
-## Optional Resources
+## Next Resources
 
-- Templates: [templates/micro-hawp.md](templates/micro-hawp.md), [templates/standard-hawp.md](templates/standard-hawp.md), [templates/work-intake.md](templates/work-intake.md), [templates/bug-plan.md](templates/bug-plan.md), [templates/status-report.md](templates/status-report.md), [templates/intent-first-handoff.md](templates/intent-first-handoff.md), [templates/audit-report.md](templates/audit-report.md)
-- Workflow guides: [usage/INIT.md](usage/INIT.md), [usage/INTAKE_WORKFLOW.md](usage/INTAKE_WORKFLOW.md), [usage/STATUS_REPORT.md](usage/STATUS_REPORT.md)
-- Patterns: [patterns/evidence-discipline.md](patterns/evidence-discipline.md), [patterns/non-findings.md](patterns/non-findings.md), [patterns/parallel-work-guardrails.md](patterns/parallel-work-guardrails.md)
-- References: [references/backlog-alignment.md](references/backlog-alignment.md), [references/docs-alignment.md](references/docs-alignment.md)
-- Review checklist: [reviews/project-review-checklist.md](reviews/project-review-checklist.md)
-- Authoring guidance: [AUTHORING_PATTERNS.md](AUTHORING_PATTERNS.md)
+### Learning & Examples
 
-Templates and patterns are optional usage aids. They do not expand the HAWP core protocol.
+- **Authoring guidance**: [authoring-patterns.md](authoring-patterns.md) — guidance for recurring task types
+- **Real examples**: [examples/](examples/) — seven concrete filled-in HAWP shapes
+- **Core spec**: [spec.md](spec.md) — v0.1 semantics, pipeline, and non-goals
+
+### Workflow Guides (Recommended Order)
+
+1. **[usage/init.md](usage/init.md)** — one-time setup for a new project
+2. **[usage/intake-workflow.md](usage/intake-workflow.md)** — intake loop for structured bug/task handling
+3. **[usage/status-report.md](usage/status-report.md)** — context handoff and session continuity
+
+### Templates by Task Type
+
+**Start here for shaping your first task:**
+
+- **Micro** (constraints, ~1 page): [templates/micro-hawp.md](templates/micro-hawp.md)
+- **Standard** (full form, 2–3 pages): [templates/standard-hawp.md](templates/standard-hawp.md)
+- **Work intake** (bug reports, features): [templates/work-intake.md](templates/work-intake.md)
+- **Bug plan** (troubleshooting + fix): [templates/bug-plan.md](templates/bug-plan.md)
+- **Handoff** (context transfer): [templates/intent-first-handoff.md](templates/intent-first-handoff.md)
+- **Status report** (checkpoint/review): [templates/status-report.md](templates/status-report.md)
+- **Audit** (review findings): [templates/audit-report.md](templates/audit-report.md)
+
+### Reference & Patterns
+
+**Quality disciplines:**
+
+- [patterns/evidence-discipline.md](patterns/evidence-discipline.md) — separate fact from inference
+- [patterns/non-findings.md](patterns/non-findings.md) — how to report absence of findings
+- [patterns/parallel-work-guardrails.md](patterns/parallel-work-guardrails.md) — multi-agent coordination
+
+**Operational references:**
+
+- [references/backlog-alignment.md](references/backlog-alignment.md) — backlog format, scope, closures
+- [references/docs-alignment.md](references/docs-alignment.md) — keeping docs sync'd with reality
+- [references/work-item-file-tracking.md](references/work-item-file-tracking.md) — file ownership in multi-agent work
+- [references/install-update-safety.md](references/install-update-safety.md) — kit distribution and maintenance
+
+### Standards & Domain Guidance
+
+**Code and architecture:**
+
+- [standards/guidelines/](standards/guidelines/) — general architecture, code style, documentation, testing, security, git
+- [standards/nodejs/](standards/nodejs/) — Node.js-specific structure and patterns
+- [standards/service-design/](standards/service-design/) — layered composition, handler responsibilities, dependency patterns
+
+**Database & persistence:**
+
+- [standards/database/](standards/database/) — SQL, NoSQL, and schema design patterns
+
+**Patterns library:**
+
+- [standards/patterns/](standards/patterns/) — cross-cutting concerns (evidence discipline, non-findings, parallel work)
+
+### Quality & Safety
+
+- [reviews/project-review-checklist.md](reviews/project-review-checklist.md) — HAWP maintenance quality gate
+- [reviews/public-safety-checklist.md](reviews/public-safety-checklist.md) — safety gate for public distribution
+- [reviews/publication-safety-guidelines.md](reviews/publication-safety-guidelines.md) — privacy and generic-ness guidance
 
 ---
 
-### Notes for Clarity
-
-- **Formatting**: The template is enclosed in triple backticks for code-block rendering.
-- **Consistency**: All fields use the same structure (`field: |`).
-- **Grammar**: Minor adjustments for clarity (e.g., "achieved through" instead of "handled through").
-- **Readability**: Line breaks and spacing improve scanning for users.
+**Note:** Templates and patterns are optional. Better shaping comes from clearer authoring, not more fields. The core shape is locked; improvements flow through guidance, examples, and discipline.

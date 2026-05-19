@@ -1,0 +1,127 @@
+# Repo-root proof
+$ pwd
+<repo-root-abs>
+
+$ git rev-parse --show-toplevel
+<repo-root-abs>
+
+$ git rev-parse --show-prefix
+
+
+$ git status --short
+ M .github/copilot-instructions.md
+ M .hawp/work/BACKLOG.md
+ M .hawp/work/active/TASK-026.md
+ M .hawp/work/active/TASK-027.md
+ M .hawp/work/active/TASK-031.md
+ M .hawp/work/active/TASK-032.md
+ M .hawp/work/active/TASK-037.md
+ D .hawp/work/active/TASK-038.md
+ M .hawp/work/active/TASK-040.md
+ D .hawp/work/active/TASK-041.md
+?? .hawp/work/active/TASK-047.md
+?? .hawp/work/active/TASK-048.md
+?? .hawp/work/closed/2026/05/14/TASK-027.md
+?? .hawp/work/closed/2026/05/14/TASK-040.md
+?? .hawp/work/evidence/2026/05/14/
+
+# Validation run
+$ npm --prefix librarian run validate:workflow
+
+> @hawp/librarian@0.0.0 validate:workflow
+> tsx scripts/validate-hawp-workflow/index.ts
+
+Validating: <repo-root-abs>/.hawp/work
+
+======================================================================
+HAWP Workflow Validation Report
+======================================================================
+
+1. BACKLOG CONSISTENCY
+----------------------------------------------------------------------
+
+Active Work (8 items):
+  Found: 8/8
+
+Recently Closed (10 items):
+  Found: 10/10
+
+Orphaned Files (in active/ without backlog row):
+  ✗ active/TASK-027.md
+  ✗ active/TASK-040.md
+
+Blocked / Parked (2 items):
+  Found: 2/2
+
+Orphaned Files (in parked/ without backlog row):
+  (none)
+
+2. CLOSED TASK COMPLETENESS
+----------------------------------------------------------------------
+
+Checking 46 plan file(s):
+  Outcome: 31/46
+  Verification: 38/46
+  Close Checklist: 26/46
+
+  [FAIL] Untyped closed files (2026-05-10 or later — must be tracked):
+    0007: current file without TASK-/BUG-style ID  (2026-05-12) [source: <repo-root-abs>/.hawp/work/closed/2026/05/12/0007.md]
+    0008-CLARIFICATION-exact-paths: current file without TASK-/BUG-style ID  (2026-05-12) [source: <repo-root-abs>/.hawp/work/closed/2026/05/12/0008-CLARIFICATION-exact-paths.md]
+    0008-install-update-distribution-review: current file without TASK-/BUG-style ID  (2026-05-12) [source: <repo-root-abs>/.hawp/work/closed/2026/05/12/0008-install-update-distribution-review.md]
+    HAWP-BACKLOG-VALIDATE-PLAN: current file without TASK-/BUG-style ID  (2026-05-12) [source: <repo-root-abs>/.hawp/work/closed/2026/05/12/HAWP-BACKLOG-VALIDATE-PLAN.md]
+    0007: current file without TASK-/BUG-style ID  (2026-05-13) [source: <repo-root-abs>/.hawp/work/closed/2026/05/13/0007.md]
+    HAWP-BACKLOG-VALIDATE-PLAN: current file without TASK-/BUG-style ID  (2026-05-13) [source: <repo-root-abs>/.hawp/work/closed/2026/05/13/HAWP-BACKLOG-VALIDATE-PLAN.md]
+
+  [FAIL] Missing sections (2026-05-10 or later — must fix):
+    TASK-030: ✗ missing Outcome, Close Checklist  (2026-05-12) [source: <repo-root-abs>/.hawp/work/closed/2026/05/12/TASK-030-files.md]
+    TASK-030: ✗ missing Outcome, Close Checklist  (2026-05-13) [source: <repo-root-abs>/.hawp/work/closed/2026/05/13/TASK-030-files.md]
+    TASK-033: ✗ missing Close Checklist  (2026-05-13) [source: <repo-root-abs>/.hawp/work/closed/2026/05/13/TASK-033.md]
+    TASK-038: ✗ missing Outcome, Close Checklist  (2026-05-13) [source: <repo-root-abs>/.hawp/work/closed/2026/05/13/TASK-038.md]
+    TASK-044: ✗ missing Outcome, Close Checklist  (2026-05-14) [source: <repo-root-abs>/.hawp/work/closed/2026/05/14/TASK-044.md]
+
+  [WARN] Legacy untyped closed files (before 2026-05-10 — tolerated, visible):
+    2026-04-26-hawp-adr-template-review: legacy file without TASK-/BUG-style ID  (2026-04-26) [source: <repo-root-abs>/.hawp/work/closed/2026/04/26/2026-04-26-hawp-adr-template-review.md]
+
+  [WARN] Legacy files missing sections (before 2026-05-10 — tolerated):
+    BUG-001: missing Outcome, Verification, Close Checklist  (2026-04-30) [source: <repo-root-abs>/.hawp/work/closed/2026/04/30/2026-04-30-bug-001-update-flow-migrate-old-layouts.md]
+    TASK-001: missing Outcome, Close Checklist  (2026-04-30) [source: <repo-root-abs>/.hawp/work/closed/2026/04/30/2026-04-30-task-001-parallel-work-guardrails-adr.md]
+    TASK-002: missing Outcome, Close Checklist  (2026-04-30) [source: <repo-root-abs>/.hawp/work/closed/2026/04/30/2026-04-30-task-002-intake-template-adr.md]
+    TASK-003: missing Outcome, Close Checklist  (2026-04-30) [source: <repo-root-abs>/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md]
+    TASK-004: missing Outcome, Verification, Close Checklist  (2026-04-30) [source: <repo-root-abs>/.hawp/work/closed/2026/04/30/2026-04-30-task-004-readme-ux-refactor.md]
+    BUG-002: missing Outcome, Verification, Close Checklist  (2026-05-01) [source: <repo-root-abs>/.hawp/work/closed/2026/05/01/2026-05-01-bug-002-update-flow-clean-legacy-work-folders.md]
+    BUG-003: missing Outcome, Verification, Close Checklist  (2026-05-01) [source: <repo-root-abs>/.hawp/work/closed/2026/05/01/2026-05-01-bug-003-closed-plan-reconciliation-and-doc-sync.md]
+    BUG-004: missing Outcome, Verification, Close Checklist  (2026-05-01) [source: <repo-root-abs>/.hawp/work/closed/2026/05/01/2026-05-01-bug-004-reconcile-done-active-plans-by-id-and-date.md]
+    BUG-005: missing Outcome, Verification, Close Checklist  (2026-05-01) [source: <repo-root-abs>/.hawp/work/closed/2026/05/01/2026-05-01-bug-005-install-update-alignment.md]
+    TASK-005: missing Close Checklist  (2026-05-02) [source: <repo-root-abs>/.hawp/work/closed/2026/05/02/TASK-005.md]
+    TASK-006: missing Outcome, Verification, Close Checklist  (2026-05-02) [source: <repo-root-abs>/.hawp/work/closed/2026/05/02/TASK-006.md]
+    TASK-007: missing Close Checklist  (2026-05-02) [source: <repo-root-abs>/.hawp/work/closed/2026/05/02/TASK-007.md]
+    TASK-008: missing Close Checklist  (2026-05-02) [source: <repo-root-abs>/.hawp/work/closed/2026/05/02/TASK-008.md]
+    TASK-009: missing Close Checklist  (2026-05-02) [source: <repo-root-abs>/.hawp/work/closed/2026/05/02/TASK-009.md]
+    TASK-010: missing Outcome, Verification, Close Checklist  (2026-05-03) [source: <repo-root-abs>/.hawp/work/closed/2026/05/03/TASK-010.md]
+
+3. EVIDENCE INTEGRITY
+----------------------------------------------------------------------
+
+  Found 0 evidence links
+  ✓ 0 valid links
+
+4. VERIFICATION CLARITY
+----------------------------------------------------------------------
+
+  Proven: 67/88
+  Unproven: 1
+    TASK-036: GitHub-hosted auto-sync run — NOT YET VERIFIED. **Reason:** the new workflow needs a real GitHub pus
+
+======================================================================
+SUMMARY
+======================================================================
+
+✓ Checks passed:     1
+✗ Issues found:      2
+! Warnings:          1
+
+Result: VALIDATION FAIL
+
+======================================================================
+
+VALIDATE_EXIT_CODE=1

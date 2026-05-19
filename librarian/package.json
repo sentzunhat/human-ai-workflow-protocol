@@ -1,0 +1,22 @@
+{
+  "name": "@hawp/librarian",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate:backlog": "tsx scripts/backlog-validate/index.ts",
+    "distribution:build": "tsx scripts/distribution/build/index.ts",
+    "distribution:sync": "npm run distribution:build && npm run distribution:validate",
+    "distribution:validate": "tsx scripts/distribution/validate/index.ts",
+    "workflow:validate": "tsx scripts/validate-hawp-workflow/index.ts",
+    "workflow:normalize": "tsx scripts/backlog-upgrade/index.ts backlog upgrade --apply --validate",
+    "validate:workflow": "npm run workflow:validate",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

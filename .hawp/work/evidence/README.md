@@ -1,6 +1,6 @@
 # Verification Evidence
 
-Optional verification artifacts referenced from plan files in `../status/`.
+Optional verification artifacts referenced from plan files in `../active/` before close and `../closed/YYYY/MM/DD/` after close.
 
 Discipline:
 

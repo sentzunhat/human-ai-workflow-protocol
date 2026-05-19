@@ -55,6 +55,8 @@ Run the guardrails on the next 2-3 parallel items and confirm whether coordinati
 
 # ADR: Parallel Work Guardrails (Markdown-First)
 
+**Backlog ID:** TASK-001
+
 ## Title
 
 Parallel Work Guardrails for HAWP (Human + Multiple AI Agents)
@@ -199,3 +201,11 @@ Confirmed unchanged by this implementation:
 3. Add one sentence in intake workflow reminding agents to check active work + overlap before implementation.
 4. Pilot on 2-3 real items, then evaluate friction and collision reduction.
 5. Keep, trim, or revert fields based on pilot signal.
+
+## Outcome
+
+_Legacy normalization scaffold added._
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

@@ -143,3 +143,7 @@ Keep edits minimal and textual only. Treat historical archive files as immutable
 - [x] Implemented
 - [x] Verified
 - [x] Closed
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

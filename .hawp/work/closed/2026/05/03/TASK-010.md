@@ -1,5 +1,7 @@
 # TASK-010 — remove legacy root .work cleanup and alignment verification
 
+**Backlog ID:** TASK-010
+
 ## Metadata
 
 - ID: TASK-010
@@ -34,3 +36,15 @@ Finalize legacy root `.work/` cleanup, close the item, and verify the backlog is
 ## Notes
 
 No historical records were deleted or rewritten. Archived mentions of `.work/` were preserved as historical context.
+
+## Outcome
+
+_Legacy normalization scaffold added._
+
+## Verification
+
+_Legacy normalization scaffold added._
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

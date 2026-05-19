@@ -119,3 +119,15 @@ Perform ADR first, then migration move, then documentation/instruction alignment
 - [x] Implemented
 - [x] Verified
 - [x] Closed
+
+## Outcome
+
+_Legacy normalization scaffold added._
+
+## Verification
+
+_Legacy normalization scaffold added._
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

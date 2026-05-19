@@ -84,3 +84,15 @@ Use a conservative parser: read markdown link targets from the Done table in `.h
 - [x] Implemented
 - [x] Verified
 - [x] Closed
+
+## Outcome
+
+_Legacy normalization scaffold added._
+
+## Verification
+
+_Legacy normalization scaffold added._
+
+## Close Checklist
+
+- [ ] Legacy normalization scaffold added.

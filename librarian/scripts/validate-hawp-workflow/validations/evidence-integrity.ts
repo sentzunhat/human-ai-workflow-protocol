@@ -1,0 +1,133 @@
+import { existsSync, readFileSync, statSync, readdirSync } from "fs";
+import { join, dirname } from "path";
+import type { EvidenceCheck } from "../types";
+
+/**
+ * Checks that evidence files referenced in verification sections exist
+ */
+export async function checkEvidenceIntegrity(
+  _workDir: string,
+  closedFiles: string[],
+): Promise<EvidenceCheck> {
+  const result: EvidenceCheck = {
+    total: 0,
+    valid: 0,
+    broken: [],
+    status: "PASS",
+  };
+
+  for (const filePath of closedFiles) {
+    try {
+      const content = readFileSync(filePath, "utf-8");
+      const fileName =
+        filePath.split("/").pop()?.replace(".md", "") || "unknown";
+
+      // Extract evidence links from verification section
+      const links = extractEvidenceLinks(content, filePath);
+
+      for (const link of links) {
+        result.total++;
+
+        // Check if evidence file exists
+        if (existsSync(link.fullPath)) {
+          result.valid++;
+        } else {
+          result.broken.push({
+            id: fileName,
+            link: link.relative,
+          });
+        }
+      }
+    } catch {
+      // Ignore read errors
+    }
+  }
+
+  if (result.broken.length > 0) {
+    result.status = "WARN";
+  }
+
+  return result;
+}
+
+interface EvidenceLink {
+  relative: string;
+  fullPath: string;
+}
+
+/**
+ * Extract evidence links from a plan file
+ * Format: Evidence: inline or link to ../evidence/YYYY/MM/DD/<ID>-*.md
+ */
+function extractEvidenceLinks(
+  content: string,
+  filePath: string,
+): EvidenceLink[] {
+  const links: EvidenceLink[] = [];
+  const fileDir = dirname(filePath);
+  const workDir = fileDir.split("/").slice(0, -1).join("/"); // Navigate to .hawp/work
+
+  // Look for Evidence: ... links
+  const lines = content.split("\n");
+  for (const line of lines) {
+    // Match pattern: Evidence: link to ../evidence/...
+    const match = line.match(
+      /Evidence:[\s]*(?:link to )?\.\.\/evidence\/([\w/.-]+\.md)/,
+    );
+    if (match && match[1]) {
+      const relativePath = match[1];
+      const fullPath = join(workDir, "evidence", relativePath);
+      links.push({
+        relative: `../evidence/${relativePath}`,
+        fullPath,
+      });
+    }
+  }
+
+  return links;
+}
+
+/**
+ * Collect all closed plan files
+ */
+export function collectClosedPlanFiles(closedDir: string): string[] {
+  const files: string[] = [];
+
+  try {
+    const stat = statSync(closedDir);
+    if (!stat.isDirectory()) return files;
+
+    const years = readdirSync(closedDir);
+    for (const year of years) {
+      if (year === "README.md") continue;
+      const yearPath = join(closedDir, year);
+      const yearStat = statSync(yearPath);
+      if (!yearStat.isDirectory()) continue;
+
+      const months = readdirSync(yearPath);
+      for (const month of months) {
+        const monthPath = join(yearPath, month);
+        const monthStat = statSync(monthPath);
+        if (!monthStat.isDirectory()) continue;
+
+        const days = readdirSync(monthPath);
+        for (const day of days) {
+          const dayPath = join(monthPath, day);
+          const dayStat = statSync(dayPath);
+          if (!dayStat.isDirectory()) continue;
+
+          const planFiles = readdirSync(dayPath);
+          for (const file of planFiles) {
+            if (file.endsWith(".md")) {
+              files.push(join(dayPath, file));
+            }
+          }
+        }
+      }
+    }
+  } catch {
+    // Ignore errors
+  }
+
+  return files;
+}

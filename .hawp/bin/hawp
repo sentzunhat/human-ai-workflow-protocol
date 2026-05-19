@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# HAWP CLI Entry Point
+#
+# Delegates to TypeScript implementations via tsx runtime.
+# Supported commands:
+#   ./.hawp/bin/hawp backlog upgrade [options]
+#   ./.hawp/bin/hawp backlog validate [options]
+
+set -e
+
+# Get the directory where this script lives
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+if [[ "$1" == "backlog" && "$2" == "upgrade" ]]; then
+	npx tsx "$REPO_ROOT/librarian/scripts/backlog-upgrade/index.ts" "$@"
+	exit $?
+fi
+
+if [[ "$1" == "backlog" && "$2" == "validate" ]]; then
+	shift 2
+	npx tsx "$REPO_ROOT/librarian/scripts/backlog-validate/index.ts" "$@"
+	exit $?
+fi
+
+cat <<'EOF'
+Unknown command.
+
+Usage:
+	./.hawp/bin/hawp backlog upgrade [options]
+	./.hawp/bin/hawp backlog validate [options]
+
+Examples:
+	./.hawp/bin/hawp backlog upgrade --dry-run --validate
+	./.hawp/bin/hawp backlog validate
+	./.hawp/bin/hawp backlog validate --strict-warnings
+EOF
+exit 2
