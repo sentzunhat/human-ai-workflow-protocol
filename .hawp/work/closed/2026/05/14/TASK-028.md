@@ -229,6 +229,24 @@ Progress summary (2026-05-14):
 
 ## Verification
 
+
+### Evidence Follow-Up
+
+- [ ] Research evidence for: Dry-run text output renders structured report from real backlog scan.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Dry-run JSON output renders parseable structured report.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Rule evaluator behaviors covered by 15 unit tests.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: False-positive signal improved after heuristic refinement (blocked count reduced).
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Expanded fixture coverage passes (13 tests).
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: A4/A5 closed-plan scaffolding behavior covered (14 tests).
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Heuristic tightening complete: A4/A5/A7 skip legacy files (15/15 passing).
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+
 - [x] TypeScript compilation passes. **Evidence:** `npm --prefix librarian run typecheck` (clean).
 - [x] Dry-run text output renders structured report from real backlog scan.
 - [x] Dry-run JSON output renders parseable structured report.

@@ -286,6 +286,18 @@ TASK-012 (workflow validation script) is currently in-progress and uses sequenti
 
 ## Verification (filled at close)
 
+
+### Evidence Follow-Up
+
+- [ ] Research evidence for: Approved / awaiting review
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Implemented
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Verified
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Closed — 2026-05-15:** Confirmed — Phase 1 foundation is solid and safe for Phase 2 adoption
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+
 **Phase 1 Verification:**
 
 ✅ **Kind/Type visible:** BACKLOG.md shows Type column; plan template shows Type field; all active items have Kind displayed

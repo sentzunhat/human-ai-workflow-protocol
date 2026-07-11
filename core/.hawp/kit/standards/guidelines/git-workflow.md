@@ -14,128 +14,55 @@ Commit message format, branch naming, versioning strategy, and release procedure
 
 ## Commit Message Format
 
-Follow **[Conventional Commits](https://www.conventionalcommits.org/)** format for clear, parseable commit history. This enables automated changelog generation and semantic versioning decisions.
+Use a **single plain sentence** per commit. PR titles should match the same style.
 
-### Format
+This is the canonical commit-message rule for HAWP projects. Provider packs implement it via `.github/instructions/commit-style.instructions.md` and the `hawp-commit-*` prompts.
+
+### Rules
+
+- Start with a **lowercase** letter
+- Use a **present- or past-tense** verb
+- **Do not** use Conventional Commit type prefixes (`feat:`, `fix:`, `chore:`, etc.) or scoped prefixes (`feat(scope):`)
+- Clearly describe **what** changed
+- Avoid implementation details unless essential
+- Do **not** add a multi-line body unless explicitly requested
+
+### Examples
 
 ```
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
+implemented a feature flag for potato peeling drill speed control.
+refactored the image upload process to improve performance.
+fixed null handling in the service constructor.
 ```
 
-### Type Classification
-
-| Type       | Meaning                                  | Release Impact  |
-| ---------- | ---------------------------------------- | --------------- |
-| `feat`     | New feature                              | Minor bump      |
-| `fix`      | Bug fix                                  | Patch bump      |
-| `refactor` | Code reorganization (no behavior change) | Patch bump      |
-| `perf`     | Performance improvement                  | Patch bump      |
-| `docs`     | Documentation only                       | No version bump |
-| `test`     | Test additions/modifications             | No version bump |
-| `chore`    | Build, deps, tooling                     | No version bump |
-| `ci`       | CI/CD configuration                      | No version bump |
-| `style`    | Formatting (no logic change)             | No version bump |
-
-### Scope (Optional)
-
-Scope references the area affected. Examples:
-
-- `service`, `handler`, `repository`, `adapter`
-- `error`, `validation`, `logging`
-- `config`, `di-container`, `types`
-- `tests`, `docs`
+### Avoid
 
 ```
 feat(error): add ForbiddenError class
 fix(service): handle null database connections
-docs(api): update endpoint documentation
-refactor(di-container): simplify auto-registration logic
+Added ForbiddenError class
 ```
 
-### Subject Line
+### Single commit (one-big)
 
-- Start with **lowercase** (after type/scope)
-- Use **imperative mood** ("add" not "added" or "adds")
-- No trailing period (.)
-- Max 50 characters
+When the user wants one commit (default):
 
-```
-# ✅ Good
-feat(error): add ForbiddenError class
-fix(service): handle null database connections
-docs(api): update endpoint documentation
+1. Review **all** uncommitted files semantically—what changed, why it hangs together.
+2. Write **one** plain-sentence message that summarizes the whole diff (aggregate by meaning, not per file).
+3. Stage everything and commit with **only** that subject line—no body, no description, no trailers.
 
-# ❌ Avoid
-feat(error): Added ForbiddenError class  # Wrong case, past tense
-fix(service): Fixes null database connections  # Wrong mood
-docs(api): updated endpoint documentation  # Wrong case
-```
+### Multiple commits (many-small)
 
-### Body (Optional but Recommended for Substantive Changes)
+When the user asks for multiple commits, splits, or semantic groups:
 
-Include body for non-trivial commits:
+1. Group changes by **semantic purpose** (e.g. commit-style docs, provider pack, librarian tooling)—not one commit per file unless a file is its own logical unit.
+2. Each group can be small or large; size does not matter—coherence does.
+3. For each group, write one plain-sentence message that summarizes that group.
+4. Commit each group separately with **only** the subject line—no body or description.
 
-```
-feat(error): add ForbiddenError class
+Use semantic versioning (below) for release bumps; do not encode version impact in commit prefixes.
 
-Introduces new ForbiddenError for 403 Forbidden responses.
-Used when a user is authenticated but lacks permissions for the resource.
-
-- Extends CustomError with code 403
-- Supports metadata for additional context
-- Aligns with existing error hierarchy
-```
-
-**Guidelines:**
-
-- Explain **what** changed and **why**
-- Use imperative mood ("refactor" not "refactored")
-- Wrap at 72 characters
-- Separate from subject with blank line
-
-### Footer (Optional)
-
-Use for breaking changes or issue references:
-
-```
-feat(service)!: make Service constructor async
-
-BREAKING CHANGE: Service constructor is now async and requires await.
-Before: const service = new Service(config);
-After: const service = await new Service(config);
-
-Fixes #42
-Relates to #88
-```
-
-**Footer Keywords:**
-
-- `BREAKING CHANGE:` — Signals breaking change (requires major version bump)
-- `Fixes #<number>` — Closes issue
-- `Relates to #<number>` — References related issue
-- `Reviewed-by:` — Code reviewer(s)
-
-### Full Example
-
-```
-feat(handler): add support for DELETE requests in Express
-
-Implements DeleteRouteHandler abstract class and concrete implementations
-for Express framework, matching existing Fastify handler patterns.
-
-- Extends AbstractRouteHandler with signature typed for DELETE
-- Supports optional request body and dynamic URL parameters
-- Includes type-safe response handling
-
-BREAKING CHANGE: Handler interface now requires explicit HTTP method type.
-
-Fixes #42
-Reviewed-by: @alice @bob
-```
+Provider workflows: `.github/instructions/commit-style.instructions.md`, `hawp-commit-one-big.prompt.md`, `hawp-commit-many-small.prompt.md`.
 
 ---
 
@@ -143,7 +70,7 @@ Reviewed-by: @alice @bob
 
 **Pattern:** `<type>/<scope>/<description>`
 
-Use the same type prefix as commits for consistency. Keep branch names lowercase, kebab-case, and descriptive.
+Keep branch names lowercase, kebab-case, and descriptive. Branch type prefixes are optional and separate from commit messages.
 
 ```
 # ✅ Good

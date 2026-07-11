@@ -1,0 +1,1 @@
+> **Agent instruction:** Update the local HAWP **GitHub/Copilot provider** installation in this repository. Run the bash command block in the **Update Command (Copy/Paste)** section in a terminal from the repository root. Report terminal output with `Source:`, `Provider:`, and `Source mode:` lines as proof.

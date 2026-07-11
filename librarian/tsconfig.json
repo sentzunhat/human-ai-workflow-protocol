@@ -11,8 +11,6 @@
     "resolveJsonModule": true,
     "allowImportingTsExtensions": false,
 
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "useDefineForClassFields": true,
     "moduleDetection": "force",
 
@@ -55,11 +53,7 @@
     "allowUnusedLabels": false,
     "allowUnreachableCode": false,
 
-    "skipLibCheck": true,
-
-    "paths": {
-      "@hawp/librarian/*": ["./scripts/*"]
-    }
+    "skipLibCheck": true
   },
   "include": ["scripts/**/*.ts"],
   "exclude": [

@@ -11,10 +11,12 @@ dist/
 # Node.js artifacts
 node_modules/
 librarian/node_modules/
+librarian/build-bin/
 librarian/build-src-esm/
 librarian/coverage/
 librarian/.tsx-cache/
 librarian/.turbo/
+golang/bin/
 
 # Portable private/local markers (any file in the repo)
 *.local.md

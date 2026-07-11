@@ -138,6 +138,18 @@ Regenerate outputs using distribution build after source and composition changes
 
 ## Verification (filled at close)
 
+
+### Evidence Follow-Up
+
+- [ ] Research evidence for: Generated files reflect source + composition updates.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Generated script blocks remain branch-correct for main and dev.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Distribution validation succeeds.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Type safety remains intact after composition changes.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+
 - [x] Generated files reflect source + composition updates.
       **Evidence:** Ran `npm run distribution:build` in `librarian/`; 4/4 generated files updated.
 - [x] Generated script blocks remain branch-correct for main and dev.

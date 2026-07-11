@@ -3,20 +3,42 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=26",
+    "npm": ">=11.17.0"
+  },
+  "packageManager": "npm@11.17.0",
   "scripts": {
-    "validate:backlog": "tsx scripts/backlog-validate/index.ts",
-    "distribution:build": "tsx scripts/distribution/build/index.ts",
-    "distribution:sync": "npm run distribution:build && npm run distribution:validate",
-    "distribution:validate": "tsx scripts/distribution/validate/index.ts",
-    "workflow:validate": "tsx scripts/validate-hawp-workflow/index.ts",
-    "workflow:normalize": "tsx scripts/backlog-upgrade/index.ts backlog upgrade --apply --validate",
-    "validate:workflow": "npm run workflow:validate",
+    "test": "node --test --import tsx $(find scripts -type f -name '*.test.ts' | sort)",
+    "check:markdown-links": "node scripts/check-markdown-links.mjs",
+    "cli:poc": "tsx scripts/hawp-cli-poc/bin/hawp-poc.ts",
+    "cli:poc:binaries": "tsx scripts/hawp-cli-poc/packaging/build-binaries.ts",
+    "cli:poc:binary": "tsx scripts/hawp-cli-poc/packaging/build-binaries.ts --target current",
+    "cli:poc:build": "tsc -p tsconfig.json",
+    "cli:poc:bundle": "esbuild scripts/hawp-cli-poc/bin/hawp-poc.ts --bundle --platform=node --format=cjs --outfile=build-bin/hawp-poc.cjs",
+    "cli:poc:node": "node build-bin/hawp-poc.cjs",
+    "uuid": "node -e \"console.log(crypto.randomUUID())\"",
+    "hawp:check": "tsx scripts/hawp/hawp-check/index.ts",
+    "kit:validate": "tsx scripts/hawp/kit-validate/index.ts",
+    "kit:normalize": "tsx scripts/hawp/kit-normalize/index.ts",
+    "providers:materialize": "tsx scripts/librarian/providers/materialize/build/index.ts",
+    "providers:validate": "tsx scripts/librarian/providers/materialize/validate/index.ts",
+    "providers:sync": "npm run providers:materialize && npm run providers:validate",
+    "distribution:build": "tsx scripts/librarian/distribution/build/index.ts",
+    "distribution:validate": "tsx scripts/librarian/distribution/validate/index.ts",
+    "distribution:sync": "npm run providers:sync && npm run distribution:build && npm run distribution:validate",
+    "work:validate": "tsx scripts/hawp/work-validate/index.ts",
+    "work:normalize:cli": "tsx scripts/hawp/work-normalize/index.ts backlog upgrade",
+    "work:normalize": "npm run work:normalize:cli -- --apply --validate",
+    "validate": "npm run typecheck && npm test && npm run check:markdown-links && npm run kit:validate && npm run distribution:sync && npm run work:validate",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@oclif/core": "^4.11.14"
+  },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "tsx": "^4.0.0",
-    "typescript": "^5.0.0"
+    "@types/node": "^26.0.0",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3"
   }
 }

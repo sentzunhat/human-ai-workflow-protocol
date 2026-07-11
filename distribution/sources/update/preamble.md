@@ -1,1 +1,0 @@
-> **Agent instruction:** Update the local HAWP installation in this repository. Run the bash command block in the **Update Command (Copy/Paste)** section in a terminal from the repository root. Do not report "already present" based on content inspection alone — execute the script and report terminal output with `Source:` and `Source mode:` lines as proof.

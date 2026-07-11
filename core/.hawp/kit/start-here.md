@@ -37,10 +37,13 @@ output: |
 - **constraints** — state what must not happen as clearly as what must.
 - **output** — describe the artifact form, not just "an answer."
 - **checkpoint** — omit unless you need a handoff or pause anchor.
+- For this repository, use Node 26 when running librarian or workflow-maintenance commands; follow the repo's declared runtime contract before treating a failure as a protocol issue.
 - For path-sensitive work, reference files using exact repo-relative paths from repository root.
 - Basename-only file mentions are unsafe for path-sensitive work unless the file is truly at repository root and explicitly marked as such.
 - Capture repo-root proof (`pwd`, `git rev-parse --show-toplevel`, `git rev-parse --show-prefix`, `git status --short`) before path-sensitive edits.
 - Do not persist machine-local absolute paths in artifacts; if proof output includes host-local prefixes, redact only the machine-local prefix with a placeholder such as `<repo-root-abs>`.
+- For publish flows, prefer GitKraken CLI (`gk`) when available; otherwise use GitHub tools/connectors for repo and PR actions.
+- If neither GitKraken nor GitHub tooling is available, use plain `git` as the fallback path and say so explicitly.
 
 ---
 
@@ -71,15 +74,16 @@ HAWP is a **shaping protocol**, not a runtime. Better results come from stronger
 
 ### Learning & Examples
 
-- **Authoring guidance**: [authoring-patterns.md](authoring-patterns.md) — guidance for recurring task types
+- **Authoring guidance**: [references/authoring-patterns.md](references/authoring-patterns.md) — guidance for recurring task types
 - **Real examples**: [examples/](examples/) — seven concrete filled-in HAWP shapes
-- **Core spec**: [spec.md](spec.md) — v0.1 semantics, pipeline, and non-goals
+- **Core spec**: [references/spec.md](references/spec.md) — v0.1 semantics, pipeline, and non-goals
 
 ### Workflow Guides (Recommended Order)
 
 1. **[usage/init.md](usage/init.md)** — one-time setup for a new project
-2. **[usage/intake-workflow.md](usage/intake-workflow.md)** — intake loop for structured bug/task handling
+2. **[usage/intake-workflow.md](usage/intake-workflow.md)** — intake loop for structured bug/task handling (investigation task first, then plan, for every item)
 3. **[usage/status-report.md](usage/status-report.md)** — context handoff and session continuity
+4. **[usage/workflow-loop.md](usage/workflow-loop.md)** — multi-iteration work across sessions (instruction-based; autonomous or gated; review/approve/retry without CLI)
 
 ### Templates by Task Type
 
@@ -91,38 +95,44 @@ HAWP is a **shaping protocol**, not a runtime. Better results come from stronger
 - **Bug plan** (troubleshooting + fix): [templates/bug-plan.md](templates/bug-plan.md)
 - **Handoff** (context transfer): [templates/intent-first-handoff.md](templates/intent-first-handoff.md)
 - **Status report** (checkpoint/review): [templates/status-report.md](templates/status-report.md)
+- **Workflow loop handoff** (iteration continuity): [templates/workflow-loop-handoff.md](templates/workflow-loop-handoff.md)
+- **Workflow loop plan section** (copy into active plan): [templates/workflow-loop-plan-section.md](templates/workflow-loop-plan-section.md)
 - **Audit** (review findings): [templates/audit-report.md](templates/audit-report.md)
 
 ### Reference & Patterns
-
-**Quality disciplines:**
-
-- [patterns/evidence-discipline.md](patterns/evidence-discipline.md) — separate fact from inference
-- [patterns/non-findings.md](patterns/non-findings.md) — how to report absence of findings
-- [patterns/parallel-work-guardrails.md](patterns/parallel-work-guardrails.md) — multi-agent coordination
 
 **Operational references:**
 
 - [references/backlog-alignment.md](references/backlog-alignment.md) — backlog format, scope, closures
 - [references/docs-alignment.md](references/docs-alignment.md) — keeping docs sync'd with reality
 - [references/work-item-file-tracking.md](references/work-item-file-tracking.md) — file ownership in multi-agent work
-- [references/install-update-safety.md](references/install-update-safety.md) — kit distribution and maintenance
+- [references/install-update-safety.md](references/install-update-safety.md) — principle summary (canonical: [standards/docs/hawp-install-update-safety.md](standards/docs/hawp-install-update-safety.md))
 
-### Standards & Domain Guidance
+**Agent instructions (optional):**
 
-**Code and architecture:**
+- [instructions/clean-code-and-structure.md](instructions/clean-code-and-structure.md) — touch-only cleanup and justified splits
 
-- [standards/guidelines/](standards/guidelines/) — general architecture, code style, documentation, testing, security, git
-- [standards/nodejs/](standards/nodejs/) — Node.js-specific structure and patterns
-- [standards/service-design/](standards/service-design/) — layered composition, handler responsibilities, dependency patterns
+### Standards map (what to open first)
 
-**Database & persistence:**
+HAWP ships two standards layers. Use **canonical** folders for real work; treat **public/** as a read-only mirror for intake history.
 
-- [standards/database/](standards/database/) — SQL, NoSQL, and schema design patterns
+| Layer | Path | Rule |
+| ----- | ---- | ---- |
+| **Canonical (normative)** | [standards/guidelines/](standards/guidelines/), [nodejs/](standards/nodejs/), [database/](standards/database/), [docs/](standards/docs/), [patterns/](standards/patterns/), [service-design/](standards/service-design/) | Cite these in reviews, PRs, and audits |
+| **Mirror (archive)** | [standards/public/](standards/public/) | Do not run install scripts from here; do not treat as live policy |
 
-**Patterns library:**
+Quick-links at [patterns/](patterns/) redirect to [standards/patterns/](standards/patterns/) — edit the standards copy only.
 
-- [standards/patterns/](standards/patterns/) — cross-cutting concerns (evidence discipline, non-findings, parallel work)
+Full index: [standards/README.md](standards/README.md) · Mirror policy: [standards/public/README.md](standards/public/README.md)
+
+**By topic:**
+
+- General engineering: [standards/guidelines/](standards/guidelines/)
+- Node/TypeScript apps: [standards/nodejs/](standards/nodejs/)
+- Data layer: [standards/database/](standards/database/)
+- Install/update safety: [standards/docs/hawp-install-update-safety.md](standards/docs/hawp-install-update-safety.md)
+- Evidence and audits: [standards/patterns/](standards/patterns/)
+- Services and composition: [standards/service-design/](standards/service-design/)
 
 ### Quality & Safety
 

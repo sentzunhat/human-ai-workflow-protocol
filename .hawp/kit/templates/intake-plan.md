@@ -1,12 +1,15 @@
 # Work Intake — Plan Template
 
 Use this template for plan files saved to `work/active/<ID>.md`.
+Fill it after the investigation task record (`work-intake.md`) exists —
+the Analysis section below carries the investigation findings forward.
 
 ---
 
 ## Bug / Task: [Short title]
 
-**Backlog ID:** TASK-XXX
+**Backlog ID (Legacy):** TASK-XXX — omit for new UUID-native items
+**UUID:** `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` — generate with `./.hawp/bin/hawp uuid`
 **Type:** bug | task | improvement
 **Reported:** YYYY-MM-DD
 **Risk Level:** low | medium | high
@@ -54,6 +57,9 @@ _Other files, routes, or modules touched by this._
 
 **Coordination note:**
 _Explain whether another active item touches the same files._
+
+**Loop lane:**
+_Optional note for parallel Workflow Loop trials. Use only when this plan is assigned to a specific lane; leave blank when not needed._
 
 **Path discipline:**
 

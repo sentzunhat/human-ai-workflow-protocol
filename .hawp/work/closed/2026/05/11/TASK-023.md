@@ -100,6 +100,16 @@ Keep wording concise, avoid script duplication, and preserve source-of-truth fra
 
 ## Verification (filled at close)
 
+
+### Evidence Follow-Up
+
+- [ ] Research evidence for: Discoverability pointers added to root docs.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Required verification suite passes after docs change.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Docs/link validation command availability checked.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+
 - [x] Discoverability pointers added to root docs.
 	**Evidence:** `README.md` now contains "Generated guide quick links" and "For contributors" sections with current paths.
 - [x] Required verification suite passes after docs change.

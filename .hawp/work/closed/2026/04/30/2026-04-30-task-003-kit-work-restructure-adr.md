@@ -208,6 +208,22 @@ Goal: track folder shape (so the structure is copyable from git) without `.gitke
 
 ## Verification Checklist
 
+
+### Evidence Follow-Up
+
+- [ ] Research evidence for: `find core/.hawp -maxdepth 1` shows only `LICENSE`, `kit`, `work`.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: `grep -r "\.hawp/usage" --exclude-dir=.git` returns only matches inside `core/.hawp/work/status/` or
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: `grep -r "\.hawp/templates\|\.hawp/patterns\|\.hawp/reviews\|\.hawp/types\|\.hawp/examples" --exclud
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: `find core/.hawp -name .gitkeep` returns no results.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: `core/.hawp/kit/templates/backlog.md` is empty/template-shaped (no real done rows).
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: `core/install.md` and `core/update.md` copy kit files via `kit/` paths.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+
 - [ ] `find core/.hawp -maxdepth 1` shows only `LICENSE`, `kit`, `work`.
 - [ ] `grep -r "\.hawp/usage" --exclude-dir=.git` returns only matches inside `core/.hawp/work/status/` or `core/.hawp/work/adrs/` (historical records).
 - [ ] `grep -r "\.hawp/templates\|\.hawp/patterns\|\.hawp/reviews\|\.hawp/types\|\.hawp/examples" --exclude-dir=.git` returns only historical/migration references.

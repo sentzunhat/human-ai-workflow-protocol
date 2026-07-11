@@ -1,0 +1,55 @@
+# HAWP provider install manifest
+# Source packs under core/providers/.<name>/ install to downstream target paths.
+
+providers:
+  claude:
+    source: providers/.claude
+    installs_to:
+      - dest: .claude/rules/
+        from: rules/
+        pattern: "hawp-*.md"
+        install: refresh
+        update: refresh
+      - dest: CLAUDE.md
+        from: CLAUDE.md.seed
+        install: seed-if-missing
+        update: skip
+  codex:
+    source: providers/.codex
+    installs_to:
+      - dest: AGENTS.md
+        from: AGENTS.md.seed
+        install: seed-if-missing
+        update: refresh
+  github:
+    source: providers/.github
+    installs_to:
+      - dest: .github/instructions/
+        from: instructions/
+      - dest: .github/prompts/
+        from: prompts/
+      - dest: .github/copilot-instructions.md
+        from: copilot-instructions.md
+        install: seed_if_missing
+        update: refresh
+  cursor:
+    source: providers/.cursor
+    installs_to:
+      - dest: .cursor/rules/
+        from: rules/
+        pattern: "*.mdc"
+        install: refresh
+        update: refresh
+      - dest: AGENTS.md
+        from: AGENTS.md.seed
+        install: seed-if-missing
+        update: refresh
+  continue:
+    source: providers/.continue
+    installs_to:
+      - dest: .continue/rules/
+        from: rules/
+        pattern: "hawp-*.md"
+        install: refresh
+        update: refresh
+    doc_ref: https://docs.continue.dev/customize/deep-dives/rules

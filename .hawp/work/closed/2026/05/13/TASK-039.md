@@ -169,6 +169,16 @@ Keep edits minimal and path-focused. Do not change semantics of source-repo-only
 
 ## Verification (filled at close)
 
+
+### Evidence Follow-Up
+
+- [ ] Research evidence for: No unintended `core/.hawp/` remains in downstream-target guidance locations.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Validation script runtime execution via npm.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: TASK-038 artifacts use consistent `.hawp` paths.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+
 - [x] No unintended `core/.hawp/` remains in downstream-target guidance locations.
       **Evidence:** `grep_search` found no matches in:
   - `.hawp/kit/instructions/da-file-tracking.md`

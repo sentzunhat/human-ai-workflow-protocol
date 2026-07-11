@@ -173,6 +173,18 @@ This item should wait to avoid conflicting auth changes.
 
 ## Verification checklist
 
+
+### Evidence Follow-Up
+
+- [ ] Research evidence for: Pattern doc exists with simple rules and examples.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Intake template includes Work Coordination section.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: At least one sample plan demonstrates overlap detection and hold behavior.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Workflow text still preserves lean HAWP scope (no PM system expansion).
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+
 - [x] Pattern doc exists with simple rules and examples.
 - [x] Intake template includes Work Coordination section.
 - [x] At least one sample plan demonstrates overlap detection and hold behavior.

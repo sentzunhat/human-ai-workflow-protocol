@@ -151,6 +151,30 @@ Completed changes:
 
 ## Verification (filled at close)
 
+
+### Evidence Follow-Up
+
+- [ ] Research evidence for: distribution build rewrites generated files from updated sources.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: distribution validate passes with no drift.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: generated update-dev/install-dev mention and include local-source mode behavior.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: default remote mode remains unchanged when local override is not set.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: end-to-end smoke test passed in temporary repo using generated `update-dev` and local override.
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Plan written
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Approved / auto-approved (low risk)
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Implemented
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Verified
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Closed
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+
 - [x] distribution build rewrites generated files from updated sources.  
       Evidence: `npm --prefix librarian run distribution:build` updated 4/4 generated files.
 - [x] distribution validate passes with no drift.  

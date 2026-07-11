@@ -52,7 +52,7 @@ File tracking is a **manual convention** for now.
 
 All paths must be:
 
-- Full and unambiguous (e.g., `core/install.md`, not `install.md`)
+- Full and unambiguous (e.g., `.hawp/kit/standards/docs/hawp-install-update-safety.md`, not `hawp-install-update-safety.md`)
 - Repo-relative (start with `.` or end with `/`)
 - Specific (e.g., `librarian/scripts/cli.ts`, not `librarian/`)
 

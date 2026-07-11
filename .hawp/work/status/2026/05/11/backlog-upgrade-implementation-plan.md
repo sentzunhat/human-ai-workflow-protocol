@@ -8,7 +8,7 @@
 
 ## Design Approval Summary
 
-Design document: [hawp-backlog-upgrade-command-design.md](../notes/2026/05/11/hawp-backlog-upgrade-command-design.md)
+Design document: [hawp-backlog-upgrade-command-design.md](../../../../notes/2026/05/11/hawp-backlog-upgrade-command-design.md)
 
 **Approved scope:**
 

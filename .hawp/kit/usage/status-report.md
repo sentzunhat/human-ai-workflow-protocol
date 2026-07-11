@@ -66,6 +66,36 @@ _What should happen next?_
 
 ### Optional Attached Artifact
 
+#### What Was Inspected
+
+_What files, logs, or environments did you check?_
+
+#### What Changed
+
+_Summary of changes made. (For full details, see the plan file.)_
+
+#### What Was Directly Verified
+
+_Confirmed facts. Only put observed results here._
+
+#### What Remains Unproven
+
+_Hypotheses, edge cases, or claims that require a live environment._
+
+#### Constraints
+
+_Scope limits or assumptions that bounded this work._
+
+#### Help Wanted
+
+_Specific support needed: reviewing a risk, challenging an assumption, proposing next steps._
+
+#### Suggested Next Step
+
+_What should happen next?_
+
+---
+
 ## Quality Rules
 
 - Keep it compact.

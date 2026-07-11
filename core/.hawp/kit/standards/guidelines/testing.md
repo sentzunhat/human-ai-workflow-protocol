@@ -191,13 +191,13 @@ Vitest hoists `vi.mock(...)` calls to the top of the file before any `import` st
 // ✅ Correct — vi.hoisted ensures fn is available when vi.mock runs
 const infoMock = vi.hoisted(() => vi.fn());
 
-vi.mock("@zacatl/logs", () => ({
+vi.mock("@your-org/logger", () => ({
   logger: { info: infoMock },
 }));
 
 // ❌ Incorrect — infoMock is not yet initialized when vi.mock hoists
 const infoMock = vi.fn();
-vi.mock("@zacatl/logs", () => ({
+vi.mock("@your-org/logger", () => ({
   logger: { info: infoMock }, // ReferenceError at runtime
 }));
 ```

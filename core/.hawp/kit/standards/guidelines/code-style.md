@@ -52,11 +52,12 @@ Key rules:
 
 ### Runtime
 
-- **Node.js**: 24.14.0 LTS+ minimum (required for `node:sqlite`, `AsyncLocalStorage` improvements, and native subpath imports).
+- **Node.js**: 24.14.0 LTS+ minimum portable baseline for these standards.
+- **Repo-specific toolchains**: some repositories intentionally require a newer Node release for local tooling, generated artifacts, or CI parity. Follow the repository's declared runtime contract first (`.nvmrc`, `.node-version`, `package.json#engines`, or equivalent).
 - **Package Manager**: npm 11.0.0+.
 - **Module System**: ESM source; dual ESM/CJS build outputs for distributed packages.
 
-> **Upgrade note**: run `nvm install 24.14.0 && nvm use 24.14.0` (or equivalent) if your local Node is below 24.14.0.
+> **Upgrade note**: if your local Node is below 24.14.0, upgrade to at least that baseline. If the current repository declares a newer runtime, use the repository value instead of this portable minimum.
 
 ### Build Pipeline
 

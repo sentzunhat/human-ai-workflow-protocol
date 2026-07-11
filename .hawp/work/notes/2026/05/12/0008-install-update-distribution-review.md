@@ -57,9 +57,9 @@ Line 52:  scriptSourceFile: "core/update.md",   ← for update-dev variant
 Exact lines from `README.md`:
 
 ```
-Line 9:  | **Install HAWP** into a repo (copy/paste) | → [core/install.md](core/install.md)         |
-Line 10: | **Update HAWP** to latest `main`          | → [core/update.md](core/update.md)           |
-Line 27: - Authoritative scripts live in [core/install.md](core/install.md) and [core/update.md](core/update.md).
+Line 9:  | **Install HAWP** into a repo (copy/paste) | → [core/install.md](../../../../../../core/install.md)         |
+Line 10: | **Update HAWP** to latest `main`          | → [core/update.md](../../../../../../core/update.md)           |
+Line 27: - Authoritative scripts live in [core/install.md](../../../../../../core/install.md) and [core/update.md](../../../../../../core/update.md).
 ```
 
 **README currently directs users to: `core/install.md` and `core/update.md`**
@@ -297,8 +297,8 @@ For each of 4 variants (install-main, install-dev, update-main, update-dev):
 
 **User-facing references in README.md:**
 
-- Line 9: `[core/install.md](core/install.md)` in "Get started" table
-- Line 27: "Authoritative scripts live in [core/install.md](core/install.md)..."
+- Line 9: `[core/install.md](../../../../../../core/install.md)` in "Get started" table
+- Line 27: "Authoritative scripts live in [core/install.md](../../../../../../core/install.md)..."
 
 **References in librarian/README.md:**
 
@@ -328,8 +328,8 @@ For each of 4 variants (install-main, install-dev, update-main, update-dev):
 
 **User-facing references in README.md:**
 
-- Line 10: `[core/update.md](core/update.md)` in "Get started" table
-- Line 27: "Authoritative scripts live in ... [core/update.md](core/update.md)"
+- Line 10: `[core/update.md](../../../../../../core/update.md)` in "Get started" table
+- Line 27: "Authoritative scripts live in ... [core/update.md](../../../../../../core/update.md)"
 
 **References in librarian/README.md:**
 
@@ -374,8 +374,8 @@ For each of 4 variants (install-main, install-dev, update-main, update-dev):
 **Current state:**
 
 ```markdown
-| **Install HAWP** into a repo (copy/paste) | → [core/install.md](core/install.md) |
-| **Update HAWP** to latest `main` | → [core/update.md](core/update.md) |
+| **Install HAWP** into a repo (copy/paste) | → [core/install.md](../../../../../../core/install.md) |
+| **Update HAWP** to latest `main` | → [core/update.md](../../../../../../core/update.md) |
 ...
 
 - Stable/default install: [core/distribution/generated/install-main.md](...)
@@ -390,13 +390,13 @@ For each of 4 variants (install-main, install-dev, update-main, update-dev):
 
 - Swap the priority: Generated branch-specific guides become primary in "Get started" table
 - core/install.md and core/update.md become "For contributors" section only
-- Link in contributors section becomes: "Authoritative scripts live in [core/distribution/sources/](core/distribution/sources/) for composition; see [librarian/README.md](librarian/README.md) for how guides are generated"
+- Link in contributors section becomes: "Authoritative scripts live in [core/distribution/sources/](../../../../../../core/distribution/sources/) for composition; see [librarian/README.md](../../../../../../librarian/README.md) for how guides are generated"
 
 **Before:**
 
 ```
-| **Install HAWP** into a repo (copy/paste) | → [core/install.md](core/install.md)         |
-| **Update HAWP** to latest `main`          | → [core/update.md](core/update.md)           |
+| **Install HAWP** into a repo (copy/paste) | → [core/install.md](../../../../../../core/install.md)         |
+| **Update HAWP** to latest `main`          | → [core/update.md](../../../../../../core/update.md)           |
 ```
 
 **After:**
@@ -415,8 +415,8 @@ For each of 4 variants (install-main, install-dev, update-main, update-dev):
 ```markdown
 ### For contributors
 
-- Authoritative scripts live in [core/install.md](core/install.md) and [core/update.md](core/update.md).
-- Editable distribution fragments live under [core/distribution/sources/](core/distribution/sources/).
+- Authoritative scripts live in [core/install.md](../../../../../../core/install.md) and [core/update.md](../../../../../../core/update.md).
+- Editable distribution fragments live under [core/distribution/sources/](../../../../../../core/distribution/sources/).
 ```
 
 **Proposed change (PHASE 2, after generator is updated):**
@@ -424,7 +424,7 @@ For each of 4 variants (install-main, install-dev, update-main, update-dev):
 ```markdown
 ### For contributors
 
-- Distribution fragments live under [core/distribution/sources/](core/distribution/sources/) and are composed into user-facing guides by [librarian/scripts/distribution/](librarian/scripts/distribution/).
+- Distribution fragments live under [core/distribution/sources/](../../../../../../core/distribution/sources/) and are composed into user-facing guides by [librarian/scripts/distribution/](librarian/scripts/distribution/).
 - Shell script blocks are maintained in [core/distribution/sources/install/script.md](core/distribution/sources/install/script.md) and [core/distribution/sources/update/script.md](core/distribution/sources/update/script.md).
 ```
 
@@ -554,8 +554,8 @@ File: `README.md`
 Replace:
 
 ```markdown
-| **Install HAWP** into a repo (copy/paste) | → [core/install.md](core/install.md) |
-| **Update HAWP** to latest `main` | → [core/update.md](core/update.md) |
+| **Install HAWP** into a repo (copy/paste) | → [core/install.md](../../../../../../core/install.md) |
+| **Update HAWP** to latest `main` | → [core/update.md](../../../../../../core/update.md) |
 ```
 
 With:
@@ -574,8 +574,8 @@ Replace:
 ```markdown
 ### For contributors
 
-- Authoritative scripts live in [core/install.md](core/install.md) and [core/update.md](core/update.md).
-- Editable distribution fragments live under [core/distribution/sources/](core/distribution/sources/).
+- Authoritative scripts live in [core/install.md](../../../../../../core/install.md) and [core/update.md](../../../../../../core/update.md).
+- Editable distribution fragments live under [core/distribution/sources/](../../../../../../core/distribution/sources/).
 - After editing either authoritative scripts or distribution sources, regenerate and validate:
 ```
 
@@ -584,7 +584,7 @@ With:
 ```markdown
 ### For contributors
 
-- Distribution sources live under [core/distribution/sources/](core/distribution/sources/) (fragments and install/update scripts).
+- Distribution sources live under [core/distribution/sources/](../../../../../../core/distribution/sources/) (fragments and install/update scripts).
 - Build system: [librarian/scripts/distribution/](librarian/scripts/distribution/) composes fragments into user-facing guides.
 - After editing distribution sources, regenerate and validate:
 ```

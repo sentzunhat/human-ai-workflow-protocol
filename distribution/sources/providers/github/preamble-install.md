@@ -1,0 +1,1 @@
+> **Agent instruction:** Install HAWP with the **GitHub/Copilot provider** in this repository. Run the bash command block in the **Install Command (Copy/Paste)** section in a terminal from the repository root. Report terminal output with `Source:`, `Provider:`, and `Source mode:` lines as proof.

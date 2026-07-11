@@ -1,12 +1,15 @@
 # Work Intake Template
 
 Use this for intake-first shaping before implementation planning.
+This is the investigation task record: every item that enters through HAWP
+gets one of these before a plan is written or implementation starts.
 
-This is an optional usage aid. It does not expand the HAWP core shape.
+This is a usage aid. It does not expand the HAWP core shape.
 
 ## Work Item
 
-**Backlog ID:** TASK-XXX
+**Backlog ID (Legacy):** TASK-XXX — omit for new UUID-native items
+**UUID:** `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` — generate with `./.hawp/bin/hawp uuid`
 **Type:** bug | task | improvement
 **Reported:** YYYY-MM-DD
 
@@ -48,5 +51,6 @@ What area is affected, and what is known right now?
 
 ## Next Step
 
+- [ ] Investigation recorded above (required before planning)
 - [ ] Write or update the plan file
 - [ ] Move backlog status accordingly

@@ -87,7 +87,9 @@ Cleanup classification:
 
 ## Instruction Overlay
 
-The instruction file `.github/instructions/hawp-docs-alignment.instructions.md` applies automatically to `docs/**`, `README.md`, and `CHANGELOG.md`. It enforces:
+For `.hawp/kit/` guidance, prefer the local instruction file `.hawp/kit/instructions/hawp-docs-alignment.md`.
+
+The instruction file `.github/instructions/hawp-docs-alignment.instructions.md` remains a secondary overlay for `docs/**`, `README.md`, and `CHANGELOG.md`. It enforces:
 
 - source-of-truth hierarchy
 - implementation-driven, minimal edits only

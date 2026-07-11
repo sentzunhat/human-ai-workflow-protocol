@@ -281,6 +281,42 @@ Created complete JSON-first data model layer (955 lines across 7 files):
 
 ## Verification
 
+
+### Evidence Follow-Up
+
+- [ ] Research evidence for: All 7 model files created in `librarian/scripts/backlog-upgrade/models/`
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: All models export cleanly from index.ts (41 total exports)
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: No circular dependencies (verified by successful compilation)
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: TypeScript compiles without errors (`npm run typecheck` passes)
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Each model can be imported independently
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Documentation comments complete
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Hash fields typed as strings (SHA256 hex)
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: BlockedItem includes all required fields: rule, confidence, candidates, reason, evidence
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: EvidenceReport includes file hashes, plan hash, validator hashes, idempotency flag
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: All factory functions create correct objects
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: All type guards validate at runtime
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: JSON serialization works for all types
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Design alignment 100%:
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: No conflicts with existing codebase
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Type coverage: 100% (all types defined)
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+- [ ] Research evidence for: Evidence report created: `.hawp/work/evidence/2026/05/12/TASK-029-evidence.md`
+- [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
+
 - [x] All 7 model files created in `librarian/scripts/backlog-upgrade/models/`
 - [x] All models export cleanly from index.ts (41 total exports)
 - [x] No circular dependencies (verified by successful compilation)

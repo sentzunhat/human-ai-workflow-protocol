@@ -8,10 +8,10 @@ These are foundational safety rules that apply to both install and update operat
 - This includes your BACKLOG, active work, parked work, closed work, decisions, and evidence files.
 - Install and update operations preserve all existing `.hawp/work/**` files, always.
 
-## Existing Copilot Instructions Are Preserved
+## Provider Overlay Behavior
 
-- `.github/copilot-instructions.md` is only seeded on first install if it does not exist.
-- If you have customized `.github/copilot-instructions.md`, update operations will not overwrite it.
+- Each guide installs **one** provider overlay from `core/providers/.<provider>/`.
+- Refresh vs seed rules and paths not touched by this guide are in **Provider Boundaries** below.
 
 ## Install and Update Are Safe to Re-Run
 
@@ -31,12 +31,14 @@ If your repository has an older HAWP layout, migration runs automatically:
 ## Active Work Reconciliation Runs Automatically
 
 - After migration, the script reads `.hawp/work/BACKLOG.md` Done rows and Active Work rows with `done` or `wont-fix` status, and moves matching `.hawp/work/active/*.md` files to `.hawp/work/closed/...`. Each moved file is printed in the output.
-- After reconciliation, `.hawp/work/active/` files with no matching BACKLOG entry are retired to `closed/YYYY/MM/DD/` using the filename date prefix. This pass only runs when the backlog has at least one data row, so fresh installs are not affected.
+- Only items explicitly marked done or wont-fix in the backlog are moved. Unlinked active items are left alone.
+- This means an update can legitimately change `.hawp/work/active/` and `.hawp/work/closed/` in the target repo when the backlog says a plan is finished.
 - All moves use the no-overwrite rule: if the destination already exists, the source file is not moved.
 
 ## Verification Before and After
 
-- Review what the script will do before running it (read the script block first).
+- Review what the script will do before running it (read the **Install Command** or **Update Command** block first).
+- Do not pipe remote guide content directly to `bash`. Optional guide-fetch helpers write a script to `/tmp` for review first.
 - After running install or update, check `.hawp/work/BACKLOG.md` and `.hawp/kit/` to confirm changes.
 - If something looks wrong, `.hawp/work/` is already preserved and safe.
 

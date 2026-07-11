@@ -159,7 +159,7 @@ Completed changes:
 - [x] Generated guides now expose the execution-first wording. **Evidence:** `core/distribution/generated/install-main.md`, `core/distribution/generated/install-dev.md`, `core/distribution/generated/update-main.md`, and `core/distribution/generated/update-dev.md` each contain `Install Work Item Contract` or `Update Work Item Contract`.
 - [x] Generated guides now explain how sync happens. **Evidence:** the same generated guides contain `Automatic sync: push source changes on main or dev...` and `Local sync: run npm --prefix librarian run distribution:sync...`.
 - [x] Touched implementation files are structurally clean. **Evidence:** diagnostics reported no errors for `librarian/scripts/distribution/shared/composition.ts` and `.github/workflows/sync-distribution-generated.yml`.
-- [x] GitHub-hosted auto-sync run verified on `dev`. **Evidence:** `.github/workflows/sync-distribution-generated.yml` run `25897172755` succeeded for commit `0da2ffd7e7fc65b461ad273c4173c7a10edd36c1` (`https://github.com/sentzunhat/human-ai-workflow-protocol/actions/runs/25897172755`). Evidence: ../evidence/../../../../evidence/2026/05/15/TASK-065-github-hosted-distribution-sync-proof.md
+- [x] GitHub-hosted auto-sync run verified on `dev`. **Evidence:** `.github/workflows/sync-distribution-generated.yml` run `25897172755` succeeded for commit `0da2ffd7e7fc65b461ad273c4173c7a10edd36c1` (`https://github.com/sentzunhat/human-ai-workflow-protocol/actions/runs/25897172755`). Evidence: ../evidence/2026/05/15/TASK-065-github-hosted-distribution-sync-proof.md
 
 ---
 

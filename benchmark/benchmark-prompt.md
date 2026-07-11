@@ -1,5 +1,7 @@
 # HAWP Benchmark Prompt
 
+**Step-by-step workflow:** [instructions/setup.md](instructions/setup.md) → [instructions/run.md](instructions/run.md) (no-HAWP arm, clean window; stop) → [instructions/cleanup.md](instructions/cleanup.md) (HAWP arm, score, record, cleanup; original repo).
+
 ## What this is
 
 A reusable guide for running a simple HAWP vs no-HAWP comparison across practical task types.
@@ -44,6 +46,33 @@ Example: "review this codebase and tell me what's wrong"
 
 Give the task to a human or AI agent without using HAWP. Do not add a structured prompt. Capture the output as-is.
 
+Full steps: [instructions/run.md](instructions/run.md). Setup and launch: [instructions/setup.md](instructions/setup.md).
+
+Keep the comparison fair:
+
+- Use the same person or the same AI model for both runs.
+- Run each in a fresh, separate session so neither run can see the other's work.
+- If the repository already has HAWP rules installed (for example in `AGENTS.md` or editor rules), the "without HAWP" run is not fully unguided. Editors like Cursor load `AGENTS.md` and `.cursor/rules/` automatically for every agent in the workspace, so this cannot be switched off from inside a chat.
+
+To get a truly clean unguided run, do **not** delete `AGENTS.md` or the rules from the repository itself — they are part of what the repo ships. Instead, use the helper script (recommended):
+
+```bash
+./benchmark/prepare-clean-workspace.sh --open --task "Your bare task prompt here"
+```
+
+That copies the repo to `/tmp/`, removes agent-loaded guidance **from the copy only**, and opens the copy in a new Cursor window. Run the bare prompt there in a fresh chat ([run.md](instructions/run.md)). Close that window, then run the HAWP arm in the original repository ([cleanup.md](instructions/cleanup.md)).
+
+Manual equivalent:
+
+1. Copy the repository to a temporary folder (for example `/tmp/benchmark-clean/`).
+2. In the copy only, delete the agent-loaded guidance: `AGENTS.md`, `.cursor/rules/`, `.continue/rules/`, and `.github/instructions/` (plus the same paths under `core/providers/` if present).
+3. Open the copy as its own workspace (a new editor window) and run the bare prompt there in a fresh chat.
+4. Run the HAWP arm in the original repository as usual.
+
+When finished, remove old copies: `./benchmark/prepare-clean-workspace.sh --cleanup`
+
+If that is more effort than the run justifies, run both arms in the original repository anyway and note the contamination in the run's caveats — it usually makes the gap look smaller than it really is, so the HAWP result is understated, not inflated.
+
 ### Step 3: Run it with HAWP
 
 Fill the HAWP shape for the same task:
@@ -60,44 +89,86 @@ const shape: Shape = {
 
 Use the filled shape as the prompt. Capture the output.
 
-For authoring guidance on specific task types, see [.hawp/kit/authoring-patterns.md](../core/.hawp/kit/authoring-patterns.md).
+Full steps: [instructions/cleanup.md](instructions/cleanup.md) (original repo only, after no-HAWP is saved).
+
+For authoring guidance on specific task types, see [.hawp/kit/references/authoring-patterns.md](../core/.hawp/kit/references/authoring-patterns.md).
 
 ### Step 4: Compare on scoring dimensions
 
 Score both outputs on each dimension below.
 
+### Step 5: Record the run
+
+Save the run so others can read it later, using this folder layout:
+
+```text
+benchmark/runs/<date>-<task-name>/
+  README.md            # task, setup, side-by-side scores, interpretation, caveats
+  comparison.md        # detailed comparison: structure, findings overlap, per-dimension analysis
+  no-hawp/
+    output.md          # raw output from the unguided run
+    scorecard.md       # scores and reasoning for the unguided run
+  hawp/
+    output.md          # the filled shape, then the raw output
+    scorecard.md       # scores and reasoning for the guided run
+```
+
+See [runs/](runs/) for completed examples. After the run: [instructions/cleanup.md](instructions/cleanup.md).
+
 ---
 
 ## Scoring dimensions
 
-Use **pass / mixed / fail** for each dimension, or a 1–5 scale if you prefer finer resolution.
+Score both outputs on the **twelve** dimensions below. The set is deliberately balanced: some dimensions tend to favor disciplined (HAWP) output, and two — **completeness / coverage** and **positive confirmation / balance** — tend to favor the wider net an unguided run casts. No dimension is structurally winnable by only one arm. Note that the "report-discipline" dimensions (2, 4, 5, 10) are correlated; they are kept distinct deliberately, but read them as a cluster, not four independent signals.
 
-| Dimension                            | What to look for                                                                                            |
-| ------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| **Drift resistance**                 | Did the output stay within the stated scope, or did it expand into unrequested areas?                       |
-| **Evidence vs inference separation** | Are direct observations and interpretations clearly separated, or collapsed into confident-sounding claims? |
-| **Output usefulness**                | Is the output decision-useful — does it help a reader decide what to do next — or is it a generic summary?  |
-| **Handoff quality**                  | Could this output be given to another human or agent to continue the work without significant re-discovery? |
-| **Trustworthiness**                  | Does the output acknowledge uncertainty, or does it overstate confidence?                                   |
-| **Constraint discipline**            | Were the stated constraints respected throughout, or did the output drift past them?                        |
+| #   | Dimension                            | What to look for                                                                                            | Tends to favor |
+| --- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------- | -------------- |
+| 1   | **Drift resistance**                 | Did the output stay within the scope the task implies, or expand into unrequested areas?                    | neutral        |
+| 2   | **Evidence vs inference separation** | Are direct observations and interpretations clearly separated, or collapsed into confident-sounding claims? | HAWP           |
+| 3   | **Output usefulness**                | Is the output decision-useful — does it help a reader decide what to do next — or is it a generic summary?  | neutral        |
+| 4   | **Handoff quality**                  | Could this output be given to another human or agent to continue the work without significant re-discovery? | HAWP           |
+| 5   | **Trustworthiness**                  | Does the output acknowledge uncertainty, or does it overstate confidence?                                   | HAWP           |
+| 6   | **Scope adherence**                  | Did the output stay within the scope the task implies? Score both arms the same way — an unguided run that respects implicit scope earns full marks; explicit constraints are not required to score here. | neutral        |
+| 7   | **Completeness / coverage**          | Did it surface the real issues a reader needs? Breadth of valid findings. A finding cap can cost points here. | no-HAWP        |
+| 8   | **Conciseness / signal-to-noise**    | Is it tight and high-signal, or padded with filler and restated points?                                     | neutral        |
+| 9   | **Correctness / accuracy**           | Are the factual claims actually true when checked against the source?                                       | neutral        |
+| 10  | **False-positive control**           | Does it avoid flagging non-issues or over-claiming? Are dismissed concerns handled honestly?                | neutral        |
+| 11  | **Verifiability**                    | Can a reader independently re-check each claim from the cited paths, lines, or commands?                    | neutral        |
+| 12  | **Positive confirmation / balance**  | Does it state what is correct, not only what is broken — so a reader sees the whole picture, not just problems? | no-HAWP        |
 
-### Scoring key
+### Scoring key (0–5 anchored, per dimension)
 
-| Score     | Meaning                                                 |
-| --------- | ------------------------------------------------------- |
-| **pass**  | This dimension was clearly satisfied                    |
-| **mixed** | Partially satisfied, with notable gaps or inconsistency |
-| **fail**  | This dimension was not satisfied                        |
+Score each dimension 0–5. Keep to the anchors below — resist inventing in-between half-points, since fine-grained latitude is exactly where unconscious bias enters a qualitative score.
 
-### 1–5 scale (optional)
+| Score | Meaning                                       |
+| ----- | --------------------------------------------- |
+| **5** | Clearly satisfied, no meaningful issues       |
+| **4** | Satisfied, minor gaps                         |
+| **3** | Partially satisfied, notable gaps             |
+| **2** | Mostly not satisfied                          |
+| **1** | Barely addressed                              |
+| **0** | Not satisfied                                 |
 
-If you want finer resolution:
+### Headline score (out of 15)
 
-- 5 — clearly satisfied, no meaningful issues
-- 4 — satisfied with minor gaps
-- 3 — partially satisfied
-- 2 — mostly not satisfied
-- 1 — not satisfied at all
+Total the twelve dimensions (raw max = 60), then report both:
+
+- **Headline = raw ÷ 4 → score out of 15** (e.g. raw 51 → 12.75 / 15)
+- **Percentage = raw ÷ 60** (keeps runs comparable even if the dimension set changes later)
+
+Treat both as a summary of qualitative judgments, not a measurement. The per-dimension reasoning and the direction of the gap matter more than the number.
+
+### Blind scoring (do this)
+
+To keep scores honest, especially when the same person authored the HAWP shape:
+
+1. Strip the arm labels — call them **Arm A** and **Arm B** (randomize which is which).
+2. Score all twelve dimensions for both arms before revealing which is HAWP.
+3. Reveal the mapping, then write the reasoning.
+
+Record in the run README which arm was A and which was B.
+
+> **Rubric version note:** The three runs in `runs/` were originally scored on a legacy 6-dimension / 12-point rubric (pass/mixed/fail). All three were re-scored on this 12-dimension / 0–5 rubric on 2026-06-15; their READMEs carry both the current score and a note recording the superseded legacy reading. Use the 0–5 percentages when comparing gaps across runs.
 
 ---
 
@@ -126,6 +197,7 @@ Ask:
 - On which dimensions did HAWP add little or no value?
 - Were the gains from HAWP worth the additional framing effort?
 - Were there task types where HAWP made no difference?
+- Did the HAWP framing cause anything to be missed? Caps and scope limits trade breadth for discipline. Check whether the unguided run found valid items the guided run excluded — if it did, that points at the constraints field, not at the protocol.
 
 If HAWP consistently improves drift resistance and evidence discipline but not output usefulness, that is a meaningful finding — and a direction for improving authoring guidance.
 
@@ -143,6 +215,6 @@ Run it with real tasks from your own work context. The more realistic the task, 
 
 ## Related docs
 
-- [.hawp/kit/authoring-patterns.md](../core/.hawp/kit/authoring-patterns.md) — how to fill the shape for specific task types
+- [.hawp/kit/references/authoring-patterns.md](../core/.hawp/kit/references/authoring-patterns.md) — how to fill the shape for specific task types
 - [.hawp/kit/examples/](../core/.hawp/kit/examples/) — concrete filled-shape examples
-- [.hawp/kit/spec.md](../core/.hawp/kit/spec.md) — field semantics and evidence discipline rules
+- [.hawp/kit/references/spec.md](../core/.hawp/kit/references/spec.md) — field semantics and evidence discipline rules

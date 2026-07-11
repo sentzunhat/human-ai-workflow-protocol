@@ -358,22 +358,20 @@ These are deferred and not part of v0.1:
 
 ### Owned Files
 
-- `core/install.md`
-- `core/update.md`
-- `core/distribution/sources/install/*.md`
-- `core/distribution/sources/update/*.md`
+- `.hawp/kit/standards/docs/hawp-install-update-safety.md`
+- `.hawp/kit/references/install-update-safety.md`
 - `.hawp/work/active/TASK-026.md`
 
 ### Read-Only Context Files
 
-- `core/distribution/generated/` (generated; for reference only)
+- `.hawp/kit/standards/public/standards/docs/` (mirror only; not normative)
 - `README.md`
-- `.github/` (instruction files)
+- `.github/instructions/` (instruction files)
 
 ### Do-Not-Touch Files
 
-- `librarian/` (separate CLI concern)
-- `shared_standards/` (separate standards concern)
+- `librarian/` (separate tooling lane)
+- `.hawp/kit/standards/public/exports/machine-readable/` (lineage metadata)
 
 ### Locked / Reserved Files
 
@@ -381,8 +379,8 @@ These are deferred and not part of v0.1:
 
 ### Changed Files
 
-- `core/install.md` — corrected branch handling
-- `core/update.md` — clarified validation step
+- `.hawp/kit/standards/docs/hawp-install-update-safety.md` — aligned install/update boundaries
+- `.hawp/kit/references/install-update-safety.md` — points to canonical doc
 ```
 
 ---

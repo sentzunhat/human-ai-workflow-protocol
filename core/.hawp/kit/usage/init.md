@@ -7,9 +7,9 @@ This repository uses HAWP as a structured workflow protocol for shaping work.
 The HAWP v0.1 protocol definition lives in:
 
 - [README.md](../README.md)
-- [spec.md](../spec.md)
+- [references/spec.md](../references/spec.md)
 - [types/shape.ts](../types/shape.ts)
-- [authoring-patterns.md](../authoring-patterns.md)
+- [references/authoring-patterns.md](../references/authoring-patterns.md)
 
 Use those documents as the protocol source of truth.
 This repo-local setup is downstream usage guidance, not a protocol redesign.
@@ -73,11 +73,11 @@ Save reports over time in [../../work/status](../../work/status) using the dated
 
 ## Intake Workflow
 
-When using HAWP for active task or bug tracking, [intake-workflow.md](intake-workflow.md) describes the operating loop: intake → analyze → plan → review gate → implement → verify → close.
+When using HAWP for active task or bug tracking, [intake-workflow.md](intake-workflow.md) describes the operating loop: intake → investigate → plan → review gate → implement → verify → close. Every incoming item becomes an investigation task first, and every item gets a plan before implementation.
 Track active and recently closed coordination in [../../work/BACKLOG.md](../../work/BACKLOG.md), and keep full history in `../../work/closed/YYYY/MM/DD/`. Use [../templates/intake-plan.md](../templates/intake-plan.md) for plan files saved to `../../work/active/`.
 This is optional. Not all HAWP usage requires tracked work items.
 
 ## Guardrail ADR
 
-For improvement work that should preserve HAWP's lean scope, see `../../work/decisions/` for the Guardrail ADR.
-It frames review and adoption improvements as optional patterns, examples, and workflow discipline rather than schema expansion.
+For improvement work that should preserve HAWP's lean scope, read the stable [guardrail-adr.md](guardrail-adr.md) reference.
+It frames review and adoption improvements as optional patterns, examples, and workflow discipline rather than schema expansion. The dated work history remains archival context, not the onboarding path.
