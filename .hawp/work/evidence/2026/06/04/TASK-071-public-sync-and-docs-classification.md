@@ -4,8 +4,8 @@ Date: 2026-06-04
 
 ## Scope
 
-- Source standards: `/Users/beltrd/Desktop/projects/sentzunhat/docs/standards/public/**`
-- Source docs: `/Users/beltrd/Desktop/projects/sentzunhat/docs/docs/**`
+- Source standards: `<sentzunhat>/docs/standards/public/**`
+- Source docs: `<sentzunhat>/docs/docs/**`
 - Destination: `core/.hawp/kit/standards/public/**`
 
 ## Direct Evidence

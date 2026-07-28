@@ -150,13 +150,13 @@ Regenerate outputs using distribution build after source and composition changes
 - [ ] Research evidence for: Type safety remains intact after composition changes.
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] Generated files reflect source + composition updates.
+- [x] Generated files reflect source + composition updates. — unproven: evidence not recorded at close (annotated 2026-07-20)
       **Evidence:** Ran `npm run distribution:build` in `librarian/`; 4/4 generated files updated.
-- [x] Generated script blocks remain branch-correct for main and dev.
+- [x] Generated script blocks remain branch-correct for main and dev. — unproven: evidence not recorded at close (annotated 2026-07-20)
       **Evidence:** Verified generated files contain `REF="main"` in main guides and `REF="dev"` in dev guides; script headings are now `Command (Copy/Paste)`.
-- [x] Distribution validation succeeds.
+- [x] Distribution validation succeeds. — unproven: evidence not recorded at close (annotated 2026-07-20)
       **Evidence:** Ran `npm run distribution:validate` in `librarian/`; output: `distribution validation passed: generated outputs are current`.
-- [x] Type safety remains intact after composition changes.
+- [x] Type safety remains intact after composition changes. — unproven: evidence not recorded at close (annotated 2026-07-20)
       **Evidence:** Ran `npm run typecheck` in `librarian/`; completed with no TypeScript errors.
 
 ## Close Checklist

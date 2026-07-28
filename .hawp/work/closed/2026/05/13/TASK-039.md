@@ -179,7 +179,7 @@ Keep edits minimal and path-focused. Do not change semantics of source-repo-only
 - [ ] Research evidence for: TASK-038 artifacts use consistent `.hawp` paths.
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] No unintended `core/.hawp/` remains in downstream-target guidance locations.
+- [x] No unintended `core/.hawp/` remains in downstream-target guidance locations. — unproven: evidence not recorded at close (annotated 2026-07-20)
       **Evidence:** `grep_search` found no matches in:
   - `.hawp/kit/instructions/da-file-tracking.md`
   - `core/.hawp/kit/instructions/da-file-tracking.md`
@@ -188,13 +188,13 @@ Keep edits minimal and path-focused. Do not change semantics of source-repo-only
   - `core/.hawp/kit/templates/work-item-files.md`
   - `core/.hawp/kit/templates/adr-template.md`
 
-- [ ] Validation script runtime execution via npm.
+- [ ] Validation script runtime execution via npm. — unproven: evidence not recorded at close (annotated 2026-07-20)
       **NOT YET VERIFIED — reason:** terminal environment lacks npm (`env: npm: No such file or directory`).
       **Direct evidence available instead:**
   - Type check diagnostics for `librarian/scripts/distribution/validate/index.ts` report no errors.
   - `git diff --name-status` confirms guard file modified.
 
-- [x] TASK-038 artifacts use consistent `.hawp` paths.
+- [x] TASK-038 artifacts use consistent `.hawp` paths. — unproven: evidence not recorded at close (annotated 2026-07-20)
       **Evidence:** `grep_search` found no `.awp/` matches in:
   - `.hawp/work/active/TASK-038.md`
   - `.hawp/work/closed/2026/05/13/TASK-038.md`

@@ -49,9 +49,9 @@ Script implemented across 7 files (index, cli, script + 3 validations + 1 test).
 - [ ] Research evidence for: `npm --prefix librarian run kit:validate` — runs and reports 7 real kit issues (expected; tracked se
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] `npm --prefix librarian run typecheck` — clean
-- [x] `npm --prefix librarian run validate` — PASS, 0 issues
-- [x] `npm --prefix librarian run kit:validate` — runs and reports 7 real kit issues (expected; tracked separately)
+- [x] `npm --prefix librarian run typecheck` — clean — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] `npm --prefix librarian run validate` — PASS, 0 issues — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] `npm --prefix librarian run kit:validate` — runs and reports 7 real kit issues (expected; tracked separately) — unproven: evidence not recorded at close (annotated 2026-07-20)
 
 ## Close Checklist
 

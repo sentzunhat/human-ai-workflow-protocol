@@ -2,7 +2,7 @@
 > @hawp/librarian@0.0.0 validate:workflow
 > tsx scripts/validate-hawp-workflow/index.ts
 
-Validating: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work
+Validating: <project-root>/.hawp/work
 
 ======================================================================
 HAWP Workflow Validation Report
@@ -35,24 +35,24 @@ Checking 47 plan file(s):
   Close Checklist: 32/47
 
   [WARN] Legacy untyped closed files (before 2026-05-10 — tolerated, visible):
-    2026-04-26-hawp-adr-template-review: legacy file without TASK-/BUG-style ID  (2026-04-26) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/04/26/2026-04-26-hawp-adr-template-review.md]
+    2026-04-26-hawp-adr-template-review: legacy file without TASK-/BUG-style ID  (2026-04-26) [source: <project-root>/.hawp/work/closed/2026/04/26/2026-04-26-hawp-adr-template-review.md]
 
   [WARN] Legacy files missing sections (before 2026-05-10 — tolerated):
-    BUG-001: missing Outcome, Verification, Close Checklist  (2026-04-30) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-bug-001-update-flow-migrate-old-layouts.md]
-    TASK-001: missing Outcome, Close Checklist  (2026-04-30) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-001-parallel-work-guardrails-adr.md]
-    TASK-002: missing Outcome, Close Checklist  (2026-04-30) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-002-intake-template-adr.md]
-    TASK-003: missing Outcome, Close Checklist  (2026-04-30) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md]
-    TASK-004: missing Outcome, Verification, Close Checklist  (2026-04-30) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-004-readme-ux-refactor.md]
-    BUG-002: missing Outcome, Verification, Close Checklist  (2026-05-01) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/05/01/2026-05-01-bug-002-update-flow-clean-legacy-work-folders.md]
-    BUG-003: missing Outcome, Verification, Close Checklist  (2026-05-01) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/05/01/2026-05-01-bug-003-closed-plan-reconciliation-and-doc-sync.md]
-    BUG-004: missing Outcome, Verification, Close Checklist  (2026-05-01) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/05/01/2026-05-01-bug-004-reconcile-done-active-plans-by-id-and-date.md]
-    BUG-005: missing Outcome, Verification, Close Checklist  (2026-05-01) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/05/01/2026-05-01-bug-005-install-update-alignment.md]
-    TASK-005: missing Close Checklist  (2026-05-02) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/05/02/TASK-005.md]
-    TASK-006: missing Outcome, Verification, Close Checklist  (2026-05-02) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/05/02/TASK-006.md]
-    TASK-007: missing Close Checklist  (2026-05-02) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/05/02/TASK-007.md]
-    TASK-008: missing Close Checklist  (2026-05-02) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/05/02/TASK-008.md]
-    TASK-009: missing Close Checklist  (2026-05-02) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/05/02/TASK-009.md]
-    TASK-010: missing Outcome, Verification, Close Checklist  (2026-05-03) [source: /Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/.hawp/work/closed/2026/05/03/TASK-010.md]
+    BUG-001: missing Outcome, Verification, Close Checklist  (2026-04-30) [source: <project-root>/.hawp/work/closed/2026/04/30/2026-04-30-bug-001-update-flow-migrate-old-layouts.md]
+    TASK-001: missing Outcome, Close Checklist  (2026-04-30) [source: <project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-001-parallel-work-guardrails-adr.md]
+    TASK-002: missing Outcome, Close Checklist  (2026-04-30) [source: <project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-002-intake-template-adr.md]
+    TASK-003: missing Outcome, Close Checklist  (2026-04-30) [source: <project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md]
+    TASK-004: missing Outcome, Verification, Close Checklist  (2026-04-30) [source: <project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-004-readme-ux-refactor.md]
+    BUG-002: missing Outcome, Verification, Close Checklist  (2026-05-01) [source: <project-root>/.hawp/work/closed/2026/05/01/2026-05-01-bug-002-update-flow-clean-legacy-work-folders.md]
+    BUG-003: missing Outcome, Verification, Close Checklist  (2026-05-01) [source: <project-root>/.hawp/work/closed/2026/05/01/2026-05-01-bug-003-closed-plan-reconciliation-and-doc-sync.md]
+    BUG-004: missing Outcome, Verification, Close Checklist  (2026-05-01) [source: <project-root>/.hawp/work/closed/2026/05/01/2026-05-01-bug-004-reconcile-done-active-plans-by-id-and-date.md]
+    BUG-005: missing Outcome, Verification, Close Checklist  (2026-05-01) [source: <project-root>/.hawp/work/closed/2026/05/01/2026-05-01-bug-005-install-update-alignment.md]
+    TASK-005: missing Close Checklist  (2026-05-02) [source: <project-root>/.hawp/work/closed/2026/05/02/TASK-005.md]
+    TASK-006: missing Outcome, Verification, Close Checklist  (2026-05-02) [source: <project-root>/.hawp/work/closed/2026/05/02/TASK-006.md]
+    TASK-007: missing Close Checklist  (2026-05-02) [source: <project-root>/.hawp/work/closed/2026/05/02/TASK-007.md]
+    TASK-008: missing Close Checklist  (2026-05-02) [source: <project-root>/.hawp/work/closed/2026/05/02/TASK-008.md]
+    TASK-009: missing Close Checklist  (2026-05-02) [source: <project-root>/.hawp/work/closed/2026/05/02/TASK-009.md]
+    TASK-010: missing Outcome, Verification, Close Checklist  (2026-05-03) [source: <project-root>/.hawp/work/closed/2026/05/03/TASK-010.md]
 
 3. EVIDENCE INTEGRITY
 ----------------------------------------------------------------------

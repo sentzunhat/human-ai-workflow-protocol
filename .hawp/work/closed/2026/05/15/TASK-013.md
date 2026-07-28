@@ -312,10 +312,10 @@ TASK-012 (workflow validation script) is currently in-progress and uses sequenti
 
 **Evidence:**
 - `x] Plan written
-- [x] Approved / awaiting review
-- [x] Implemented
-- [x] Verified
-- [x] Closed — 2026-05-15:** Confirmed — Phase 1 foundation is solid and safe for Phase 2 adoption
+- [x] Approved / awaiting review — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Implemented — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Verified — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Closed — 2026-05-15:** Confirmed — Phase 1 foundation is solid and safe for Phase 2 adoption — unproven: evidence not recorded at close (annotated 2026-07-20)
 
 ---
 

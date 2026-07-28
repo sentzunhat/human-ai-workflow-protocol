@@ -35,8 +35,8 @@ All 7 issues resolved. `kit:validate` now reports: ✓ 3 checks passed, 0 issues
 - [ ] Research evidence for: `npm --prefix librarian run validate` → PASS
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] `npm --prefix librarian run kit:validate` → 0 issues
-- [x] `npm --prefix librarian run validate` → PASS
+- [x] `npm --prefix librarian run kit:validate` → 0 issues — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] `npm --prefix librarian run validate` → PASS — unproven: evidence not recorded at close (annotated 2026-07-20)
 
 ## Close Checklist
 

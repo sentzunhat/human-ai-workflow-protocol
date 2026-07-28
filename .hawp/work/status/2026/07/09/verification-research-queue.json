@@ -2,602 +2,602 @@
   {
     "itemId": "2026-04-30-task-001-parallel-work-guardrails-adr",
     "claim": "Pattern doc exists with simple rules and examples.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-001-parallel-work-guardrails-adr.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-001-parallel-work-guardrails-adr.md",
     "lineNumber": 14,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "2026-04-30-task-001-parallel-work-guardrails-adr",
     "claim": "Intake template includes Work Coordination section.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-001-parallel-work-guardrails-adr.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-001-parallel-work-guardrails-adr.md",
     "lineNumber": 15,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "2026-04-30-task-001-parallel-work-guardrails-adr",
     "claim": "At least one sample plan demonstrates overlap detection and hold behavior.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-001-parallel-work-guardrails-adr.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-001-parallel-work-guardrails-adr.md",
     "lineNumber": 16,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "2026-04-30-task-001-parallel-work-guardrails-adr",
     "claim": "Workflow text still preserves lean HAWP scope (no PM system expansion).",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-001-parallel-work-guardrails-adr.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-001-parallel-work-guardrails-adr.md",
     "lineNumber": 17,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "2026-04-30-task-003-kit-work-restructure-adr",
     "claim": "`find core/.hawp -maxdepth 1` shows only `LICENSE`, `kit`, `work`.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md",
     "lineNumber": 18,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "2026-04-30-task-003-kit-work-restructure-adr",
     "claim": "`grep -r \"\\.hawp/usage\" --exclude-dir=.git` returns only matches inside `core/.hawp/work/status/` or",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md",
     "lineNumber": 19,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "2026-04-30-task-003-kit-work-restructure-adr",
     "claim": "`grep -r \"\\.hawp/templates\\|\\.hawp/patterns\\|\\.hawp/reviews\\|\\.hawp/types\\|\\.hawp/examples\" --exclud",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md",
     "lineNumber": 20,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "2026-04-30-task-003-kit-work-restructure-adr",
     "claim": "`find core/.hawp -name .gitkeep` returns no results.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md",
     "lineNumber": 21,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "2026-04-30-task-003-kit-work-restructure-adr",
     "claim": "`core/.hawp/kit/templates/backlog.md` is empty/template-shaped (no real done rows).",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md",
     "lineNumber": 22,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "2026-04-30-task-003-kit-work-restructure-adr",
     "claim": "`core/install.md` and `core/update.md` copy kit files via `kit/` paths.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/04/30/2026-04-30-task-003-kit-work-restructure-adr.md",
     "lineNumber": 23,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-023",
     "claim": "Discoverability pointers added to root docs.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/11/TASK-023.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/11/TASK-023.md",
     "lineNumber": 12,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-023",
     "claim": "Required verification suite passes after docs change.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/11/TASK-023.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/11/TASK-023.md",
     "lineNumber": 14,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-023",
     "claim": "Docs/link validation command availability checked.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/11/TASK-023.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/11/TASK-023.md",
     "lineNumber": 16,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-024",
     "claim": "Generated files reflect source + composition updates.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/11/TASK-024.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/11/TASK-024.md",
     "lineNumber": 14,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-024",
     "claim": "Generated script blocks remain branch-correct for main and dev.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/11/TASK-024.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/11/TASK-024.md",
     "lineNumber": 16,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-024",
     "claim": "Distribution validation succeeds.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/11/TASK-024.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/11/TASK-024.md",
     "lineNumber": 18,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-024",
     "claim": "Type safety remains intact after composition changes.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/11/TASK-024.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/11/TASK-024.md",
     "lineNumber": 20,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "All 7 model files created in `librarian/scripts/backlog-upgrade/models/`",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 38,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "All models export cleanly from index.ts (41 total exports)",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 39,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "No circular dependencies (verified by successful compilation)",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 40,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "TypeScript compiles without errors (`npm run typecheck` passes)",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 41,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "Each model can be imported independently",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 42,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "Documentation comments complete",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 43,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "Hash fields typed as strings (SHA256 hex)",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 44,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "BlockedItem includes all required fields: rule, confidence, candidates, reason, evidence",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 45,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "EvidenceReport includes file hashes, plan hash, validator hashes, idempotency flag",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 46,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "All factory functions create correct objects",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 47,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "All type guards validate at runtime",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 48,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "JSON serialization works for all types",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 49,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "Design alignment 100%:",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 50,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "No conflicts with existing codebase",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 57,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "Type coverage: 100% (all types defined)",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 58,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-029",
     "claim": "Evidence report created: `.hawp/work/evidence/2026/05/12/TASK-029-evidence.md`",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-029.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-029.md",
     "lineNumber": 59,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-030-files",
     "claim": "Required sections added for compatibility\\n- [x] Original artifact body preserved",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/12/TASK-030-files.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/12/TASK-030-files.md",
     "lineNumber": 8,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-030-files",
     "claim": "Required sections added for compatibility\\n- [x] Original artifact body preserved",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-030-files.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-030-files.md",
     "lineNumber": 8,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-033",
     "claim": "distribution build rewrites generated files from updated sources.  ",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-033.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-033.md",
     "lineNumber": 26,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-033",
     "claim": "distribution validate passes with no drift.  ",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-033.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-033.md",
     "lineNumber": 28,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-033",
     "claim": "generated update-dev/install-dev mention and include local-source mode behavior.  ",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-033.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-033.md",
     "lineNumber": 30,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-033",
     "claim": "default remote mode remains unchanged when local override is not set.  ",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-033.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-033.md",
     "lineNumber": 32,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-033",
     "claim": "end-to-end smoke test passed in temporary repo using generated `update-dev` and local override.  ",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-033.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-033.md",
     "lineNumber": 34,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-033",
     "claim": "Plan written",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-033.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-033.md",
     "lineNumber": 41,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-033",
     "claim": "Approved / auto-approved (low risk)",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-033.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-033.md",
     "lineNumber": 42,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-033",
     "claim": "Implemented",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-033.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-033.md",
     "lineNumber": 43,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-033",
     "claim": "Verified",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-033.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-033.md",
     "lineNumber": 44,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-033",
     "claim": "Closed",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-033.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-033.md",
     "lineNumber": 45,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-039",
     "claim": "No unintended `core/.hawp/` remains in downstream-target guidance locations.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-039.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-039.md",
     "lineNumber": 12,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-039",
     "claim": "Validation script runtime execution via npm.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-039.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-039.md",
     "lineNumber": 21,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-039",
     "claim": "TASK-038 artifacts use consistent `.hawp` paths.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/13/TASK-039.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/13/TASK-039.md",
     "lineNumber": 27,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-028",
     "claim": "Dry-run text output renders structured report from real backlog scan.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/14/TASK-028.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/14/TASK-028.md",
     "lineNumber": 21,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-028",
     "claim": "Dry-run JSON output renders parseable structured report.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/14/TASK-028.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/14/TASK-028.md",
     "lineNumber": 22,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-028",
     "claim": "Rule evaluator behaviors covered by 15 unit tests.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/14/TASK-028.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/14/TASK-028.md",
     "lineNumber": 23,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-028",
     "claim": "False-positive signal improved after heuristic refinement (blocked count reduced).",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/14/TASK-028.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/14/TASK-028.md",
     "lineNumber": 24,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-028",
     "claim": "Expanded fixture coverage passes (13 tests).",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/14/TASK-028.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/14/TASK-028.md",
     "lineNumber": 25,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-028",
     "claim": "A4/A5 closed-plan scaffolding behavior covered (14 tests).",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/14/TASK-028.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/14/TASK-028.md",
     "lineNumber": 26,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-028",
     "claim": "Heuristic tightening complete: A4/A5/A7 skip legacy files (15/15 passing).",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/14/TASK-028.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/14/TASK-028.md",
     "lineNumber": 27,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-013",
     "claim": "Approved / awaiting review",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/15/TASK-013.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/15/TASK-013.md",
     "lineNumber": 28,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-013",
     "claim": "Implemented",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/15/TASK-013.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/15/TASK-013.md",
     "lineNumber": 29,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-013",
     "claim": "Verified",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/15/TASK-013.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/15/TASK-013.md",
     "lineNumber": 30,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-013",
     "claim": "Closed — 2026-05-15:** Confirmed — Phase 1 foundation is solid and safe for Phase 2 adoption",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/05/15/TASK-013.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/05/15/TASK-013.md",
     "lineNumber": 31,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-069",
     "claim": "New docs standards files were added under `core/.hawp/kit/standards/docs/`.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/06/04/TASK-069.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/06/04/TASK-069.md",
     "lineNumber": 14,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-069",
     "claim": "Core standards index references the new docs category and canonical standard.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/06/04/TASK-069.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/06/04/TASK-069.md",
     "lineNumber": 16,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-069",
     "claim": "Private/public review classification is documented with direct absorb vs adapt-required outputs.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/06/04/TASK-069.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/06/04/TASK-069.md",
     "lineNumber": 18,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-069",
     "claim": "Follow-up work item created for private workflow adaptation.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/06/04/TASK-069.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/06/04/TASK-069.md",
     "lineNumber": 20,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-071",
     "claim": "Source and destination file counts match for full public mirror.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/06/04/TASK-071.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/06/04/TASK-071.md",
     "lineNumber": 14,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-071",
     "claim": "Mirrored destination contains expected category paths and files.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/06/04/TASK-071.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/06/04/TASK-071.md",
     "lineNumber": 16,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-071",
     "claim": "Standards index documents the mirrored subtree.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/06/04/TASK-071.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/06/04/TASK-071.md",
     "lineNumber": 18,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-071",
     "claim": "Docs folder was reviewed and classified with public-boundary outcome.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/06/04/TASK-071.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/06/04/TASK-071.md",
     "lineNumber": 20,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-070",
     "claim": "Audit evidence created: `.hawp/work/evidence/2026/06/06/TASK-070-audit.md` — contains repo-root proo",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/06/07/TASK-070.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/06/07/TASK-070.md",
     "lineNumber": 14,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-070",
     "claim": "Implementation change: `core/providers/shared/behaviors/hawp-intake.md` — wording updated.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/06/07/TASK-070.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/06/07/TASK-070.md",
     "lineNumber": 15,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-070",
     "claim": "BACKLOG updated to reflect the closed plan file location.",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/06/07/TASK-070.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/06/07/TASK-070.md",
     "lineNumber": 16,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-070",
     "claim": "Commits & staged-path proof: recorded inline below (commit SHAs and changed files).",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/06/07/TASK-070.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/06/07/TASK-070.md",
     "lineNumber": 17,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-082",
     "claim": "`npm --prefix librarian run validate` → VALIDATION PASS, 0 issues, 1 legacy warning (pre-existing)",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/02/TASK-082.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/02/TASK-082.md",
     "lineNumber": 12,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-082",
     "claim": "`ls librarian/scripts/` shows `work-validate/`, `work-normalize/`, `hawp-check/`",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/02/TASK-082.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/02/TASK-082.md",
     "lineNumber": 13,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-082",
     "claim": "`npm --prefix librarian run work:validate` resolves correctly (typecheck passes)",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/02/TASK-082.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/02/TASK-082.md",
     "lineNumber": 14,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-083",
     "claim": "`npm --prefix librarian run typecheck` — clean",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/02/TASK-083.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/02/TASK-083.md",
     "lineNumber": 12,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-083",
     "claim": "`npm --prefix librarian run validate` — PASS, 0 issues",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/02/TASK-083.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/02/TASK-083.md",
     "lineNumber": 13,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-083",
     "claim": "`npm --prefix librarian run kit:validate` — runs and reports 7 real kit issues (expected; tracked se",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/02/TASK-083.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/02/TASK-083.md",
     "lineNumber": 14,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-084",
     "claim": "`npm --prefix librarian run typecheck` — clean",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/02/TASK-084.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/02/TASK-084.md",
     "lineNumber": 14,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-084",
     "claim": "`npm --prefix librarian run validate` — PASS, 0 issues",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/02/TASK-084.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/02/TASK-084.md",
     "lineNumber": 15,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-084",
     "claim": "`npm --prefix librarian run kit:normalize` — reports no normalization needed (kit is already clean)",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/02/TASK-084.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/02/TASK-084.md",
     "lineNumber": 16,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-084",
     "claim": "All kit-normalize tests pass",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/02/TASK-084.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/02/TASK-084.md",
     "lineNumber": 17,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-085",
     "claim": "`npm --prefix librarian run kit:validate` → 0 issues",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/02/TASK-085.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/02/TASK-085.md",
     "lineNumber": 10,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "TASK-085",
     "claim": "`npm --prefix librarian run validate` → PASS",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/02/TASK-085.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/02/TASK-085.md",
     "lineNumber": 11,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "0e1c4afa-9668-4d61-b5b6-1e27be42ca23",
     "claim": "Full validate suite passes with short-display rows live in BACKLOG.md:",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/03/0e1c4afa-9668-4d61-b5b6-1e27be42ca23.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/03/0e1c4afa-9668-4d61-b5b6-1e27be42ca23.md",
     "lineNumber": 11,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "2bcbf995-983a-4c23-ab2b-2703ef50d477",
     "claim": "Downstream simulation: copied `core/.hawp/bin/hawp` into a bare temp repo —",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/03/2bcbf995-983a-4c23-ab2b-2703ef50d477.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/03/2bcbf995-983a-4c23-ab2b-2703ef50d477.md",
     "lineNumber": 8,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   },
   {
     "itemId": "582904f4-1c60-41ba-a357-15f22d7017c7",
     "claim": "`hawp uuid`, `hawp uuid --short`, `hawp generate uuid`, `hawp generate uuid --short`",
-    "filePath": "/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/07/03/582904f4-1c60-41ba-a357-15f22d7017c7.md",
+    "filePath": "<project-root>/.hawp/work/closed/2026/07/03/582904f4-1c60-41ba-a357-15f22d7017c7.md",
     "lineNumber": 8,
     "recommendedAction": "Research concrete supporting evidence for this verification claim, then update the checklist line with Evidence: ... or mark it explicitly unproven."
   }

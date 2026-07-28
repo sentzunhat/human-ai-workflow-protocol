@@ -119,7 +119,7 @@ Normalized as historical file-tracking artifact; retained original content and a
 - [ ] Research evidence for: Required sections added for compatibility\n- [x] Original artifact body preserved
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] Required sections added for compatibility\n- [x] Original artifact body preserved
+- [x] Required sections added for compatibility\n- [x] Original artifact body preserved — unproven: evidence not recorded at close (annotated 2026-07-20)
 
 ## Close Checklist
 

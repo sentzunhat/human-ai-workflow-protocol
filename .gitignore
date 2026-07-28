@@ -16,7 +16,7 @@ librarian/build-src-esm/
 librarian/coverage/
 librarian/.tsx-cache/
 librarian/.turbo/
-golang/bin/
+librarian/go/bin/
 
 # Portable private/local markers (any file in the repo)
 *.local.md
@@ -27,3 +27,7 @@ golang/bin/
 .hawp/work/logs/
 .hawp/work/**/private/
 .hawp/work/**/local/
+.hawp/db/
+librarian/go/hawp
+librarian/go/hawp-test
+librarian/go/hawp-test.sha256

@@ -57,8 +57,9 @@ export function checkClosedTaskCompleteness(
 
   for (const { filePath, date } of entries) {
     const filename = filePath.split("/").pop() ?? "";
+    const content = readFileSync(filePath, "utf-8");
 
-    const classification = classifyClosedFile(filename, date);
+    const classification = classifyClosedFile(filename, date, content);
 
     if (classification.kind === "supporting") {
       result.skipped++;
@@ -92,7 +93,6 @@ export function checkClosedTaskCompleteness(
     }
 
     result.total++;
-    const content = readFileSync(filePath, "utf-8");
     const headingMatches = findRequiredHeadingMatches(content);
     const missingSections: string[] = [];
 
@@ -161,11 +161,21 @@ export function checkClosedTaskCompleteness(
 function classifyClosedFile(
   filename: string,
   date: string,
+  content: string,
 ): ClosedFileClassification {
   const nameWithoutExt = filename.replace(/\.md$/i, "");
   const nameLower = nameWithoutExt.toLowerCase();
   const id = extractIdFromFilename(nameWithoutExt);
   const isLegacy = !date || date < LEGACY_CUTOFF;
+
+  // Shared closed record: one audit session can close several backlog rows
+  // at once (see backlog-consistency.ts's recordListsId). Recognized by a
+  // "**Closes:** `id1`, `id2`, ..." line naming every row it covers — that
+  // line IS its typing, even though the filename itself carries no single
+  // TASK-/BUG-/UUID-style ID.
+  if (/^\*\*Closes:\*\*/m.test(content)) {
+    return { kind: "plan", id: nameWithoutExt };
+  }
 
   if (nameLower.startsWith("backlog")) {
     return {

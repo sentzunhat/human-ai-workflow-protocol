@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import type { BacklogCheck, BacklogRow } from "../types";
 import { extractIdFromFilename, idsMatch } from "./id-parser";
@@ -116,6 +116,22 @@ export function checkBacklogConsistency(
 }
 
 /**
+ * True when a closed record's content names the given ID as a backtick'd
+ * token (e.g. "`e2c4f9g5`"), the convention this repo uses in a shared
+ * closed record's "Closes" list to name every backlog row it covers.
+ */
+function recordListsId(filePath: string, id: string): boolean {
+  try {
+    const content = readFileSync(filePath, "utf-8");
+    const pattern = new RegExp(`\`${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\``, "i");
+    return pattern.test(content);
+  } catch (error) {
+    warn(`error while reading closed record ${filePath}`, error);
+    return false;
+  }
+}
+
+/**
  * Recursively searches for a plan file in closed/ directory
  */
 function findClosedFile(closedDir: string, id: string): boolean {
@@ -155,6 +171,14 @@ function findClosedFile(closedDir: string, id: string): boolean {
             }
             const fileId = extractIdFromFilename(file.replace(/\.md$/i, ""));
             if (fileId && idsMatch(id, fileId)) {
+              return true;
+            }
+            // A single closed record can document several backlog rows at
+            // once (e.g. one audit session that fixed 7 findings) — a
+            // filename can't literally contain every row's ID, so also
+            // accept a record whose CONTENT names the ID (as a backtick'd
+            // token, to avoid matching arbitrary substrings in prose).
+            if (recordListsId(join(dayPath, file), id)) {
               return true;
             }
           }

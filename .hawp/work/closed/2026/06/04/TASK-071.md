@@ -25,8 +25,8 @@ Prior work promoted selected public standards, but not an explicit full-file mir
 **Directly verified:**
 
 - Full file inventory was captured for:
-  - `/Users/beltrd/Desktop/projects/sentzunhat/docs/standards/public/**`
-  - `/Users/beltrd/Desktop/projects/sentzunhat/docs/docs/**`
+  - `<sentzunhat>/docs/standards/public/**`
+  - `<sentzunhat>/docs/docs/**`
 - `standards/public/**` contains additional public assets (context and exports) not yet mirrored in core.
 - `docs/docs/**` contains project docs without explicit public/private boundaries in path naming.
 
@@ -127,7 +127,7 @@ Do not mirror `standards/private/**` or `standards/project-specific/**`. For `do
 
 ## Outcome (filled at close)
 
-- Mirrored all files from `/Users/beltrd/Desktop/projects/sentzunhat/docs/standards/public/**` into `core/.hawp/kit/standards/public/**` while preserving directory structure.
+- Mirrored all files from `<sentzunhat>/docs/standards/public/**` into `core/.hawp/kit/standards/public/**` while preserving directory structure.
 - Updated `core/.hawp/kit/standards/README.md` with a `public/` mirror section that distinguishes full-source mirror content from canonical promoted standards categories.
 - Recorded a full audit artifact with source/destination counts and `docs/docs/**` classification.
 
@@ -145,13 +145,13 @@ Do not mirror `standards/private/**` or `standards/project-specific/**`. For `do
 - [ ] Research evidence for: Docs folder was reviewed and classified with public-boundary outcome.
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] Source and destination file counts match for full public mirror.
+- [x] Source and destination file counts match for full public mirror. — unproven: evidence not recorded at close (annotated 2026-07-20)
   - **Evidence:** `source_count=32`, `dest_count=32` captured in terminal output and summarized in `.hawp/work/evidence/2026/06/04/TASK-071-public-sync-and-docs-classification.md`.
-- [x] Mirrored destination contains expected category paths and files.
+- [x] Mirrored destination contains expected category paths and files. — unproven: evidence not recorded at close (annotated 2026-07-20)
   - **Evidence:** sample destination list in `.hawp/work/evidence/2026/06/04/TASK-071-public-sync-and-docs-classification.md`.
-- [x] Standards index documents the mirrored subtree.
+- [x] Standards index documents the mirrored subtree. — unproven: evidence not recorded at close (annotated 2026-07-20)
   - **Evidence:** `core/.hawp/kit/standards/README.md` (`public/ (full source mirror)` section).
-- [x] Docs folder was reviewed and classified with public-boundary outcome.
+- [x] Docs folder was reviewed and classified with public-boundary outcome. — unproven: evidence not recorded at close (annotated 2026-07-20)
   - **Evidence:** `.hawp/work/evidence/2026/06/04/TASK-071-public-sync-and-docs-classification.md` (`docs_total_count=119`, `docs_public_path_count=0`).
 
 ## Close Checklist

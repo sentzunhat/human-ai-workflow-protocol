@@ -31,8 +31,8 @@ core/distribution/sources/shared/update.md
 core/update.md
 
 # Files found by ls -la:
-.rw-r--r--@ 29k beltrd 12 May 14:49 core/install.md
-.rw-r--r--  21k beltrd 12 May 13:37 core/update.md
+.rw-r--r--@ 29k <owner> 12 May 14:49 core/install.md
+.rw-r--r--  21k <owner> 12 May 13:37 core/update.md
 
 # No files at repo root:
 ls: install.md: No such file or directory

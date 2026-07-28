@@ -248,13 +248,13 @@ Progress summary (2026-05-14):
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
 - [x] TypeScript compilation passes. **Evidence:** `npm --prefix librarian run typecheck` (clean).
-- [x] Dry-run text output renders structured report from real backlog scan.
-- [x] Dry-run JSON output renders parseable structured report.
-- [x] Rule evaluator behaviors covered by 15 unit tests.
-- [x] False-positive signal improved after heuristic refinement (blocked count reduced).
-- [x] Expanded fixture coverage passes (13 tests).
-- [x] A4/A5 closed-plan scaffolding behavior covered (14 tests).
-- [x] Heuristic tightening complete: A4/A5/A7 skip legacy files (15/15 passing).
+- [x] Dry-run text output renders structured report from real backlog scan. — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Dry-run JSON output renders parseable structured report. — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Rule evaluator behaviors covered by 15 unit tests. — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] False-positive signal improved after heuristic refinement (blocked count reduced). — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Expanded fixture coverage passes (13 tests). — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] A4/A5 closed-plan scaffolding behavior covered (14 tests). — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Heuristic tightening complete: A4/A5/A7 skip legacy files (15/15 passing). — unproven: evidence not recorded at close (annotated 2026-07-20)
   - **Evidence:** `cd librarian && npx --yes tsx --test scripts/backlog-upgrade/__tests__/detection.test.ts scripts/backlog-upgrade/__tests__/script.test.ts scripts/backlog-upgrade/__tests__/cli.test.ts` produces 15/15 PASS.
   - **Heuristic changes:** `isLegacyClosedFile()` checks file path date; `hasStaleTemplateReference()` narrowed to `core/distribution/generated/` and `core/distribution/sources/` patterns only.
   - **Test fixture:** New test `runDetection skips A4/A5/A7 for legacy closed files (pre-2026-05-10)` validates tolerance.

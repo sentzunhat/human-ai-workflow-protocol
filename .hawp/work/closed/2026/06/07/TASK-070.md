@@ -103,10 +103,10 @@ Audit internal standards documents that are currently private or workflow-only a
 - [ ] Research evidence for: Commits & staged-path proof: recorded inline below (commit SHAs and changed files).
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] Audit evidence created: `.hawp/work/evidence/2026/06/06/TASK-070-audit.md` — contains repo-root proof and short file-level findings.
-- [x] Implementation change: `core/providers/shared/behaviors/hawp-intake.md` — wording updated.
-- [x] BACKLOG updated to reflect the closed plan file location.
-- [x] Commits & staged-path proof: recorded inline below (commit SHAs and changed files).
+- [x] Audit evidence created: `.hawp/work/evidence/2026/06/06/TASK-070-audit.md` — contains repo-root proof and short file-level findings. — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Implementation change: `core/providers/shared/behaviors/hawp-intake.md` — wording updated. — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] BACKLOG updated to reflect the closed plan file location. — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Commits & staged-path proof: recorded inline below (commit SHAs and changed files). — unproven: evidence not recorded at close (annotated 2026-07-20)
 
 **Evidence:**
 

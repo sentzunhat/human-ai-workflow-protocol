@@ -141,7 +141,12 @@ export const parseBacklog = (
       }
 
       const normalizedId = normalizeHeader(rawId);
-      if (normalizedId === "id" || normalizedId === "legacy id") {
+      if (
+        normalizedId === "id" ||
+        normalizedId === "legacy id" ||
+        rawId.startsWith("**") ||
+        /^[✓⏹️]+$/u.test(rawId)
+      ) {
         continue;
       }
 

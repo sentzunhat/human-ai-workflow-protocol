@@ -4,7 +4,12 @@ HAWP maintenance and documentation generation tooling.
 
 ## Purpose
 
-The `librarian` folder contains scripts that power HAWP packaging, validation, and workflow integrity checks. It is designed to be extensible for future CLI commands and automation integration.
+The `librarian` folder is the single librarian home. It holds two lanes:
+
+- **npm/TypeScript tooling** (this level) — the current working implementation of packaging, validation, and workflow integrity checks.
+- **Go implementation** ([go/](go/README.md)) — the future installable `hawp` CLI. The TypeScript commands are being ported there phase by phase (see `.hawp/work/notes/2026/07/20/librarian-ts-to-go-port-plan.md`); `make build` in `go/` produces the distributable `go/bin/hawp` binary. The full command taxonomy lives in [go/README.md](go/README.md).
+
+The npm scripts remain canonical until their Go equivalent lands with matching unit tests.
 
 ## Runtime
 
@@ -164,16 +169,20 @@ npm run validate
 
 ## CLI
 
-`./.hawp/bin/hawp` is a thin bash wrapper over these scripts:
+`./.hawp/bin/hawp` is a thin bash wrapper. It prefers the compiled Go binary
+(`librarian/go/bin/hawp`, build with `cd librarian/go && make build`) and
+falls back to these npm scripts when the binary is absent:
 
 ```bash
-./.hawp/bin/hawp kit validate [options]      # scripts/hawp/kit-validate/
-./.hawp/bin/hawp kit normalize [options]     # scripts/hawp/kit-normalize/
-./.hawp/bin/hawp work validate [options]     # scripts/hawp/work-validate/
-./.hawp/bin/hawp work normalize [options]    # scripts/hawp/work-normalize/ raw CLI
+./.hawp/bin/hawp kit validate [options]      # Go; fallback scripts/hawp/kit-validate/
+./.hawp/bin/hawp kit normalize [options]     # Go; fallback scripts/hawp/kit-normalize/
+./.hawp/bin/hawp work validate [options]     # Go; fallback scripts/hawp/work-validate/
+./.hawp/bin/hawp work normalize [options]    # Go; fallback scripts/hawp/work-normalize/ raw CLI
+./.hawp/bin/hawp check                       # Go composite: kit + work + links
+./.hawp/bin/hawp links check                 # Go markdown link check
 ./.hawp/bin/hawp backlog upgrade [options]   # alias for work normalize
-./.hawp/bin/hawp backlog validate [options]  # alias for work validate via scripts/hawp/hawp-check/ (npm: hawp:check)
-./.hawp/bin/hawp uuid [--short]              # generate a work item UUID (npm: uuid)
+./.hawp/bin/hawp backlog validate [options]  # alias for check (npm fallback: work:validate)
+./.hawp/bin/hawp uuid [--short]              # generate a work item UUID
 ```
 
 `npm --prefix librarian run work:normalize` is the apply-and-validate shortcut.
@@ -192,27 +201,10 @@ The librarian architecture supports:
 - **UUID-based work item migration** (extensible id-parser)
 - **Multi-root validation** for monorepo support
 
-## CLI/Binary PoC
+## Go binary
 
-The experimental CLI proof lives under `scripts/hawp-cli-poc/`. It uses a
-Zacatl-aligned folder shape with a thin bin boundary, platform router,
-application command adapter, domain operation, and infrastructure adapter.
-
-```bash
-npm --prefix librarian run cli:poc -- kit validate
-npm --prefix librarian run cli:poc:bundle
-npm --prefix librarian run cli:poc:node -- kit validate
-```
-
-For standalone binaries, use the Node 26 SEA proof:
-
-```bash
-npm --prefix librarian run cli:poc:binary
-npm --prefix librarian run cli:poc:binaries -- --target all
-```
-
-`cli:poc:binary` builds the current host target when the active Node runtime
-supports `--build-sea`. Cross-platform binaries are produced by
-`.github/workflows/hawp-cli-poc-binaries.yml`, which builds one target per
-runner: Linux x64/ARM64, macOS x64/ARM64, and Windows x64/ARM64. Generated
-artifacts under `librarian/build-bin/` are disposable and ignored.
+The installable CLI is the Go implementation in [go/](go/README.md).
+`make build` produces `go/bin/hawp`; `make dist` cross-compiles all release
+platforms. The former Node/oclif/SEA PoC (`scripts/hawp-cli-poc/`) and its
+CI workflow were retired 2026-07-20 after the Go port reached mutation
+parity (see `.hawp/work/closed/2026/07/20/`).

@@ -1,0 +1,116 @@
+name: Release librarian-go
+
+# Two ways to cut a release:
+#   1. Push a tag matching "librarian-go-v*" directly.
+#   2. Run this workflow manually (Actions tab -> Run workflow) with a
+#      "version" input (e.g. "0.1.0") — the workflow creates and pushes
+#      the tag itself, so no local `git tag`/`git push` is needed.
+#
+# Either way, the job builds the cross-platform hawp binaries (make
+# dist) and publishes a GitHub Release. By default the release publishes
+# immediately (auto-approved) — set the "draft" input to true on a
+# manual dispatch to require a maintainer to review the built binaries
+# and changelog on GitHub and click "Publish release" before it goes
+# live. A draft release is invisible to unauthenticated API requests —
+# including the ones `hawp update` makes — so nothing is downloadable
+# until it's published. GitHub computes a SHA-256 digest for each
+# uploaded asset automatically, which `hawp update` verifies against.
+on:
+  push:
+    tags:
+      - "librarian-go-v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, e.g. 0.1.0 (no leading v, no librarian-go- prefix)"
+        required: true
+      draft:
+        description: "Require manual review/publish instead of auto-publishing immediately"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Resolve version and tag
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            version="${{ github.event.inputs.version }}"
+          else
+            version="${GITHUB_REF_NAME#librarian-go-v}"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=librarian-go-v$version" >> "$GITHUB_OUTPUT"
+          # 0.0.x tags are test/pre-release builds validating the release
+          # and self-update mechanism itself, not a real product release.
+          if [[ "$version" == 0.0.* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create and push tag (manual dispatch only)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          if git rev-parse "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "Tag $tag already exists — aborting so it is never silently reused." >&2
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" -m "librarian-go $tag (via workflow_dispatch)"
+          git push origin "$tag"
+
+      - name: Build release binaries
+        working-directory: librarian/go
+        run: make dist VERSION=v${{ steps.version.outputs.version }}
+
+      - name: Package kit + provider overlay bundle
+        run: |
+          set -e
+          stage=$(mktemp -d)
+          mkdir -p "$stage/kit" "$stage/providers"
+          cp -r .hawp/kit/. "$stage/kit/"
+          cp core/providers/manifest.yaml "$stage/providers/"
+          for provider in .claude .codex .cursor .continue .github; do
+            cp -r "core/providers/$provider" "$stage/providers/$provider"
+          done
+          tar -C "$stage" -czf librarian/go/bin/dist/hawp-kit-bundle.tar.gz kit providers
+
+      - name: Extract changelog section for this version
+        run: |
+          awk -v ver="${{ steps.version.outputs.version }}" '
+            $0 ~ "^## \\[" ver "\\]" { found=1; print; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' librarian/go/CHANGELOG.md > /tmp/release-notes.md
+          if [ ! -s /tmp/release-notes.md ]; then
+            echo "::error::No librarian/go/CHANGELOG.md section found for version ${{ steps.version.outputs.version }} — add one before releasing." >&2
+            exit 1
+          fi
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "librarian-go v${{ steps.version.outputs.version }}"
+          body_path: /tmp/release-notes.md
+          prerelease: ${{ steps.version.outputs.prerelease }}
+          draft: ${{ github.event.inputs.draft == 'true' }}
+          files: librarian/go/bin/dist/*
+          generate_release_notes: true

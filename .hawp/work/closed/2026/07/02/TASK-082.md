@@ -54,9 +54,9 @@ All three script folders renamed. Two internal cross-references fixed (`hawp-che
 - [ ] Research evidence for: `npm --prefix librarian run work:validate` resolves correctly (typecheck passes)
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] `npm --prefix librarian run validate` → VALIDATION PASS, 0 issues, 1 legacy warning (pre-existing)
-- [x] `ls librarian/scripts/` shows `work-validate/`, `work-normalize/`, `hawp-check/`
-- [x] `npm --prefix librarian run work:validate` resolves correctly (typecheck passes)
+- [x] `npm --prefix librarian run validate` → VALIDATION PASS, 0 issues, 1 legacy warning (pre-existing) — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] `ls librarian/scripts/` shows `work-validate/`, `work-normalize/`, `hawp-check/` — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] `npm --prefix librarian run work:validate` resolves correctly (typecheck passes) — unproven: evidence not recorded at close (annotated 2026-07-20)
 
 ## Close Checklist
 

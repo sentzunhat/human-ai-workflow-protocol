@@ -149,13 +149,13 @@ Keep private-lane recommendations process-focused and avoid copying route invent
 - [ ] Research evidence for: Follow-up work item created for private workflow adaptation.
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] New docs standards files were added under `core/.hawp/kit/standards/docs/`.
+- [x] New docs standards files were added under `core/.hawp/kit/standards/docs/`. — unproven: evidence not recorded at close (annotated 2026-07-20)
   - **Evidence:** `core/.hawp/kit/standards/docs/README.md`, `core/.hawp/kit/standards/docs/hawp-install-update-safety.md`.
-- [x] Core standards index references the new docs category and canonical standard.
+- [x] Core standards index references the new docs category and canonical standard. — unproven: evidence not recorded at close (annotated 2026-07-20)
   - **Evidence:** `core/.hawp/kit/standards/README.md`.
-- [x] Private/public review classification is documented with direct absorb vs adapt-required outputs.
+- [x] Private/public review classification is documented with direct absorb vs adapt-required outputs. — unproven: evidence not recorded at close (annotated 2026-07-20)
   - **Evidence:** `.hawp/work/evidence/2026/06/04/TASK-069-standards-public-private-audit.md`.
-- [x] Follow-up work item created for private workflow adaptation.
+- [x] Follow-up work item created for private workflow adaptation. — unproven: evidence not recorded at close (annotated 2026-07-20)
   - **Evidence:** `.hawp/work/BACKLOG.md` contains `TASK-070`.
 
 ## Close Checklist
