@@ -1,13 +1,11 @@
 name: Tag and release on merge to main
 
-# When dev is merged into main, read the version from version.go,
-# create the annotated tag, then trigger the release workflow directly
-# via workflow_dispatch. GitHub blocks cascading tag-push triggers
-# between workflows using GITHUB_TOKEN, so we call the release workflow
-# explicitly instead of relying on the tag push to fire it.
+# When dev is merged into main, read the version from version.go and
+# trigger the release workflow via workflow_dispatch. The release workflow
+# creates the tag itself, builds the 6 binaries, and publishes the release.
 #
-# Skips silently if the tag already exists — so re-pushing main
-# without bumping the version never double-tags or errors.
+# Skips if the release tag already exists — so re-pushing main without
+# bumping the version never double-releases or errors.
 
 on:
   push:
@@ -15,16 +13,14 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
   actions: write
 
 jobs:
-  tag-and-release:
+  trigger-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Read version from version.go
         id: version
@@ -37,21 +33,12 @@ jobs:
       - name: Skip if tag already exists
         id: check
         run: |
-          if git rev-parse "refs/tags/${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
-            echo "Tag ${{ steps.version.outputs.tag }} already exists — skipping."
+          if git ls-remote --tags origin "${{ steps.version.outputs.tag }}" | grep -q .; then
+            echo "Tag ${{ steps.version.outputs.tag }} already exists — skipping release."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Create and push tag
-        if: steps.check.outputs.skip == 'false'
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "${{ steps.version.outputs.tag }}" \
-            -m "librarian-go ${{ steps.version.outputs.tag }}"
-          git push origin "${{ steps.version.outputs.tag }}"
 
       - name: Trigger release workflow
         if: steps.check.outputs.skip == 'false'
@@ -59,6 +46,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh workflow run release-librarian-go.yml \
-            --ref "${{ steps.version.outputs.tag }}" \
             --field version="${{ steps.version.outputs.version }}" \
             --field draft=false
