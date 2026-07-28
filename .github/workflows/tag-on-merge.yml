@@ -1,8 +1,10 @@
-name: Tag on merge to main
+name: Tag and release on merge to main
 
 # When dev is merged into main, read the version from version.go,
-# create and push the annotated tag librarian-go-vX.Y.Z, and let
-# release-librarian-go.yml take it from there.
+# create the annotated tag, then trigger the release workflow directly
+# via workflow_dispatch. GitHub blocks cascading tag-push triggers
+# between workflows using GITHUB_TOKEN, so we call the release workflow
+# explicitly instead of relying on the tag push to fire it.
 #
 # Skips silently if the tag already exists — so re-pushing main
 # without bumping the version never double-tags or errors.
@@ -14,9 +16,10 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
-  tag-release:
+  tag-and-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -49,3 +52,13 @@ jobs:
           git tag -a "${{ steps.version.outputs.tag }}" \
             -m "librarian-go ${{ steps.version.outputs.tag }}"
           git push origin "${{ steps.version.outputs.tag }}"
+
+      - name: Trigger release workflow
+        if: steps.check.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh workflow run release-librarian-go.yml \
+            --ref "${{ steps.version.outputs.tag }}" \
+            --field version="${{ steps.version.outputs.version }}" \
+            --field draft=false
