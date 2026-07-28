@@ -133,9 +133,7 @@ See `.hawp/kit/examples/` for concrete filled shapes.
 **Tooling and reference:**
 
 - `.github/` — Copilot instructions and prompt library
-- `golang/` — experimental Go scaffold for the future small librarian product
-- `librarian/` — distribution validation and backlog tooling (see [librarian/README.md](librarian/README.md))
-- `nodejs/` — transition marker for the current Node/TypeScript implementation lane
+- `librarian/` — distribution validation and backlog tooling (see [librarian/README.md](librarian/README.md)); `librarian/go/` holds the Go scaffold for the future small native librarian product
 - `.hawp/bin/hawp` — repo-local CLI wrapper (`kit validate`, `kit normalize`, `work validate`, `work normalize`, plus `backlog` aliases)
 - `benchmark/` — optional HAWP vs other methods comparison
 

@@ -2,26 +2,42 @@
 
 # HAWP CLI Entry Point
 #
-# Delegates to TypeScript implementations via tsx runtime.
+# Prefers the compiled Go librarian binary (librarian/go/bin/hawp) when it
+# exists; falls back to the TypeScript implementations via npm/tsx.
 # Supported commands:
 #   ./.hawp/bin/hawp kit validate [options]
 #   ./.hawp/bin/hawp kit normalize [options]
 #   ./.hawp/bin/hawp work validate [options]
 #   ./.hawp/bin/hawp work normalize [options]
+#   ./.hawp/bin/hawp check                       (combined kit + work + links, Go binary)
+#   ./.hawp/bin/hawp links check                 (markdown link check, Go binary)
 #   ./.hawp/bin/hawp backlog upgrade [options]   (alias for work normalize)
-#   ./.hawp/bin/hawp backlog validate [options]  (alias for work validate)
+#   ./.hawp/bin/hawp backlog validate [options]  (alias for check / work validate)
 #   ./.hawp/bin/hawp uuid [--short]              (generate a work item UUID)
 #   ./.hawp/bin/hawp generate uuid [--short]     (alias for uuid)
+#   ./.hawp/bin/hawp init                        (provision ~/.hawp; Go binary only)
+#   ./.hawp/bin/hawp version                     (Go binary only)
+#   ./.hawp/bin/hawp update [--check]             (self-update; Go binary only)
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+GO_BIN="$REPO_ROOT/librarian/go/bin/hawp"
 
 COMMAND="${1:-}"
 SUBCOMMAND="${2:-}"
 
 shift 0
+
+has_go_bin() {
+	[ -x "$GO_BIN" ]
+}
+
+# Runs the Go binary from the repo root so repo discovery works.
+run_go() {
+	(cd "$REPO_ROOT" && exec "$GO_BIN" "$@")
+}
 
 run_npm_script() {
 	if [ ! -d "$REPO_ROOT/librarian" ]; then
@@ -34,6 +50,10 @@ run_npm_script() {
 
 # Prints a UUID v4 for work item IDs. --short prints the 8-char display form.
 generate_uuid() {
+	if has_go_bin; then
+		run_go uuid "$@"
+		return
+	fi
 	local uuid
 	uuid="$(node -e 'console.log(crypto.randomUUID())')"
 	if [ "${1:-}" = "--short" ]; then
@@ -46,27 +66,39 @@ generate_uuid() {
 case "$COMMAND $SUBCOMMAND" in
 	"kit validate")
 		shift 2
-		run_npm_script "kit:validate" "$@"
+		if has_go_bin; then run_go kit validate "$@"; else run_npm_script "kit:validate" "$@"; fi
 		;;
 	"kit normalize")
 		shift 2
-		run_npm_script "kit:normalize" "$@"
+		if has_go_bin; then run_go kit normalize "$@"; else run_npm_script "kit:normalize" "$@"; fi
 		;;
 	"work validate")
 		shift 2
-		run_npm_script "work:validate" "$@"
+		if has_go_bin; then run_go work validate "$@"; else run_npm_script "work:validate" "$@"; fi
 		;;
 	"work normalize")
 		shift 2
-		run_npm_script "work:normalize:cli" "$@"
+		if has_go_bin; then run_go work normalize "$@"; else run_npm_script "work:normalize:cli" "$@"; fi
+		;;
+	"links check")
+		shift 2
+		if has_go_bin; then
+			run_go links check "$@"
+		else
+			run_npm_script "check:markdown-links" "$@"
+		fi
+		;;
+	"check "*|"check")
+		shift 1
+		if has_go_bin; then run_go check "$@"; else run_npm_script "hawp:check" "$@"; fi
 		;;
 	"backlog upgrade")
 		shift 2
-		run_npm_script "work:normalize:cli" "$@"
+		if has_go_bin; then run_go backlog upgrade "$@"; else run_npm_script "work:normalize:cli" "$@"; fi
 		;;
 	"backlog validate")
 		shift 2
-		run_npm_script "work:validate" "$@"
+		if has_go_bin; then run_go backlog validate "$@"; else run_npm_script "work:validate" "$@"; fi
 		;;
 	"generate uuid")
 		shift 2
@@ -75,6 +107,34 @@ case "$COMMAND $SUBCOMMAND" in
 	"uuid "*|"uuid")
 		shift 1
 		generate_uuid "$@"
+		;;
+	"init "*|"init")
+		shift 1
+		if has_go_bin; then
+			run_go init "$@"
+		else
+			echo "Error: 'init' requires the Go librarian binary (librarian/go/bin/hawp)." >&2
+			echo "Build it with: cd librarian/go && make build" >&2
+			exit 2
+		fi
+		;;
+	"version "*|"version")
+		shift 1
+		if has_go_bin; then
+			run_go version "$@"
+		else
+			echo "Error: 'version' requires the Go librarian binary (librarian/go/bin/hawp)." >&2
+			exit 2
+		fi
+		;;
+	"update "*|"update")
+		shift 1
+		if has_go_bin; then
+			run_go update "$@"
+		else
+			echo "Error: 'update' requires the Go librarian binary (librarian/go/bin/hawp)." >&2
+			exit 2
+		fi
 		;;
 	*)
 		cat <<'EOF'
@@ -85,10 +145,15 @@ Usage:
 	./.hawp/bin/hawp kit normalize [options]
 	./.hawp/bin/hawp work validate [options]
 	./.hawp/bin/hawp work normalize [options]
+	./.hawp/bin/hawp check
+	./.hawp/bin/hawp links check
 	./.hawp/bin/hawp backlog upgrade [options]
 	./.hawp/bin/hawp backlog validate [options]
 	./.hawp/bin/hawp uuid [--short]
 	./.hawp/bin/hawp generate uuid [--short]
+	./.hawp/bin/hawp init                        (Go binary only)
+	./.hawp/bin/hawp version                     (Go binary only)
+	./.hawp/bin/hawp update [--check]             (Go binary only)
 
 Examples:
 	./.hawp/bin/hawp kit validate
@@ -96,8 +161,13 @@ Examples:
 	./.hawp/bin/hawp work validate
 	./.hawp/bin/hawp work normalize --dry-run --validate
 	./.hawp/bin/hawp work normalize --apply --validate
+	./.hawp/bin/hawp check           # combined validation
 	./.hawp/bin/hawp uuid            # new work item ID
 	./.hawp/bin/hawp uuid --short    # 8-char display form
+	./.hawp/bin/hawp update --check  # is a newer release available?
+
+Build the Go binary for the fast native path:
+	cd librarian/go && make build
 EOF
 		exit 2
 		;;

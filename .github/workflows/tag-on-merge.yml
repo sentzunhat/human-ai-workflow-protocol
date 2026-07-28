@@ -1,0 +1,51 @@
+name: Tag on merge to main
+
+# When dev is merged into main, read the version from version.go,
+# create and push the annotated tag librarian-go-vX.Y.Z, and let
+# release-librarian-go.yml take it from there.
+#
+# Skips silently if the tag already exists — so re-pushing main
+# without bumping the version never double-tags or errors.
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  tag-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from version.go
+        id: version
+        run: |
+          version=$(grep 'var Version = ' librarian/go/internal/domain/update/version.go \
+            | sed 's/.*"\(.*\)"/\1/')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=librarian-go-v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if tag already exists
+        id: check
+        run: |
+          if git rev-parse "refs/tags/${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "Tag ${{ steps.version.outputs.tag }} already exists — skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create and push tag
+        if: steps.check.outputs.skip == 'false'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "${{ steps.version.outputs.tag }}" \
+            -m "librarian-go ${{ steps.version.outputs.tag }}"
+          git push origin "${{ steps.version.outputs.tag }}"

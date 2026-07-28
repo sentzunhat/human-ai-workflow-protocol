@@ -45,10 +45,10 @@ Script implemented with `planFileRenames` + `planLinkUpdates` + `applyLinkUpdate
 - [ ] Research evidence for: All kit-normalize tests pass
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] `npm --prefix librarian run typecheck` — clean
-- [x] `npm --prefix librarian run validate` — PASS, 0 issues
-- [x] `npm --prefix librarian run kit:normalize` — reports no normalization needed (kit is already clean)
-- [x] All kit-normalize tests pass
+- [x] `npm --prefix librarian run typecheck` — clean — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] `npm --prefix librarian run validate` — PASS, 0 issues — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] `npm --prefix librarian run kit:normalize` — reports no normalization needed (kit is already clean) — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] All kit-normalize tests pass — unproven: evidence not recorded at close (annotated 2026-07-20)
 
 ## Close Checklist
 

@@ -224,12 +224,12 @@ Goal: track folder shape (so the structure is copyable from git) without `.gitke
 - [ ] Research evidence for: `core/install.md` and `core/update.md` copy kit files via `kit/` paths.
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [ ] `find core/.hawp -maxdepth 1` shows only `LICENSE`, `kit`, `work`.
-- [ ] `grep -r "\.hawp/usage" --exclude-dir=.git` returns only matches inside `core/.hawp/work/status/` or `core/.hawp/work/adrs/` (historical records).
-- [ ] `grep -r "\.hawp/templates\|\.hawp/patterns\|\.hawp/reviews\|\.hawp/types\|\.hawp/examples" --exclude-dir=.git` returns only historical/migration references.
-- [ ] `find core/.hawp -name .gitkeep` returns no results.
-- [ ] `core/.hawp/kit/templates/backlog.md` is empty/template-shaped (no real done rows).
-- [ ] `core/install.md` and `core/update.md` copy kit files via `kit/` paths.
+- [ ] `find core/.hawp -maxdepth 1` shows only `LICENSE`, `kit`, `work`. — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [ ] `grep -r "\.hawp/usage" --exclude-dir=.git` returns only matches inside `core/.hawp/work/status/` or `core/.hawp/work/adrs/` (historical records). — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [ ] `grep -r "\.hawp/templates\|\.hawp/patterns\|\.hawp/reviews\|\.hawp/types\|\.hawp/examples" --exclude-dir=.git` returns only historical/migration references. — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [ ] `find core/.hawp -name .gitkeep` returns no results. — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [ ] `core/.hawp/kit/templates/backlog.md` is empty/template-shaped (no real done rows). — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [ ] `core/install.md` and `core/update.md` copy kit files via `kit/` paths. — unproven: evidence not recorded at close (annotated 2026-07-20)
 
 ## Implementation Plan
 

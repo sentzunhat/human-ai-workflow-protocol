@@ -61,5 +61,14 @@ export function extractIdFromFilename(filename: string): string | null {
     return dateMatch[1]!.toUpperCase();
   }
 
+  // Short-ID prefix + descriptive slug: c9a7f2e1-github-actions-pipeline,
+  // h5f7c2j8-retry-v001-release. These 8-char row IDs are arbitrary
+  // alphanumeric tokens, not necessarily valid hex (distinct from the full
+  // UUID case, which UUID_PATTERN above already handles).
+  const shortIdSlugMatch = filename.match(/^([0-9a-z]{8})-[a-z]/i);
+  if (shortIdSlugMatch) {
+    return shortIdSlugMatch[1]!.toLowerCase();
+  }
+
   return null;
 }

@@ -175,26 +175,26 @@ Completed changes:
 - [ ] Research evidence for: Closed
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] distribution build rewrites generated files from updated sources.  
+- [x] distribution build rewrites generated files from updated sources. — unproven: evidence not recorded at close (annotated 2026-07-20)
       Evidence: `npm --prefix librarian run distribution:build` updated 4/4 generated files.
-- [x] distribution validate passes with no drift.  
+- [x] distribution validate passes with no drift. — unproven: evidence not recorded at close (annotated 2026-07-20)
       Evidence: `npm --prefix librarian run distribution:validate` passed.
-- [x] generated update-dev/install-dev mention and include local-source mode behavior.  
+- [x] generated update-dev/install-dev mention and include local-source mode behavior. — unproven: evidence not recorded at close (annotated 2026-07-20)
       Evidence: `rg -n 'HAWP_LOCAL_CORE|Source mode: local core' core/distribution/generated/update-dev.md core/distribution/generated/install-dev.md`.
-- [x] default remote mode remains unchanged when local override is not set.  
+- [x] default remote mode remains unchanged when local override is not set. — unproven: evidence not recorded at close (annotated 2026-07-20)
       Evidence: scripts still print archive URL and use remote fetch path when `HAWP_LOCAL_CORE` is empty.
-- [x] end-to-end smoke test passed in temporary repo using generated `update-dev` and local override.  
+- [x] end-to-end smoke test passed in temporary repo using generated `update-dev` and local override. — unproven: evidence not recorded at close (annotated 2026-07-20)
       Evidence: output contained `Source mode: local core (...)`, `HAWP update complete`, and seeded `.hawp/kit`, `.hawp/work`, `.github/instructions`.
 
 ---
 
 ### Status
 
-- [x] Plan written
-- [x] Approved / auto-approved (low risk)
-- [x] Implemented
-- [x] Verified
-- [x] Closed
+- [x] Plan written — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Approved / auto-approved (low risk) — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Implemented — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Verified — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Closed — unproven: evidence not recorded at close (annotated 2026-07-20)
 
 ## Close Checklist
 

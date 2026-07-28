@@ -110,11 +110,11 @@ Keep wording concise, avoid script duplication, and preserve source-of-truth fra
 - [ ] Research evidence for: Docs/link validation command availability checked.
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] Discoverability pointers added to root docs.
+- [x] Discoverability pointers added to root docs. — unproven: evidence not recorded at close (annotated 2026-07-20)
 	**Evidence:** `README.md` now contains "Generated guide quick links" and "For contributors" sections with current paths.
-- [x] Required verification suite passes after docs change.
+- [x] Required verification suite passes after docs change. — unproven: evidence not recorded at close (annotated 2026-07-20)
 	**Evidence:** Ran `npm run distribution:validate`, `npm run typecheck`, and `npm run validate:workflow -- --work-root ../.hawp/work` from `librarian/`; all passed.
-- [x] Docs/link validation command availability checked.
+- [x] Docs/link validation command availability checked. — unproven: evidence not recorded at close (annotated 2026-07-20)
 	**Evidence:** `librarian/package.json` scripts include only `distribution:build`, `distribution:validate`, `typecheck`, and `validate:workflow`; no separate docs/link validator exists.
 
 ## Close Checklist

@@ -317,28 +317,28 @@ Created complete JSON-first data model layer (955 lines across 7 files):
 - [ ] Research evidence for: Evidence report created: `.hawp/work/evidence/2026/05/12/TASK-029-evidence.md`
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] All 7 model files created in `librarian/scripts/backlog-upgrade/models/`
-- [x] All models export cleanly from index.ts (41 total exports)
-- [x] No circular dependencies (verified by successful compilation)
-- [x] TypeScript compiles without errors (`npm run typecheck` passes)
-- [x] Each model can be imported independently
-- [x] Documentation comments complete
-- [x] Hash fields typed as strings (SHA256 hex)
-- [x] BlockedItem includes all required fields: rule, confidence, candidates, reason, evidence
-- [x] EvidenceReport includes file hashes, plan hash, validator hashes, idempotency flag
-- [x] All factory functions create correct objects
-- [x] All type guards validate at runtime
-- [x] JSON serialization works for all types
-- [x] Design alignment 100%:
+- [x] All 7 model files created in `librarian/scripts/backlog-upgrade/models/` — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] All models export cleanly from index.ts (41 total exports) — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] No circular dependencies (verified by successful compilation) — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] TypeScript compiles without errors (`npm run typecheck` passes) — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Each model can be imported independently — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Documentation comments complete — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Hash fields typed as strings (SHA256 hex) — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] BlockedItem includes all required fields: rule, confidence, candidates, reason, evidence — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] EvidenceReport includes file hashes, plan hash, validator hashes, idempotency flag — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] All factory functions create correct objects — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] All type guards validate at runtime — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] JSON serialization works for all types — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Design alignment 100%: — unproven: evidence not recorded at close (annotated 2026-07-20)
   - ✅ JSON-first internal objects
   - ✅ Structured blocked items with rule/confidence/candidates/reason
   - ✅ Immutable hash artifacts (SHA256)
   - ✅ Validator state tracking (before/after)
   - ✅ Idempotency support
   - ✅ No CLI, scanning, apply, or AI synthesis
-- [x] No conflicts with existing codebase
-- [x] Type coverage: 100% (all types defined)
-- [x] Evidence report created: `.hawp/work/evidence/2026/05/12/TASK-029-evidence.md`
+- [x] No conflicts with existing codebase — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Type coverage: 100% (all types defined) — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Evidence report created: `.hawp/work/evidence/2026/05/12/TASK-029-evidence.md` — unproven: evidence not recorded at close (annotated 2026-07-20)
 
 **Result:** ✅ Ready to close and move to TASK-027
 

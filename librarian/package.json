@@ -11,12 +11,6 @@
   "scripts": {
     "test": "node --test --import tsx $(find scripts -type f -name '*.test.ts' | sort)",
     "check:markdown-links": "node scripts/check-markdown-links.mjs",
-    "cli:poc": "tsx scripts/hawp-cli-poc/bin/hawp-poc.ts",
-    "cli:poc:binaries": "tsx scripts/hawp-cli-poc/packaging/build-binaries.ts",
-    "cli:poc:binary": "tsx scripts/hawp-cli-poc/packaging/build-binaries.ts --target current",
-    "cli:poc:build": "tsc -p tsconfig.json",
-    "cli:poc:bundle": "esbuild scripts/hawp-cli-poc/bin/hawp-poc.ts --bundle --platform=node --format=cjs --outfile=build-bin/hawp-poc.cjs",
-    "cli:poc:node": "node build-bin/hawp-poc.cjs",
     "uuid": "node -e \"console.log(crypto.randomUUID())\"",
     "hawp:check": "tsx scripts/hawp/hawp-check/index.ts",
     "kit:validate": "tsx scripts/hawp/kit-validate/index.ts",
@@ -32,9 +26,6 @@
     "work:normalize": "npm run work:normalize:cli -- --apply --validate",
     "validate": "npm run typecheck && npm test && npm run check:markdown-links && npm run kit:validate && npm run distribution:sync && npm run work:validate",
     "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@oclif/core": "^4.11.14"
   },
   "devDependencies": {
     "@types/node": "^26.0.0",

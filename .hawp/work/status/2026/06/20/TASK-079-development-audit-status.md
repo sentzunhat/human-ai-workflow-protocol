@@ -34,7 +34,7 @@ The repository is development-healthy when run with its intended Node 26 runtime
 
 ## What Was Directly Verified
 
-- Repo root is `/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol`; no subdirectory prefix was active.
+- Repo root is `<project-root>`; no subdirectory prefix was active.
 - Pre-existing dirty worktree entries were present before this audit:
   - `.hawp/kit/references/docs-alignment.md`
   - `.hawp/kit/instructions/hawp-docs-alignment.md`

@@ -87,10 +87,10 @@ Re-evidence (2026-05-14):
 
 ```bash
 pwd
-/Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol
+<project-root>
 
 git rev-parse --show-toplevel
-/Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol
+<project-root>
 
 git rev-parse --show-prefix
 

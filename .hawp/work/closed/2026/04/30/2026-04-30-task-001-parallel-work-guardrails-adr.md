@@ -185,10 +185,10 @@ This item should wait to avoid conflicting auth changes.
 - [ ] Research evidence for: Workflow text still preserves lean HAWP scope (no PM system expansion).
 - [ ] Update the original verification checklist line with Evidence: ... or explicit unproven wording.
 
-- [x] Pattern doc exists with simple rules and examples.
-- [x] Intake template includes Work Coordination section.
-- [x] At least one sample plan demonstrates overlap detection and hold behavior.
-- [x] Workflow text still preserves lean HAWP scope (no PM system expansion).
+- [x] Pattern doc exists with simple rules and examples. — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Intake template includes Work Coordination section. — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] At least one sample plan demonstrates overlap detection and hold behavior. — unproven: evidence not recorded at close (annotated 2026-07-20)
+- [x] Workflow text still preserves lean HAWP scope (no PM system expansion). — unproven: evidence not recorded at close (annotated 2026-07-20)
 
 ## Implementation Status
 

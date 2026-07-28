@@ -251,6 +251,74 @@ test("checkBacklogConsistency resolves UUID-named active plan files without orph
   });
 });
 
+test("checkClosedTaskCompleteness recognizes a shared closed record via its Closes: line", () => {
+  withTempWorkDir((workDir) => {
+    writeClosedPlan(
+      workDir,
+      { year: "2026", month: "07", day: "26" },
+      "shared-audit.md",
+      [
+        "# Shared audit",
+        "",
+        "**Closes:** `abc12345`, `def67890`",
+        "",
+        "## Outcome",
+        "",
+        "Both fixed.",
+        "",
+        "## Verification",
+        "",
+        "- [x] checked. Evidence: output captured",
+        "",
+        "## Close Checklist",
+        "",
+        "- [x] done",
+        "",
+      ].join("\n"),
+    );
+
+    const result = checkClosedTaskCompleteness(workDir, []);
+    assert.equal(result.total, 1);
+    assert.equal(result.untypedCurrent.length, 0);
+    assert.equal(result.failing.length, 0);
+    assert.equal(result.status, "PASS");
+  });
+});
+
+test("checkBacklogConsistency matches multiple rows against one shared closed record", () => {
+  withTempWorkDir((workDir) => {
+    writeClosedPlan(
+      workDir,
+      { year: "2026", month: "07", day: "26" },
+      "shared-audit.md",
+      "# Shared audit\n\n**Closes:** `abc12345`, `def67890`\n",
+    );
+
+    const result = checkBacklogConsistency(workDir, {
+      active: [],
+      closed: [
+        {
+          id: "abc12345",
+          type: "fix",
+          title: "first fix",
+          status: "done",
+          detail: undefined,
+        },
+        {
+          id: "def67890",
+          type: "fix",
+          title: "second fix",
+          status: "done",
+          detail: undefined,
+        },
+      ],
+      parked: [],
+    });
+    assert.equal(result.status, "PASS");
+    assert.equal(result.recentlyClosed.found, 2);
+  });
+});
+
 test("checkClosedTaskCompleteness fails post-cutoff plans missing required sections", () => {
   withTempWorkDir((workDir) => {
     writeClosedPlan(

@@ -133,7 +133,9 @@ export const parseBacklog = (backlogPath: string): BacklogParseResult => {
     if (
       !id ||
       normalizeHeader(id) === "id" ||
-        normalizeHeader(id) === "legacy id"
+      normalizeHeader(id) === "legacy id" ||
+      id.startsWith("**") ||
+      /^[✓⏹️]+$/u.test(id)
     ) {
       return;
     }
