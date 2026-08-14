@@ -94,6 +94,15 @@ func FormatAsMarkdown(results []search.Result, query string, maxTokens int) Cont
 	return block
 }
 
+// PrepareContext applies the standard context policy before formatting. The
+// CLI compatibility wrapper still calls FormatAsMarkdown directly, while RAG
+// retrieval uses this operation so deduplication has one explicit owner.
+func PrepareContext(results []search.Result, query string, maxTokens int) ContextBlock {
+	return FormatAsMarkdown(DeduplicateResults(results, defaultDeduplicationThreshold), query, maxTokens)
+}
+
+const defaultDeduplicationThreshold = 0.95
+
 // deduplicateReferences collapses FormattedResults into one DocumentReference
 // per unique Source, keeping the highest-relevance chunk's Relevance and
 // Content, sorted by Relevance descending. Shared by FormatAsMarkdown (the

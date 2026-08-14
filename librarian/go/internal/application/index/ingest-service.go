@@ -7,7 +7,8 @@ import (
 	"time"
 
 	domainindex "github.com/sentzunhat/hawp/librarian/go/internal/domain/index"
-	"github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/sqlite"
+	domainstore "github.com/sentzunhat/hawp/librarian/go/internal/domain/index/store"
+	sqliteindex "github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/sqlite/index"
 )
 
 // IngestResult summarizes an ingest run.
@@ -56,12 +57,20 @@ type EnrichedCorpus struct {
 
 // IngestService orchestrates the ingest of enriched documents into the index.
 type IngestService struct {
-	dbPath string
+	dbPath    string
+	openStore func(string) (domainstore.CorpusWriter, error)
 }
 
 // NewIngestService creates an ingest service.
 func NewIngestService(dbPath string) *IngestService {
-	return &IngestService{dbPath: dbPath}
+	return NewIngestServiceWithStoreOpener(dbPath, func(path string) (domainstore.CorpusWriter, error) {
+		return sqliteindex.Open(path)
+	})
+}
+
+// NewIngestServiceWithStoreOpener composes ingestion with its persistence port.
+func NewIngestServiceWithStoreOpener(dbPath string, opener func(string) (domainstore.CorpusWriter, error)) *IngestService {
+	return &IngestService{dbPath: dbPath, openStore: opener}
 }
 
 // Execute ingests documents from a corpus into the index database.
@@ -70,32 +79,23 @@ func (s *IngestService) Execute(corpus *EnrichedCorpus) (IngestResult, error) {
 	start := time.Now()
 
 	// Open or create the index database
-	db, err := sqlite.Open(s.dbPath)
+	db, err := s.openStore(s.dbPath)
 	if err != nil {
 		return result, fmt.Errorf("open index db: %w", err)
 	}
 	defer db.Close()
 
 	// Initialize schema
-	if err := db.InitSchema(); err != nil {
+	if err := db.Initialize(); err != nil {
 		return result, fmt.Errorf("init schema: %w", err)
 	}
 
 	// Ingest each document
 	for _, enriched := range corpus.Documents {
-		// Insert document
-		docID, err := db.InsertDocument(
-			enriched.Category, enriched.Type, enriched.Path, enriched.FolderRole,
-		)
-		if err != nil {
-			return result, fmt.Errorf("insert document %s: %w", enriched.Path, err)
-		}
-		result.DocumentsProcessed++
-
-		// If it's a work item, insert metadata
+		// Build optional work metadata before the atomic document replacement.
+		var metadata *domainstore.DocumentMetadata
 		if enriched.Category == "work" && enriched.WorkUUID != nil {
-			metadata := sqlite.DocumentMetadata{
-				DocumentID: docID,
+			metadata = &domainstore.DocumentMetadata{
 				WorkUUID:   *enriched.WorkUUID,
 				Status:     *enriched.Status,
 				Owner:      enriched.Owner,
@@ -103,15 +103,10 @@ func (s *IngestService) Execute(corpus *EnrichedCorpus) (IngestResult, error) {
 				ReportedAt: enriched.ReportedAt,
 				ClosedAt:   enriched.ClosedAt,
 			}
-			if err := db.InsertMetadata(metadata); err != nil {
-				return result, fmt.Errorf("insert metadata for %s: %w", enriched.Path, err)
-			}
-			result.MetadataRows++
 		}
 
 		// Create chunks
 		doc := domainindex.Document{
-			ID:         docID,
 			Category:   enriched.Category,
 			Type:       enriched.Type,
 			Path:       enriched.Path,
@@ -119,10 +114,9 @@ func (s *IngestService) Execute(corpus *EnrichedCorpus) (IngestResult, error) {
 			Content:    enriched.Content,
 		}
 
-		var metadata *domainindex.DocumentMetadata
-		if enriched.Category == "work" && enriched.WorkUUID != nil {
-			metadata = &domainindex.DocumentMetadata{
-				DocumentID: docID,
+		var domainMetadata *domainindex.DocumentMetadata
+		if metadata != nil {
+			domainMetadata = &domainindex.DocumentMetadata{
 				WorkUUID:   *enriched.WorkUUID,
 				Status:     *enriched.Status,
 				Owner:      enriched.Owner,
@@ -132,31 +126,33 @@ func (s *IngestService) Execute(corpus *EnrichedCorpus) (IngestResult, error) {
 			}
 		}
 
-		folderContext := domainindex.BuildFolderContext(doc, metadata)
+		folderContext := domainindex.BuildFolderContext(doc, domainMetadata)
 		metadataJSONBytes, _ := json.Marshal(enriched.Metadata)
 		metadataJSONStr := string(metadataJSONBytes)
 
-		// Re-ingesting the same document must be safe to repeat: clear its
-		// prior chunks first so re-runs neither violate the
-		// UNIQUE(document_id, chunk_idx) constraint nor leave stale trailing
-		// chunks behind when the new content chunks to fewer pieces.
-		if err := db.DeleteChunksForDocument(docID); err != nil {
-			return result, fmt.Errorf("clear existing chunks for %s: %w", enriched.Path, err)
+		chunkTexts := domainindex.ChunkBySection(enriched.Content)
+		replacement := domainstore.DocumentReplacement{
+			Category: enriched.Category, Type: enriched.Type, Path: enriched.Path,
+			FolderRole: enriched.FolderRole, Metadata: metadata,
+			Chunks: make([]domainstore.Chunk, 0, len(chunkTexts)),
 		}
-
-		chunks := domainindex.ChunkBySection(enriched.Content)
-		for i, chunkText := range chunks {
-			chunk := sqlite.Chunk{
-				DocumentID:    docID,
-				ChunkIdx:      i,
+		for i, chunkText := range chunkTexts {
+			replacement.Chunks = append(replacement.Chunks, domainstore.Chunk{
+				Index:         i,
 				Text:          chunkText,
-				FolderContext: &folderContext,
-				MetadataJSON:  &metadataJSONStr,
-			}
-			if err := db.InsertChunk(chunk); err != nil {
-				return result, fmt.Errorf("insert chunk %s#%d: %w", enriched.Path, i, err)
-			}
-			result.ChunksCreated++
+				FolderContext: folderContext,
+				MetadataJSON:  metadataJSONStr,
+			})
+		}
+		if _, err := db.ReplaceDocument(replacement); err != nil {
+			return result, fmt.Errorf("replace document %s: %w", enriched.Path, err)
+		}
+		result.DocumentsProcessed++
+		result.ChunksCreated += len(chunkTexts)
+		if metadata != nil {
+			result.MetadataRows++
+		}
+		for _, chunkText := range chunkTexts {
 			result.BytesIndexed += int64(len(chunkText))
 		}
 	}

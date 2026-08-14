@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/sentzunhat/hawp/librarian/go/internal/application/search"
+	domainsearch "github.com/sentzunhat/hawp/librarian/go/internal/domain/search"
 )
 
 // DocumentReference tracks the source and position of a retrieved document.
@@ -53,8 +54,26 @@ type RAGPipeline interface {
 // It wraps a ContextReshaper and bridges between ContextBlock (search results)
 // and RAGPipelineOutput (references + reshaped content).
 type DefaultRAGPipeline struct {
-	reshaper *ContextReshaper
+	reshaper  *ContextReshaper
+	retriever Retriever
+}
+
+// Retriever supplies ranked results for a context query. It is intentionally
+// local to this capability so retrieval can be tested or replaced without
+// coupling the RAG orchestration to a concrete index.
+type Retriever interface {
+	Retrieve(ctx context.Context, query string, topK int) ([]domainsearch.Result, error)
+}
+
+type localIndexRetriever struct {
 	repoRoot string
+}
+
+func (r localIndexRetriever) Retrieve(ctx context.Context, query string, topK int) ([]domainsearch.Result, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	return search.Query(r.repoRoot, query, topK)
 }
 
 // NewDefaultRAGPipeline creates a RAG pipeline with the specified
@@ -83,10 +102,19 @@ func NewDefaultRAGPipeline(config ReshapingConfig, repoRoot string) (*DefaultRAG
 		return nil, fmt.Errorf("initialize reshaper: %w", err)
 	}
 
-	return &DefaultRAGPipeline{
-		reshaper: reshaper,
-		repoRoot: repoRoot,
-	}, nil
+	return NewRAGPipeline(reshaper, localIndexRetriever{repoRoot: repoRoot})
+}
+
+// NewRAGPipeline composes an injected reshaper and retriever. The default
+// constructor remains the compatibility entry point for the local index.
+func NewRAGPipeline(reshaper *ContextReshaper, retriever Retriever) (*DefaultRAGPipeline, error) {
+	if reshaper == nil {
+		return nil, fmt.Errorf("reshaper is required")
+	}
+	if retriever == nil {
+		return nil, fmt.Errorf("retriever is required")
+	}
+	return &DefaultRAGPipeline{reshaper: reshaper, retriever: retriever}, nil
 }
 
 // Retrieve runs query against the local index (internal/application/search —
@@ -101,11 +129,11 @@ func NewDefaultRAGPipeline(config ReshapingConfig, repoRoot string) (*DefaultRAG
 // (e.g. one of MongoDB's mdbr-leaf models) would slot in as just another
 // entry in embeddings.SupportedModels, not a new subsystem.
 func (p *DefaultRAGPipeline) Retrieve(ctx context.Context, query string, topK int) (ContextBlock, error) {
-	results, err := search.Query(p.repoRoot, query, topK)
+	results, err := p.retriever.Retrieve(ctx, query, topK)
 	if err != nil {
 		return ContextBlock{}, fmt.Errorf("retrieve: %w", err)
 	}
-	return FormatAsMarkdown(results, query, defaultRetrieveMaxTokens), nil
+	return PrepareContext(results, query, defaultRetrieveMaxTokens), nil
 }
 
 // defaultRetrieveMaxTokens bounds FormatAsMarkdown's token budget when
@@ -125,7 +153,7 @@ func (p *DefaultRAGPipeline) Reshape(ctx context.Context, block ContextBlock, ma
 	}
 
 	// Run embeddings + LLM reshape on the block
-	reshaped, err := p.reshaper.Reshape(ctx, &block)
+	reshaped, err := p.reshaper.ReshapeWithMaxTokens(ctx, &block, maxTokens)
 	if err != nil {
 		return RAGPipelineOutput{}, fmt.Errorf("reshape failed: %w", err)
 	}

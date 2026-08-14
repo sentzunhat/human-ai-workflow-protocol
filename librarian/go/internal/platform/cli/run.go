@@ -21,10 +21,10 @@ import (
 	appkitsync "github.com/sentzunhat/hawp/librarian/go/internal/application/kitsync"
 	applinks "github.com/sentzunhat/hawp/librarian/go/internal/application/links"
 	appprovision "github.com/sentzunhat/hawp/librarian/go/internal/application/provision"
+	appsearch "github.com/sentzunhat/hawp/librarian/go/internal/application/search"
 	appupdate "github.com/sentzunhat/hawp/librarian/go/internal/application/update"
 	appuuid "github.com/sentzunhat/hawp/librarian/go/internal/application/uuidgen"
 	appwork "github.com/sentzunhat/hawp/librarian/go/internal/application/work"
-	appsearch "github.com/sentzunhat/hawp/librarian/go/internal/application/search"
 	domainindex "github.com/sentzunhat/hawp/librarian/go/internal/domain/index"
 	domainsearch "github.com/sentzunhat/hawp/librarian/go/internal/domain/search"
 	domainupdate "github.com/sentzunhat/hawp/librarian/go/internal/domain/update"
@@ -886,16 +886,7 @@ func runSearch(args []string) error {
 		return nil
 	}
 
-	dbPath := filepath.Join(root, ".hawp", "db", "index.sqlite")
-	db, err := sqlite.Open(dbPath)
-	if err != nil {
-		fmt.Printf("Index not found at %s. Run `hawp search index` first.\n", dbPath)
-		return nil
-	}
-	defer db.Close()
-
-	// Lexical search (FTS5)
-	results, err := db.QueryChunksLexical(query, limit*3) // Get more candidates for re-ranking
+	results, err := appsearch.Query(root, query, limit)
 	if err != nil {
 		return fmt.Errorf("search failed: %w", err)
 	}
@@ -905,29 +896,18 @@ func runSearch(args []string) error {
 		return nil
 	}
 
-	// Check if vectors exist for hybrid search
-	hasVectors, _ := db.HasVectors()
-	if hasVectors {
-		results = appsearch.HybridRank(results, query, db, limit)
-	} else {
-		// Keep only top-limit results from lexical search
-		if len(results) > limit {
-			results = results[:limit]
-		}
-	}
-
 	if !wantContext {
 		// Original output format
 		fmt.Printf("Search results for %q (%d found):\n\n", query, len(results))
 		for i, result := range results {
 			fmt.Printf("[%d] %s | %s (chunk %v)\n",
 				i+1,
-				getStr(result, "path"),
-				getStr(result, "folder_role"),
-				getInt(result, "chunk_idx"),
+				result.Source,
+				result.Title,
+				result.ChunkIndex,
 			)
-			fmt.Printf("    Context: %s\n", getStr(result, "folder_context"))
-			text := getStr(result, "text")
+			fmt.Printf("    Context: %s\n", result.FolderContext)
+			text := result.Content
 			if len(text) > 150 {
 				text = text[:150] + "..."
 			}
@@ -940,19 +920,23 @@ func runSearch(args []string) error {
 	searchResults := make([]domainsearch.Result, len(results))
 	for i, r := range results {
 		searchResults[i] = domainsearch.Result{
-			Source:    getStr(r, "path"),
-			Title:     getStr(r, "folder_role"),
-			Content:   getStr(r, "text"),
-			Relevance: float32(0.95), // Default high relevance
-			Embedding: []float32{},   // Not used in dedup for now
+			ChunkID:       r.ChunkID,
+			Source:        r.Source,
+			Title:         r.Title,
+			Content:       r.Content,
+			FolderContext: r.FolderContext,
+			ChunkIndex:    r.ChunkIndex,
+			Type:          r.Type,
+			Category:      r.Category,
+			WorkUUID:      r.WorkUUID,
+			Status:        r.Status,
+			Relevance:     r.Relevance,
+			LexicalRank:   r.LexicalRank,
+			SemanticScore: r.SemanticScore,
 		}
 	}
 
-	// Deduplicate results
-	deduped := appcontext.DeduplicateResults(searchResults, 0.95)
-
-	// Format as context block
-	block := appcontext.FormatAsMarkdown(deduped, query, maxTokens)
+	block := prepareSearchContext(searchResults, query, maxTokens)
 
 	// Optionally reshape via embeddings + LLM (Phase 3). Never silently
 	// ignored: any failure to load config, construct backends, or reshape
@@ -1002,116 +986,6 @@ func runSearch(args []string) error {
 	}
 
 	return nil
-}
-
-// toJSONReferences converts DocumentReferences into the JSON shape a
-// downstream retrieval step consumes as reference docs: source, title,
-// matched content excerpt, relevance, and line range (when known). Kept as
-// one conversion function so the raw-search and reshaped-output JSON paths
-// emit an identical "references" shape.
-func toJSONReferences(refs []appcontext.DocumentReference) []map[string]interface{} {
-	out := make([]map[string]interface{}, len(refs))
-	for i, r := range refs {
-		out[i] = map[string]interface{}{
-			"source":     r.Source,
-			"title":      r.Title,
-			"content":    r.Content,
-			"relevance":  r.Relevance,
-			"line_start": r.LineStart,
-			"line_end":   r.LineEnd,
-		}
-	}
-	return out
-}
-
-// tryReshapeViaRAGPipeline loads context config and runs the full RAG pipeline
-// (retrieval → reshaping via embeddings+LLM) over the block. On any failure
-// (config, backend construction, or the reshape call itself) it prints an
-// explicit warning to stderr and returns nil so the caller falls back to the
-// unreshaped block — --llm-reshape must never fail silently.
-//
-// The RAG pipeline maintains references to original source documents throughout
-// the reshaping process, enabling attribution and source verification.
-func tryReshapeViaRAGPipeline(block appcontext.ContextBlock, maxTokens int) *appcontext.RAGPipelineOutput {
-	home, err := os.UserHomeDir()
-	hawpHome := ""
-	if err == nil {
-		hawpHome = filepath.Join(home, ".hawp")
-	}
-
-	root, _ := repo.FindBacklogRepoRoot(mustGetwd())
-
-	cfg, err := appcontext.LoadContextConfig(hawpHome, root)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: --llm-reshape config error: %v; using unreshaped context.\n", err)
-		return nil
-	}
-
-	pipeline, err := appcontext.NewDefaultRAGPipeline(appcontext.ReshapingConfig{
-		EmbeddingsBackend: cfg.Embeddings.Backend,
-		EmbeddingsModel:   cfg.Embeddings.Model,
-		EmbeddingsURL:     cfg.Backends.Ollama.URL,
-		LLMBackend:        cfg.LLM.Backend,
-		LLMModel:          cfg.LLM.Model,
-		LLMURL:            cfg.Backends.Ollama.URL,
-		MaxTokens:         maxTokens,
-		Temperature:       cfg.LLM.Temperature,
-	}, root)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: --llm-reshape unavailable (%v); using unreshaped context. "+
-			"Configure via ~/.hawp/config/context.json or HAWP_LLM_BACKEND/HAWP_EMBEDDINGS_BACKEND.\n", err)
-		return nil
-	}
-	defer pipeline.Close()
-
-	result, err := pipeline.Reshape(context.Background(), block, maxTokens)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: --llm-reshape failed (%v); using unreshaped context.\n", err)
-		return nil
-	}
-
-	return &result
-}
-
-// renderReshapedWithReferences formats a RAGPipelineOutput as markdown for
-// terminal output. Includes the reshaped content, key concepts, pipeline
-// info, and source references.
-//
-// Pipeline "none-none" is special-cased: Content is already the interleaved
-// reference+content body (see formatResultsInline / ContextReshaper.Reshape),
-// so a trailing references list here would just repeat it. Any pipeline that
-// ran embeddings and/or an LLM gets the trailing list, since its Content is
-// either merged LLM prose (no per-chunk attribution possible) or otherwise
-// doesn't already carry inline references.
-func renderReshapedWithReferences(title string, output *appcontext.RAGPipelineOutput) string {
-	var sb strings.Builder
-
-	if output.Pipeline == "none-none" {
-		fmt.Fprintf(&sb, "# %s\n\n", title)
-	} else {
-		fmt.Fprintf(&sb, "# %s (LLM-reshaped, pipeline: %s)\n\n", title, output.Pipeline)
-	}
-
-	if len(output.KeyConcepts) > 0 {
-		fmt.Fprintf(&sb, "**Key concepts:** %s\n\n", strings.Join(output.KeyConcepts, ", "))
-	}
-
-	sb.WriteString(output.Content)
-	sb.WriteString("\n")
-
-	if output.Pipeline != "none-none" && len(output.References) > 0 {
-		sb.WriteString("\n---\n\n")
-		sb.WriteString("## References\n\n")
-		for _, ref := range output.References {
-			fmt.Fprintf(&sb, "**Reference:** %s (%d%% relevant)\n", ref.Source, int(ref.Relevance*100))
-			if ref.LineStart > 0 || ref.LineEnd > 0 {
-				fmt.Fprintf(&sb, "    Lines: %d-%d\n", ref.LineStart, ref.LineEnd)
-			}
-			sb.WriteString("\n")
-		}
-	}
-
-	return sb.String()
 }
 
 // runSearchBenchmark runs benchmark tests on all 3 search patterns

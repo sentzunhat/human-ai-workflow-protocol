@@ -196,6 +196,75 @@ type Chunk struct {
 	MetadataJSON  *string
 }
 
+// DocumentReplacement is the complete persisted state for one indexed
+// document. ReplaceDocument applies it atomically so a failed re-ingest never
+// leaves stale metadata or a partial chunk set behind.
+type DocumentReplacement struct {
+	Category   string
+	Type       string
+	Path       string
+	FolderRole string
+	Metadata   *DocumentMetadata
+	Chunks     []Chunk
+}
+
+// ReplaceDocument upserts one document, replaces optional work metadata, and
+// replaces every chunk in one transaction.
+func (ix *IndexDB) ReplaceDocument(replacement DocumentReplacement) (int64, error) {
+	tx, err := ix.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+
+	var documentID int64
+	err = tx.QueryRow(
+		`INSERT INTO documents (category, type, path, folder_role)
+		 VALUES (?, ?, ?, ?)
+		 ON CONFLICT(path) DO UPDATE SET
+		   category=excluded.category, type=excluded.type,
+		   folder_role=excluded.folder_role, updated_at=CURRENT_TIMESTAMP
+		 RETURNING id`,
+		replacement.Category, replacement.Type, replacement.Path, replacement.FolderRole,
+	).Scan(&documentID)
+	if err != nil {
+		return 0, err
+	}
+
+	if replacement.Metadata != nil {
+		metadata := *replacement.Metadata
+		metadata.DocumentID = documentID
+		if _, err := tx.Exec(
+			`INSERT INTO documents_metadata (document_id, work_uuid, status, owner, risk_level, reported_at, closed_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?)
+			 ON CONFLICT(document_id) DO UPDATE SET
+			   work_uuid=excluded.work_uuid, status=excluded.status, owner=excluded.owner,
+			   risk_level=excluded.risk_level, reported_at=excluded.reported_at,
+			   closed_at=excluded.closed_at, updated_at=CURRENT_TIMESTAMP`,
+			metadata.DocumentID, metadata.WorkUUID, metadata.Status, metadata.Owner, metadata.RiskLevel, metadata.ReportedAt, metadata.ClosedAt,
+		); err != nil {
+			return 0, err
+		}
+	}
+
+	if _, err := tx.Exec(`DELETE FROM chunks WHERE document_id = ?`, documentID); err != nil {
+		return 0, err
+	}
+	for _, chunk := range replacement.Chunks {
+		if _, err := tx.Exec(
+			`INSERT INTO chunks (document_id, chunk_idx, text, folder_context, metadata_json)
+			 VALUES (?, ?, ?, ?, ?)`,
+			documentID, chunk.ChunkIdx, chunk.Text, chunk.FolderContext, chunk.MetadataJSON,
+		); err != nil {
+			return 0, err
+		}
+	}
+	if err := tx.Commit(); err != nil {
+		return 0, err
+	}
+	return documentID, nil
+}
+
 // InsertChunk inserts a chunk and updates the FTS5 index.
 func (ix *IndexDB) InsertChunk(c Chunk) error {
 	_, err := ix.db.Exec(
@@ -295,14 +364,14 @@ func (ix *IndexDB) QueryChunksLexical(query string, limit int) ([]map[string]int
 		}
 
 		result := map[string]interface{}{
-			"id":              id,
-			"text":            text,
-			"folder_context":  folderContext,
-			"path":            path,
-			"type":            typ,
-			"category":        category,
-			"folder_role":     folderRole,
-			"chunk_idx":       chunkIdx,
+			"id":             id,
+			"text":           text,
+			"folder_context": folderContext,
+			"path":           path,
+			"type":           typ,
+			"category":       category,
+			"folder_role":    folderRole,
+			"chunk_idx":      chunkIdx,
 		}
 		if workUUID != nil {
 			result["work_uuid"] = workUUID

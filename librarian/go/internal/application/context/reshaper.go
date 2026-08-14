@@ -80,35 +80,51 @@ type ContextReshaper struct {
 //	}
 //	defer reshaper.Close()
 func NewContextReshaper(config ReshapingConfig) (*ContextReshaper, error) {
-	if config.TopK == 0 {
-		config.TopK = 5 // Default to 5 key concepts
-	}
-	if config.MaxTokens == 0 {
-		config.MaxTokens = 512 // Default token budget for LLM
-	}
+	config = withReshapingDefaults(config)
 
-	// Initialize embedder (ONNX or Ollama). EmbeddingsURL is honored only by
-	// backends that use it (Ollama); NewEmbedderWithURL ignores it for ONNX.
+	// The default constructor owns provider construction. Callers that already
+	// own provider lifecycle can use NewContextReshaperWithClients instead.
 	embedder, err := embeddings.NewEmbedderWithURL(config.EmbeddingsBackend, config.EmbeddingsModel, config.EmbeddingsURL)
 	if err != nil {
 		return nil, fmt.Errorf("initialize embedder: %w", err)
 	}
 
-	// Initialize LLM client (Ollama or ONNX scaffolding). LLMURL is honored
-	// only by backends that use it (Ollama).
 	llmClient, err := llm.NewLLMClientWithURL(config.LLMBackend, config.LLMModel, config.LLMURL)
 	if err != nil {
 		embedder.Close()
 		return nil, fmt.Errorf("initialize LLM: %w", err)
 	}
 
-	reshaper := &ContextReshaper{
+	return NewContextReshaperWithClients(config, embedder, llmClient)
+}
+
+// NewContextReshaperWithClients builds a reshaper from injected provider
+// contracts. It makes application behavior deterministic in tests and lets
+// composition select supported providers without changing the use case.
+func NewContextReshaperWithClients(config ReshapingConfig, embedder embeddings.Embedder, llmClient llm.LLMClient) (*ContextReshaper, error) {
+	config = withReshapingDefaults(config)
+	if embedder == nil {
+		return nil, fmt.Errorf("embedder is required")
+	}
+	if llmClient == nil {
+		return nil, fmt.Errorf("LLM client is required")
+	}
+
+	return &ContextReshaper{
 		embedder: embedder,
 		llm:      llmClient,
 		config:   config,
-	}
+	}, nil
+}
 
-	return reshaper, nil
+func withReshapingDefaults(config ReshapingConfig) ReshapingConfig {
+	if config.TopK == 0 {
+		config.TopK = 5 // Default to 5 key concepts
+	}
+	if config.MaxTokens == 0 {
+		config.MaxTokens = 512 // Default token budget for LLM
+	}
+	return config
 }
 
 // Reshape improves a context block via a multi-step pipeline:
@@ -136,6 +152,13 @@ func NewContextReshaper(config ReshapingConfig) (*ContextReshaper, error) {
 //	fmt.Printf("Concepts: %v\n", improved.KeyConcepts)
 //	fmt.Printf("Reshaped:\n%s\n", improved.Content)
 func (r *ContextReshaper) Reshape(ctx context.Context, block *ContextBlock) (*ReshapedBlock, error) {
+	return r.ReshapeWithMaxTokens(ctx, block, r.config.MaxTokens)
+}
+
+// ReshapeWithMaxTokens improves a context block using this invocation's token
+// limit. A non-positive limit preserves the configured default for backwards
+// compatibility with callers that previously relied on it.
+func (r *ContextReshaper) ReshapeWithMaxTokens(ctx context.Context, block *ContextBlock, maxTokens int) (*ReshapedBlock, error) {
 	// block.String() always renders a non-empty "# Title" header, even with
 	// zero Results, so it can never signal an empty block on its own — the
 	// real signal is the absence of any results to reshape.
@@ -166,7 +189,10 @@ func (r *ContextReshaper) Reshape(ctx context.Context, block *ContextBlock) (*Re
 	content := formatResultsInline(block.Results)
 	if r.config.LLMBackend != "none" {
 		prompt := r.buildReshapingPrompt(markdown, concepts)
-		reshaped, err := r.llm.Reshape(ctx, prompt, r.config.MaxTokens)
+		if maxTokens <= 0 {
+			maxTokens = r.config.MaxTokens
+		}
+		reshaped, err := r.llm.Reshape(ctx, prompt, maxTokens)
 		if err != nil {
 			return nil, fmt.Errorf("reshape via LLM: %w", err)
 		}

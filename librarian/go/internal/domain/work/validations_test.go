@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/sentzunhat/hawp/librarian/go/internal/domain/work/source"
 )
 
 // buildWorkDir creates a minimal .hawp/work fixture tree.
@@ -155,11 +157,16 @@ func TestVerificationClarity(t *testing.T) {
 }
 
 func TestDeadLinks(t *testing.T) {
-	workDir := buildWorkDir(t, map[string]string{
-		"BACKLOG.md":         "see [plan](active/TASK-001.md) and [gone](active/missing.md)\n",
-		"active/TASK-001.md": "```\n[example in fence](nowhere.md)\n```\n",
+	root := t.TempDir()
+	backlog := filepath.Join(root, "BACKLOG.md")
+	plan := filepath.Join(root, "active", "TASK-001.md")
+	result := CheckDeadLinks(source.Snapshot{
+		Files: []source.File{
+			{Path: backlog, RelPath: "BACKLOG.md", Links: []source.Link{{Href: "active/TASK-001.md"}, {Href: "active/missing.md"}}},
+			{Path: plan, RelPath: "active/TASK-001.md"},
+		},
+		ExistingPaths: map[string]struct{}{backlog: {}, plan: {}},
 	})
-	result := CheckDeadLinks(workDir)
 	if result.Scanned != 2 {
 		t.Fatalf("scanned = %d, want 2", result.Scanned)
 	}

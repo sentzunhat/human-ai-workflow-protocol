@@ -1,23 +1,11 @@
 package context
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
-)
 
-func writeFixture(t *testing.T, root string, files map[string]string) {
-	t.Helper()
-	for rel, content := range files {
-		full := filepath.Join(root, filepath.FromSlash(rel))
-		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
-			t.Fatal(err)
-		}
-		if err := os.WriteFile(full, []byte(content), 0o644); err != nil {
-			t.Fatal(err)
-		}
-	}
-}
+	"github.com/sentzunhat/hawp/librarian/go/internal/domain/context/source"
+)
 
 func TestKitRole(t *testing.T) {
 	if got := kitRole("start-here.md"); got != "root" {
@@ -32,19 +20,14 @@ func TestKitRole(t *testing.T) {
 }
 
 func TestEnrichKitAssignsRolesAndFolderContext(t *testing.T) {
-	root := t.TempDir()
-	kitPath := filepath.Join(root, ".hawp", "kit")
-	writeFixture(t, root, map[string]string{
-		".hawp/kit/start-here.md":       "# Start\n\nEntry point for HAWP.\n",
-		".hawp/kit/usage/init.md":       "# Init\n\nHow to run init.\n",
-		".hawp/kit/standards/README.md": "# Standards\n\nRules to follow in real work.\n",
-		".hawp/kit/standards/naming.md": "# Naming\n\nUse kebab-case.\n",
-	})
+	corpus := source.KitCorpus{Files: []source.File{
+		{RelPath: "start-here.md", RepoPath: ".hawp/kit/start-here.md", Content: "# Start\n\nEntry point for HAWP.\n"},
+		{RelPath: "usage/init.md", RepoPath: ".hawp/kit/usage/init.md", Content: "# Init\n\nHow to run init.\n"},
+		{RelPath: "standards/README.md", RepoPath: ".hawp/kit/standards/README.md", Content: "# Standards\n\nRules to follow in real work.\n"},
+		{RelPath: "standards/naming.md", RepoPath: ".hawp/kit/standards/naming.md", Content: "# Naming\n\nUse kebab-case.\n"},
+	}}
 
-	docs, err := EnrichKit(root, kitPath)
-	if err != nil {
-		t.Fatal(err)
-	}
+	docs := EnrichKit(corpus)
 	if len(docs) != 4 {
 		t.Fatalf("documents = %d, want 4 (including the standards README)", len(docs))
 	}

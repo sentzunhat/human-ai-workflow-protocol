@@ -1,12 +1,10 @@
 package context
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/markdown"
-	"github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/repo"
+	"github.com/sentzunhat/hawp/librarian/go/internal/domain/context/source"
 )
 
 // kitRole classifies a kit-relative path by its top-level segment, e.g.
@@ -33,47 +31,32 @@ func firstDescriptiveLine(content string) string {
 	return ""
 }
 
-// EnrichKit walks kitPath and returns every markdown document (including
-// README.md files) tagged with its folder role and a context prefix.
-// Folders with a README.md contribute their first descriptive line as
-// shared context for every other document in that folder.
-func EnrichKit(repoRoot, kitPath string) ([]Document, error) {
-	files := markdown.CollectFiles(kitPath, false)
-
+// EnrichKit converts acquired kit files into context-aware documents.
+// File discovery and reading belong to the source adapter, not this package.
+func EnrichKit(corpus source.KitCorpus) []Document {
 	folderContext := map[string]string{}
-	for _, file := range files {
-		if filepath.Base(file) != "README.md" {
+	for _, file := range corpus.Files {
+		if filepath.Base(file.RelPath) != "README.md" {
 			continue
 		}
-		raw, err := os.ReadFile(file)
-		if err != nil {
-			continue
-		}
-		role := kitRole(repo.ToRepoRelative(kitPath, file))
-		folderContext[role] = firstDescriptiveLine(string(raw))
+		folderContext[kitRole(file.RelPath)] = firstDescriptiveLine(file.Content)
 	}
 
-	documents := make([]Document, 0, len(files))
-	for _, file := range files {
-		raw, err := os.ReadFile(file)
-		if err != nil {
-			continue
-		}
-		kitRel := repo.ToRepoRelative(kitPath, file)
-		role := kitRole(kitRel)
-
+	documents := make([]Document, 0, len(corpus.Files))
+	for _, file := range corpus.Files {
+		role := kitRole(file.RelPath)
 		prefix := "[kit/" + role + "]"
 		if summary := folderContext[role]; summary != "" {
 			prefix += " " + summary
 		}
 
 		documents = append(documents, Document{
-			RelPath:       repo.ToRepoRelative(repoRoot, file),
+			RelPath:       file.RepoPath,
 			Corpus:        CorpusKit,
 			Role:          role,
 			ContextPrefix: prefix,
-			Content:       string(raw),
+			Content:       file.Content,
 		})
 	}
-	return documents, nil
+	return documents
 }

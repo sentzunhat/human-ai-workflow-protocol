@@ -8,7 +8,8 @@ import (
 	"time"
 
 	"github.com/sentzunhat/hawp/librarian/go/internal/domain/embeddings"
-	"github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/sqlite"
+	domainstore "github.com/sentzunhat/hawp/librarian/go/internal/domain/index/store"
+	sqliteindex "github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/sqlite/index"
 )
 
 // DefaultEmbeddingModel is the model used when none is specified. Matches
@@ -55,12 +56,26 @@ Embedding complete:
 // model catalog, and one auto-download path. No `hawp model pull` step
 // needed anymore for `search embed`.
 type EmbedService struct {
-	dbPath string
+	dbPath      string
+	openStore   func(string) (domainstore.EmbeddingStore, error)
+	newEmbedder func(string, string) (embeddings.Embedder, error)
 }
 
 // NewEmbedService creates an embed service.
 func NewEmbedService(dbPath string) *EmbedService {
-	return &EmbedService{dbPath: dbPath}
+	return NewEmbedServiceWithDependencies(dbPath,
+		func(path string) (domainstore.EmbeddingStore, error) { return sqliteindex.Open(path) },
+		embeddings.NewEmbedder,
+	)
+}
+
+// NewEmbedServiceWithDependencies composes embedding with its store and model ports.
+func NewEmbedServiceWithDependencies(
+	dbPath string,
+	openStore func(string) (domainstore.EmbeddingStore, error),
+	newEmbedder func(string, string) (embeddings.Embedder, error),
+) *EmbedService {
+	return &EmbedService{dbPath: dbPath, openStore: openStore, newEmbedder: newEmbedder}
 }
 
 // Execute embeds all chunks with NULL vectors in the index database.
@@ -82,7 +97,7 @@ func (s *EmbedService) Execute(ctx context.Context, backend, modelID string) (Em
 	start := time.Now()
 
 	// Open database
-	db, err := sqlite.Open(s.dbPath)
+	db, err := s.openStore(s.dbPath)
 	if err != nil {
 		return result, fmt.Errorf("open index db: %w", err)
 	}
@@ -91,12 +106,12 @@ func (s *EmbedService) Execute(ctx context.Context, backend, modelID string) (Em
 	// InitSchema is idempotent (CREATE TABLE IF NOT EXISTS) — call it here so
 	// the index_metadata table exists even for a DB indexed before that
 	// table existed, without needing a full `search index` re-run.
-	if err := db.InitSchema(); err != nil {
+	if err := db.Initialize(); err != nil {
 		return result, fmt.Errorf("ensure schema: %w", err)
 	}
 
 	// Get chunks with NULL embeddings
-	chunks, err := db.GetChunksNeedingEmbedding()
+	chunks, err := db.PendingChunks()
 	if err != nil {
 		return result, fmt.Errorf("fetch chunks: %w", err)
 	}
@@ -105,7 +120,9 @@ func (s *EmbedService) Execute(ctx context.Context, backend, modelID string) (Em
 		return result, fmt.Errorf("no chunks to embed")
 	}
 
-	if existing, ok, metaErr := db.GetEmbeddingMetadata(); metaErr == nil && ok {
+	if existing, ok, metaErr := db.EmbeddingMetadata(); metaErr != nil {
+		return result, fmt.Errorf("read embedding metadata: %w", metaErr)
+	} else if ok {
 		if existing.Backend != backend || existing.Model != modelID {
 			return result, fmt.Errorf(
 				"this index was already embedded with %s/%s; embedding the rest with %s/%s would mix incompatible vector spaces in one index. "+
@@ -114,7 +131,7 @@ func (s *EmbedService) Execute(ctx context.Context, backend, modelID string) (Em
 		}
 	}
 
-	embedder, err := embeddings.NewEmbedder(backend, modelID)
+	embedder, err := s.newEmbedder(backend, modelID)
 	if err != nil {
 		return result, fmt.Errorf("init %s embedder for %s: %w", backend, modelID, err)
 	}
@@ -135,7 +152,7 @@ func (s *EmbedService) Execute(ctx context.Context, backend, modelID string) (Em
 	vectorDims := 0
 
 	// Start transaction for entire embedding process
-	if err := db.BeginTx(); err != nil {
+	if err := db.Begin(); err != nil {
 		return result, fmt.Errorf("start transaction: %w", err)
 	}
 
@@ -185,7 +202,7 @@ func (s *EmbedService) Execute(ctx context.Context, backend, modelID string) (Em
 		for k, vec := range batchVectors {
 			chunkIdx := batchIndices[batchIdx[k]]
 			vectorJSON, _ := json.Marshal(vec)
-			if err := db.UpdateChunkEmbedding(chunks[chunkIdx].ID, vectorJSON); err != nil {
+			if err := db.UpdateEmbedding(chunks[chunkIdx].ID, vectorJSON); err != nil {
 				db.Rollback()
 				return result, fmt.Errorf("store embedding for chunk %d: %w", chunks[chunkIdx].ID, err)
 			}
@@ -197,7 +214,7 @@ func (s *EmbedService) Execute(ctx context.Context, backend, modelID string) (Em
 					db.Rollback()
 					return result, fmt.Errorf("commit transaction at %d vectors: %w", totalEmbedded, err)
 				}
-				if err := db.BeginTx(); err != nil {
+				if err := db.Begin(); err != nil {
 					return result, fmt.Errorf("restart transaction: %w", err)
 				}
 				fmt.Printf("\rStored %d/%d vectors...", totalEmbedded, len(chunks))
@@ -215,7 +232,7 @@ func (s *EmbedService) Execute(ctx context.Context, backend, modelID string) (Em
 	}
 
 	if totalEmbedded > 0 {
-		if metaErr := db.SetEmbeddingMetadata(sqlite.EmbeddingMetadata{
+		if metaErr := db.SetEmbeddingMetadata(domainstore.EmbeddingMetadata{
 			Backend: backend,
 			Model:   modelID,
 			Dim:     vectorDims,

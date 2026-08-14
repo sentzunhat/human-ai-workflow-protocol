@@ -1,8 +1,10 @@
 package context
 
 import (
-	"path/filepath"
 	"testing"
+
+	"github.com/sentzunhat/hawp/librarian/go/internal/domain/context/source"
+	domainwork "github.com/sentzunhat/hawp/librarian/go/internal/domain/work"
 )
 
 const backlogFixture = `# Backlog
@@ -27,19 +29,23 @@ const backlogFixture = `# Backlog
 `
 
 func TestEnrichWorkResolvesBacklogMetadata(t *testing.T) {
-	root := t.TempDir()
-	writeFixture(t, root, map[string]string{
-		".hawp/work/BACKLOG.md":                      backlogFixture,
-		".hawp/work/active/TASK-001.md":              "# active plan\n",
-		".hawp/work/parked/TASK-002.md":              "# parked plan\n",
-		".hawp/work/closed/2026/07/05/TASK-003.md":   "# closed plan\n",
-		".hawp/work/decisions/2026/07/05/adr-001.md": "# a decision with no backlog row\n",
-	})
-
-	docs, err := EnrichWork(root, filepath.Join(root, ".hawp", "work"))
-	if err != nil {
-		t.Fatal(err)
+	backlog := &domainwork.Backlog{
+		Active: []domainwork.BacklogRow{{ID: "TASK-001", Type: "feature", Status: "in-progress"}},
+		Parked: []domainwork.BacklogRow{{ID: "TASK-002", Type: "improvement", Status: "not needed"}},
+		Closed: []domainwork.BacklogRow{{ID: "TASK-003", Type: "bug", Status: "2026-07-05"}},
 	}
+	corpus := source.WorkCorpus{
+		Backlog: backlog,
+		Files: []source.File{
+			{RelPath: "active/TASK-001.md", RepoPath: ".hawp/work/active/TASK-001.md", Content: "# active plan\n"},
+			{RelPath: "parked/TASK-002.md", RepoPath: ".hawp/work/parked/TASK-002.md", Content: "# parked plan\n"},
+			{RelPath: "closed/2026/07/05/TASK-003.md", RepoPath: ".hawp/work/closed/2026/07/05/TASK-003.md", Content: "# closed plan\n"},
+			{RelPath: "decisions/2026/07/05/adr-001.md", RepoPath: ".hawp/work/decisions/2026/07/05/adr-001.md", Content: "# a decision with no backlog row\n"},
+			{RelPath: "future/TASK-004.md", RepoPath: ".hawp/work/future/TASK-004.md", Content: "# ignored\n"},
+		},
+	}
+
+	docs := EnrichWork(corpus)
 	if len(docs) != 4 {
 		t.Fatalf("documents = %d, want 4", len(docs))
 	}

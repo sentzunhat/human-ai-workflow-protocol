@@ -70,6 +70,21 @@ func TestParseBacklogSections(t *testing.T) {
 	}
 }
 
+func TestParseBacklogContentMatchesFileParser(t *testing.T) {
+	content := `# Backlog
+
+## Active Work
+
+| ID | Type | Title | Status |
+| --- | --- | --- | --- |
+| TASK-001 | task | Extract source | in-progress |
+`
+	backlog := ParseBacklogContent(content)
+	if len(backlog.Active) != 1 || backlog.Active[0].ID != "TASK-001" {
+		t.Fatalf("active rows = %+v, want TASK-001", backlog.Active)
+	}
+}
+
 func TestParseBacklogMissingFile(t *testing.T) {
 	if _, err := ParseBacklog(filepath.Join(t.TempDir(), "nope.md")); err == nil {
 		t.Fatal("expected error for missing backlog")

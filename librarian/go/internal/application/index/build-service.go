@@ -8,7 +8,9 @@ import (
 	"sort"
 
 	domaincontext "github.com/sentzunhat/hawp/librarian/go/internal/domain/context"
+	contextsource "github.com/sentzunhat/hawp/librarian/go/internal/domain/context/source"
 	domainindex "github.com/sentzunhat/hawp/librarian/go/internal/domain/index"
+	filesystemcontext "github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/filesystem/context"
 )
 
 // BuildResult is the enriched document corpus for the requested scope,
@@ -20,10 +22,15 @@ type BuildResult struct {
 
 type BuildService struct {
 	RepoRoot string
+	Source   contextsource.CorpusSource
 }
 
 func NewBuildService(repoRoot string) BuildService {
-	return BuildService{RepoRoot: repoRoot}
+	return BuildService{RepoRoot: repoRoot, Source: filesystemcontext.NewAdapter()}
+}
+
+func NewBuildServiceWithSource(repoRoot string, source contextsource.CorpusSource) BuildService {
+	return BuildService{RepoRoot: repoRoot, Source: source}
 }
 
 // Execute walks the requested corpus (or both) and returns every
@@ -32,19 +39,19 @@ func (service BuildService) Execute(scope domainindex.DocumentScope) (BuildResul
 	result := BuildResult{Scope: scope}
 
 	if scope == domainindex.ScopeAll || scope == domainindex.ScopeKit {
-		docs, err := domaincontext.EnrichKit(service.RepoRoot, filepath.Join(service.RepoRoot, ".hawp", "kit"))
+		docs, err := service.Source.ReadKit(service.RepoRoot, filepath.Join(service.RepoRoot, ".hawp", "kit"))
 		if err != nil {
 			return BuildResult{}, fmt.Errorf("kit enrichment: %w", err)
 		}
-		result.Documents = append(result.Documents, docs...)
+		result.Documents = append(result.Documents, domaincontext.EnrichKit(docs)...)
 	}
 
 	if scope == domainindex.ScopeAll || scope == domainindex.ScopeWork {
-		docs, err := domaincontext.EnrichWork(service.RepoRoot, filepath.Join(service.RepoRoot, ".hawp", "work"))
+		docs, err := service.Source.ReadWork(service.RepoRoot, filepath.Join(service.RepoRoot, ".hawp", "work"))
 		if err != nil {
 			return BuildResult{}, fmt.Errorf("work enrichment: %w", err)
 		}
-		result.Documents = append(result.Documents, docs...)
+		result.Documents = append(result.Documents, domaincontext.EnrichWork(docs)...)
 	}
 
 	return result, nil

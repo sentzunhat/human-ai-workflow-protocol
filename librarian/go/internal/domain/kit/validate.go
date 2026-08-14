@@ -1,16 +1,12 @@
-// Package kit implements the .hawp/kit/ structure validations: file naming,
-// required files, and internal links. Ported from
-// librarian/scripts/hawp/kit-validate.
+// Package kit implements pure .hawp/kit structure rules.
 package kit
 
 import (
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
-	"github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/markdown"
-	"github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/repo"
+	"github.com/sentzunhat/hawp/librarian/go/internal/domain/kit/source"
 )
 
 // Issue is one validation finding against a kit-relative path.
@@ -31,77 +27,65 @@ var RequiredFiles = []string{
 
 var validNameRe = regexp.MustCompile(`^[a-z0-9][a-z0-9.-]*$`)
 
-// CheckFileNaming flags entries that are not lowercase-hyphen named
-// (README.md is allowed).
-func CheckFileNaming(kitPath string) []Issue {
+// CheckFileNaming flags entries that are not lowercase-hyphen named.
+func CheckFileNaming(snapshot source.Snapshot) []Issue {
 	var issues []Issue
-	var walk func(dir string)
-	walk = func(dir string) {
-		entries, err := os.ReadDir(dir)
-		if err != nil {
-			return
-		}
-		for _, entry := range entries {
-			full := filepath.Join(dir, entry.Name())
-			rel := repo.ToRepoRelative(kitPath, full)
-			if entry.Name() != "README.md" && !validNameRe.MatchString(entry.Name()) {
-				issues = append(issues, Issue{File: rel, Message: `name should be lowercase-hyphen (got "` + entry.Name() + `")`})
-			}
-			if entry.IsDir() {
-				walk(full)
-			}
+	for _, entry := range snapshot.Entries {
+		if entry.Name != "README.md" && !validNameRe.MatchString(entry.Name) {
+			issues = append(issues, Issue{File: entry.RelPath, Message: `name should be lowercase-hyphen (got "` + entry.Name + `")`})
 		}
 	}
-	walk(kitPath)
 	return issues
 }
 
 // CheckRequiredFiles flags missing required kit files.
-func CheckRequiredFiles(kitPath string) []Issue {
+func CheckRequiredFiles(snapshot source.Snapshot) []Issue {
+	present := make(map[string]bool, len(snapshot.Files))
+	for _, file := range snapshot.Files {
+		present[filepath.ToSlash(file.RelPath)] = true
+	}
 	var issues []Issue
 	for _, rel := range RequiredFiles {
-		if !repo.Exists(filepath.Join(kitPath, filepath.FromSlash(rel))) {
+		if !present[rel] {
 			issues = append(issues, Issue{File: rel, Message: "required kit file is missing"})
 		}
 	}
 	return issues
 }
 
-// CheckInternalLinks flags relative links in kit markdown (including
-// README.md files) whose targets do not exist. Fenced code blocks are
-// ignored.
-func CheckInternalLinks(kitPath string) []Issue {
+// CheckInternalLinks flags relative links whose targets are absent. The
+// adapter supplies links with fenced code blocks already excluded.
+func CheckInternalLinks(snapshot source.Snapshot) []Issue {
+	present := make(map[string]bool, len(snapshot.Files))
+	for _, file := range snapshot.Files {
+		present[filepath.ToSlash(file.RelPath)] = true
+	}
+
 	var issues []Issue
-	for _, file := range markdown.CollectFiles(kitPath, false) {
-		raw, err := os.ReadFile(file)
-		if err != nil {
-			continue
-		}
-		content := markdown.BlankFences(string(raw))
-		rel := repo.ToRepoRelative(kitPath, file)
-		for _, link := range markdown.ExtractLinks(content) {
-			if !markdown.IsLocalHref(link.Href) {
+	for _, file := range snapshot.Files {
+		for _, link := range file.Links {
+			if !isLocalHref(link.Href) {
 				continue
 			}
-			pathPart := markdown.PathPart(link.Href)
+			pathPart := TrimAnchor(link.Href)
 			if pathPart == "" {
 				continue
 			}
-			target := filepath.Join(filepath.Dir(file), pathPart)
-			if !repo.Exists(target) {
-				issues = append(issues, Issue{File: rel, Message: "broken link: " + link.Href})
+			target := filepath.ToSlash(filepath.Clean(filepath.Join(filepath.Dir(file.RelPath), pathPart)))
+			if !present[target] {
+				issues = append(issues, Issue{File: file.RelPath, Message: "broken link: " + link.Href})
 			}
 		}
 	}
 	return issues
 }
 
-// Validate runs all three kit checks and returns the combined issues plus
-// the number of checks run.
-func Validate(kitPath string) (issues []Issue, checks int) {
-	issues = append(issues, CheckFileNaming(kitPath)...)
-	issues = append(issues, CheckRequiredFiles(kitPath)...)
-	issues = append(issues, CheckInternalLinks(kitPath)...)
+// Validate runs all three kit checks and returns the combined issues plus the
+// number of checks run.
+func Validate(snapshot source.Snapshot) (issues []Issue, checks int) {
+	issues = append(issues, CheckFileNaming(snapshot)...)
+	issues = append(issues, CheckRequiredFiles(snapshot)...)
+	issues = append(issues, CheckInternalLinks(snapshot)...)
 	return issues, 3
 }
 
@@ -109,4 +93,8 @@ func Validate(kitPath string) (issues []Issue, checks int) {
 func TrimAnchor(href string) string {
 	head, _, _ := strings.Cut(href, "#")
 	return head
+}
+
+func isLocalHref(href string) bool {
+	return href != "" && !strings.HasPrefix(href, "http") && !strings.HasPrefix(href, "/") && !strings.HasPrefix(href, "#")
 }

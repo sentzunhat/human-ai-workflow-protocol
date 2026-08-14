@@ -1,14 +1,12 @@
 package context
 
 import (
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
+	"github.com/sentzunhat/hawp/librarian/go/internal/domain/context/source"
 	domainwork "github.com/sentzunhat/hawp/librarian/go/internal/domain/work"
-	"github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/markdown"
-	"github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/repo"
 )
 
 // workRoleFolders are the top-level .hawp/work/ subfolders enriched here.
@@ -48,39 +46,50 @@ func resolveID(filename string) string {
 	return domainwork.ExtractShortUUID(name)
 }
 
-// EnrichWork walks workRoot (a .hawp/work directory) and returns every
-// markdown document tagged with its folder role and, for active/closed/
-// parked records, metadata resolved from BACKLOG.md.
-func EnrichWork(repoRoot, workRoot string) ([]Document, error) {
-	backlog, err := domainwork.ParseBacklog(filepath.Join(workRoot, "BACKLOG.md"))
-	if err != nil {
-		return nil, err
+// EnrichWork converts acquired work files and backlog metadata into context
+// documents. The source adapter owns traversal, reads, and backlog loading.
+func EnrichWork(corpus source.WorkCorpus) []Document {
+	if corpus.Backlog == nil {
+		corpus.Backlog = &domainwork.Backlog{}
 	}
 	rowsByRole := map[string][]domainwork.BacklogRow{
-		"active": backlog.Active, "closed": backlog.Closed, "parked": backlog.Parked,
+		"active": corpus.Backlog.Active, "closed": corpus.Backlog.Closed, "parked": corpus.Backlog.Parked,
 	}
 
-	var documents []Document
+	allowedRoles := map[string]bool{}
 	for _, role := range workRoleFolders {
-		dir := filepath.Join(workRoot, role)
-		for _, file := range markdown.CollectFiles(dir, true) {
-			documents = append(documents, buildWorkDocument(repoRoot, file, role, rowsByRole[role]))
-		}
+		allowedRoles[role] = true
 	}
-	return documents, nil
+
+	documents := make([]Document, 0, len(corpus.Files))
+	for _, file := range corpus.Files {
+		role := workRole(filepath.ToSlash(file.RelPath))
+		if !allowedRoles[role] {
+			continue
+		}
+		documents = append(documents, buildWorkDocument(file, role, rowsByRole[role]))
+	}
+	return documents
 }
 
-func buildWorkDocument(repoRoot, file, role string, rows []domainwork.BacklogRow) Document {
-	raw, _ := os.ReadFile(file)
-	id := resolveID(filepath.Base(file))
+func workRole(relPath string) string {
+	parts := strings.Split(strings.TrimPrefix(relPath, "/"), "/")
+	if len(parts) == 0 || parts[0] == "" {
+		return ""
+	}
+	return parts[0]
+}
+
+func buildWorkDocument(file source.File, role string, rows []domainwork.BacklogRow) Document {
+	id := resolveID(filepath.Base(file.RelPath))
 	doc := Document{
-		RelPath: repo.ToRepoRelative(repoRoot, file),
+		RelPath: file.RepoPath,
 		Corpus:  CorpusWork,
 		Role:    role,
 		ID:      id,
-		Content: string(raw),
+		Content: file.Content,
 	}
-	if closedDate := closedDateFromPath(file); closedDate != "" {
+	if closedDate := closedDateFromPath("/" + filepath.ToSlash(file.RelPath) + "/"); closedDate != "" {
 		doc.ClosedDate = closedDate
 	}
 	if row, ok := rowByID(rows, id); ok {

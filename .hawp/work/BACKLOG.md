@@ -26,6 +26,24 @@ Active coordination index for open work. Closed history is archived under `.hawp
 | ---- | --------- | ---- | ----- | ------ | ----- | --------- | ------- |
 | `c9a7f2e1` | — | infrastructure | Cross-platform GitHub Actions CI/CD pipeline (6-binary matrix) | done | — | [plan](active/c9a7f2e1-github-actions-pipeline.md) | 2026-07-23 |
 | `d1b3e8f4` | — | infrastructure | Repo audit & cleanup: verified clean, all systems ready for v0.0.1 | done | — | [evidence](evidence/2026/07/23/d1b3e8f4-repo-clean.md) | 2026-07-23 |
+| `u7d4c8a1` | — | task | Audit docs drift and checkpoint alignment | done | unassigned | [plan](closed/2026/08/10/u7d4c8a1-audit-docs-drift.md) | 2026-08-10 |
+| `b6c4e8a2` | — | task | Audit and align librarian architecture with domain port/adapter boundaries | in-progress | unassigned | [plan](active/b6c4e8a2-architecture-port-adapter-audit.md) | 2026-08-10 |
+| `c1d2e3f4` | — | audit | Recursive audit: domain context capability | done | unassigned | [plan](closed/2026/08/10/c1d2e3f4-audit-domain-context.md) | 2026-08-10 |
+| `c1d2e3f5` | — | fix | Extract domain context corpus/source boundary | done | unassigned | [plan](closed/2026/08/11/c1d2e3f5-fix-domain-context-boundary.md) | 2026-08-11 |
+| `c1d2e3f6` | — | audit | Recursive audit: domain kit capability | done | unassigned | [plan](closed/2026/08/11/c1d2e3f6-audit-domain-kit.md) | 2026-08-11 |
+| `c1d2e3f7` | — | fix | Isolate kit content input from normalization and validation | done | unassigned | [plan](closed/2026/08/13/c1d2e3f7-fix-domain-kit-boundary.md) | 2026-08-13 |
+| `c1d2e3f8` | — | audit | Recursive audit: domain work capability | done | unassigned | [plan](closed/2026/08/13/c1d2e3f8-audit-domain-work.md) | 2026-08-13 |
+| `c1d2e3f9` | — | fix | Extract work source and link-resolution boundaries | in-progress | unassigned | [plan](active/c1d2e3f9-fix-domain-work-boundary.md) | 2026-08-13 |
+| `c1d2e402` | — | fix | Extract work normalization scan and mutation boundary | plan-ready | unassigned | [plan](active/c1d2e402-fix-work-normalization-boundary.md) | 2026-08-13 |
+| `392313e4-eded-402b-9d5e-20350c86b856` | — | migration | Normalize dated UUID work-item folders and repair workflow references | plan-ready | unassigned | [plan](active/392313e4-eded-402b-9d5e-20350c86b856-workspace-identity-migration.md) | 2026-08-13 |
+| `c1d2e3fa` | — | audit | Recursive audit: application index capability | done | unassigned | [plan](closed/2026/08/13/c1d2e3fa-audit-application-index.md) | 2026-08-13 |
+| `c1d2e3fb` | — | fix | Introduce typed index persistence capability contracts | in-progress | unassigned | [plan](active/c1d2e3fb-fix-index-persistence-boundary.md) | 2026-08-13 |
+| `c1d2e3fc` | — | audit | Recursive audit: application context capability | done | unassigned | [plan](closed/2026/08/13/c1d2e3fc-audit-application-context.md) | 2026-08-13 |
+| `c1d2e3fd` | — | fix | Separate context retrieval, formatting, and reshape seams | in-progress | unassigned | [plan](active/c1d2e3fd-fix-context-seams.md) | 2026-08-13 |
+| `c1d2e3fe` | — | audit | Recursive audit: SQLite infrastructure capabilities | plan-ready | unassigned | [plan](active/c1d2e3fe-audit-sqlite-capabilities.md) | 2026-08-10 |
+| `c1d2e3ff` | — | fix | Group SQLite persistence by capability and remove raw result maps | plan-ready | unassigned | [plan](active/c1d2e3ff-fix-sqlite-capabilities.md) | 2026-08-10 |
+| `c1d2e400` | — | audit | Recursive audit: CLI command capabilities | plan-ready | unassigned | [plan](active/c1d2e400-audit-cli-capabilities.md) | 2026-08-10 |
+| `c1d2e401` | — | fix | Split CLI routing by command capability | plan-ready | unassigned | [plan](active/c1d2e401-fix-cli-capability-splits.md) | 2026-08-10 |
 | `h5f7c2j8` | — | fix | Retry v0.0.1 release: tag fixed workflow + push (GitHub Actions corrected) | plan-ready | unassigned | [plan](active/h5f7c2j8-retry-v001-release.md) | 2026-07-23 |
 | `f3d5a0h6` | — | test | Release verification: test all 6 binaries cross-platform | plan-ready | unassigned | [plan](active/f3d5a0h6-release-verification.md) | 2026-07-23 |
 | `i6g8d3k9` | — | feature | Context Packing (Slice 4): v0.0.2 - Phases 1-5 (NO APIs) | done | unassigned | [plan](active/i6g8d3k9-context-packing-slice4.md) | 2026-07-24 |

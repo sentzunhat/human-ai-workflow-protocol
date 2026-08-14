@@ -5,6 +5,8 @@ import (
 	"io"
 
 	domainkit "github.com/sentzunhat/hawp/librarian/go/internal/domain/kit"
+	"github.com/sentzunhat/hawp/librarian/go/internal/domain/kit/source"
+	filesystemkit "github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/filesystem/kit"
 	"github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/repo"
 )
 
@@ -18,6 +20,12 @@ type NormalizeOptions struct {
 // Normalize plans (and in apply mode performs) kit file renames and link
 // rewrites, writing a dry-run/apply report. Returns the exit code.
 func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
+	return NormalizeWithWorkspace(out, errOut, opts, filesystemkit.NewAdapter())
+}
+
+// NormalizeWithWorkspace keeps command behavior in the application layer
+// while allowing a kit-specific workspace adapter to be injected in tests.
+func NormalizeWithWorkspace(out, errOut io.Writer, opts NormalizeOptions, workspace source.Workspace) int {
 	fmt.Fprintln(out, "kit:normalize")
 	fmt.Fprintln(out, "=============")
 	fmt.Fprintf(out, "kit: %s\n", opts.KitPath)
@@ -27,12 +35,17 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 	}
 	fmt.Fprintf(out, "mode: %s\n\n", mode)
 
-	renames := domainkit.PlanFileRenames(opts.KitPath)
+	snapshot, err := workspace.Read(opts.KitPath)
+	if err != nil {
+		fmt.Fprintf(errOut, "kit normalize error: %v\n", err)
+		return 1
+	}
+	renames := domainkit.PlanFileRenames(snapshot)
 	renameMap := make(map[string]string, len(renames))
 	for _, rename := range renames {
 		renameMap[rename.From] = rename.To
 	}
-	linkUpdates := domainkit.PlanLinkUpdates(opts.KitPath, renameMap)
+	linkUpdates := domainkit.PlanLinkUpdates(snapshot, renameMap)
 
 	if !opts.Apply {
 		if len(renames) == 0 && len(linkUpdates) == 0 {
@@ -62,7 +75,7 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 		return 1
 	}
 
-	conflictFrom, conflictTo, err := domainkit.ApplyRenames(renames)
+	conflictFrom, conflictTo, err := workspace.ApplyRenames(renames)
 	if err != nil {
 		fmt.Fprintf(errOut, "kit normalize error: %v\n", err)
 		return 1
@@ -74,7 +87,7 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 		return 1
 	}
 
-	changedFiles, err := domainkit.ApplyLinkUpdates(linkUpdates)
+	changedFiles, err := workspace.ApplyLinkUpdates(linkUpdates)
 	if err != nil {
 		fmt.Fprintf(errOut, "kit normalize error: %v\n", err)
 		return 1

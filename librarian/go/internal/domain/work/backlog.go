@@ -15,12 +15,18 @@ func ParseBacklog(backlogPath string) (*Backlog, error) {
 	if err != nil {
 		return nil, err
 	}
+	return ParseBacklogContent(string(content)), nil
+}
+
+// ParseBacklogContent extracts tracked backlog rows from already-acquired
+// content. Source adapters own file access; this parser owns HAWP semantics.
+func ParseBacklogContent(content string) *Backlog {
 
 	backlog := &Backlog{}
 	section := ""
 	var headerMap map[string]int
 
-	for _, line := range strings.Split(string(content), "\n") {
+	for _, line := range strings.Split(content, "\n") {
 		switch {
 		case strings.Contains(line, "## Active Work"):
 			section, headerMap = "active", nil
@@ -72,7 +78,7 @@ func ParseBacklog(backlogPath string) (*Backlog, error) {
 		}
 	}
 
-	return backlog, nil
+	return backlog
 }
 
 func parseTableCells(line string) []string {

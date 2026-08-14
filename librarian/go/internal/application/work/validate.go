@@ -7,15 +7,17 @@ import (
 	"path/filepath"
 
 	domainwork "github.com/sentzunhat/hawp/librarian/go/internal/domain/work"
+	filesystemwork "github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/filesystem/work"
 )
 
 // Validate parses the backlog and runs all five checks against workDir
 // (a .hawp/work directory).
 func Validate(workDir string) (*domainwork.Report, error) {
-	backlog, err := domainwork.ParseBacklog(filepath.Join(workDir, "BACKLOG.md"))
+	snapshot, err := filesystemwork.NewAdapter().Read(workDir)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse BACKLOG.md: %w", err)
 	}
+	backlog := domainwork.ParseBacklogContent(snapshot.BacklogContent)
 
 	closedFiles := domainwork.CollectClosedPlanFiles(filepath.Join(workDir, "closed"))
 
@@ -24,7 +26,7 @@ func Validate(workDir string) (*domainwork.Report, error) {
 		Completeness: domainwork.CheckClosedTaskCompleteness(workDir),
 		Evidence:     domainwork.CheckEvidenceIntegrity(workDir, closedFiles),
 		Clarity:      domainwork.CheckVerificationClarity(closedFiles),
-		DeadLinks:    domainwork.CheckDeadLinks(workDir),
+		DeadLinks:    domainwork.CheckDeadLinks(snapshot),
 	}
 	report.Summarize()
 	return report, nil
