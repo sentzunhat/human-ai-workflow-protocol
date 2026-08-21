@@ -28,6 +28,7 @@ librarian/go/bin/
 .hawp/work/**/private/
 .hawp/work/**/local/
 .hawp/db/
+.hawp/.space/
 librarian/go/hawp
 librarian/go/hawp-test
 librarian/go/hawp-test.sha256
