@@ -24,21 +24,11 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 | UUID | Legacy ID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | --------- | ---- | ----- | ------ | ----- | --------- | ------- |
-| `c9a7f2e1` | — | infrastructure | Cross-platform GitHub Actions CI/CD pipeline (6-binary matrix) | done | — | [plan](active/c9a7f2e1-github-actions-pipeline.md) | 2026-07-23 |
-| `d1b3e8f4` | — | infrastructure | Repo audit & cleanup: verified clean, all systems ready for v0.0.1 | done | — | [evidence](evidence/2026/07/23/d1b3e8f4-repo-clean.md) | 2026-07-23 |
-| `u7d4c8a1` | — | task | Audit docs drift and checkpoint alignment | done | unassigned | [plan](closed/2026/08/10/u7d4c8a1-audit-docs-drift.md) | 2026-08-10 |
 | `b6c4e8a2` | — | task | Audit and align librarian architecture with domain port/adapter boundaries | in-progress | unassigned | [plan](active/b6c4e8a2-architecture-port-adapter-audit.md) | 2026-08-10 |
-| `c1d2e3f4` | — | audit | Recursive audit: domain context capability | done | unassigned | [plan](closed/2026/08/10/c1d2e3f4-audit-domain-context.md) | 2026-08-10 |
-| `c1d2e3f5` | — | fix | Extract domain context corpus/source boundary | done | unassigned | [plan](closed/2026/08/11/c1d2e3f5-fix-domain-context-boundary.md) | 2026-08-11 |
-| `c1d2e3f6` | — | audit | Recursive audit: domain kit capability | done | unassigned | [plan](closed/2026/08/11/c1d2e3f6-audit-domain-kit.md) | 2026-08-11 |
-| `c1d2e3f7` | — | fix | Isolate kit content input from normalization and validation | done | unassigned | [plan](closed/2026/08/13/c1d2e3f7-fix-domain-kit-boundary.md) | 2026-08-13 |
-| `c1d2e3f8` | — | audit | Recursive audit: domain work capability | done | unassigned | [plan](closed/2026/08/13/c1d2e3f8-audit-domain-work.md) | 2026-08-13 |
 | `c1d2e3f9` | — | fix | Extract work source and link-resolution boundaries | done | unassigned | [plan](active/c1d2e3f9-fix-domain-work-boundary.md) | 2026-08-21 |
 | `c1d2e402` | — | fix | Extract work normalization scan and mutation boundary | plan-ready | unassigned | [plan](active/c1d2e402-fix-work-normalization-boundary.md) | 2026-08-13 |
 | `392313e4-eded-402b-9d5e-20350c86b856` | — | migration | Normalize dated UUID work-item folders and repair workflow references | plan-ready | unassigned | [plan](active/392313e4-eded-402b-9d5e-20350c86b856-workspace-identity-migration.md) | 2026-08-13 |
-| `c1d2e3fa` | — | audit | Recursive audit: application index capability | done | unassigned | [plan](closed/2026/08/13/c1d2e3fa-audit-application-index.md) | 2026-08-13 |
 | `c1d2e3fb` | — | fix | Introduce typed index persistence capability contracts | in-progress | unassigned | [plan](active/c1d2e3fb-fix-index-persistence-boundary.md) | 2026-08-13 |
-| `c1d2e3fc` | — | audit | Recursive audit: application context capability | done | unassigned | [plan](closed/2026/08/13/c1d2e3fc-audit-application-context.md) | 2026-08-13 |
 | `c1d2e3fd` | — | fix | Separate context retrieval, formatting, and reshape seams | done | unassigned | [plan](active/c1d2e3fd-fix-context-seams.md) | 2026-08-21 |
 | `c1d2e3fe` | — | audit | Recursive audit: SQLite infrastructure capabilities | plan-ready | unassigned | [plan](active/c1d2e3fe-audit-sqlite-capabilities.md) | 2026-08-10 |
 | `c1d2e3ff` | — | fix | Group SQLite persistence by capability and remove raw result maps | plan-ready | unassigned | [plan](active/c1d2e3ff-fix-sqlite-capabilities.md) | 2026-08-10 |
@@ -46,7 +36,6 @@ Active coordination index for open work. Closed history is archived under `.hawp
 | `c1d2e401` | — | fix | Split CLI routing by command capability | plan-ready | unassigned | [plan](active/c1d2e401-fix-cli-capability-splits.md) | 2026-08-10 |
 | `c42d1443-fbd0-4a98-8379-6058ace02dc4` | — | fix | Unify search index through shared build and ingest flow | plan-ready | unassigned | [plan](active/c42d1443-fbd0-4a98-8379-6058ace02dc4-unify-search-index-flow.md) | 2026-08-15 |
 | `fcb5c8a2-eb3e-4554-9889-2e9118f4ad02` | — | feature | Optional HAWP parallel coordination execution space | plan-ready | unassigned | [plan](active/fcb5c8a2-eb3e-4554-9889-2e9118f4ad02-parallel-coordination-space.md) | 2026-08-15 |
-| `d7e5a1b9` | — | infrastructure/docs | Propagate release-readiness guidance across all provider packs | done | unassigned | [plan](closed/2026/08/21/d7e5a1b9-release-readiness-provider-alignment.md) | 2026-08-21 |
 | `h5f7c2j8` | — | fix | Retry v0.0.1 release: tag fixed workflow + push (GitHub Actions corrected) | plan-ready | unassigned | [plan](active/h5f7c2j8-retry-v001-release.md) | 2026-07-23 |
 | `f3d5a0h6` | — | test | Release verification: test all 6 binaries cross-platform | plan-ready | unassigned | [plan](active/f3d5a0h6-release-verification.md) | 2026-07-23 |
 | `i6g8d3k9` | — | feature | Context Packing (Slice 4): v0.0.2 - Phases 1-5 (NO APIs) | done | unassigned | [plan](active/i6g8d3k9-context-packing-slice4.md) | 2026-07-24 |
@@ -92,23 +81,22 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 ## Recently Closed
 
-Limited to the last 10 items.
+Limited to the last 30 days.
 
 | ID       | Type             | Title                                                                     | Closed     | Detail                                |
 | -------- | ---------------- | ------------------------------------------------------------------------- | ---------- | ------------------------------------- |
-| `w4x6y8z0` | fix | `--llm-reshape` wired into the CLI (shared record, see `v003-ship-audit`) | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit.md) |
-| `n4o6p8q0` | fix | `ReshapingConfig` now honors configured Ollama URL (shared record) | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit.md) |
-| `j2k4l6m8` | fix | `DefaultConfig()` no longer defaults to nonexistent ONNX LLM model (shared record) | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit.md) |
-| `a1b3c5d7` | fix | 8 failing Ollama LLM tests repaired (shared record) | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit.md) |
-| `e9f1g3h5` | fix | token budget `1995/0` display bug fixed (shared record) | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit.md) |
-| `i7j9k1l3` | fix | `aes256` silent downgrade now rejected at config validation (shared record) | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit.md) |
-| `r5s7t9u1` | fix | `Reshape()` empty-block guard fixed (shared record) | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit.md) |
-| `e2c4f9g5` | infrastructure | update command v2 (platform detect, download, SHA256 verify) was already complete | 2026-07-23 | [plan](closed/2026/07/23/e2c4f9g5-update-already-complete.md) |
-| `4b114c0c` | feature | document index ingest pipeline (fbf12a93 Slice 1: SQLite + FTS5 lexical search) | 2026-07-22 | [plan](closed/2026/07/22/4b114c0c-document-index-ingest.md) |
-| `273f3e4b` | feature | hawp update also syncs .hawp/kit/ and the installed provider overlay (unified version) | 2026-07-21 | [plan](closed/2026/07/21/273f3e4b-4978-4fc1-ae8c-2f8ecc99402a.md) |
-| `748609a8` | feature | adopt hugot as a transformers.js-style Go wrapper for hawp (model pull + embed, pure-Go, no cgo) | 2026-07-21 | [plan](closed/2026/07/21/748609a8-ac1a-4e27-a0dc-7a67d3b9fd14.md) |
-| `b95436f2` | feature | draft-and-approve release workflow: workflow_dispatch cuts the tag, builds, auto-publishes or drafts | 2026-07-21 | [plan](closed/2026/07/21/b95436f2-e9e2-4259-ac65-53a28068ccab.md) |
-Older closed work (`f93bee55` / 2026-07-21 and earlier) is archived under `closed/YYYY/MM/DD/`.
+| `d7e5a1b9` | infrastructure/docs | Propagate release-readiness guidance across all provider packs | 2026-08-21 | [plan](closed/2026/08/21/d7e5a1b9-release-readiness-provider-alignment.md) |
+| `c1d2e3fc` | audit | Recursive audit: application context capability | 2026-08-13 | [plan](closed/2026/08/13/c1d2e3fc-audit-application-context.md) |
+| `c1d2e3fa` | audit | Recursive audit: application index capability | 2026-08-13 | [plan](closed/2026/08/13/c1d2e3fa-audit-application-index.md) |
+| `c1d2e3f8` | audit | Recursive audit: domain work capability | 2026-08-13 | [plan](closed/2026/08/13/c1d2e3f8-audit-domain-work.md) |
+| `c1d2e3f7` | fix | Isolate kit content input from normalization and validation | 2026-08-13 | [plan](closed/2026/08/13/c1d2e3f7-fix-domain-kit-boundary.md) |
+| `c1d2e3f6` | audit | Recursive audit: domain kit capability | 2026-08-11 | [plan](closed/2026/08/11/c1d2e3f6-audit-domain-kit.md) |
+| `c1d2e3f5` | fix | Extract domain context corpus/source boundary | 2026-08-11 | [plan](closed/2026/08/11/c1d2e3f5-fix-domain-context-boundary.md) |
+| `c1d2e3f4` | audit | Recursive audit: domain context capability | 2026-08-10 | [plan](closed/2026/08/10/c1d2e3f4-audit-domain-context.md) |
+| `u7d4c8a1` | task | Audit docs drift and checkpoint alignment | 2026-08-10 | [plan](closed/2026/08/10/u7d4c8a1-audit-docs-drift.md) |
+| `c9a7f2e1` | infrastructure | Cross-platform GitHub Actions CI/CD pipeline (6-binary matrix) | 2026-07-23 | [plan](closed/2026/07/23/c9a7f2e1-github-actions-pipeline.md) |
+| `d1b3e8f4` | infrastructure | Repo audit & cleanup: verified clean, all systems ready for v0.0.1 | 2026-07-23 | [plan](closed/2026/07/23/d1b3e8f4-repo-audit-cleanup.md) |
+Older closed work (`w4x6y8z0`, `r5s7t9u1`, `e2c4f9g5`, `4b114c0c`, `273f3e4b`, `748609a8`, `b95436f2`, `f93bee55` and earlier) is archived under `closed/YYYY/MM/DD/`.
 
 ---
 

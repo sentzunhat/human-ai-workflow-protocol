@@ -358,3 +358,25 @@ func VerifyBinary(binaryPath string, checksumURL string) error {
 - ARM64 Linux may need self-hosted runner if ubuntu-latest doesn't support it (check Actions panel)
 - Keep CHANGELOG.md updated before tagging — release notes auto-pull from it
 
+
+## Outcome
+
+Cross-platform GitHub Actions CI/CD pipeline implemented for 6-binary matrix
+(Windows/macOS/Linux × amd64/arm64). Tag push triggers automated build,
+SHA256 checksum generation, and GitHub Release creation. Pipeline is live
+and has produced verified binary releases.
+
+## Verification
+
+- `.github/workflows/release.yml` in production and passing.
+- All 6 binaries built successfully for v0.0.1, v0.0.2, v0.0.3 releases.
+- SHA256 checksums verified for each binary.
+
+## Close Checklist
+
+- [x] GitHub Actions workflow created and passing
+- [x] All 6 platform/arch combinations building
+- [x] SHA256 checksums generated per binary
+- [x] GitHub Release auto-created with artifacts
+- [x] Update command detects platform and downloads correct binary
+- [x] Moved to `closed/2026/07/23/`
