@@ -1,85 +1,123 @@
-// Package index adapts the SQLite index database to domain index store ports.
-package index
+// Package sqliteindex provides the SQLite adapter implementing the
+// domain/index/store capability contracts. It bridges domain types to the
+// sqlite.IndexDB low-level operations so application services depend only on
+// typed port interfaces.
+package sqliteindex
 
 import (
-	domainstore "github.com/sentzunhat/hawp/librarian/go/internal/domain/index/store"
+	domainindex "github.com/sentzunhat/hawp/librarian/go/internal/domain/index"
+	"github.com/sentzunhat/hawp/librarian/go/internal/domain/index/store"
 	"github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/sqlite"
 )
 
-// Adapter provides index persistence through capability-local store ports.
+// Adapter wraps *sqlite.IndexDB and implements store.DocumentStore and
+// store.EmbeddingStore. It converts domain types to the sqlite-local types
+// expected by IndexDB.
 type Adapter struct {
 	db *sqlite.IndexDB
 }
 
-// Open opens the SQLite-backed index adapter.
-func Open(path string) (*Adapter, error) {
-	db, err := sqlite.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	return &Adapter{db: db}, nil
+// NewAdapter creates an Adapter backed by an already-opened IndexDB.
+// The caller retains ownership of db (Open/InitSchema/Close).
+func NewAdapter(db *sqlite.IndexDB) *Adapter {
+	return &Adapter{db: db}
 }
 
-func (a *Adapter) Initialize() error { return a.db.InitSchema() }
-
-func (a *Adapter) Close() error { return a.db.Close() }
-
-func (a *Adapter) ReplaceDocument(replacement domainstore.DocumentReplacement) (int64, error) {
-	var metadata *sqlite.DocumentMetadata
-	if replacement.Metadata != nil {
-		metadata = &sqlite.DocumentMetadata{
-			WorkUUID: replacement.Metadata.WorkUUID, Status: replacement.Metadata.Status,
-			Owner: replacement.Metadata.Owner, RiskLevel: replacement.Metadata.RiskLevel,
-			ReportedAt: replacement.Metadata.ReportedAt, ClosedAt: replacement.Metadata.ClosedAt,
+// ReplaceDocument implements store.DocumentStore. It maps domain types to
+// sqlite-local types and delegates to IndexDB.ReplaceDocument for the atomic
+// upsert + chunk replacement.
+func (a *Adapter) ReplaceDocument(
+	doc domainindex.Document,
+	meta *domainindex.DocumentMetadata,
+	chunks []domainindex.Chunk,
+) (int64, error) {
+	var sqliteMeta *sqlite.DocumentMetadata
+	if meta != nil {
+		sqliteMeta = &sqlite.DocumentMetadata{
+			WorkUUID:   meta.WorkUUID,
+			Status:     meta.Status,
+			Owner:      meta.Owner,
+			RiskLevel:  meta.RiskLevel,
+			ReportedAt: meta.ReportedAt,
+			ClosedAt:   meta.ClosedAt,
 		}
 	}
 
-	chunks := make([]sqlite.Chunk, 0, len(replacement.Chunks))
-	for _, chunk := range replacement.Chunks {
-		folderContext, metadataJSON := chunk.FolderContext, chunk.MetadataJSON
-		chunks = append(chunks, sqlite.Chunk{
-			ChunkIdx: chunk.Index, Text: chunk.Text,
-			FolderContext: &folderContext, MetadataJSON: &metadataJSON,
-		})
+	sqliteChunks := make([]sqlite.Chunk, len(chunks))
+	for i, c := range chunks {
+		var fc *string
+		if c.FolderContext != "" {
+			v := c.FolderContext
+			fc = &v
+		}
+		sqliteChunks[i] = sqlite.Chunk{
+			ChunkIdx:     c.ChunkIdx,
+			Text:         c.Text,
+			FolderContext: fc,
+			MetadataJSON: c.MetadataJSON,
+		}
 	}
-	return a.db.ReplaceDocument(sqlite.DocumentReplacement{
-		Category: replacement.Category, Type: replacement.Type, Path: replacement.Path,
-		FolderRole: replacement.FolderRole, Metadata: metadata, Chunks: chunks,
-	})
+
+	return a.db.ReplaceDocument(
+		sqlite.DocumentRow{
+			Category:   doc.Category,
+			Type:       doc.Type,
+			Path:       doc.Path,
+			FolderRole: doc.FolderRole,
+		},
+		sqliteMeta,
+		sqliteChunks,
+	)
 }
 
-func (a *Adapter) PendingChunks() ([]domainstore.PendingChunk, error) {
-	chunks, err := a.db.GetChunksNeedingEmbedding()
+// GetChunksNeedingEmbedding implements store.EmbeddingStore.
+func (a *Adapter) GetChunksNeedingEmbedding() ([]store.ChunkData, error) {
+	raw, err := a.db.GetChunksNeedingEmbedding()
 	if err != nil {
 		return nil, err
 	}
-	pending := make([]domainstore.PendingChunk, len(chunks))
-	for i, chunk := range chunks {
-		pending[i] = domainstore.PendingChunk{ID: chunk.ID, Text: chunk.Text}
+	out := make([]store.ChunkData, len(raw))
+	for i, c := range raw {
+		out[i] = store.ChunkData{ID: c.ID, Text: c.Text}
 	}
-	return pending, nil
+	return out, nil
 }
 
-func (a *Adapter) EmbeddingMetadata() (domainstore.EmbeddingMetadata, bool, error) {
-	metadata, ok, err := a.db.GetEmbeddingMetadata()
-	return domainstore.EmbeddingMetadata{Backend: metadata.Backend, Model: metadata.Model, Dim: metadata.Dim}, ok, err
+// GetEmbeddingMetadata implements store.EmbeddingStore.
+func (a *Adapter) GetEmbeddingMetadata() (store.EmbeddingMetadata, bool, error) {
+	raw, ok, err := a.db.GetEmbeddingMetadata()
+	if err != nil {
+		return store.EmbeddingMetadata{}, false, err
+	}
+	if !ok {
+		return store.EmbeddingMetadata{}, false, nil
+	}
+	return store.EmbeddingMetadata{
+		Backend: raw.Backend,
+		Model:   raw.Model,
+		Dim:     raw.Dim,
+	}, true, nil
 }
 
-func (a *Adapter) Begin() error { return a.db.BeginTx() }
-
-func (a *Adapter) UpdateEmbedding(chunkID int64, embedding []byte) error {
-	return a.db.UpdateChunkEmbedding(chunkID, embedding)
-}
-
-func (a *Adapter) Commit() error { return a.db.Commit() }
-
-func (a *Adapter) Rollback() error { return a.db.Rollback() }
-
-func (a *Adapter) SetEmbeddingMetadata(metadata domainstore.EmbeddingMetadata) error {
+// SetEmbeddingMetadata implements store.EmbeddingStore.
+func (a *Adapter) SetEmbeddingMetadata(meta store.EmbeddingMetadata) error {
 	return a.db.SetEmbeddingMetadata(sqlite.EmbeddingMetadata{
-		Backend: metadata.Backend, Model: metadata.Model, Dim: metadata.Dim,
+		Backend: meta.Backend,
+		Model:   meta.Model,
+		Dim:     meta.Dim,
 	})
 }
 
-var _ domainstore.CorpusWriter = (*Adapter)(nil)
-var _ domainstore.EmbeddingStore = (*Adapter)(nil)
+// UpdateChunkEmbedding implements store.EmbeddingStore.
+func (a *Adapter) UpdateChunkEmbedding(chunkID int64, embedding []byte) error {
+	return a.db.UpdateChunkEmbedding(chunkID, embedding)
+}
+
+// BeginTx implements store.EmbeddingStore.
+func (a *Adapter) BeginTx() error { return a.db.BeginTx() }
+
+// Commit implements store.EmbeddingStore.
+func (a *Adapter) Commit() error { return a.db.Commit() }
+
+// Rollback implements store.EmbeddingStore.
+func (a *Adapter) Rollback() error { return a.db.Rollback() }

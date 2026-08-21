@@ -7,7 +7,8 @@ import (
 	"time"
 
 	domainindex "github.com/sentzunhat/hawp/librarian/go/internal/domain/index"
-	domainstore "github.com/sentzunhat/hawp/librarian/go/internal/domain/index/store"
+	"github.com/sentzunhat/hawp/librarian/go/internal/domain/index/store"
+	"github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/sqlite"
 	sqliteindex "github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/sqlite/index"
 )
 
@@ -56,56 +57,49 @@ type EnrichedCorpus struct {
 }
 
 // IngestService orchestrates the ingest of enriched documents into the index.
+// Use NewIngestService to construct from a database path (backward compatible),
+// or NewIngestServiceFromStore to inject an explicit DocumentStore.
 type IngestService struct {
-	dbPath    string
-	openStore func(string) (domainstore.CorpusWriter, error)
+	dbPath string
+	store  store.DocumentStore
 }
 
-// NewIngestService creates an ingest service.
+// NewIngestService creates an ingest service that opens a SQLite database at
+// dbPath on each Execute call (backward compatible constructor).
 func NewIngestService(dbPath string) *IngestService {
-	return NewIngestServiceWithStoreOpener(dbPath, func(path string) (domainstore.CorpusWriter, error) {
-		return sqliteindex.Open(path)
-	})
+	return &IngestService{dbPath: dbPath}
 }
 
-// NewIngestServiceWithStoreOpener composes ingestion with its persistence port.
-func NewIngestServiceWithStoreOpener(dbPath string, opener func(string) (domainstore.CorpusWriter, error)) *IngestService {
-	return &IngestService{dbPath: dbPath, openStore: opener}
+// NewIngestServiceFromStore creates an ingest service backed by the given
+// DocumentStore. InitSchema is the caller's responsibility.
+func NewIngestServiceFromStore(s store.DocumentStore) *IngestService {
+	return &IngestService{store: s}
 }
 
-// Execute ingests documents from a corpus into the index database.
+// Execute ingests documents from a corpus into the index.
 func (s *IngestService) Execute(corpus *EnrichedCorpus) (IngestResult, error) {
+	if s.store != nil {
+		return ingest(corpus, s.store)
+	}
+
+	// Backward-compatible path: open SQLite, create adapter, ingest, close.
+	db, err := sqlite.Open(s.dbPath)
+	if err != nil {
+		return IngestResult{}, fmt.Errorf("open index db: %w", err)
+	}
+	defer db.Close()
+	if err := db.InitSchema(); err != nil {
+		return IngestResult{}, fmt.Errorf("init schema: %w", err)
+	}
+	return ingest(corpus, sqliteindex.NewAdapter(db))
+}
+
+// ingest runs the core ingestion logic against any DocumentStore implementation.
+func ingest(corpus *EnrichedCorpus, ds store.DocumentStore) (IngestResult, error) {
 	result := IngestResult{}
 	start := time.Now()
 
-	// Open or create the index database
-	db, err := s.openStore(s.dbPath)
-	if err != nil {
-		return result, fmt.Errorf("open index db: %w", err)
-	}
-	defer db.Close()
-
-	// Initialize schema
-	if err := db.Initialize(); err != nil {
-		return result, fmt.Errorf("init schema: %w", err)
-	}
-
-	// Ingest each document
 	for _, enriched := range corpus.Documents {
-		// Build optional work metadata before the atomic document replacement.
-		var metadata *domainstore.DocumentMetadata
-		if enriched.Category == "work" && enriched.WorkUUID != nil {
-			metadata = &domainstore.DocumentMetadata{
-				WorkUUID:   *enriched.WorkUUID,
-				Status:     *enriched.Status,
-				Owner:      enriched.Owner,
-				RiskLevel:  enriched.RiskLevel,
-				ReportedAt: enriched.ReportedAt,
-				ClosedAt:   enriched.ClosedAt,
-			}
-		}
-
-		// Create chunks
 		doc := domainindex.Document{
 			Category:   enriched.Category,
 			Type:       enriched.Type,
@@ -114,9 +108,9 @@ func (s *IngestService) Execute(corpus *EnrichedCorpus) (IngestResult, error) {
 			Content:    enriched.Content,
 		}
 
-		var domainMetadata *domainindex.DocumentMetadata
-		if metadata != nil {
-			domainMetadata = &domainindex.DocumentMetadata{
+		var meta *domainindex.DocumentMetadata
+		if enriched.Category == "work" && enriched.WorkUUID != nil {
+			meta = &domainindex.DocumentMetadata{
 				WorkUUID:   *enriched.WorkUUID,
 				Status:     *enriched.Status,
 				Owner:      enriched.Owner,
@@ -126,34 +120,32 @@ func (s *IngestService) Execute(corpus *EnrichedCorpus) (IngestResult, error) {
 			}
 		}
 
-		folderContext := domainindex.BuildFolderContext(doc, domainMetadata)
+		folderContext := domainindex.BuildFolderContext(doc, meta)
 		metadataJSONBytes, _ := json.Marshal(enriched.Metadata)
 		metadataJSONStr := string(metadataJSONBytes)
 
-		chunkTexts := domainindex.ChunkBySection(enriched.Content)
-		replacement := domainstore.DocumentReplacement{
-			Category: enriched.Category, Type: enriched.Type, Path: enriched.Path,
-			FolderRole: enriched.FolderRole, Metadata: metadata,
-			Chunks: make([]domainstore.Chunk, 0, len(chunkTexts)),
+		rawChunks := domainindex.ChunkBySection(enriched.Content)
+		domainChunks := make([]domainindex.Chunk, len(rawChunks))
+		for i, text := range rawChunks {
+			fc := folderContext
+			mj := metadataJSONStr
+			domainChunks[i] = domainindex.Chunk{
+				ChunkIdx:      i,
+				Text:          text,
+				FolderContext: fc,
+				MetadataJSON:  &mj,
+			}
+			result.BytesIndexed += int64(len(text))
 		}
-		for i, chunkText := range chunkTexts {
-			replacement.Chunks = append(replacement.Chunks, domainstore.Chunk{
-				Index:         i,
-				Text:          chunkText,
-				FolderContext: folderContext,
-				MetadataJSON:  metadataJSONStr,
-			})
-		}
-		if _, err := db.ReplaceDocument(replacement); err != nil {
+
+		if _, err := ds.ReplaceDocument(doc, meta, domainChunks); err != nil {
 			return result, fmt.Errorf("replace document %s: %w", enriched.Path, err)
 		}
+
 		result.DocumentsProcessed++
-		result.ChunksCreated += len(chunkTexts)
-		if metadata != nil {
+		result.ChunksCreated += len(rawChunks)
+		if meta != nil {
 			result.MetadataRows++
-		}
-		for _, chunkText := range chunkTexts {
-			result.BytesIndexed += int64(len(chunkText))
 		}
 	}
 
