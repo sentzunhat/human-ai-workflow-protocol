@@ -2,9 +2,9 @@
 work-item: c1d2e3fd
 type: fix
 title: "Separate context retrieval, formatting, and reshape seams"
-status: in-progress
+status: done
 created: 2026-08-10
-updated: 2026-08-13
+updated: 2026-08-21
 parent: b6c4e8a2
 depends-on: c1d2e3fc
 ---
@@ -53,8 +53,16 @@ testable while preserving current output and fallback behavior.
 - Added `PrepareContext` so pipeline retrieval owns result deduplication before
   formatting, while preserving `FormatAsMarkdown` as a compatibility wrapper.
 - Focused context tests and diff checks pass.
-
-## Next Slice
-
-Migrate CLI context mode to the shared preparation/orchestration path and add
-an equivalence test proving the CLI and pipeline render the same context block.
+- CLI context mode migrated: `prepareSearchContext` delegates to
+  `PrepareContext` (one shared orchestration path, no separate deduplication).
+- `DefaultRetrieveMaxTokens` exported from `rag.go` so the equivalence test
+  can reference the pipeline's token budget without duplicating the magic number.
+- `TestCLIAndPipelineContextAreEquivalent` added to `search_output_test.go`:
+  proves CLI path and `pipeline.Retrieve` produce identical `ContextBlock`
+  values for the same inputs (including near-duplicate collapse). Uses fake
+  retriever, embedder, and LLM — no model files or network required.
+- `TestPrepareSearchContextMatchesApplicationPreparation` (existing): proves
+  CLI path matches `PrepareContext` directly.
+- `TestRAGPipelineReshapeHonorsInvocationMaxTokens` (existing): proves
+  `Reshape` uses invocation-time `maxTokens`, not the constructor default.
+- All Done When criteria met: clean build, all focused tests pass.
