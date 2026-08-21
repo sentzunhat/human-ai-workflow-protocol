@@ -114,3 +114,26 @@ in-memory source input, read-error behavior, and ignored-folder behavior.
 The audit is complete for the inspected `domain/context` capability. The
 follow-up implementation item is the next compoundable item; this audit does
 not modify production code.
+
+## Outcome
+
+Completed full capability audit of `domain/context`. Identified five confirmed
+findings: domain-to-infrastructure coupling, mixed acquisition and enrichment,
+silent content loss, fixed folder allow-list policy, and application-facing
+call boundary. Produced a concrete boundary proposal and handoff spec for
+`c1d2e3f5`. No production code modified.
+
+## Verification
+
+- `go test ./internal/domain/context ./internal/application/index` passed.
+- Existing tests confirm role/prefix behavior, backlog metadata resolution,
+  closed-date extraction, ID parsing, scope filtering, and JSON export.
+- Boundary proposal reviewed and accepted as implementation-ready handoff.
+
+## Close Checklist
+
+- [x] All confirmed findings documented with file paths
+- [x] Boundary proposal produced for `c1d2e3f5`
+- [x] No production code changed
+- [x] Follow-up item `c1d2e3f5` updated with implementation-ready scope
+- [x] Moved to `closed/2026/08/10/`

@@ -46,7 +46,7 @@ Active coordination index for open work. Closed history is archived under `.hawp
 | `c1d2e401` | — | fix | Split CLI routing by command capability | plan-ready | unassigned | [plan](active/c1d2e401-fix-cli-capability-splits.md) | 2026-08-10 |
 | `c42d1443-fbd0-4a98-8379-6058ace02dc4` | — | fix | Unify search index through shared build and ingest flow | plan-ready | unassigned | [plan](active/c42d1443-fbd0-4a98-8379-6058ace02dc4-unify-search-index-flow.md) | 2026-08-15 |
 | `fcb5c8a2-eb3e-4554-9889-2e9118f4ad02` | — | feature | Optional HAWP parallel coordination execution space | plan-ready | unassigned | [plan](active/fcb5c8a2-eb3e-4554-9889-2e9118f4ad02-parallel-coordination-space.md) | 2026-08-15 |
-| `d7e5a1b9` | — | infrastructure/docs | Propagate release-readiness guidance across all provider packs | done | unassigned | [plan](active/d7e5a1b9-release-readiness-provider-alignment.md) | 2026-08-21 |
+| `d7e5a1b9` | — | infrastructure/docs | Propagate release-readiness guidance across all provider packs | done | unassigned | [plan](closed/2026/08/21/d7e5a1b9-release-readiness-provider-alignment.md) | 2026-08-21 |
 | `h5f7c2j8` | — | fix | Retry v0.0.1 release: tag fixed workflow + push (GitHub Actions corrected) | plan-ready | unassigned | [plan](active/h5f7c2j8-retry-v001-release.md) | 2026-07-23 |
 | `f3d5a0h6` | — | test | Release verification: test all 6 binaries cross-platform | plan-ready | unassigned | [plan](active/f3d5a0h6-release-verification.md) | 2026-07-23 |
 | `i6g8d3k9` | — | feature | Context Packing (Slice 4): v0.0.2 - Phases 1-5 (NO APIs) | done | unassigned | [plan](active/i6g8d3k9-context-packing-slice4.md) | 2026-07-24 |

@@ -47,3 +47,18 @@ Audit workflow and documentation drift against the live HAWP ledger, status-repo
 - A conservative edit plan.
 - A minimal set of doc/workflow fixes, if any.
 - A dated status report that records before/after and what remains unproven.
+
+## Verification
+
+- `npm run distribution:validate` passed: generated provider guides are current.
+- Confirmed `.hawp/work/STATUS.md` seeding and preservation behavior matches
+  live install/update contract.
+- No source-code changes made; only minimal doc alignment applied.
+
+## Close Checklist
+
+- [x] Docs drift audit completed within bounded scope
+- [x] `distribution:validate` passed
+- [x] STATUS.md seeding contract confirmed
+- [x] Historical notes with legacy mentions left intentionally untouched
+- [x] Moved to `closed/2026/08/10/`

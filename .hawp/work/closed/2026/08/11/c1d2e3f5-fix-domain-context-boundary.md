@@ -80,7 +80,26 @@ behavior while owning the adapter composition.
 - `rg` confirms no infrastructure imports or filesystem acquisition calls in
   `domain/context`.
 
+## Outcome
+
+Introduced `domain/context/source/port.go` with typed kit/work corpus contracts
+and moved all filesystem acquisition behind `infrastructure/filesystem/context/adapter.go`.
+Domain context now has no direct infrastructure imports. Application build service
+wires the default adapter; `NewBuildServiceWithSource` enables focused in-memory
+testing. Existing repository-facing behavior, README exclusion, fixed work-folder
+allow-list, and skip-on-read-error policy all preserved.
+
 ## Result
 
 The context corpus/source boundary is implemented and verified. The next
 compoundable work item is the recursive audit of `domain/kit` (`c1d2e3f6`).
+
+## Close Checklist
+
+- [x] Domain context imports no concrete Markdown/repository infrastructure
+- [x] Typed corpus source contract added in `domain/context/source/`
+- [x] Filesystem adapter added in `infrastructure/filesystem/context/`
+- [x] Default adapter wired in `application/index/build-service.go`
+- [x] In-memory source tests and policy coverage added
+- [x] All verification commands passed
+- [x] Moved to `closed/2026/08/11/`

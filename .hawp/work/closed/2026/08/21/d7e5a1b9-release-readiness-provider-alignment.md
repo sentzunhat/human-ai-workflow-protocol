@@ -24,9 +24,27 @@ HAWP provider without changing HAWP's runtime or project-owned work records.
   owner-approved and distinguishes direct evidence from inference.
 - Existing worktree changes remain preserved.
 
+## Outcome
+
+Added a canonical shared release-readiness behavior covering dependency
+consolidation, CI/Docker verification, release gates, and secure OIDC
+publication. Materialized it for GitHub Copilot, Claude Code, Cursor, and
+Continue provider packs. Updated the Codex and GitHub global instruction
+overlays. Regenerated and validated all provider/distribution artifacts.
+No HAWP runtime or project-owned work records were changed.
+
 ## Verification
 
 - `mise exec node@26.5.0 -- npm --prefix librarian run distribution:sync`
   passed: provider materialization and validation passed; distribution build
   and validation passed.
 - Pre-existing dirty files were preserved; no merge, push, or publish ran.
+
+## Close Checklist
+
+- [x] Canonical release-readiness behavior added to shared behaviors
+- [x] All four provider packs materialized and validated
+- [x] Codex and GitHub global overlays updated
+- [x] `distribution:sync` passed clean
+- [x] No HAWP runtime or work records modified
+- [x] Moved to `closed/2026/08/21/`
