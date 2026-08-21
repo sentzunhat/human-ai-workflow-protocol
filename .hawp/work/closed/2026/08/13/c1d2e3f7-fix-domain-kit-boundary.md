@@ -61,9 +61,18 @@ missing files, rename conflicts, and link-update mutation.
 - A package scan confirms `domain/kit` has no concrete infrastructure imports,
   filesystem calls, or Markdown parser calls.
 
-## Result
+## Outcome
 
 The kit capability now follows the same capability-local boundary as context:
 domain rules consume typed inputs, filesystem operations are isolated in the
 filesystem kit adapter, and application services own use-case composition.
 The next compoundable item is `c1d2e3f8`, the recursive audit of `domain/work`.
+
+## Close Checklist
+
+- [x] `domain/kit/source/port.go` added with typed workspace contract
+- [x] `infrastructure/filesystem/kit/adapter.go` added for all I/O concerns
+- [x] Domain kit validation and normalization consume snapshots, no concrete infrastructure imports
+- [x] Application kit services compose the adapter; dry-run/apply/dirty-worktree preserved
+- [x] In-memory domain tests and filesystem adapter tests added
+- [x] Build and diff checks pass

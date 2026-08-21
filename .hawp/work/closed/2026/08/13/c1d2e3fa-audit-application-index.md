@@ -39,3 +39,10 @@ triggers, CLI behavior, and model guards.
 ## Verification
 
 - `go test ./internal/application/index ./internal/infrastructure/sqlite ./internal/infrastructure/sqlite/search`
+
+## Close Checklist
+
+- [x] Findings confirmed with direct evidence (CLI bypass, suppressed errors, non-atomic writes)
+- [x] Boundary proposal written and handed off to `c1d2e3fb`
+- [x] No production code changed in this audit
+- [x] Linked implementation item exists and is implementation-ready

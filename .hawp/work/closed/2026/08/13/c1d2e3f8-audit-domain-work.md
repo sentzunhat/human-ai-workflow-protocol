@@ -102,7 +102,15 @@ existing date/legacy semantics; unreadable files warn/skip where they do now.
 `c1d2e402` is added as the follow-up for normalization scan/mutation
 extraction. Do not fold it into `c1d2e3f9`.
 
-## Audit Result
+## Outcome
 
 The recursive work audit is complete. No production behavior changed in this
-audit; the two linked improvements are ordered to keep the refactor safe.
+audit; the two linked improvements (`c1d2e3f9`, `c1d2e402`) are ordered to
+keep the refactor safe.
+
+## Close Checklist
+
+- [x] Findings confirmed with direct evidence (responsibility map + test run)
+- [x] Boundary proposal written with capability-local port/adapter layout
+- [x] No production code changed in this audit
+- [x] `c1d2e3f9` (validation boundary) and `c1d2e402` (normalization boundary) created as follow-ups

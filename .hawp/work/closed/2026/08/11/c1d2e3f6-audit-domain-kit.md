@@ -100,8 +100,15 @@ rules, filesystem adapter tests for discovery and mutation/conflict behavior,
 and preserve the existing dry-run/apply, dirty-worktree, link-rewrite, and
 error behavior.
 
-## Audit Result
+## Outcome
 
 The recursive audit is complete for `domain/kit`. This audit did not modify
-production code; its linked implementation item is the next compoundable
-slice.
+production code; its linked implementation item (`c1d2e3f7`) is the next
+compoundable slice.
+
+## Close Checklist
+
+- [x] Findings confirmed with direct evidence (responsibility map + test run)
+- [x] Boundary proposal written and handed off to `c1d2e3f7`
+- [x] No production code changed in this audit
+- [x] Linked implementation item exists and is implementation-ready

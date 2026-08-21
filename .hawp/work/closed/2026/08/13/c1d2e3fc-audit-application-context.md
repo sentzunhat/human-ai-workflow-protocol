@@ -37,3 +37,10 @@ orchestration path. Config persistence is explicitly out of scope.
 - Equivalent context output through CLI and pipeline for identical inputs.
 - Fake retriever, embedder, and LLM coverage plus token-limit proof.
 - Preserve provenance, budgets, model-free passthrough, and fallback behavior.
+
+## Close Checklist
+
+- [x] Findings confirmed with direct evidence (separate retrieval paths, hardwired factories, config-persistence gap)
+- [x] Boundary proposal written and handed off to `c1d2e3fd`
+- [x] No production code changed in this audit
+- [x] Linked implementation item exists and is implementation-ready
