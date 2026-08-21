@@ -196,75 +196,6 @@ type Chunk struct {
 	MetadataJSON  *string
 }
 
-// DocumentReplacement is the complete persisted state for one indexed
-// document. ReplaceDocument applies it atomically so a failed re-ingest never
-// leaves stale metadata or a partial chunk set behind.
-type DocumentReplacement struct {
-	Category   string
-	Type       string
-	Path       string
-	FolderRole string
-	Metadata   *DocumentMetadata
-	Chunks     []Chunk
-}
-
-// ReplaceDocument upserts one document, replaces optional work metadata, and
-// replaces every chunk in one transaction.
-func (ix *IndexDB) ReplaceDocument(replacement DocumentReplacement) (int64, error) {
-	tx, err := ix.db.Begin()
-	if err != nil {
-		return 0, err
-	}
-	defer tx.Rollback()
-
-	var documentID int64
-	err = tx.QueryRow(
-		`INSERT INTO documents (category, type, path, folder_role)
-		 VALUES (?, ?, ?, ?)
-		 ON CONFLICT(path) DO UPDATE SET
-		   category=excluded.category, type=excluded.type,
-		   folder_role=excluded.folder_role, updated_at=CURRENT_TIMESTAMP
-		 RETURNING id`,
-		replacement.Category, replacement.Type, replacement.Path, replacement.FolderRole,
-	).Scan(&documentID)
-	if err != nil {
-		return 0, err
-	}
-
-	if replacement.Metadata != nil {
-		metadata := *replacement.Metadata
-		metadata.DocumentID = documentID
-		if _, err := tx.Exec(
-			`INSERT INTO documents_metadata (document_id, work_uuid, status, owner, risk_level, reported_at, closed_at)
-			 VALUES (?, ?, ?, ?, ?, ?, ?)
-			 ON CONFLICT(document_id) DO UPDATE SET
-			   work_uuid=excluded.work_uuid, status=excluded.status, owner=excluded.owner,
-			   risk_level=excluded.risk_level, reported_at=excluded.reported_at,
-			   closed_at=excluded.closed_at, updated_at=CURRENT_TIMESTAMP`,
-			metadata.DocumentID, metadata.WorkUUID, metadata.Status, metadata.Owner, metadata.RiskLevel, metadata.ReportedAt, metadata.ClosedAt,
-		); err != nil {
-			return 0, err
-		}
-	}
-
-	if _, err := tx.Exec(`DELETE FROM chunks WHERE document_id = ?`, documentID); err != nil {
-		return 0, err
-	}
-	for _, chunk := range replacement.Chunks {
-		if _, err := tx.Exec(
-			`INSERT INTO chunks (document_id, chunk_idx, text, folder_context, metadata_json)
-			 VALUES (?, ?, ?, ?, ?)`,
-			documentID, chunk.ChunkIdx, chunk.Text, chunk.FolderContext, chunk.MetadataJSON,
-		); err != nil {
-			return 0, err
-		}
-	}
-	if err := tx.Commit(); err != nil {
-		return 0, err
-	}
-	return documentID, nil
-}
-
 // InsertChunk inserts a chunk and updates the FTS5 index.
 func (ix *IndexDB) InsertChunk(c Chunk) error {
 	_, err := ix.db.Exec(
@@ -536,6 +467,75 @@ func (ix *IndexDB) GetChunkVectors(chunkIDs []int64) (map[int64][]float32, error
 		vectors[chunkID] = vector
 	}
 	return vectors, rows.Err()
+}
+
+// DocumentRow holds the fields needed to upsert a document row.
+type DocumentRow struct {
+	Category   string
+	Type       string
+	Path       string
+	FolderRole string
+}
+
+// ReplaceDocument atomically upserts a document, optional work metadata,
+// clears its previous chunks, and inserts replacement chunks. Any failure
+// rolls back the whole operation, preserving the previous document and chunk
+// state. Returns the database-assigned document ID.
+func (ix *IndexDB) ReplaceDocument(doc DocumentRow, meta *DocumentMetadata, chunks []Chunk) (int64, error) {
+	tx, err := ix.db.Begin()
+	if err != nil {
+		return 0, err
+	}
+
+	var id int64
+	err = tx.QueryRow(
+		`INSERT INTO documents (category, type, path, folder_role)
+		 VALUES (?, ?, ?, ?)
+		 ON CONFLICT(path) DO UPDATE SET
+		   category=excluded.category, type=excluded.type,
+		   folder_role=excluded.folder_role, updated_at=CURRENT_TIMESTAMP
+		 RETURNING id`,
+		doc.Category, doc.Type, doc.Path, doc.FolderRole,
+	).Scan(&id)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	if meta != nil {
+		_, err = tx.Exec(
+			`INSERT INTO documents_metadata (document_id, work_uuid, status, owner, risk_level, reported_at, closed_at)
+			 VALUES (?, ?, ?, ?, ?, ?, ?)
+			 ON CONFLICT(document_id) DO UPDATE SET
+			   work_uuid=excluded.work_uuid, status=excluded.status, owner=excluded.owner,
+			   risk_level=excluded.risk_level, reported_at=excluded.reported_at,
+			   closed_at=excluded.closed_at, updated_at=CURRENT_TIMESTAMP`,
+			id, meta.WorkUUID, meta.Status, meta.Owner, meta.RiskLevel, meta.ReportedAt, meta.ClosedAt,
+		)
+		if err != nil {
+			tx.Rollback()
+			return 0, err
+		}
+	}
+
+	if _, err = tx.Exec(`DELETE FROM chunks WHERE document_id = ?`, id); err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	for _, chunk := range chunks {
+		_, err = tx.Exec(
+			`INSERT INTO chunks (document_id, chunk_idx, text, folder_context, metadata_json)
+			 VALUES (?, ?, ?, ?, ?)`,
+			id, chunk.ChunkIdx, chunk.Text, chunk.FolderContext, chunk.MetadataJSON,
+		)
+		if err != nil {
+			tx.Rollback()
+			return 0, err
+		}
+	}
+
+	return id, tx.Commit()
 }
 
 // EmbeddingMetadata records which backend/model embedded the chunks

@@ -4,7 +4,7 @@ type: fix
 title: "Introduce typed index persistence capability contracts"
 status: in-progress
 created: 2026-08-10
-updated: 2026-08-13
+updated: 2026-08-21
 parent: b6c4e8a2
 depends-on: c1d2e3fa
 ---
@@ -55,8 +55,31 @@ and embeddings, moving SQLite construction toward explicit composition.
 - Migrated ingest to that operation, preserving schema and FTS trigger use.
 - Added rollback coverage proving a failed duplicate chunk insert preserves the
   previous document and chunk state.
+- Introduced typed capability contracts in `domain/index/store/` (`DocumentStore`
+  and `EmbeddingStore` interfaces) using domain types from `domain/index`.
+- Implemented the adapter in `infrastructure/sqlite/index/` (`Adapter` struct)
+  wrapping `*sqlite.IndexDB`, implementing both store interfaces with type mapping.
+- Updated `IngestService` to accept a `store.DocumentStore` via
+  `NewIngestServiceFromStore`; the existing `NewIngestService(dbPath)` constructor
+  creates the adapter internally (backward compat, no CLI changes needed yet).
+- Updated `EmbedService` to accept a `store.EmbeddingStore` via
+  `NewEmbedServiceFromStore`; same backward compat approach.
+- Fixed embedding metadata-read error propagation: `GetEmbeddingMetadata` errors
+  are now returned to the caller rather than silently skipping the mixed-model
+  guard (previously `if metaErr == nil && ok` swallowed real read failures).
+- Focused tests: `replace_document_test.go` (atomic replacement, rollback,
+  metadata upsert, FTS sync), `adapter_test.go` (document/chunk/embedding
+  persistence separately, interface conformance), `store_test.go` (mock-based
+  service tests proving no SQLite construction in the service path, metadata-read
+  error propagation, mixed-model rejection). All 28 non-integration tests pass.
 
 ## Next Slice
 
-Introduce typed index-store contracts over this existing atomic operation and
-propagate embedding metadata-read failures before migrating CLI composition.
+Migrate CLI composition to inject the `Adapter` explicitly so the application
+layer is fully free of infrastructure construction:
+
+- Remove the dbPath-opening backward-compat path from `IngestService.Execute`
+  and `EmbedService.Execute`.
+- Have `platform/cli/` create `sqlite.IndexDB` and `sqliteindex.NewAdapter(db)`
+  directly and pass the adapter to the service constructors.
+- Prove the CLI indexing flow retains resolved work metadata end-to-end.
