@@ -1,13 +1,13 @@
 package work
 
 import (
-	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 
-	"github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/repo"
+	"github.com/sentzunhat/hawp/librarian/go/internal/domain/work/source"
 )
+
+const legacyClosedCutoff = "2026-05-10"
 
 var supportingSuffixes = []string{
 	"-summary", "-status", "-status-report", "-checkpoint", "-evidence",
@@ -20,32 +20,31 @@ var (
 	pathDateRe              = regexp.MustCompile(`/(\d{4})/(\d{2})/(\d{2})/`)
 )
 
-type closedFileEntry struct {
-	filePath string
-	date     string // "YYYY-MM-DD" from the path, or ""
-}
-
 type classification struct {
 	kind   string // "plan" | "supporting" | "legacy-untyped" | "current-untyped"
 	id     string
 	reason string
 }
 
-// CheckClosedTaskCompleteness verifies that closed plan files carry the
-// Outcome, Verification, and Close Checklist sections. Files dated before the
-// legacy cutoff only warn; supporting files (summaries, evidence, archives)
-// are skipped.
-func CheckClosedTaskCompleteness(workDir string) ClosedTaskCheck {
+// CheckClosedTaskCompleteness verifies that closed plan files in snapshot
+// carry the Outcome, Verification, and Close Checklist sections. Files dated
+// before the legacy cutoff only warn; supporting files are skipped.
+func CheckClosedTaskCompleteness(snapshot source.Snapshot) ClosedTaskCheck {
 	result := ClosedTaskCheck{Status: StatusPass}
 
-	for _, entry := range collectClosedFilesGeneric(filepath.Join(workDir, "closed")) {
-		filename := filepath.Base(entry.filePath)
-		class := classifyClosedFile(filename, entry.date)
-		date := entry.date
+	for _, file := range snapshot.Files {
+		if !isClosedMarkdownFile(file.RelPath) {
+			continue
+		}
+
+		filename := filenameFromPath(file.RelPath)
+		dateFromPath := dateFromClosedPath(file.RelPath)
+		class := classifyClosedFile(filename, dateFromPath)
+		date := dateFromPath
 		if date == "" {
 			date = "unknown"
 		}
-		finding := FileFinding{ID: class.id, Date: date, Reason: class.reason, FilePath: entry.filePath}
+		finding := FileFinding{ID: class.id, Date: date, Reason: class.reason, FilePath: file.Path}
 
 		switch class.kind {
 		case "supporting":
@@ -61,14 +60,8 @@ func CheckClosedTaskCompleteness(workDir string) ClosedTaskCheck {
 		}
 
 		result.Total++
-		content, err := os.ReadFile(entry.filePath)
-		if err != nil {
-			warnf("skipping unreadable closed plan %s: %v", entry.filePath, err)
-			continue
-		}
-
 		var missing []string
-		hasOutcome, hasVerification, hasChecklist := findRequiredHeadings(string(content))
+		hasOutcome, hasVerification, hasChecklist := findRequiredHeadings(file.Content)
 		if hasOutcome {
 			result.WithOutcome++
 		} else {
@@ -87,7 +80,7 @@ func CheckClosedTaskCompleteness(workDir string) ClosedTaskCheck {
 
 		if len(missing) > 0 {
 			finding.Sections = missing
-			if entry.date == "" || entry.date < repo.LegacyClosedCutoff {
+			if dateFromPath == "" || dateFromPath < legacyClosedCutoff {
 				result.Warnings = append(result.Warnings, finding)
 			} else {
 				result.Failing = append(result.Failing, finding)
@@ -107,7 +100,7 @@ func classifyClosedFile(filename, date string) classification {
 	nameWithoutExt := strings.TrimSuffix(filename, ".md")
 	nameLower := strings.ToLower(nameWithoutExt)
 	id := ExtractIDFromFilename(nameWithoutExt)
-	isLegacy := date == "" || date < repo.LegacyClosedCutoff
+	isLegacy := date == "" || date < legacyClosedCutoff
 
 	if strings.HasPrefix(nameLower, "backlog") {
 		return classification{"supporting", nameWithoutExt, "matches BACKLOG supporting-file pattern"}
@@ -160,32 +153,24 @@ func findRequiredHeadings(content string) (outcome, verification, checklist bool
 	return
 }
 
-// collectClosedFilesGeneric walks closed/ at any depth, extracting the date
-// from a /YYYY/MM/DD/ path segment when present. README.md files are skipped.
-func collectClosedFilesGeneric(closedDir string) []closedFileEntry {
-	var out []closedFileEntry
-	var walk func(dir string)
-	walk = func(dir string) {
-		entries, err := os.ReadDir(dir)
-		if err != nil {
-			return
-		}
-		for _, entry := range entries {
-			full := filepath.Join(dir, entry.Name())
-			if entry.IsDir() {
-				walk(full)
-				continue
-			}
-			if !strings.HasSuffix(entry.Name(), ".md") || entry.Name() == "README.md" {
-				continue
-			}
-			date := ""
-			if m := pathDateRe.FindStringSubmatch(strings.ReplaceAll(full, "\\", "/")); m != nil {
-				date = m[1] + "-" + m[2] + "-" + m[3]
-			}
-			out = append(out, closedFileEntry{filePath: full, date: date})
-		}
+func isClosedMarkdownFile(relPath string) bool {
+	relPath = strings.ReplaceAll(relPath, "\\", "/")
+	return strings.HasPrefix(relPath, "closed/") &&
+		strings.HasSuffix(relPath, ".md") &&
+		filenameFromPath(relPath) != "README.md"
+}
+
+func filenameFromPath(relPath string) string {
+	relPath = strings.ReplaceAll(relPath, "\\", "/")
+	if index := strings.LastIndex(relPath, "/"); index >= 0 {
+		return relPath[index+1:]
 	}
-	walk(closedDir)
-	return out
+	return relPath
+}
+
+func dateFromClosedPath(relPath string) string {
+	if m := pathDateRe.FindStringSubmatch("/" + strings.ReplaceAll(relPath, "\\", "/")); m != nil {
+		return m[1] + "-" + m[2] + "-" + m[3]
+	}
+	return ""
 }

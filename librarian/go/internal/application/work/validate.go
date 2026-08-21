@@ -23,7 +23,7 @@ func Validate(workDir string) (*domainwork.Report, error) {
 
 	report := &domainwork.Report{
 		Backlog:      domainwork.CheckBacklogConsistency(workDir, backlog),
-		Completeness: domainwork.CheckClosedTaskCompleteness(workDir),
+		Completeness: domainwork.CheckClosedTaskCompleteness(snapshot),
 		Evidence:     domainwork.CheckEvidenceIntegrity(workDir, closedFiles),
 		Clarity:      domainwork.CheckVerificationClarity(closedFiles),
 		DeadLinks:    domainwork.CheckDeadLinks(snapshot),

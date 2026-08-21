@@ -72,13 +72,13 @@ func TestBacklogConsistencyPassAndFail(t *testing.T) {
 }
 
 func TestClosedTaskCompleteness(t *testing.T) {
-	workDir := buildWorkDir(t, map[string]string{
-		"closed/2026/07/03/TASK-086.md":         closedPlanComplete,
-		"closed/2026/07/03/TASK-087.md":         "# plan without sections",
-		"closed/2026/04/01/TASK-001.md":         "# legacy plan without sections",
-		"closed/2026/07/03/TASK-086-summary.md": "# supporting, skipped",
-	})
-	result := CheckClosedTaskCompleteness(workDir)
+	snapshot := source.Snapshot{Files: []source.File{
+		{Path: "/work/closed/2026/07/03/TASK-086.md", RelPath: "closed/2026/07/03/TASK-086.md", Content: closedPlanComplete},
+		{Path: "/work/closed/2026/07/03/TASK-087.md", RelPath: "closed/2026/07/03/TASK-087.md", Content: "# plan without sections"},
+		{Path: "/work/closed/2026/04/01/TASK-001.md", RelPath: "closed/2026/04/01/TASK-001.md", Content: "# legacy plan without sections"},
+		{Path: "/work/closed/2026/07/03/TASK-086-summary.md", RelPath: "closed/2026/07/03/TASK-086-summary.md", Content: "# supporting, skipped"},
+	}}
+	result := CheckClosedTaskCompleteness(snapshot)
 	if result.Total != 3 {
 		t.Fatalf("total plans = %d, want 3", result.Total)
 	}
@@ -95,10 +95,9 @@ func TestClosedTaskCompleteness(t *testing.T) {
 		t.Errorf("status = %s, want FAIL", result.Status)
 	}
 
-	passDir := buildWorkDir(t, map[string]string{
-		"closed/2026/07/03/TASK-086.md": closedPlanComplete,
-	})
-	if got := CheckClosedTaskCompleteness(passDir); got.Status != StatusPass {
+	if got := CheckClosedTaskCompleteness(source.Snapshot{Files: []source.File{
+		{Path: "/work/closed/2026/07/03/TASK-086.md", RelPath: "closed/2026/07/03/TASK-086.md", Content: closedPlanComplete},
+	}}); got.Status != StatusPass {
 		t.Errorf("all-complete status = %s, want PASS", got.Status)
 	}
 }
