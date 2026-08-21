@@ -133,13 +133,15 @@ func (p *DefaultRAGPipeline) Retrieve(ctx context.Context, query string, topK in
 	if err != nil {
 		return ContextBlock{}, fmt.Errorf("retrieve: %w", err)
 	}
-	return PrepareContext(results, query, defaultRetrieveMaxTokens), nil
+	return PrepareContext(results, query, DefaultRetrieveMaxTokens), nil
 }
 
-// defaultRetrieveMaxTokens bounds FormatAsMarkdown's token budget when
+// DefaultRetrieveMaxTokens bounds PrepareContext's token budget when
 // Retrieve builds the initial ContextBlock. Reshape can still be called
-// with its own, separate maxTokens for the LLM step.
-const defaultRetrieveMaxTokens = 4000
+// with its own, separate maxTokens for the LLM step. Exported so callers
+// that mirror the pipeline path (e.g. equivalence tests) can use the same
+// value without duplicating the magic number.
+const DefaultRetrieveMaxTokens = 4000
 
 // Reshape takes a ContextBlock (formatted search results) and improves it via
 // embeddings + LLM reshaping. Returns the reshaped content along with references
