@@ -4,7 +4,6 @@ package work
 import (
 	"fmt"
 	"io"
-	"path/filepath"
 
 	domainwork "github.com/sentzunhat/hawp/librarian/go/internal/domain/work"
 	filesystemwork "github.com/sentzunhat/hawp/librarian/go/internal/infrastructure/filesystem/work"
@@ -19,13 +18,11 @@ func Validate(workDir string) (*domainwork.Report, error) {
 	}
 	backlog := domainwork.ParseBacklogContent(snapshot.BacklogContent)
 
-	closedFiles := domainwork.CollectClosedPlanFiles(filepath.Join(workDir, "closed"))
-
 	report := &domainwork.Report{
-		Backlog:      domainwork.CheckBacklogConsistency(workDir, backlog),
+		Backlog:      domainwork.CheckBacklogConsistency(snapshot, backlog),
 		Completeness: domainwork.CheckClosedTaskCompleteness(snapshot),
-		Evidence:     domainwork.CheckEvidenceIntegrity(workDir, closedFiles),
-		Clarity:      domainwork.CheckVerificationClarity(closedFiles),
+		Evidence:     domainwork.CheckEvidenceIntegrity(snapshot),
+		Clarity:      domainwork.CheckVerificationClarity(snapshot.ClosedFiles),
 		DeadLinks:    domainwork.CheckDeadLinks(snapshot),
 	}
 	report.Summarize()

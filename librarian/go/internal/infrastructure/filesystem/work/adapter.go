@@ -38,5 +38,22 @@ func (Adapter) Read(workDir string) (source.Snapshot, error) {
 		snapshot.Files = append(snapshot.Files, file)
 		snapshot.ExistingPaths[path] = struct{}{}
 	}
+
+	for _, f := range snapshot.Files {
+		if isClosedPlanRelPath(f.RelPath) {
+			snapshot.ClosedFiles = append(snapshot.ClosedFiles, f)
+		}
+	}
 	return snapshot, nil
+}
+
+// isClosedPlanRelPath reports whether a relative path looks like a
+// closed/YYYY/MM/DD/<file>.md plan file (not the top-level README.md).
+func isClosedPlanRelPath(relPath string) bool {
+	relPath = strings.ReplaceAll(relPath, "\\", "/")
+	if !strings.HasPrefix(relPath, "closed/") || !strings.HasSuffix(relPath, ".md") {
+		return false
+	}
+	base := relPath[strings.LastIndex(relPath, "/")+1:]
+	return base != "README.md" && strings.Count(relPath, "/") >= 4
 }

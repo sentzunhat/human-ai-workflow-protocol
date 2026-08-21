@@ -26,3 +26,33 @@ func TestAdapterReadCollectsBacklogAndMarkdown(t *testing.T) {
 		t.Fatalf("snapshot = %+v", snapshot)
 	}
 }
+
+// TestAdapterReadPopulatesClosedFiles verifies the repository path: the adapter
+// classifies closed/YYYY/MM/DD/*.md files into snapshot.ClosedFiles.
+func TestAdapterReadPopulatesClosedFiles(t *testing.T) {
+	root := t.TempDir()
+	closedDir := filepath.Join(root, "closed", "2026", "07", "03")
+	if err := os.MkdirAll(closedDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "BACKLOG.md"), []byte("# Backlog\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(closedDir, "TASK-001.md"), []byte("# closed plan\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	snapshot, err := NewAdapter().Read(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(snapshot.ClosedFiles) != 1 {
+		t.Fatalf("ClosedFiles = %d, want 1", len(snapshot.ClosedFiles))
+	}
+	if snapshot.ClosedFiles[0].Content != "# closed plan\n" {
+		t.Errorf("ClosedFiles[0].Content = %q, want '# closed plan\\n'", snapshot.ClosedFiles[0].Content)
+	}
+	if snapshot.ClosedFiles[0].RelPath != "closed/2026/07/03/TASK-001.md" {
+		t.Errorf("ClosedFiles[0].RelPath = %q", snapshot.ClosedFiles[0].RelPath)
+	}
+}

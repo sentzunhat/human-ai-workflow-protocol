@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/sentzunhat/hawp/librarian/go/internal/domain/work/source"
 )
 
 var (
@@ -220,7 +222,8 @@ func ApplyClosedRecordNormalization(repoRoot string) (ApplyResult, error) {
 // records for dry-run reporting.
 func BuildResearchQueue(repoRoot string) []ResearchItem {
 	closedRoot := filepath.Join(repoRoot, ".hawp", "work", "closed")
-	clarity := CheckVerificationClarity(walkPlanMarkdown(closedRoot))
+	closedFiles := closedFilesFromPaths(walkPlanMarkdown(closedRoot))
+	clarity := CheckVerificationClarity(closedFiles)
 	items := make([]ResearchItem, 0, len(clarity.Ambiguous))
 	for _, claim := range clarity.Ambiguous {
 		items = append(items, ResearchItem{
@@ -229,4 +232,19 @@ func BuildResearchQueue(repoRoot string) []ResearchItem {
 		})
 	}
 	return items
+}
+
+// closedFilesFromPaths reads each path and wraps it in a source.File for
+// use by validators that consume the snapshot-based API. This adapter exists
+// inside the normalization layer, which already owns direct filesystem access.
+func closedFilesFromPaths(paths []string) []source.File {
+	files := make([]source.File, 0, len(paths))
+	for _, path := range paths {
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		files = append(files, source.File{Path: path, RelPath: path, Content: string(raw)})
+	}
+	return files
 }

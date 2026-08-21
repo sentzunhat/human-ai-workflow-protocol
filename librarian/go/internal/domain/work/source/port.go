@@ -16,6 +16,7 @@ type Link struct{ Href string }
 type Snapshot struct {
 	BacklogContent string
 	Files          []File
+	ClosedFiles    []File // pre-classified closed/YYYY/MM/DD/*.md plan files
 	ExistingPaths  map[string]struct{}
 }
 
