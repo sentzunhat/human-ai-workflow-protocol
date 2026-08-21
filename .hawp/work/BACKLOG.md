@@ -24,12 +24,9 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 | UUID | Legacy ID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | --------- | ---- | ----- | ------ | ----- | --------- | ------- |
-| `b6c4e8a2` | — | task | Audit and align librarian architecture with domain port/adapter boundaries | in-progress | unassigned | [plan](active/b6c4e8a2-architecture-port-adapter-audit.md) | 2026-08-10 |
-| `c1d2e3f9` | — | fix | Extract work source and link-resolution boundaries | done | unassigned | [plan](active/c1d2e3f9-fix-domain-work-boundary.md) | 2026-08-21 |
+| `b6c4e8a2` | — | task | Audit and align librarian architecture with domain port/adapter boundaries | in-progress | unassigned | [plan](active/b6c4e8a2-architecture-port-adapter-audit.md) | 2026-08-21 |
 | `c1d2e402` | — | fix | Extract work normalization scan and mutation boundary | plan-ready | unassigned | [plan](active/c1d2e402-fix-work-normalization-boundary.md) | 2026-08-13 |
 | `392313e4-eded-402b-9d5e-20350c86b856` | — | migration | Normalize dated UUID work-item folders and repair workflow references | plan-ready | unassigned | [plan](active/392313e4-eded-402b-9d5e-20350c86b856-workspace-identity-migration.md) | 2026-08-13 |
-| `c1d2e3fb` | — | fix | Introduce typed index persistence capability contracts | in-progress | unassigned | [plan](active/c1d2e3fb-fix-index-persistence-boundary.md) | 2026-08-13 |
-| `c1d2e3fd` | — | fix | Separate context retrieval, formatting, and reshape seams | done | unassigned | [plan](active/c1d2e3fd-fix-context-seams.md) | 2026-08-21 |
 | `c1d2e3fe` | — | audit | Recursive audit: SQLite infrastructure capabilities | plan-ready | unassigned | [plan](active/c1d2e3fe-audit-sqlite-capabilities.md) | 2026-08-10 |
 | `c1d2e3ff` | — | fix | Group SQLite persistence by capability and remove raw result maps | plan-ready | unassigned | [plan](active/c1d2e3ff-fix-sqlite-capabilities.md) | 2026-08-10 |
 | `c1d2e400` | — | audit | Recursive audit: CLI command capabilities | plan-ready | unassigned | [plan](active/c1d2e400-audit-cli-capabilities.md) | 2026-08-10 |
@@ -85,6 +82,9 @@ Limited to the last 30 days.
 
 | ID       | Type             | Title                                                                     | Closed     | Detail                                |
 | -------- | ---------------- | ------------------------------------------------------------------------- | ---------- | ------------------------------------- |
+| `c1d2e3fd` | fix | Separate context retrieval, formatting, and reshape seams | 2026-08-21 | [plan](closed/2026/08/21/c1d2e3fd-fix-context-seams.md) |
+| `c1d2e3fb` | fix | Introduce typed index persistence capability contracts | 2026-08-21 | [plan](closed/2026/08/21/c1d2e3fb-fix-index-persistence-boundary.md) |
+| `c1d2e3f9` | fix | Extract work source and link-resolution boundaries | 2026-08-21 | [plan](closed/2026/08/21/c1d2e3f9-fix-domain-work-boundary.md) |
 | `d7e5a1b9` | infrastructure/docs | Propagate release-readiness guidance across all provider packs | 2026-08-21 | [plan](closed/2026/08/21/d7e5a1b9-release-readiness-provider-alignment.md) |
 | `c1d2e3fc` | audit | Recursive audit: application context capability | 2026-08-13 | [plan](closed/2026/08/13/c1d2e3fc-audit-application-context.md) |
 | `c1d2e3fa` | audit | Recursive audit: application index capability | 2026-08-13 | [plan](closed/2026/08/13/c1d2e3fa-audit-application-index.md) |

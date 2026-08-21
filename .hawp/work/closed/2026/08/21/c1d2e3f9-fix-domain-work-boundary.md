@@ -73,3 +73,21 @@ tracked separately in `c1d2e402`.
 
 No remaining slices for this item. Normalization scan/mutation is tracked in
 `c1d2e402`.
+
+## Outcome
+
+Migrated all remaining work domain validators (backlog consistency, evidence integrity, verification clarity, research queue builder) from direct filesystem I/O to consuming a pre-built `WorkSnapshot` typed value. Validator functions are now pure — no filesystem calls inside the validation logic. The `BuildWorkSnapshot` constructor owns all I/O, and each validator receives only the data it needs.
+
+## Verification
+
+- `go test ./internal/domain/work/...` all pass.
+- Build: `CGO_ENABLED=0 go build ./...` clean.
+- Merged to development as PR #6.
+
+## Close Checklist
+
+- [x] All work validators consume typed snapshot, no direct I/O
+- [x] `BuildWorkSnapshot` constructor owns all filesystem reads
+- [x] Tests updated to use in-memory snapshot fixtures
+- [x] Build and tests pass
+- [x] Merged to development

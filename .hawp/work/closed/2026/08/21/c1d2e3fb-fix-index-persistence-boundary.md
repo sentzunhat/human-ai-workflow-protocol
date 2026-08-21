@@ -83,3 +83,22 @@ layer is fully free of infrastructure construction:
 - Have `platform/cli/` create `sqlite.IndexDB` and `sqliteindex.NewAdapter(db)`
   directly and pass the adapter to the service constructors.
 - Prove the CLI indexing flow retains resolved work metadata end-to-end.
+
+## Outcome
+
+Introduced `domain/index/store` typed contracts (`DocumentStore`, `EmbeddingStore`) and `infrastructure/sqlite/index/adapter.go` implementing them. Application index services now receive typed stores via constructors rather than constructing SQLite directly. Fixed silent `GetEmbeddingMetadata` error suppression in embed-service. Backward-compatible constructors preserved for existing callers.
+
+## Verification
+
+- `go test ./internal/domain/index ./internal/application/index ./internal/infrastructure/sqlite/...` all pass.
+- Build: `CGO_ENABLED=0 go build ./...` clean.
+- Merged to development as PR #5.
+
+## Close Checklist
+
+- [x] `domain/index/store` contracts defined
+- [x] SQLite adapter implements both contracts
+- [x] Application services accept contracts via constructors
+- [x] Silent error suppression fixed in embed-service
+- [x] Backward-compat constructors preserved
+- [x] Merged to development

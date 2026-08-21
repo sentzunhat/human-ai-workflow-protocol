@@ -66,3 +66,21 @@ testable while preserving current output and fallback behavior.
 - `TestRAGPipelineReshapeHonorsInvocationMaxTokens` (existing): proves
   `Reshape` uses invocation-time `maxTokens`, not the constructor default.
 - All Done When criteria met: clean build, all focused tests pass.
+
+## Outcome
+
+Migrated CLI context mode from duplicated retrieval logic to the shared retrieve-format-reshape Pipeline. Exported `DefaultRetrieveMaxTokens` from the RAG module. Added `TestCLIAndPipelineContextAreEquivalent` proving CLI and pipeline produce identical output using in-process stubs. Context logic is no longer duplicated between CLI and pipeline paths.
+
+## Verification
+
+- `go test ./internal/platform/cli ./internal/application/context ...` all pass.
+- Build: `CGO_ENABLED=0 go build ./...` clean.
+- Merged to development as PR #4.
+
+## Close Checklist
+
+- [x] CLI context mode uses shared Pipeline
+- [x] `DefaultRetrieveMaxTokens` exported
+- [x] Equivalence test added and passing
+- [x] No duplicated context retrieval logic
+- [x] Merged to development
