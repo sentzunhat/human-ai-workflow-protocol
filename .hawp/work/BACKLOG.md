@@ -27,7 +27,7 @@ Active coordination index for open work. Closed history is archived under `.hawp
 | `b6c4e8a2` | — | task | Audit and align librarian architecture with domain port/adapter boundaries | in-progress | unassigned | [plan](active/b6c4e8a2-architecture-port-adapter-audit.md) | 2026-08-21 |
 | `c1d2e402` | — | fix | Extract work normalization scan and mutation boundary | plan-ready | unassigned | [plan](active/c1d2e402-fix-work-normalization-boundary.md) | 2026-08-13 |
 | `392313e4-eded-402b-9d5e-20350c86b856` | — | migration | Normalize dated UUID work-item folders and repair workflow references | plan-ready | unassigned | [plan](active/392313e4-eded-402b-9d5e-20350c86b856-workspace-identity-migration.md) | 2026-08-13 |
-| `c1d2e3fe` | — | audit | Recursive audit: SQLite infrastructure capabilities | plan-ready | unassigned | [plan](active/c1d2e3fe-audit-sqlite-capabilities.md) | 2026-08-10 |
+| `c1d2e3fe` | — | audit | Recursive audit: SQLite infrastructure capabilities | done | unassigned | [plan](active/c1d2e3fe-audit-sqlite-capabilities.md) | 2026-08-21 |
 | `c1d2e3ff` | — | fix | Group SQLite persistence by capability and remove raw result maps | plan-ready | unassigned | [plan](active/c1d2e3ff-fix-sqlite-capabilities.md) | 2026-08-10 |
 | `c1d2e400` | — | audit | Recursive audit: CLI command capabilities | plan-ready | unassigned | [plan](active/c1d2e400-audit-cli-capabilities.md) | 2026-08-10 |
 | `c1d2e401` | — | fix | Split CLI routing by command capability | plan-ready | unassigned | [plan](active/c1d2e401-fix-cli-capability-splits.md) | 2026-08-10 |
