@@ -33,20 +33,20 @@ Active coordination index for open work. Closed history is archived under `.hawp
 | `c1d2e3f6` | — | audit | Recursive audit: domain kit capability | done | unassigned | [plan](closed/2026/08/11/c1d2e3f6-audit-domain-kit.md) | 2026-08-11 |
 | `c1d2e3f7` | — | fix | Isolate kit content input from normalization and validation | done | unassigned | [plan](closed/2026/08/13/c1d2e3f7-fix-domain-kit-boundary.md) | 2026-08-13 |
 | `c1d2e3f8` | — | audit | Recursive audit: domain work capability | done | unassigned | [plan](closed/2026/08/13/c1d2e3f8-audit-domain-work.md) | 2026-08-13 |
-| `c1d2e3f9` | — | fix | Extract work source and link-resolution boundaries | in-progress | unassigned | [plan](active/c1d2e3f9-fix-domain-work-boundary.md) | 2026-08-13 |
+| `c1d2e3f9` | — | fix | Extract work source and link-resolution boundaries | done | unassigned | [plan](active/c1d2e3f9-fix-domain-work-boundary.md) | 2026-08-21 |
 | `c1d2e402` | — | fix | Extract work normalization scan and mutation boundary | plan-ready | unassigned | [plan](active/c1d2e402-fix-work-normalization-boundary.md) | 2026-08-13 |
 | `392313e4-eded-402b-9d5e-20350c86b856` | — | migration | Normalize dated UUID work-item folders and repair workflow references | plan-ready | unassigned | [plan](active/392313e4-eded-402b-9d5e-20350c86b856-workspace-identity-migration.md) | 2026-08-13 |
 | `c1d2e3fa` | — | audit | Recursive audit: application index capability | done | unassigned | [plan](closed/2026/08/13/c1d2e3fa-audit-application-index.md) | 2026-08-13 |
 | `c1d2e3fb` | — | fix | Introduce typed index persistence capability contracts | in-progress | unassigned | [plan](active/c1d2e3fb-fix-index-persistence-boundary.md) | 2026-08-13 |
 | `c1d2e3fc` | — | audit | Recursive audit: application context capability | done | unassigned | [plan](closed/2026/08/13/c1d2e3fc-audit-application-context.md) | 2026-08-13 |
-| `c1d2e3fd` | — | fix | Separate context retrieval, formatting, and reshape seams | in-progress | unassigned | [plan](active/c1d2e3fd-fix-context-seams.md) | 2026-08-13 |
+| `c1d2e3fd` | — | fix | Separate context retrieval, formatting, and reshape seams | done | unassigned | [plan](active/c1d2e3fd-fix-context-seams.md) | 2026-08-21 |
 | `c1d2e3fe` | — | audit | Recursive audit: SQLite infrastructure capabilities | plan-ready | unassigned | [plan](active/c1d2e3fe-audit-sqlite-capabilities.md) | 2026-08-10 |
 | `c1d2e3ff` | — | fix | Group SQLite persistence by capability and remove raw result maps | plan-ready | unassigned | [plan](active/c1d2e3ff-fix-sqlite-capabilities.md) | 2026-08-10 |
 | `c1d2e400` | — | audit | Recursive audit: CLI command capabilities | plan-ready | unassigned | [plan](active/c1d2e400-audit-cli-capabilities.md) | 2026-08-10 |
 | `c1d2e401` | — | fix | Split CLI routing by command capability | plan-ready | unassigned | [plan](active/c1d2e401-fix-cli-capability-splits.md) | 2026-08-10 |
 | `c42d1443-fbd0-4a98-8379-6058ace02dc4` | — | fix | Unify search index through shared build and ingest flow | plan-ready | unassigned | [plan](active/c42d1443-fbd0-4a98-8379-6058ace02dc4-unify-search-index-flow.md) | 2026-08-15 |
 | `fcb5c8a2-eb3e-4554-9889-2e9118f4ad02` | — | feature | Optional HAWP parallel coordination execution space | plan-ready | unassigned | [plan](active/fcb5c8a2-eb3e-4554-9889-2e9118f4ad02-parallel-coordination-space.md) | 2026-08-15 |
-| `d7e5a1b9` | — | infrastructure/docs | Propagate release-readiness guidance across all provider packs | in-progress | unassigned | [plan](active/d7e5a1b9-release-readiness-provider-alignment.md) | 2026-08-15 |
+| `d7e5a1b9` | — | infrastructure/docs | Propagate release-readiness guidance across all provider packs | done | unassigned | [plan](active/d7e5a1b9-release-readiness-provider-alignment.md) | 2026-08-21 |
 | `h5f7c2j8` | — | fix | Retry v0.0.1 release: tag fixed workflow + push (GitHub Actions corrected) | plan-ready | unassigned | [plan](active/h5f7c2j8-retry-v001-release.md) | 2026-07-23 |
 | `f3d5a0h6` | — | test | Release verification: test all 6 binaries cross-platform | plan-ready | unassigned | [plan](active/f3d5a0h6-release-verification.md) | 2026-07-23 |
 | `i6g8d3k9` | — | feature | Context Packing (Slice 4): v0.0.2 - Phases 1-5 (NO APIs) | done | unassigned | [plan](active/i6g8d3k9-context-packing-slice4.md) | 2026-07-24 |
