@@ -4,7 +4,7 @@ type: fix
 title: "Extract work source and link-resolution boundaries"
 status: in-progress
 created: 2026-08-10
-updated: 2026-08-13
+updated: 2026-08-21
 parent: b6c4e8a2
 depends-on: c1d2e3f8
 ---
@@ -48,9 +48,28 @@ tracked separately in `c1d2e402`.
 - Verified the domain, application, filesystem adapter, composite check, and
   CLI packages after the composition change.
 - Verified domain work, application work, composite check, and CLI tests.
+- Migrated backlog consistency, evidence integrity, and verification clarity
+  validators onto the typed snapshot. Added `ClosedFiles []File` to
+  `source.Snapshot`; the filesystem adapter classifies and pre-loads
+  `closed/YYYY/MM/DD/*.md` files into it.
+- `CheckBacklogConsistency` now scans `snapshot.Files` RelPaths instead of
+  calling `os.ReadDir`/`os.Stat`; no longer accepts a `workDir` string.
+- `CheckEvidenceIntegrity` now accepts the full snapshot; checks evidence
+  path existence via `snapshot.Files` RelPath scan rather than `os.Stat`.
+- `CheckVerificationClarity` now accepts `[]source.File` and reads content
+  from `file.Content` rather than `os.ReadFile`.
+- `CollectClosedPlanFiles` removed from the domain; the adapter populates
+  `snapshot.ClosedFiles` directly.
+- Domain tests rewritten as pure in-memory (non-repository) snapshot tests;
+  repository path covered by the new `TestAdapterReadPopulatesClosedFiles`
+  infrastructure test.
+- `BuildResearchQueue` in `normalize_apply.go` updated via a local
+  `closedFilesFromPaths` adapter to compile against the new API; normalization
+  mutation logic is otherwise untouched (deferred to `c1d2e402`).
+- Build clean; all domain/work, application/work, filesystem, and CLI tests
+  pass.
 
 ## Next Slice
 
-Migrate backlog consistency, closed-plan checks, evidence, clarity, and
-dead-link validation onto the existing snapshot. Normalization scan/mutation
-remains explicitly deferred to `c1d2e402`.
+No remaining slices for this item. Normalization scan/mutation is tracked in
+`c1d2e402`.

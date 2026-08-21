@@ -1,10 +1,10 @@
 package work
 
 import (
-	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/sentzunhat/hawp/librarian/go/internal/domain/work/source"
 )
 
 var (
@@ -13,21 +13,16 @@ var (
 	unprovenRe            = regexp.MustCompile(`(?i)\b(?:explicitly )?unproven\b`)
 )
 
-// CheckVerificationClarity scans Verification sections in closed plans for
+// CheckVerificationClarity scans Verification sections in closed plan files for
 // checklist claims, classifying each as proven (Evidence:), explicitly
 // unproven, or ambiguous.
-func CheckVerificationClarity(closedFiles []string) VerificationCheck {
+func CheckVerificationClarity(closedFiles []source.File) VerificationCheck {
 	result := VerificationCheck{Status: StatusPass}
 
-	for _, filePath := range closedFiles {
-		content, err := os.ReadFile(filePath)
-		if err != nil {
-			warnf("skipping unreadable closed plan %s: %v", filePath, err)
-			continue
-		}
-		fileName := strings.TrimSuffix(filepath.Base(filePath), ".md")
+	for _, file := range closedFiles {
+		fileName := strings.TrimSuffix(filenameFromPath(file.RelPath), ".md")
 
-		section := extractVerificationSection(string(content))
+		section := extractVerificationSection(file.Content)
 		if section == "" {
 			continue
 		}
@@ -46,7 +41,7 @@ func CheckVerificationClarity(closedFiles []string) VerificationCheck {
 			}
 
 			result.Total++
-			entry := Claim{ID: fileName, Claim: claim, FilePath: filePath, LineNumber: index + 1}
+			entry := Claim{ID: fileName, Claim: claim, FilePath: file.Path, LineNumber: index + 1}
 
 			switch {
 			case strings.Contains(line, "Evidence:"):
