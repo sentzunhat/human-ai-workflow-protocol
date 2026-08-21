@@ -21,3 +21,12 @@ Do not invent per-field folders such as input/, context/, mission/, constraints/
 
 Prefer compact, decision-useful outputs. Separate direct evidence from inference.
 
+For releases, dependency consolidation, CI, Docker, or publication work, also
+follow `.hawp/kit/standards/guidelines/security.md` and the repository's
+release-readiness guidance: consolidate only compatible updates, preserve
+automation branches, verify the full supported matrix, distinguish production
+audit findings from fixture-owned findings, and do not merge, tag, publish, or
+revoke credentials without owner approval. Prefer registry Trusted Publishing
+through CI OIDC over long-lived publish tokens; require exact workflow trust,
+least-privilege permissions, and provenance verification before calling that
+migration complete.

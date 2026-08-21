@@ -36,7 +36,7 @@ Frontmatter: `name`, `description`, `globs` (string or array), `alwaysApply`. Ru
 
 ## Shared behaviors (source of truth)
 
-Four HAWP integration behaviors are authored once under `core/providers/shared/behaviors/` and materialized into GitHub, Cursor, and Continue packs. See [shared/README.md](shared/README.md).
+Five HAWP integration behaviors are authored once under `core/providers/shared/behaviors/` and materialized into GitHub, Cursor, and Continue packs. See [shared/README.md](shared/README.md).
 
 Hand-maintained per provider: GitHub `copilot-instructions.md` and prompts; Cursor `AGENTS.md.seed`.
 

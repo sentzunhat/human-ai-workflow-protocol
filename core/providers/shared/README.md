@@ -10,7 +10,8 @@ shared/
 │   ├── hawp-core.md
 │   ├── hawp-intake.md
 │   ├── hawp-backlog-alignment.md
-│   └── hawp-docs-alignment.md
+│   ├── hawp-docs-alignment.md
+│   └── hawp-release-readiness.md
 └── README.md
 ```
 
@@ -24,6 +25,7 @@ Emit maps live in `librarian/scripts/librarian/providers/materialize/composition
 | Intake | `hawp-intake.md` | `hawp-intake.instructions.md` | `hawp-intake.mdc` | `hawp-03-intake.md` |
 | Backlog | `hawp-backlog-alignment.md` | `hawp-backlog-alignment.instructions.md` | `hawp-backlog-alignment.mdc` | `hawp-02-backlog-alignment.md` |
 | Docs | `hawp-docs-alignment.md` | `hawp-docs-alignment.instructions.md` | `hawp-docs-alignment.mdc` | `hawp-04-docs-alignment.md` |
+| Release | `hawp-release-readiness.md` | `hawp-release-readiness.instructions.md` | `hawp-release-readiness.mdc` | `hawp-05-release-readiness.md` |
 
 **Hand-maintained** (not generated): GitHub `copilot-instructions.md`, prompts, commit-style; Cursor `AGENTS.md.seed`; Codex `AGENTS.md.seed`; Claude `CLAUDE.md.seed`.
 

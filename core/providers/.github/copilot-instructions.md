@@ -37,3 +37,11 @@ Do not:
 - overstate certainty; keep direct evidence separate from inference
 
 Prefer compact, decision-useful outputs.
+
+For releases, dependency consolidation, CI, Docker, or publication work, use
+the HAWP release-readiness behavior. Consolidate only compatible updates,
+preserve automation branches, verify the complete supported matrix, separate
+production audit findings from fixture-only findings, and keep merge/tag/
+publish/revocation actions owner-approved. Prefer registry Trusted Publishing
+through GitHub Actions OIDC with least privilege, exact workflow trust, and
+provenance verification over long-lived publish tokens.

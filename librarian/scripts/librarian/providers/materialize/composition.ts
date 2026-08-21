@@ -36,6 +36,12 @@ export const MATERIALIZATION_TARGETS: MaterializationTarget[] = [
       "core/providers/.github/instructions/hawp-docs-alignment.instructions.md",
     frontmatter: { applyTo: "docs/**,README.md,CHANGELOG.md,.hawp/kit/**,.hawp/work/**" },
   },
+  {
+    behavior: "hawp-release-readiness",
+    outputPath:
+      "core/providers/.github/instructions/hawp-release-readiness.instructions.md",
+    frontmatter: { applyTo: ".github/**,.hawp/**,package.json,package-lock.json,**/Dockerfile,docs/**" },
+  },
   // Claude Code
   {
     behavior: "hawp-core",
@@ -64,6 +70,13 @@ export const MATERIALIZATION_TARGETS: MaterializationTarget[] = [
     outputPath: "core/providers/.claude/rules/hawp-docs-alignment.md",
     frontmatter: {
       paths: [".hawp/kit/**", ".hawp/work/**"],
+    },
+  },
+  {
+    behavior: "hawp-release-readiness",
+    outputPath: "core/providers/.claude/rules/hawp-release-readiness.md",
+    frontmatter: {
+      description: "HAWP release, dependency, CI, and publication safety",
     },
   },
   // Cursor
@@ -99,6 +112,15 @@ export const MATERIALIZATION_TARGETS: MaterializationTarget[] = [
     frontmatter: {
       description: "HAWP docs alignment when editing kit or workflow docs",
       globs: ".hawp/kit/**,.hawp/work/**",
+      alwaysApply: false,
+    },
+  },
+  {
+    behavior: "hawp-release-readiness",
+    outputPath: "core/providers/.cursor/rules/hawp-release-readiness.mdc",
+    frontmatter: {
+      description: "HAWP release, dependency, CI, and publication safety",
+      globs: "package.json,package-lock.json,.github/**,docs/**,.hawp/**,**/Dockerfile",
       alwaysApply: false,
     },
   },
@@ -139,6 +161,16 @@ export const MATERIALIZATION_TARGETS: MaterializationTarget[] = [
       name: "HAWP Docs Alignment",
       description: "HAWP docs alignment when editing kit or workflow docs",
       globs: [".hawp/kit/**", ".hawp/work/**"],
+      alwaysApply: false,
+    },
+  },
+  {
+    behavior: "hawp-release-readiness",
+    outputPath: "core/providers/.continue/rules/hawp-05-release-readiness.md",
+    frontmatter: {
+      name: "HAWP Release Readiness",
+      description: "HAWP release, dependency, CI, and publication safety",
+      globs: ["package.json", "package-lock.json", ".github/**", "docs/**", ".hawp/**", "**/Dockerfile"],
       alwaysApply: false,
     },
   },
