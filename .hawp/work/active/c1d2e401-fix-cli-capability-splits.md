@@ -1,24 +1,41 @@
----
-work-item: c1d2e401
-type: fix
-title: "Split CLI routing by command capability"
-status: plan-ready
-created: 2026-08-10
-updated: 2026-08-10
-parent: b6c4e8a2
-depends-on: c1d2e400
----
+# c1d2e401 — Fix CLI capability splits: extract run.go into per-group cmd_*.go files
 
-# Fix: CLI Capability Splits
+**Type:** refactor
+**Status:** plan-ready
+**Updated:** 2026-08-21
 
-## Mission
+## Goal
 
-Mechanically split CLI routing into capability-local command files, starting
-with search/index, then update and work, without changing behavior.
+Split `librarian/go/internal/platform/cli/run.go` (~1226 lines) into per-capability-group files so each group is independently readable and testable. Leave `run.go` as a thin router (`Run` function + `ExitError` type only).
 
-## Done When
+## Input
 
-- `run.go` no longer owns unrelated command families.
-- Command registration and transport output remain stable.
-- Capability-local tests cover routing and error paths.
-- Targeted tests, build, and diff checks pass.
+- Audit findings from `c1d2e400`: [plan](c1d2e400-audit-cli-capabilities.md)
+
+## Target layout
+
+| File | Contents |
+| ---- | -------- |
+| `run.go` | `Run` router + `ExitError` only |
+| `cmd_links.go` | `runLinksCheck`, `runLinksClean` |
+| `cmd_kit.go` | `runKitValidate`, `runKitNormalize` |
+| `cmd_work.go` | `runWorkValidate`, `runWorkNormalize`, `runWorkNew` |
+| `cmd_update.go` | update functions + `parseProviderFlags`, `doKitSync`, `sortedProviderNames` |
+| `cmd_util.go` | `runUUID`, `runCheck`, `runInit`, `mustGetwd`, `helpText` |
+| `cmd_index.go` | `runIndexBuild`, `runModelPull`, `runEmbed`, `modelsRoot` |
+| `cmd_search.go` | all search functions + helpers |
+
+## Split order
+
+Follow the 8-step order in `c1d2e400`'s `## Handoff To c1d2e401` section. Verify `go build ./... && go vet ./... && go test ./internal/platform/cli/...` after each step.
+
+## Known seams to defer
+
+- `benchmark.go` direct sqlite access — document as follow-up, do not address here
+- `download.NewHTTPFetcher()` / `githubrelease.NewClient()` constructor duplication — note as tech debt, defer to a subsequent refactor
+
+## Constraints
+
+- No behavior changes — this is a mechanical file split only
+- Each step leaves the build green
+- Do not merge with any feature or bug work

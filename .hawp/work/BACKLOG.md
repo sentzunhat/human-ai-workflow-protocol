@@ -29,8 +29,8 @@ Active coordination index for open work. Closed history is archived under `.hawp
 | `392313e4-eded-402b-9d5e-20350c86b856` | — | migration | Normalize dated UUID work-item folders and repair workflow references | plan-ready | unassigned | [plan](active/392313e4-eded-402b-9d5e-20350c86b856-workspace-identity-migration.md) | 2026-08-13 |
 | `c1d2e3fe` | — | audit | Recursive audit: SQLite infrastructure capabilities | done | unassigned | [plan](active/c1d2e3fe-audit-sqlite-capabilities.md) | 2026-08-21 |
 | `c1d2e3ff` | — | fix | Group SQLite persistence by capability and remove raw result maps | plan-ready | unassigned | [plan](active/c1d2e3ff-fix-sqlite-capabilities.md) | 2026-08-10 |
-| `c1d2e400` | — | audit | Recursive audit: CLI command capabilities | plan-ready | unassigned | [plan](active/c1d2e400-audit-cli-capabilities.md) | 2026-08-10 |
-| `c1d2e401` | — | fix | Split CLI routing by command capability | plan-ready | unassigned | [plan](active/c1d2e401-fix-cli-capability-splits.md) | 2026-08-10 |
+| `c1d2e400` | — | audit | Recursive audit: CLI command capabilities | done | unassigned | [plan](active/c1d2e400-audit-cli-capabilities.md) | 2026-08-21 |
+| `c1d2e401` | — | fix | Split CLI routing by command capability | plan-ready | unassigned | [plan](active/c1d2e401-fix-cli-capability-splits.md) | 2026-08-21 |
 | `c42d1443-fbd0-4a98-8379-6058ace02dc4` | — | fix | Unify search index through shared build and ingest flow | plan-ready | unassigned | [plan](active/c42d1443-fbd0-4a98-8379-6058ace02dc4-unify-search-index-flow.md) | 2026-08-15 |
 | `fcb5c8a2-eb3e-4554-9889-2e9118f4ad02` | — | feature | Optional HAWP parallel coordination execution space | plan-ready | unassigned | [plan](active/fcb5c8a2-eb3e-4554-9889-2e9118f4ad02-parallel-coordination-space.md) | 2026-08-15 |
 | `h5f7c2j8` | — | fix | Retry v0.0.1 release: tag fixed workflow + push (GitHub Actions corrected) | plan-ready | unassigned | [plan](active/h5f7c2j8-retry-v001-release.md) | 2026-07-23 |
