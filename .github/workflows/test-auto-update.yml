@@ -1,0 +1,87 @@
+name: Auto-update integration test
+
+# Verifies that a released 0.0.1 binary can self-update to the latest
+# release using `hawp update`. Runs on every push to main and on demand.
+# Skips gracefully if only one release exists (nothing to update from).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-update:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            asset: hawp-linux-amd64
+            binary: hawp-linux-amd64
+          - os: macos-latest
+            asset: hawp-darwin-arm64
+            binary: hawp-darwin-arm64
+          - os: windows-latest
+            asset: hawp-windows-amd64.exe
+            binary: hawp-windows-amd64.exe
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Resolve baseline (0.0.1) and latest release
+        id: releases
+        shell: bash
+        run: |
+          API="https://api.github.com/repos/sentzunhat/human-ai-workflow-protocol"
+          LATEST=$(curl -fsSL "$API/releases/latest" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
+          echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
+          # Check baseline (0.0.1) release exists
+          STATUS=$(curl -o /dev/null -w "%{http_code}" -fsSL "$API/releases/tags/0.0.1")
+          echo "baseline_exists=$([ "$STATUS" = "200" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if baseline release missing
+        if: steps.releases.outputs.baseline_exists != 'true'
+        shell: bash
+        run: |
+          echo "Baseline release 0.0.1 not found — skipping update test."
+          exit 0
+
+      - name: Skip if already on baseline (nothing to update)
+        if: steps.releases.outputs.latest == '0.0.1'
+        shell: bash
+        run: |
+          echo "Latest is 0.0.1 — no update available to test."
+          exit 0
+
+      - name: Download 0.0.1 binary
+        shell: bash
+        run: |
+          curl -fsSL -o hawp \
+            "https://github.com/sentzunhat/human-ai-workflow-protocol/releases/download/0.0.1/${{ matrix.asset }}"
+          chmod +x hawp
+
+      - name: Verify 0.0.1
+        shell: bash
+        run: ./hawp version
+
+      - name: Run hawp update
+        shell: bash
+        run: ./hawp update --no-providers
+
+      - name: Verify upgraded to latest
+        shell: bash
+        run: |
+          GOT=$(./hawp version)
+          WANT="${{ steps.releases.outputs.latest }}"
+          echo "version after update: $GOT (expected $WANT)"
+          if [ "$GOT" != "$WANT" ]; then
+            echo "::error::version mismatch — got $GOT, want $WANT"
+            exit 1
+          fi
+
+      - name: Confirm already up to date
+        shell: bash
+        run: ./hawp update --check --no-providers
