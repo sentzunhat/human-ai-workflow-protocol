@@ -107,6 +107,43 @@ func TestBuildFolderContextKitDoc(t *testing.T) {
 	}
 }
 
+func TestChunkBySectionWithLinesTracksLineNumbers(t *testing.T) {
+	content := "## Introduction\n\nLine three.\n\n## Section Two\n\nLine seven."
+	chunks := ChunkBySectionWithLines(content)
+
+	if len(chunks) < 2 {
+		t.Fatalf("expected at least 2 chunks, got %d", len(chunks))
+	}
+
+	// First chunk starts at line 1
+	if chunks[0].StartLine != 1 {
+		t.Errorf("first chunk StartLine = %d, want 1", chunks[0].StartLine)
+	}
+	if chunks[0].EndLine < chunks[0].StartLine {
+		t.Errorf("EndLine %d < StartLine %d", chunks[0].EndLine, chunks[0].StartLine)
+	}
+
+	// Second chunk must start after the first ends
+	if chunks[1].StartLine <= chunks[0].StartLine {
+		t.Errorf("second chunk StartLine %d should be after first %d",
+			chunks[1].StartLine, chunks[0].StartLine)
+	}
+}
+
+func TestChunkBySectionWithLinesSingleChunk(t *testing.T) {
+	content := "Line 1\nLine 2\nLine 3\n"
+	chunks := ChunkBySectionWithLines(content)
+	if len(chunks) == 0 {
+		t.Fatal("expected at least one chunk")
+	}
+	if chunks[0].StartLine != 1 {
+		t.Errorf("StartLine = %d, want 1", chunks[0].StartLine)
+	}
+	if chunks[0].Text == "" {
+		t.Error("chunk text should not be empty")
+	}
+}
+
 func TestBuildFolderContextWorkDoc(t *testing.T) {
 	doc := Document{
 		Path:       ".hawp/work/active/fbf12a93-plan.md",

@@ -276,6 +276,57 @@ func TestInsertDocumentIsIdempotent(t *testing.T) {
 	}
 }
 
+// TestInsertChunkStoresLinePositions verifies that line_start/line_end survive
+// a round-trip through InsertChunk → QueryChunksLexical.
+func TestInsertChunkStoresLinePositions(t *testing.T) {
+	tmpDir := t.TempDir()
+	db, err := Open(filepath.Join(tmpDir, "test.db"))
+	if err != nil {
+		t.Fatalf("Open() error = %v", err)
+	}
+	defer db.Close()
+	if err := db.InitSchema(); err != nil {
+		t.Fatalf("InitSchema() error = %v", err)
+	}
+
+	docID, err := db.InsertDocument("kit", "guide", "test/doc.md", "start-here")
+	if err != nil {
+		t.Fatalf("InsertDocument() error = %v", err)
+	}
+
+	chunk := Chunk{
+		DocumentID: docID,
+		ChunkIdx:   0,
+		Text:       "backlog alignment policy document",
+		LineStart:  5,
+		LineEnd:    22,
+	}
+	if err := db.InsertChunk(chunk); err != nil {
+		t.Fatalf("InsertChunk() error = %v", err)
+	}
+
+	rows, err := db.QueryChunksLexical("backlog alignment", 5)
+	if err != nil {
+		t.Fatalf("QueryChunksLexical() error = %v", err)
+	}
+	if len(rows) == 0 {
+		t.Fatal("QueryChunksLexical() returned no rows")
+	}
+
+	row := rows[0]
+	lineStart, ok1 := row["line_start"].(int64)
+	lineEnd, ok2 := row["line_end"].(int64)
+	if !ok1 || !ok2 {
+		t.Fatalf("line_start/line_end missing or wrong type in result: %v", row)
+	}
+	if lineStart != 5 {
+		t.Errorf("line_start = %d, want 5", lineStart)
+	}
+	if lineEnd != 22 {
+		t.Errorf("line_end = %d, want 22", lineEnd)
+	}
+}
+
 // TestDeleteChunksForDocumentClearsFTS proves the FTS5 delete trigger keeps
 // chunks_fts in sync when chunks are cleared for re-ingest.
 func TestDeleteChunksForDocumentClearsFTS(t *testing.T) {
