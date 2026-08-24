@@ -465,8 +465,8 @@ Save each benchmark run to:
 
 After each benchmark run, update:
 
-- `librarian/docs/BACKENDS.md` — performance characteristics table
-- `librarian/docs/BENCHMARKS_vXXX.md` — latest results
+- `librarian/docs/backends.md` — performance characteristics table
+- `librarian/docs/benchmarks-vXXX.md` — latest results
 - `librarian/src/README.md` — quick performance reference
 
 ---
@@ -607,12 +607,12 @@ jobs:
           go run ./benchmarks/cmd/reporter.go \
             -input bench_result.json \
             -baseline librarian/src/benchmarks/results/v003-baseline.json \
-            -output librarian/docs/BENCHMARKS_latest.md
+            -output librarian/docs/benchmarks-latest.md
       
       - name: Commit Results
         run: |
           git add librarian/src/benchmarks/results/
-          git add librarian/docs/BENCHMARKS_latest.md
+          git add librarian/docs/benchmarks-latest.md
           git commit -m "ci: benchmark run $(date +%Y-%m-%d)" || true
           git push
 ```
@@ -738,8 +738,8 @@ As benchmarks accumulate, investigate:
    - Default remains ONNX (free, offline)
 
 6. **Update docs:**
-   - Add OpenAI to BACKENDS.md
-   - Update BENCHMARKS_v010.md with full comparison
+   - Add OpenAI to backends.md
+   - Update benchmarks-v010.md with full comparison
    - Add pairing recommendations to README
 
 ---
@@ -757,8 +757,8 @@ When adding a new backend (Anthropic, HF, Azure, etc.):
 - [ ] Verify no regressions in existing benchmarks
 - [ ] Spot-check quality manually (5-10 examples)
 - [ ] Update cost model if API-based
-- [ ] Document results in BENCHMARKS_vXXX.md
-- [ ] Update BACKENDS.md pairing recommendations
+- [ ] Document results in benchmarks-vXXX.md
+- [ ] Update backends.md pairing recommendations
 - [ ] File follow-up issues for deep dives (e.g., "Investigate why OpenAI+Ollama pairing has low relevance score")
 
 ---

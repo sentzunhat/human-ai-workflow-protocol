@@ -14,7 +14,7 @@ ONNX, "none"). Pure domain code, same shape as `../embeddings`.
 | Backend | Adapter | Status |
 |---|---|---|
 | `ollama` | `OllamaLLMClient` | Working, default |
-| `onnx` | `ONNXLLMClient` | Verified working (SmolLM2-360M via hugot's CGO ORT backend) but requires a `-tags ORT` build with 3 native libraries — not part of the default build. See `librarian/docs/v0.1.0_VISION.md`'s "ONNX Text2Text Model" section for the full setup and reproduction steps. |
+| `onnx` | `ONNXLLMClient` | Verified working (SmolLM2-360M via hugot's CGO ORT backend) but requires a `-tags ORT` build with 3 native libraries — not part of the default build. See `librarian/docs/v0.1.0-vision.md`'s "ONNX Text2Text Model" section for the full setup and reproduction steps. |
 | `none` | `NullLLMClient` | Zero-cost passthrough (returns input unchanged) |
 
 ## Quick use

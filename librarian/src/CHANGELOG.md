@@ -3,6 +3,41 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.5] - 2026-08-24
+
+`hawp update --check` read-only fix, benchmark rewrite, and docs naming cleanup.
+
+### Fixed
+
+- **`hawp update --check`** — previously triggered the full update instead of being
+  read-only. Now routes to `runUpdateVerify()` (same path as `hawp update verify`):
+  exits 0 when up-to-date, exits 1 when an update is available, no side effects.
+  `--check` is now documented in registry help text and `hawp update --help`.
+
+- **`hawp search benchmark`** — benchmark was entirely fake: all three patterns called
+  `QueryChunksLexical`; quality scores were hardcoded; semantic mode doesn't exist as
+  a separate code path. Fixed:
+  - Hybrid now calls real `appsearch.HybridRank` (lexical candidates → Ollama embed →
+    cosine re-rank), matching the production search path.
+  - Query set replaced: 15 Go/ML queries (8 zero-hit) → 10 HAWP corpus queries
+    (all verified to return results against the kit + work index).
+  - Quality scoring: hardcoded → keyword-matching against the actual top result text.
+  - Patterns reduced to `["lexical", "hybrid"]` — no fake semantic-only mode.
+  - Dead code removed: `benchmarkGetStr` (deduped with existing `getStr` in same
+    package), `"semantic"` entries in the summary pattern loops.
+
+### Changed
+
+- `librarian/docs/` files renamed UPPERCASE → kebab-case to match the repo
+  documentation naming standard. All internal cross-references updated.
+
+### Documentation
+
+- `search.md` — corrected Ollama warm embed time from ~110ms/chunk to ~32ms/chunk
+  (measured on 2873-chunk batch with nomic-embed-text).
+- Added `librarian/docs/benchmarks-v004.md` — v0.0.4 benchmark results, pre-fix and
+  post-fix tables, comparison vs v0.0.3, FTS5 fix confirmation, corpus mismatch notes.
+
 ## [0.0.4] - 2026-08-24
 
 stdio MCP server (`hawp mcp`) and expanded `hawp init`.

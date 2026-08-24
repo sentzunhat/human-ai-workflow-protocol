@@ -51,7 +51,7 @@ type ModelInfo struct {
 // model trained on 4T tokens — meaningfully higher quality than FLAN-T5's
 // older T5-based architecture at a similar CPU latency (measured ~120ms per
 // 50-token extraction), for ~10x the download size (819MB vs 60-80MB).
-// See librarian/docs/BENCHMARKS_v003.md and v0.1.0_VISION.md.
+// See librarian/docs/benchmarks-v003.md and v0.1.0-vision.md.
 // NOTE: hugot's ORT generative pipeline requires a genai_config.json —
 // the ONNX Runtime GenAI model-builder format, NOT the standard
 // optimum/Transformers.js ONNX export (HuggingFaceTB/SmolLM2-360M-Instruct

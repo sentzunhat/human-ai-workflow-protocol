@@ -26,19 +26,19 @@ All notable changes to this project are documented here.
   - ONNX + Ollama as default (fast embeddings, flexible LLM)
 
 #### Documentation
-- **[CONTEXT_RESHAPING.md](./docs/CONTEXT_RESHAPING.md)** - Usage guide for context reshaping
+- **[context-reshaping.md](./docs/context-reshaping.md)** - Usage guide for context reshaping
   - Quick start guide for Mac Max M1
   - Configuration examples (ONNX+Ollama, all-Ollama)
   - Go API usage examples
   - CLI flag documentation
   
-- **[BACKENDS.md](./docs/BACKENDS.md)** - Backend architecture & strategy
+- **[backends.md](./docs/backends.md)** - Backend architecture & strategy
   - Detailed backend comparison table
   - Performance characteristics (speed, quality, privacy)
   - Phase breakdown and roadmap to v0.1.0
   - Factory pattern explanation
   
-- **[TROUBLESHOOTING.md](./docs/TROUBLESHOOTING.md)** - Common issues & solutions
+- **[troubleshooting.md](./docs/troubleshooting.md)** - Common issues & solutions
   - 12 common problems with solutions
   - Debug checklist
   - Performance reference tables
