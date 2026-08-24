@@ -276,6 +276,106 @@ func TestInsertDocumentIsIdempotent(t *testing.T) {
 	}
 }
 
+// TestInsertChunkStoresLinePositions verifies that line_start/line_end survive
+// a round-trip through InsertChunk → QueryChunksLexical.
+func TestInsertChunkStoresLinePositions(t *testing.T) {
+	tmpDir := t.TempDir()
+	db, err := Open(filepath.Join(tmpDir, "test.db"))
+	if err != nil {
+		t.Fatalf("Open() error = %v", err)
+	}
+	defer db.Close()
+	if err := db.InitSchema(); err != nil {
+		t.Fatalf("InitSchema() error = %v", err)
+	}
+
+	docID, err := db.InsertDocument("kit", "guide", "test/doc.md", "start-here")
+	if err != nil {
+		t.Fatalf("InsertDocument() error = %v", err)
+	}
+
+	chunk := Chunk{
+		DocumentID: docID,
+		ChunkIdx:   0,
+		Text:       "backlog alignment policy document",
+		LineStart:  5,
+		LineEnd:    22,
+	}
+	if err := db.InsertChunk(chunk); err != nil {
+		t.Fatalf("InsertChunk() error = %v", err)
+	}
+
+	rows, err := db.QueryChunksLexical("backlog alignment", 5)
+	if err != nil {
+		t.Fatalf("QueryChunksLexical() error = %v", err)
+	}
+	if len(rows) == 0 {
+		t.Fatal("QueryChunksLexical() returned no rows")
+	}
+
+	row := rows[0]
+	lineStart, ok1 := row["line_start"].(int64)
+	lineEnd, ok2 := row["line_end"].(int64)
+	if !ok1 || !ok2 {
+		t.Fatalf("line_start/line_end missing or wrong type in result: %v", row)
+	}
+	if lineStart != 5 {
+		t.Errorf("line_start = %d, want 5", lineStart)
+	}
+	if lineEnd != 22 {
+		t.Errorf("line_end = %d, want 22", lineEnd)
+	}
+}
+
+// TestSanitizeFTSQuery verifies that version strings, dots, and other FTS5
+// special chars are stripped without crashing and without returning an error.
+func TestSanitizeFTSQuery(t *testing.T) {
+	cases := []struct {
+		in   string
+		want string
+	}{
+		{"backlog alignment", "backlog alignment"},
+		{"0.0.4", "0 0 4"},
+		{"merge-release", "merge release"},
+		{"hawp_search tool", "hawp_search tool"},
+		{"(parens) AND \"quotes\"", "parens AND quotes"},
+		{"...", ""},
+		{"", ""},
+	}
+	for _, c := range cases {
+		got := sanitizeFTSQuery(c.in)
+		if got != c.want {
+			t.Errorf("sanitizeFTSQuery(%q) = %q, want %q", c.in, got, c.want)
+		}
+	}
+}
+
+// TestQueryChunksLexicalDotQuery verifies that a version-string query (dots)
+// does not return an error from FTS5.
+func TestQueryChunksLexicalDotQuery(t *testing.T) {
+	tmpDir := t.TempDir()
+	db, err := Open(filepath.Join(tmpDir, "test.db"))
+	if err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+	defer db.Close()
+	if err := db.InitSchema(); err != nil {
+		t.Fatalf("InitSchema: %v", err)
+	}
+
+	docID, _ := db.InsertDocument("kit", "guide", "doc.md", "start-here")
+	_ = db.InsertChunk(Chunk{DocumentID: docID, ChunkIdx: 0, Text: "version 0 0 4 release notes"})
+
+	rows, err := db.QueryChunksLexical("0.0.4", 5)
+	if err != nil {
+		t.Fatalf("dot query must not error: %v", err)
+	}
+	// Should find the chunk since "0 0 4" are all present in the text.
+	if len(rows) == 0 {
+		t.Error("expected at least one result for dot query on matching text")
+	}
+}
+
 // TestDeleteChunksForDocumentClearsFTS proves the FTS5 delete trigger keeps
 // chunks_fts in sync when chunks are cleared for re-ingest.
 func TestDeleteChunksForDocumentClearsFTS(t *testing.T) {

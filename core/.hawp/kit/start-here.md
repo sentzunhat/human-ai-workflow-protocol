@@ -84,6 +84,7 @@ HAWP is a **shaping protocol**, not a runtime. Better results come from stronger
 2. **[usage/intake-workflow.md](usage/intake-workflow.md)** — intake loop for structured bug/task handling (investigation task first, then plan, for every item)
 3. **[usage/status-report.md](usage/status-report.md)** — context handoff and session continuity
 4. **[usage/workflow-loop.md](usage/workflow-loop.md)** — multi-iteration work across sessions (instruction-based; autonomous or gated; review/approve/retry without CLI)
+5. **[usage/search.md](usage/search.md)** — index and search kit/work documents via CLI or MCP (`hawp_search` tool)
 
 ### Templates by Task Type
 

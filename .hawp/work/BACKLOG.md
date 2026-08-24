@@ -24,7 +24,6 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
-| `3b51837c` | feature | v0.0.4: `hawp init` + `hawp mcp` + provider MCP config auto-write | plan-ready | unassigned | [plan](active/3b51837c/plan.md) | 2026-08-24 |
 | `t5l7m9n1` | planning | Benchmarking infrastructure for v0.0.3+: harness scaffold + test data | plan-ready | unassigned | [plan](active/t5l7m9n1/plan.md) | 2026-07-26 |
 
 ---
@@ -49,6 +48,7 @@ Limited to the last 10 items.
 
 | ID | Type | Title | Closed | Detail |
 | -- | ---- | ----- | ------ | ------ |
+| `3b51837c` | feature | v0.0.4: `hawp init` + `hawp mcp` + provider MCP config auto-write (Codex, Claude, Cursor, Continue) | 2026-08-24 | [plan](closed/2026/08/24/3b51837c/plan.md) |
 | `j7h9e4l0` | test | Auto-update verification: `hawp update` 0.0.1 → 0.0.2 (darwin-arm64) | 2026-08-24 | [plan](closed/2026/08/24/j7h9e4l0/plan.md) |
 | `b7e2a4f9` | refactor | Rename `librarian/go/` → `src/` + retire TS validators | 2026-08-22 | [plan](closed/2026/08/22/b7e2a4f9/plan.md) |
 | `b8d3e1f0` | batch-close | All v0.0.1/0.0.2/0.0.3 planned work — shipped in 0.0.1 release (2026-08-21) | 2026-08-22 | [index](closed/2026/08/22/b8d3e1f0/plan.md) |
@@ -59,6 +59,7 @@ Limited to the last 10 items.
 | `e9f1g3h5` | fix | Token budget `1995/0` display bug fixed | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
 | `i7j9k1l3` | fix | `aes256` silent downgrade now rejected at config validation | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
 | `r5s7t9u1` | fix | `Reshape()` empty-block guard fixed | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
+_(history older than 30 days archived in `closed/`)_
 
 ---
 

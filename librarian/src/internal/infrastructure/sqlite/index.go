@@ -84,6 +84,8 @@ CREATE TABLE IF NOT EXISTS chunks (
     folder_context TEXT,
     metadata_json TEXT,
     embedding BLOB,
+    line_start INT NOT NULL DEFAULT 0,
+    line_end INT NOT NULL DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (document_id, chunk_idx),
@@ -136,8 +138,13 @@ CREATE INDEX IF NOT EXISTS idx_documents_metadata_work_uuid ON documents_metadat
 CREATE INDEX IF NOT EXISTS idx_documents_metadata_status ON documents_metadata(status);
 CREATE INDEX IF NOT EXISTS idx_chunks_document_id ON chunks(document_id);
 `
-	_, err := ix.db.Exec(schema)
-	return err
+	if _, err := ix.db.Exec(schema); err != nil {
+		return err
+	}
+	// Migrate existing DBs: add line columns if absent (ignore "duplicate column" error).
+	ix.db.Exec(`ALTER TABLE chunks ADD COLUMN line_start INT NOT NULL DEFAULT 0`)
+	ix.db.Exec(`ALTER TABLE chunks ADD COLUMN line_end INT NOT NULL DEFAULT 0`)
+	return nil
 }
 
 // InsertDocument inserts a document row, or updates it in place if `path`
@@ -194,14 +201,16 @@ type Chunk struct {
 	Text          string
 	FolderContext *string
 	MetadataJSON  *string
+	LineStart     int
+	LineEnd       int
 }
 
 // InsertChunk inserts a chunk and updates the FTS5 index.
 func (ix *IndexDB) InsertChunk(c Chunk) error {
 	_, err := ix.db.Exec(
-		`INSERT INTO chunks (document_id, chunk_idx, text, folder_context, metadata_json)
-		 VALUES (?, ?, ?, ?, ?)`,
-		c.DocumentID, c.ChunkIdx, c.Text, c.FolderContext, c.MetadataJSON,
+		`INSERT INTO chunks (document_id, chunk_idx, text, folder_context, metadata_json, line_start, line_end)
+		 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		c.DocumentID, c.ChunkIdx, c.Text, c.FolderContext, c.MetadataJSON, c.LineStart, c.LineEnd,
 	)
 	if err != nil {
 		return err
@@ -264,12 +273,33 @@ func ensureDir(dbPath string) error {
 	return nil
 }
 
+// sanitizeFTSQuery strips chars that FTS5 treats as syntax (dots, dashes,
+// parens, quotes, etc.) so raw user input never causes a parse error.
+// Each non-word run is replaced by a space; resulting tokens are joined by space
+// (implicit AND in FTS5). An empty result means no searchable terms remain.
+func sanitizeFTSQuery(q string) string {
+	var b strings.Builder
+	for _, r := range q {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '_' {
+			b.WriteRune(r)
+		} else {
+			b.WriteRune(' ')
+		}
+	}
+	return strings.Join(strings.Fields(b.String()), " ")
+}
+
 // QueryChunksLexical returns chunks matching a lexical FTS5 query.
 func (ix *IndexDB) QueryChunksLexical(query string, limit int) ([]map[string]interface{}, error) {
+	query = sanitizeFTSQuery(query)
+	if query == "" {
+		return nil, nil
+	}
 	rows, err := ix.db.Query(`
 		SELECT c.id, c.document_id, c.chunk_idx, c.text, c.folder_context,
 		       d.category, d.type, d.path, d.folder_role,
-		       dm.work_uuid, dm.status, dm.closed_at
+		       dm.work_uuid, dm.status, dm.closed_at,
+		       c.line_start, c.line_end
 		FROM chunks_fts
 		JOIN chunks c ON chunks_fts.rowid = c.id
 		JOIN documents d ON c.document_id = d.id
@@ -288,21 +318,25 @@ func (ix *IndexDB) QueryChunksLexical(query string, limit int) ([]map[string]int
 		var text, folderContext *string
 		var category, typ, path, folderRole *string
 		var workUUID, status, closedAt *string
+		var lineStart, lineEnd int64
 
 		if err := rows.Scan(&id, &docID, &chunkIdx, &text, &folderContext,
-			&category, &typ, &path, &folderRole, &workUUID, &status, &closedAt); err != nil {
+			&category, &typ, &path, &folderRole, &workUUID, &status, &closedAt,
+			&lineStart, &lineEnd); err != nil {
 			continue
 		}
 
 		result := map[string]interface{}{
-			"id":              id,
-			"text":            text,
-			"folder_context":  folderContext,
-			"path":            path,
-			"type":            typ,
-			"category":        category,
-			"folder_role":     folderRole,
-			"chunk_idx":       chunkIdx,
+			"id":             id,
+			"text":           text,
+			"folder_context": folderContext,
+			"path":           path,
+			"type":           typ,
+			"category":       category,
+			"folder_role":    folderRole,
+			"chunk_idx":      chunkIdx,
+			"line_start":     lineStart,
+			"line_end":       lineEnd,
 		}
 		if workUUID != nil {
 			result["work_uuid"] = workUUID

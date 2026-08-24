@@ -144,20 +144,22 @@ func (s *IngestService) Execute(corpus *EnrichedCorpus) (IngestResult, error) {
 			return result, fmt.Errorf("clear existing chunks for %s: %w", enriched.Path, err)
 		}
 
-		chunks := domainindex.ChunkBySection(enriched.Content)
-		for i, chunkText := range chunks {
+		chunks := domainindex.ChunkBySectionWithLines(enriched.Content)
+		for i, cr := range chunks {
 			chunk := sqlite.Chunk{
 				DocumentID:    docID,
 				ChunkIdx:      i,
-				Text:          chunkText,
+				Text:          cr.Text,
 				FolderContext: &folderContext,
 				MetadataJSON:  &metadataJSONStr,
+				LineStart:     cr.StartLine,
+				LineEnd:       cr.EndLine,
 			}
 			if err := db.InsertChunk(chunk); err != nil {
 				return result, fmt.Errorf("insert chunk %s#%d: %w", enriched.Path, i, err)
 			}
 			result.ChunksCreated++
-			result.BytesIndexed += int64(len(chunkText))
+			result.BytesIndexed += int64(len(cr.Text))
 		}
 	}
 
