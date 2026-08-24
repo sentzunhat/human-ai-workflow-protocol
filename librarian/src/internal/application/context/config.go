@@ -309,7 +309,7 @@ func validateBackend(backend, kind string) error {
 //
 // v0.1.0 ships "none" and "offline" backends (ONNX + Ollama + none).
 // "online" backends are defined in ContextConfig.Backends but not yet wired
-// into the embeddings/llm factories — see librarian/docs/v0.1.0_VISION.md.
+// into the embeddings/llm factories — see librarian/docs/v0.1.0-vision.md.
 func BackendCategory(backend string) string {
 	switch backend {
 	case "none":

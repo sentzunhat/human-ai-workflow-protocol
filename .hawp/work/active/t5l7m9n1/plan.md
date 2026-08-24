@@ -71,7 +71,7 @@ v0.0.4+ will add incrementally:
 
 | Item | Location | Status |
 |---|---|---|
-| Complete benchmark plan | `librarian/docs/BENCHMARK_PLAN_v004plus.md` | ✅ Done |
+| Complete benchmark plan | `librarian/docs/benchmark-plan-v004plus.md` | ✅ Done |
 | Test data repository | `.hawp/benchmarks/test-data/` | Stub only |
 | Benchmark harness (`go test` suite) | `librarian/src/benchmarks/` | Stub only |
 | CI/CD workflow | `.github/workflows/benchmarks.yml` | Not started |
@@ -165,6 +165,6 @@ v0.0.4+ will add incrementally:
 
 ## Reference
 
-**Full Plan:** `librarian/docs/BENCHMARK_PLAN_v004plus.md`  
-**v0.0.3 Baseline:** `librarian/docs/BENCHMARKS_v003.md`  
-**Backend Status:** `librarian/docs/BACKENDS.md`
+**Full Plan:** `librarian/docs/benchmark-plan-v004plus.md`  
+**v0.0.3 Baseline:** `librarian/docs/benchmarks-v003.md`  
+**Backend Status:** `librarian/docs/backends.md`
