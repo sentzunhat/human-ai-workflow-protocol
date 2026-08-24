@@ -20,6 +20,7 @@ import (
 	appkit "github.com/sentzunhat/hawp/librarian/src/internal/application/kit"
 	appkitsync "github.com/sentzunhat/hawp/librarian/src/internal/application/kitsync"
 	applinks "github.com/sentzunhat/hawp/librarian/src/internal/application/links"
+	appmcp "github.com/sentzunhat/hawp/librarian/src/internal/platform/mcp"
 	appprovision "github.com/sentzunhat/hawp/librarian/src/internal/application/provision"
 	appupdate "github.com/sentzunhat/hawp/librarian/src/internal/application/update"
 	appuuid "github.com/sentzunhat/hawp/librarian/src/internal/application/uuidgen"
@@ -82,7 +83,10 @@ func Run(args []string) error {
 		return runCheck()
 
 	case command == "init":
-		return runInit()
+		return runInit(args[1:])
+
+	case command == "mcp":
+		return runMCP()
 
 	case command == "version":
 		fmt.Println(domainupdate.Version)
@@ -319,7 +323,9 @@ func runWorkNew(args []string) error {
 	return nil
 }
 
-func runInit() error {
+func runInit(args []string) error {
+	providers := parseProviderFlags(args)
+
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return err
@@ -329,7 +335,32 @@ func runInit() error {
 	if result.Failed() {
 		return ExitError{Code: 1}
 	}
+
+	client := githubrelease.NewClient()
+	if err := doKitSync(client, providers); err != nil {
+		return err
+	}
+
+	if len(providers) > 0 {
+		root, rerr := repo.FindBacklogRepoRoot(mustGetwd())
+		if rerr != nil {
+			fmt.Println("Not in a HAWP repo; skipping MCP config write.")
+			return nil
+		}
+		if err := appmcp.WriteProviderConfigs(root, providers); err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+func runMCP() error {
+	root, err := repo.FindBacklogRepoRoot(mustGetwd())
+	if err != nil {
+		root = mustGetwd()
+	}
+	return appmcp.Serve(root, domainupdate.Version)
 }
 
 // runUpdateVerify checks for an available update and reports it. Exits 1
@@ -1200,7 +1231,8 @@ COMMANDS
   work new "<title>" [--type ...]      scaffold intake: UUID, plan file, inbox backlog row
   work normalize [--apply --validate]  normalize work record drift (dry-run default)
   check                                combined kit + work + links validation
-  init                                  provision ~/.hawp (ONNX Runtime + embedding model)
+  init [--provider <name>|all]           provision ~/.hawp, sync kit, write MCP configs (claude|cursor|continue|all)
+  mcp                                   start stdio MCP server (JSON-RPC 2.0) for AI agent tool use
   version                               print the running hawp version
   update                                update binary + kit + all providers (--no-providers for kit-only)
   update latest                         update binary only
