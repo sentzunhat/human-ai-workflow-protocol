@@ -273,8 +273,28 @@ func ensureDir(dbPath string) error {
 	return nil
 }
 
+// sanitizeFTSQuery strips chars that FTS5 treats as syntax (dots, dashes,
+// parens, quotes, etc.) so raw user input never causes a parse error.
+// Each non-word run is replaced by a space; resulting tokens are joined by space
+// (implicit AND in FTS5). An empty result means no searchable terms remain.
+func sanitizeFTSQuery(q string) string {
+	var b strings.Builder
+	for _, r := range q {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '_' {
+			b.WriteRune(r)
+		} else {
+			b.WriteRune(' ')
+		}
+	}
+	return strings.Join(strings.Fields(b.String()), " ")
+}
+
 // QueryChunksLexical returns chunks matching a lexical FTS5 query.
 func (ix *IndexDB) QueryChunksLexical(query string, limit int) ([]map[string]interface{}, error) {
+	query = sanitizeFTSQuery(query)
+	if query == "" {
+		return nil, nil
+	}
 	rows, err := ix.db.Query(`
 		SELECT c.id, c.document_id, c.chunk_idx, c.text, c.folder_context,
 		       d.category, d.type, d.path, d.folder_role,

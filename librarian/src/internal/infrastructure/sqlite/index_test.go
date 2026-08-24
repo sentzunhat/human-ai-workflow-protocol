@@ -327,6 +327,55 @@ func TestInsertChunkStoresLinePositions(t *testing.T) {
 	}
 }
 
+// TestSanitizeFTSQuery verifies that version strings, dots, and other FTS5
+// special chars are stripped without crashing and without returning an error.
+func TestSanitizeFTSQuery(t *testing.T) {
+	cases := []struct {
+		in   string
+		want string
+	}{
+		{"backlog alignment", "backlog alignment"},
+		{"0.0.4", "0 0 4"},
+		{"merge-release", "merge release"},
+		{"hawp_search tool", "hawp_search tool"},
+		{"(parens) AND \"quotes\"", "parens AND quotes"},
+		{"...", ""},
+		{"", ""},
+	}
+	for _, c := range cases {
+		got := sanitizeFTSQuery(c.in)
+		if got != c.want {
+			t.Errorf("sanitizeFTSQuery(%q) = %q, want %q", c.in, got, c.want)
+		}
+	}
+}
+
+// TestQueryChunksLexicalDotQuery verifies that a version-string query (dots)
+// does not return an error from FTS5.
+func TestQueryChunksLexicalDotQuery(t *testing.T) {
+	tmpDir := t.TempDir()
+	db, err := Open(filepath.Join(tmpDir, "test.db"))
+	if err != nil {
+		t.Fatalf("Open: %v", err)
+	}
+	defer db.Close()
+	if err := db.InitSchema(); err != nil {
+		t.Fatalf("InitSchema: %v", err)
+	}
+
+	docID, _ := db.InsertDocument("kit", "guide", "doc.md", "start-here")
+	_ = db.InsertChunk(Chunk{DocumentID: docID, ChunkIdx: 0, Text: "version 0 0 4 release notes"})
+
+	rows, err := db.QueryChunksLexical("0.0.4", 5)
+	if err != nil {
+		t.Fatalf("dot query must not error: %v", err)
+	}
+	// Should find the chunk since "0 0 4" are all present in the text.
+	if len(rows) == 0 {
+		t.Error("expected at least one result for dot query on matching text")
+	}
+}
+
 // TestDeleteChunksForDocumentClearsFTS proves the FTS5 delete trigger keeps
 // chunks_fts in sync when chunks are cleared for re-ingest.
 func TestDeleteChunksForDocumentClearsFTS(t *testing.T) {
