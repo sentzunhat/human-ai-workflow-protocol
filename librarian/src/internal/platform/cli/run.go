@@ -853,11 +853,10 @@ func runSearchEmbed(args []string) error {
 		return nil
 	}
 
-	// Parse flags. --backend ollama switches modelID's meaning from an
-	// ONNX model pulled via `hawp model pull` to any model available on
-	// the local Ollama server (e.g. --model nomic-embed-text).
-	backend := "onnx"
-	modelID := appindex.DefaultEmbeddingModel
+	// Parse flags. --backend is required: "onnx" or "ollama".
+	// --model overrides the default for that backend.
+	backend := ""
+	modelID := ""
 	modelSet := false
 	for i := 0; i < len(args); i++ {
 		switch {
@@ -870,8 +869,16 @@ func runSearchEmbed(args []string) error {
 			i++
 		}
 	}
-	if backend == "ollama" && !modelSet {
-		modelID = "nomic-embed-text"
+	if backend == "" {
+		return errors.New("--backend is required: hawp search embed --backend onnx|ollama [--model <name>]")
+	}
+	if !modelSet {
+		switch backend {
+		case "onnx":
+			modelID = appindex.DefaultEmbeddingModel
+		case "ollama":
+			modelID = "nomic-embed-text"
+		}
 	}
 
 	fmt.Printf("Embedding %d chunks with %s (%s)...\n", needEmbed, modelID, backend)
@@ -1235,7 +1242,7 @@ COMMANDS
   db init                              plan the ~/.hawp home layout (scaffold)
   index build [--scope all|work|kit] [--export <path>]  enrich kit/work docs with folder context
   search index                                     ingest kit + work documents into SQLite (no vectors yet)
-  search embed [--model <name>] [--backend onnx|ollama]  embed all chunks with vectors
+  search embed --backend onnx|ollama [--model <name>]  embed all chunks with vectors
   search <query> [--limit <n>] [--context] [--llm-reshape] [--format markdown|json] [--max-tokens <n>]
                                                    lexical + vector hybrid search; --context for LLM-ready format,
                                                    --llm-reshape to additionally restructure via embeddings+LLM
