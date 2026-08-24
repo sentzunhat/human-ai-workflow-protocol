@@ -1,4 +1,4 @@
-name: Librarian Quality
+name: Quality
 
 on:
     push:

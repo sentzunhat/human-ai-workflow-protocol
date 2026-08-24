@@ -1,120 +1,123 @@
-name: Build & Release
+name: Release
 
+# Two ways to cut a release:
+#   1. Push a tag matching "X.Y.Z" format (e.g. "0.0.1") directly.
+#   2. Run this workflow manually (Actions tab -> Run workflow) with a
+#      "version" input (e.g. "0.1.0") — the workflow creates and pushes
+#      the tag itself, so no local `git tag`/`git push` is needed.
+#
+# Either way, the job builds the cross-platform hawp binaries (make
+# dist) and publishes a GitHub Release. By default the release publishes
+# immediately (auto-approved) — set the "draft" input to true on a
+# manual dispatch to require a maintainer to review the built binaries
+# and changelog on GitHub and click "Publish release" before it goes
+# live. A draft release is invisible to unauthenticated API requests —
+# including the ones `hawp update` makes — so nothing is downloadable
+# until it's published. GitHub computes a SHA-256 digest for each
+# uploaded asset automatically, which `hawp update` verifies against.
 on:
   push:
     tags:
-      - 'v*'  # Trigger on version tags (v0.0.1, v0.1.0, etc.)
-  workflow_dispatch:  # Allow manual trigger from Actions tab
+      - "[0-9]+.[0-9]+.[0-9]+"
+  workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g., 0.0.1)'
+        description: "Version to release, e.g. 0.0.1 (plain X.Y.Z format)"
         required: true
-        type: string
+      draft:
+        description: "Require manual review/publish instead of auto-publishing immediately"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
 
 jobs:
-  # ========== BUILD MATRIX: 6 PLATFORMS ==========
-  build:
-    name: Build ${{ matrix.os }}-${{ matrix.arch }}
-    runs-on: ${{ matrix.runs-on }}
-    strategy:
-      matrix:
-        include:
-          # Windows builds
-          - os: windows
-            arch: amd64
-            runs-on: windows-latest
-            ext: .exe
-          - os: windows
-            arch: arm64
-            runs-on: windows-latest
-            ext: .exe
-          # macOS builds
-          - os: darwin
-            arch: amd64
-            runs-on: macos-latest  # Intel Macs (latest stable)
-            ext: ''
-          - os: darwin
-            arch: arm64
-            runs-on: macos-14  # Apple Silicon
-            ext: ''
-          # Linux builds
-          - os: linux
-            arch: amd64
-            runs-on: ubuntu-latest
-            ext: ''
-          - os: linux
-            arch: arm64
-            runs-on: ubuntu-latest
-            ext: ''
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v4
-        with:
-          go-version: '1.21'
-
-      # Run tests first — fail if any fail
-      - name: Run Tests
-        working-directory: librarian/src
-        env:
-          INTEGRATION: "1"
-        run: |
-          go test ./...
-
-      # Compile binary for target OS/arch
-      - name: Build binary
-        working-directory: librarian/src
-        env:
-          GOOS: ${{ matrix.os }}
-          GOARCH: ${{ matrix.arch }}
-          CGO_ENABLED: 0  # Pure Go, no C dependencies
-        run: |
-          go build -o hawp-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} ./cmd/hawp
-
-      # Generate SHA256 for verification (cross-platform via openssl)
-      - name: Generate checksum
-        working-directory: librarian/src
-        run: |
-          openssl dgst -sha256 -r hawp-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }} | awk '{print $1 "  " $2}' > hawp-${{ matrix.os }}-${{ matrix.arch }}.sha256
-
-      # Upload artifacts for release job (files created in librarian/src via working-directory above)
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: hawp-${{ matrix.os }}-${{ matrix.arch }}
-          path: |
-            librarian/src/hawp-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.ext }}
-            librarian/src/hawp-${{ matrix.os }}-${{ matrix.arch }}.sha256
-
-  # ========== RELEASE CREATION ==========
-  release:
-    name: Create GitHub Release
-    needs: build
+  build-and-release:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
         with:
-          files: |
-            hawp-windows-amd64/hawp-windows-amd64.exe
-            hawp-windows-amd64/hawp-windows-amd64.sha256
-            hawp-windows-arm64/hawp-windows-arm64.exe
-            hawp-windows-arm64/hawp-windows-arm64.sha256
-            hawp-darwin-amd64/hawp-darwin-amd64
-            hawp-darwin-amd64/hawp-darwin-amd64.sha256
-            hawp-darwin-arm64/hawp-darwin-arm64
-            hawp-darwin-arm64/hawp-darwin-arm64.sha256
-            hawp-linux-amd64/hawp-linux-amd64
-            hawp-linux-amd64/hawp-linux-amd64.sha256
-            hawp-linux-arm64/hawp-linux-arm64
-            hawp-linux-arm64/hawp-linux-arm64.sha256
-          draft: false
-          prerelease: false
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Resolve version and tag
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            version="${{ github.event.inputs.version }}"
+          else
+            version="${GITHUB_REF_NAME}"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$version" >> "$GITHUB_OUTPUT"
+          # 0.0.x tags are test/pre-release builds validating the release
+          # and self-update mechanism itself, not a real product release.
+          if [[ "$version" == 0.0.* ]]; then
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create and push tag (manual dispatch only)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          if git rev-parse "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "Tag $tag already exists — aborting so it is never silently reused." >&2
+            exit 1
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "$tag" -m "librarian-go $tag (via workflow_dispatch)"
+          git push origin "$tag"
+
+      - name: Build release binaries
+        working-directory: librarian/src
+        run: make dist VERSION=${{ steps.version.outputs.version }}
+
+      - name: Package kit + provider overlay bundle
+        run: |
+          set -e
+          stage=$(mktemp -d)
+          mkdir -p "$stage/kit" "$stage/providers"
+          cp -r .hawp/kit/. "$stage/kit/"
+          cp core/providers/manifest.yaml "$stage/providers/"
+          for provider in .claude .codex .cursor .continue .github; do
+            cp -r "core/providers/$provider" "$stage/providers/$provider"
+          done
+          tar -C "$stage" -czf librarian/src/bin/dist/hawp-kit-bundle.tar.gz kit providers
+
+      - name: Generate checksums.txt
+        run: |
+          cd librarian/src/bin/dist
+          sha256sum * > checksums.txt
+          echo "checksums.txt:"
+          cat checksums.txt
+
+      - name: Extract changelog section for this version
+        run: |
+          awk -v ver="${{ steps.version.outputs.version }}" '
+            $0 ~ "^## \\[" ver "\\]" { found=1; print; next }
+            found && /^## \[/ { exit }
+            found { print }
+          ' librarian/src/CHANGELOG.md > /tmp/release-notes.md
+          if [ ! -s /tmp/release-notes.md ]; then
+            echo "::error::No librarian/src/CHANGELOG.md section found for version ${{ steps.version.outputs.version }} — add one before releasing." >&2
+            exit 1
+          fi
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "librarian-go v${{ steps.version.outputs.version }}"
+          body_path: /tmp/release-notes.md
+          prerelease: ${{ steps.version.outputs.prerelease }}
+          draft: ${{ github.event.inputs.draft == 'true' }}
+          files: librarian/src/bin/dist/*
+          generate_release_notes: true

@@ -45,6 +45,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh workflow run release-librarian-go.yml \
+          gh workflow run release.yml \
             --field version="${{ steps.version.outputs.version }}" \
             --field draft=false
