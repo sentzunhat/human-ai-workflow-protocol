@@ -3,6 +3,33 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.4] - 2026-08-24
+
+stdio MCP server (`hawp mcp`) and expanded `hawp init`.
+
+### Added
+
+- **`hawp mcp`** — start a stdio JSON-RPC 2.0 MCP server. Exposes three tools
+  to any connected AI agent (Claude Code, Cursor, Continue, etc.):
+  - `hawp_search` — hybrid lexical+vector search over indexed kit and work docs.
+  - `hawp_work_new` — scaffold a new work item (UUID, plan file, BACKLOG row).
+  - `hawp_work_validate` — run composite kit + work + links validation.
+- **`hawp init --provider <name>|all`** — new `--provider` flag writes the MCP
+  server entry into the appropriate config file for each requested provider:
+  - `claude` → `.mcp.json`
+  - `cursor` → `.cursor/mcp.json`
+  - `continue` → prints manual config instructions
+  - `all` → expands to claude + cursor + continue + codex
+  Config writes are idempotent (no-op if the hawp entry already exists).
+- `hawp init` now also syncs `.hawp/kit/` from the latest release (same as
+  `hawp update sync`) after provisioning `~/.hawp/`.
+
+### Changed
+
+- Registry description for `init` and `update` updated to reflect new behavior.
+
+---
+
 ## [0.0.3] - 2026-08-24
 
 Provider update parity, cross-platform auto-update CI, search usage docs,

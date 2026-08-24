@@ -20,6 +20,7 @@ import (
 	appkit "github.com/sentzunhat/hawp/librarian/src/internal/application/kit"
 	appkitsync "github.com/sentzunhat/hawp/librarian/src/internal/application/kitsync"
 	applinks "github.com/sentzunhat/hawp/librarian/src/internal/application/links"
+	appmcp "github.com/sentzunhat/hawp/librarian/src/internal/platform/mcp"
 	appprovision "github.com/sentzunhat/hawp/librarian/src/internal/application/provision"
 	appupdate "github.com/sentzunhat/hawp/librarian/src/internal/application/update"
 	appuuid "github.com/sentzunhat/hawp/librarian/src/internal/application/uuidgen"
@@ -82,7 +83,10 @@ func Run(args []string) error {
 		return runCheck()
 
 	case command == "init":
-		return runInit()
+		return runInit(args[1:])
+
+	case command == "mcp":
+		return runMCP()
 
 	case command == "version":
 		fmt.Println(domainupdate.Version)
@@ -319,7 +323,9 @@ func runWorkNew(args []string) error {
 	return nil
 }
 
-func runInit() error {
+func runInit(args []string) error {
+	providers := parseProviderFlags(args)
+
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return err
@@ -329,7 +335,32 @@ func runInit() error {
 	if result.Failed() {
 		return ExitError{Code: 1}
 	}
+
+	client := githubrelease.NewClient()
+	if err := doKitSync(client, providers); err != nil {
+		return err
+	}
+
+	if len(providers) > 0 {
+		root, rerr := repo.FindBacklogRepoRoot(mustGetwd())
+		if rerr != nil {
+			fmt.Println("Not in a HAWP repo; skipping MCP config write.")
+			return nil
+		}
+		if err := appmcp.WriteProviderConfigs(root, providers); err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+func runMCP() error {
+	root, err := repo.FindBacklogRepoRoot(mustGetwd())
+	if err != nil {
+		root = mustGetwd()
+	}
+	return appmcp.Serve(root, domainupdate.Version)
 }
 
 // runUpdateVerify checks for an available update and reports it. Exits 1
@@ -822,11 +853,10 @@ func runSearchEmbed(args []string) error {
 		return nil
 	}
 
-	// Parse flags. --backend ollama switches modelID's meaning from an
-	// ONNX model pulled via `hawp model pull` to any model available on
-	// the local Ollama server (e.g. --model nomic-embed-text).
-	backend := "onnx"
-	modelID := appindex.DefaultEmbeddingModel
+	// Parse flags. --backend is required: "onnx" or "ollama".
+	// --model overrides the default for that backend.
+	backend := ""
+	modelID := ""
 	modelSet := false
 	for i := 0; i < len(args); i++ {
 		switch {
@@ -839,8 +869,16 @@ func runSearchEmbed(args []string) error {
 			i++
 		}
 	}
-	if backend == "ollama" && !modelSet {
-		modelID = "nomic-embed-text"
+	if backend == "" {
+		return errors.New("--backend is required: hawp search embed --backend onnx|ollama [--model <name>]")
+	}
+	if !modelSet {
+		switch backend {
+		case "onnx":
+			modelID = appindex.DefaultEmbeddingModel
+		case "ollama":
+			modelID = "nomic-embed-text"
+		}
 	}
 
 	fmt.Printf("Embedding %d chunks with %s (%s)...\n", needEmbed, modelID, backend)
@@ -1165,15 +1203,6 @@ func getInt(m map[string]interface{}, key string) int64 {
 	return 0
 }
 
-func getFloat(m map[string]interface{}, key string) float64 {
-	if v, ok := m[key]; ok {
-		if f, ok := v.(float64); ok {
-			return f
-		}
-	}
-	return 0.0
-}
-
 func mustGetwd() string {
 	wd, err := os.Getwd()
 	if err != nil {
@@ -1200,7 +1229,8 @@ COMMANDS
   work new "<title>" [--type ...]      scaffold intake: UUID, plan file, inbox backlog row
   work normalize [--apply --validate]  normalize work record drift (dry-run default)
   check                                combined kit + work + links validation
-  init                                  provision ~/.hawp (ONNX Runtime + embedding model)
+  init [--provider <name>|all]           provision ~/.hawp, sync kit, write MCP configs (claude|cursor|codex|continue|all)
+  mcp                                   start stdio MCP server (JSON-RPC 2.0) for AI agent tool use
   version                               print the running hawp version
   update                                update binary + kit + all providers (--no-providers for kit-only)
   update latest                         update binary only
@@ -1212,7 +1242,7 @@ COMMANDS
   db init                              plan the ~/.hawp home layout (scaffold)
   index build [--scope all|work|kit] [--export <path>]  enrich kit/work docs with folder context
   search index                                     ingest kit + work documents into SQLite (no vectors yet)
-  search embed [--model <name>] [--backend onnx|ollama]  embed all chunks with vectors
+  search embed --backend onnx|ollama [--model <name>]  embed all chunks with vectors
   search <query> [--limit <n>] [--context] [--llm-reshape] [--format markdown|json] [--max-tokens <n>]
                                                    lexical + vector hybrid search; --context for LLM-ready format,
                                                    --llm-reshape to additionally restructure via embeddings+LLM
