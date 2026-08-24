@@ -343,7 +343,27 @@ For each of the 6 platforms:
 
 ---
 
-**Status:** ✅ READY TO TEST (After v0.0.2 release)
+## Outcome
 
-This is critical infrastructure testing. Auto-update must be reliable for ongoing releases.
+`hawp update` verified end-to-end on darwin-arm64: `0.0.1` binary detected `0.0.2`, downloaded,
+verified SHA256 via `checksums.txt`, replaced binary, refreshed 106 kit files. Post-update
+`hawp version` → `0.0.2`; subsequent `hawp update --check` → "Already up to date."
+
+Linux and Windows platforms covered by the `test-auto-update.yml` CI workflow added in v0.0.3.
+
+## Verification
+
+- Evidence: `.hawp/work/evidence/2026/08/24/j7h9e4l0-auto-update-darwin-arm64.md`
+- [x] `hawp version` → `0.0.1` from downloaded release binary ✅
+- [x] `hawp update` detected `0.0.2` and self-replaced ✅
+- [x] SHA256 verified via `checksums.txt` ✅
+- [x] Kit refreshed: 106 file(s) ✅
+- [x] `hawp version` → `0.0.2` post-update ✅
+- [x] `hawp update --check` → "Already up to date" ✅
+
+## Close Checklist
+
+- [x] Outcome documented
+- [x] Verification evidence linked
+- [x] Work item moved to `closed/2026/08/24/j7h9e4l0/`
 

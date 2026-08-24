@@ -24,6 +24,7 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
+| `3b51837c` | feature | v0.0.4: `hawp init` + `hawp mcp` + provider MCP config auto-write | plan-ready | unassigned | [plan](active/3b51837c/plan.md) | 2026-08-24 |
 | `t5l7m9n1` | planning | Benchmarking infrastructure for v0.0.3+: harness scaffold + test data | plan-ready | unassigned | [plan](active/t5l7m9n1/plan.md) | 2026-07-26 |
 
 ---
@@ -79,5 +80,4 @@ Limited to the last 10 items.
 
 ## Future Improvements
 
-- **Optional MCP server overlay for librarian tooling** (deferred, much later).
 - **Evidence recovery for legacy unproven claims** (optional, low priority): 85 legacy claims carry explicit unproven annotations (`a7ebe68a`, 2026-07-20).

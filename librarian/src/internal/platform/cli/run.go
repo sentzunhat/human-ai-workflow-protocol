@@ -391,10 +391,14 @@ func runUpdateSync(args []string) error {
 	return doKitSync(client, providers)
 }
 
-// runUpdateFull is the default for bare `hawp update`: updates the binary
-// then syncs kit. Providers are opt-in via --provider.
+// runUpdateFull is the default for bare `hawp update`: updates the binary,
+// syncs kit, and syncs all provider overlays. Pass --no-providers to skip
+// provider sync (kit-only).
 func runUpdateFull(args []string) error {
 	providers := parseProviderFlags(args)
+	if len(providers) == 0 && !containsArg(args, "--no-providers") {
+		providers = []string{"all"}
+	}
 
 	client := githubrelease.NewClient()
 	status, err := appupdate.Check(client, domainupdate.Repo, domainupdate.Version)
@@ -433,6 +437,15 @@ func parseProviderFlags(args []string) []string {
 	return providers
 }
 
+func containsArg(args []string, flag string) bool {
+	for _, a := range args {
+		if a == flag {
+			return true
+		}
+	}
+	return false
+}
+
 func doKitSync(client githubrelease.Client, providers []string) error {
 	root, err := repo.FindBacklogRepoRoot(mustGetwd())
 	if err != nil {
@@ -455,7 +468,7 @@ func doKitSync(client githubrelease.Client, providers []string) error {
 		fmt.Printf("Provider %s %s: %d file(s).\n", name, action, result.Providers[name])
 	}
 	if len(result.Providers) == 0 {
-		fmt.Println("No provider overlays synced (use --provider <name> or --provider all to include them).")
+		fmt.Println("No provider overlays synced (use --provider <name>|all or run bare `hawp update`).")
 	}
 	return nil
 }
@@ -1189,7 +1202,7 @@ COMMANDS
   check                                combined kit + work + links validation
   init                                  provision ~/.hawp (ONNX Runtime + embedding model)
   version                               print the running hawp version
-  update                                update binary + kit (no providers by default)
+  update                                update binary + kit + all providers (--no-providers for kit-only)
   update latest                         update binary only
   update sync [--provider <name>|all]   sync kit (+ providers if specified)
   update verify                         check whether an update is available (exit 1 = update ready)

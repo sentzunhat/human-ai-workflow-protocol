@@ -3,6 +3,40 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.3] - 2026-08-24
+
+Provider update parity, cross-platform auto-update CI, search usage docs,
+and kit reference docs updated for folder-per-UUID work item layout.
+
+### Update
+
+- `hawp update` now syncs all provider overlays by default (equivalent to
+  `--provider all`). Use `--no-providers` to update the binary and kit only.
+- Help text updated: `update  update binary + kit + all providers (--no-providers for kit-only)`
+
+### CI
+
+- New workflow: `test-auto-update.yml` — runs on every `main` push across
+  Linux (ubuntu-latest), macOS (macos-latest), and Windows (windows-latest).
+  Downloads the `0.0.1` binary, runs `hawp update`, and asserts the binary
+  upgraded to the latest release. Skips gracefully when only one release
+  exists or baseline is already latest.
+
+### Docs
+
+- Added `core/.hawp/kit/usage/search.md`: full guide for `hawp search`
+  including search modes, context packing (`--context`), LLM reshape
+  (`--llm-reshape`), embedding backends, flag reference, and agent workflow.
+- Updated `core/.hawp/kit/references/backlog-alignment.md`: documents
+  folder-per-UUID work item layout (`active/{uuid}/plan.md`,
+  `closed/YYYY/MM/DD/{uuid}/plan.md`) as the current standard alongside
+  the legacy flat-file format.
+- Updated `core/.hawp/kit/references/work-item-file-tracking.md`: aligns
+  file location examples and agent usage instructions with folder-per-item
+  layout; legacy `TASK-NNN-files.md` format noted as still accepted.
+
+---
+
 ## [0.0.2] - 2026-08-24
 
 Maintenance release: validator improvements, source layout cleanup,
