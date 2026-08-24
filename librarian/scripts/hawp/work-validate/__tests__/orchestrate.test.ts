@@ -107,8 +107,8 @@ test("extractIdFromFilename recognizes legacy, date-prefixed, and UUID formats",
     extractIdFromFilename("361FB08E-6457-4ED5-80BD-76337B6F0E89.md"),
     "361fb08e-6457-4ed5-80bd-76337b6f0e89",
   );
-  // Short UUID display form is handled separately (extractShortUuid / idsMatch)
-  assert.equal(extractIdFromFilename("361fb08e"), null);
+  // Bare 8-char alphanumeric (folder-per-item dir names like active/b7e2a4f9/)
+  assert.equal(extractIdFromFilename("361fb08e"), "361fb08e");
   assert.equal(extractIdFromFilename("no-id-here"), null);
 });
 
