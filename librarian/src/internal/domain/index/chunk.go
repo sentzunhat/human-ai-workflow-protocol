@@ -36,12 +36,48 @@ type Chunk struct {
 	MetadataJSON  *string // structured metadata as JSON
 }
 
+// ChunkRange is a chunk with its line range in the source document (1-indexed).
+type ChunkRange struct {
+	Text      string
+	StartLine int
+	EndLine   int
+}
+
+// ChunkBySectionWithLines splits content the same way as ChunkBySection but
+// also tracks the 1-indexed start/end line of each chunk in the original
+// content, so callers can store precise file positions in the index.
+func ChunkBySectionWithLines(content string) []ChunkRange {
+	texts := chunkTexts(content)
+	results := make([]ChunkRange, 0, len(texts))
+	searchFrom := 0
+	for _, text := range texts {
+		idx := strings.Index(content[searchFrom:], text)
+		if idx < 0 {
+			results = append(results, ChunkRange{Text: text})
+			continue
+		}
+		absStart := searchFrom + idx
+		startLine := strings.Count(content[:absStart], "\n") + 1
+		endLine := startLine + strings.Count(text, "\n")
+		results = append(results, ChunkRange{Text: text, StartLine: startLine, EndLine: endLine})
+		searchFrom = absStart + len(text)
+	}
+	return results
+}
+
 // ChunkBySection splits a document by ## section headings (for plans/guides),
 // returning chunks that preserve semantic boundaries.
 func ChunkBySection(content string) []string {
-	// Split by ## headings; for each section, chunk by paragraphs if too long.
-	// Target: 150-200 words per chunk, but respect section boundaries.
+	chunks := ChunkBySectionWithLines(content)
+	texts := make([]string, len(chunks))
+	for i, c := range chunks {
+		texts[i] = c.Text
+	}
+	return texts
+}
 
+// chunkTexts is the shared splitting logic used by both exported functions.
+func chunkTexts(content string) []string {
 	var chunks []string
 	sections := regexp.MustCompile(`(?m)^## `).Split(content, -1)
 
@@ -49,14 +85,12 @@ func ChunkBySection(content string) []string {
 		if strings.TrimSpace(section) == "" {
 			continue
 		}
-		// If the section is short, keep it whole
 		wordCount := len(strings.Fields(section))
 		if wordCount <= 250 {
 			chunks = append(chunks, strings.TrimSpace(section))
 			continue
 		}
 
-		// Large section: split by paragraphs (blank-line delimited)
 		paras := regexp.MustCompile(`\n\n+`).Split(section, -1)
 		var current strings.Builder
 		currentWords := 0
@@ -68,7 +102,6 @@ func ChunkBySection(content string) []string {
 			}
 			paraWords := len(strings.Fields(para))
 
-			// If current chunk + this paragraph fits, add it
 			if currentWords+paraWords <= 200 {
 				if currentWords > 0 {
 					current.WriteString("\n\n")
@@ -78,7 +111,6 @@ func ChunkBySection(content string) []string {
 				continue
 			}
 
-			// Otherwise, flush current and start fresh
 			if currentWords > 0 {
 				chunks = append(chunks, strings.TrimSpace(current.String()))
 			}
@@ -87,7 +119,6 @@ func ChunkBySection(content string) []string {
 			currentWords = paraWords
 		}
 
-		// Flush any remaining
 		if currentWords > 0 {
 			chunks = append(chunks, strings.TrimSpace(current.String()))
 		}
