@@ -3,10 +3,10 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [0.0.2] - 2026-08-23
+## [0.0.2] - 2026-08-24
 
-Maintenance release: validator improvements, source layout cleanup, and
-release pipeline simplification. No new user-facing CLI commands.
+Maintenance release: validator improvements, source layout cleanup,
+release pipeline simplification, and platform-aware binary install.
 
 ### Work Validator
 
@@ -24,6 +24,14 @@ release pipeline simplification. No new user-facing CLI commands.
   `github.com/sentzunhat/hawp/librarian/src`
 - npm hawp scripts (`kit:validate`, `work:validate`, `hawp:check`, etc.)
   now invoke the compiled Go binary directly — TypeScript fallbacks retired
+
+### Install
+
+- Provider install scripts now detect OS and arch at runtime and download
+  the matching `hawp` binary from the GitHub release (macOS arm64/amd64,
+  Linux amd64/arm64, Windows amd64/arm64). SHA256 verification runs when
+  `checksums.txt` is available. Falls back gracefully when the platform is
+  unsupported or the network is unavailable.
 
 ### Release
 
