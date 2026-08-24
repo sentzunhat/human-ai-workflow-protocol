@@ -1196,15 +1196,6 @@ func getInt(m map[string]interface{}, key string) int64 {
 	return 0
 }
 
-func getFloat(m map[string]interface{}, key string) float64 {
-	if v, ok := m[key]; ok {
-		if f, ok := v.(float64); ok {
-			return f
-		}
-	}
-	return 0.0
-}
-
 func mustGetwd() string {
 	wd, err := os.Getwd()
 	if err != nil {
@@ -1231,7 +1222,7 @@ COMMANDS
   work new "<title>" [--type ...]      scaffold intake: UUID, plan file, inbox backlog row
   work normalize [--apply --validate]  normalize work record drift (dry-run default)
   check                                combined kit + work + links validation
-  init [--provider <name>|all]           provision ~/.hawp, sync kit, write MCP configs (claude|cursor|continue|all)
+  init [--provider <name>|all]           provision ~/.hawp, sync kit, write MCP configs (claude|cursor|codex|continue|all)
   mcp                                   start stdio MCP server (JSON-RPC 2.0) for AI agent tool use
   version                               print the running hawp version
   update                                update binary + kit + all providers (--no-providers for kit-only)

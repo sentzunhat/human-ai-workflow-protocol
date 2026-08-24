@@ -8,6 +8,13 @@ import (
 	"strings"
 )
 
+// codexTOMLBlock is the TOML snippet appended to codex.toml for the hawp server.
+const codexTOMLBlock = `
+[mcp_servers.hawp]
+command = ".hawp/bin/hawp"
+args = ["mcp"]
+`
+
 // hawpServerEntry is the MCP server config block written for all providers
 // that support JSON-RPC MCP (Claude Code, Cursor).
 var hawpServerEntry = map[string]any{
@@ -19,8 +26,9 @@ var hawpServerEntry = map[string]any{
 // relevant provider config file for each named provider. Idempotent: if the
 // hawp entry already exists it is not duplicated or overwritten.
 //
-// Supported: claude, cursor (JSON .mcp.json/.cursor/mcp.json).
-// Continue, codex, and github print a manual-config message instead.
+// File-writing providers: claude (.mcp.json), cursor (.cursor/mcp.json), codex (codex.toml).
+// Continue prints a manual config block (no standard file location).
+// github/Copilot prints a note (VS Code manages its own MCP config).
 func WriteProviderConfigs(repoRoot string, providers []string) error {
 	seen := map[string]bool{}
 	for _, p := range providers {
@@ -54,8 +62,14 @@ func WriteProviderConfigs(repoRoot string, providers []string) error {
 			fmt.Println("        command: .hawp/bin/hawp")
 			fmt.Println("        args: [mcp]")
 
-		case "codex", "github":
-			fmt.Printf("MCP (%s): no native MCP support yet — use `hawp` CLI commands directly.\n", p)
+		case "codex":
+			if err := writeCodexTOML(filepath.Join(repoRoot, "codex.toml")); err != nil {
+				return fmt.Errorf("codex MCP config: %w", err)
+			}
+			fmt.Println("MCP: wrote codex.toml (Codex)")
+
+		case "github":
+			fmt.Println("MCP (github/Copilot): configure via VS Code MCP panel or .vscode/mcp.json — no file written.")
 
 		case "all":
 			// Expand "all" to the four main MCP-capable providers.
@@ -66,6 +80,32 @@ func WriteProviderConfigs(repoRoot string, providers []string) error {
 		}
 	}
 	return nil
+}
+
+// writeCodexTOML appends the hawp MCP server entry to codex.toml (creating
+// the file if absent). Idempotent: skips when an [mcp_servers.hawp] block is
+// already present. We avoid a TOML library dependency by treating the file as
+// plain text — the block format is fixed, so a substring check is sufficient.
+func writeCodexTOML(path string) error {
+	existing, err := os.ReadFile(path)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+
+	if strings.Contains(string(existing), "[mcp_servers.hawp]") {
+		return nil // already configured
+	}
+
+	content := string(existing)
+	if !strings.HasSuffix(content, "\n") && len(content) > 0 {
+		content += "\n"
+	}
+	content += codexTOMLBlock
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(path, []byte(content), 0o644)
 }
 
 // writeMCPJSON merges the hawp server entry into a JSON MCP config file.
