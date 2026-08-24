@@ -6,183 +6,150 @@ import (
 	"strings"
 	"time"
 
+	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
 )
 
 // BenchmarkQuery represents a test query with expected characteristics
 type BenchmarkQuery struct {
-	Query       string
-	Intent      string // What semantic concept it's testing
+	Query            string
+	Intent           string // What semantic concept it's testing
 	RelevantKeywords []string
 }
 
 // BenchmarkResult holds metrics for one query-pattern combination
 type BenchmarkResult struct {
-	Query         string
-	Pattern       string  // "lexical", "semantic", "hybrid"
-	LatencyMS     float64
-	ResultCount   int
+	Query            string
+	Pattern          string // "lexical", "hybrid"
+	LatencyMS        float64
+	ResultCount      int
 	TopResultQuality string // "high", "medium", "low"
 }
 
-// BenchmarkQueries are 15 test queries covering different semantic intents
+// benchmarkQueries are 10 corpus-representative queries drawn from the actual
+// .hawp/kit/ and .hawp/work/ document set. All queries are verified to return
+// results against the current index.
 var benchmarkQueries = []BenchmarkQuery{
 	{
-		Query:  "vector embedding ONNX",
-		Intent: "Core technical topic",
-		RelevantKeywords: []string{"vector", "embedding", "onnx", "model"},
+		Query:            "backlog alignment rules",
+		Intent:           "Work tracking policy",
+		RelevantKeywords: []string{"backlog", "alignment", "active", "closed"},
 	},
 	{
-		Query:  "transaction persistence SQLite",
-		Intent: "Database reliability",
-		RelevantKeywords: []string{"transaction", "persist", "sqlite", "commit"},
+		Query:            "status report handoff",
+		Intent:           "Context transfer between sessions",
+		RelevantKeywords: []string{"status", "report", "handoff", "session"},
 	},
 	{
-		Query:  "hybrid search ranking",
-		Intent: "Information retrieval combining methods",
-		RelevantKeywords: []string{"hybrid", "search", "rank", "combine"},
+		Query:            "evidence discipline patterns",
+		Intent:           "Evidence standards for findings",
+		RelevantKeywords: []string{"evidence", "discipline", "finding", "inference"},
 	},
 	{
-		Query:  "cosine similarity vectors",
-		Intent: "Vector math for semantic matching",
-		RelevantKeywords: []string{"cosine", "similarity", "vector", "semantic"},
+		Query:            "intake workflow investigation first",
+		Intent:           "Intake process and investigation ordering",
+		RelevantKeywords: []string{"intake", "investigation", "plan", "workflow"},
 	},
 	{
-		Query:  "full text search FTS5",
-		Intent: "Lexical search",
-		RelevantKeywords: []string{"full", "text", "search", "fts5"},
+		Query:            "provider overlay sync",
+		Intent:           "Provider distribution and materialization",
+		RelevantKeywords: []string{"provider", "overlay", "sync", "distribution"},
 	},
 	{
-		Query:  "concurrency WAL mode",
-		Intent: "Database concurrent access",
-		RelevantKeywords: []string{"concurrent", "wai", "mode", "lock"},
+		Query:            "hawp mcp stdio server tools",
+		Intent:           "MCP server configuration for AI agents",
+		RelevantKeywords: []string{"mcp", "server", "tool", "stdio"},
 	},
 	{
-		Query:  "batch processing performance",
-		Intent: "Throughput optimization",
-		RelevantKeywords: []string{"batch", "process", "performance", "throughput"},
+		Query:            "HAWP shape template mission constraints output",
+		Intent:           "Core HAWP protocol shape fields",
+		RelevantKeywords: []string{"mission", "constraints", "output", "shape"},
 	},
 	{
-		Query:  "model inference CPU GPU",
-		Intent: "Acceleration options",
-		RelevantKeywords: []string{"model", "inference", "cpu", "gpu"},
+		Query:            "work item plan file format",
+		Intent:           "Plan file structure and fields",
+		RelevantKeywords: []string{"plan", "work", "item", "status"},
 	},
 	{
-		Query:  "semantic search relevance",
-		Intent: "Quality of results",
-		RelevantKeywords: []string{"semantic", "search", "relevance", "quality"},
+		Query:            "kit normalize validate",
+		Intent:           "Kit maintenance and validation commands",
+		RelevantKeywords: []string{"kit", "normalize", "validate", "naming"},
 	},
 	{
-		Query:  "lexical keyword matching",
-		Intent: "Basic keyword search",
-		RelevantKeywords: []string{"lexical", "keyword", "match", "basic"},
-	},
-	{
-		Query:  "schema database design",
-		Intent: "Data structure and organization",
-		RelevantKeywords: []string{"schema", "database", "design", "table"},
-	},
-	{
-		Query:  "test coverage unit integration",
-		Intent: "Quality assurance",
-		RelevantKeywords: []string{"test", "coverage", "unit", "integration"},
-	},
-	{
-		Query:  "latency optimization milliseconds",
-		Intent: "Performance metrics",
-		RelevantKeywords: []string{"latency", "optimization", "millisecond", "perf"},
-	},
-	{
-		Query:  "document corpus indexing",
-		Intent: "Large document management",
-		RelevantKeywords: []string{"document", "corpus", "index", "large"},
-	},
-	{
-		Query:  "retrieval quality recall precision",
-		Intent: "Search quality measurement",
-		RelevantKeywords: []string{"retrieval", "quality", "recall", "precision"},
+		Query:            "hawp update binary install",
+		Intent:           "Binary update and install flow",
+		RelevantKeywords: []string{"update", "binary", "install", "release"},
 	},
 }
 
-// RunBenchmark executes benchmark tests on all three patterns
+// RunBenchmark executes benchmark tests across lexical and hybrid patterns.
 func RunBenchmark(db *sqlite.IndexDB) error {
 	fmt.Println("\n╔════════════════════════════════════════════════════════════════╗")
-	fmt.Println("║           HYBRID SEARCH BENCHMARK: 3 PATTERNS                 ║")
+	fmt.Println("║           SEARCH BENCHMARK: LEXICAL vs HYBRID                 ║")
 	fmt.Println("╚════════════════════════════════════════════════════════════════╝")
 
-	// Track results
-	var results []BenchmarkResult
-
-	// Check if vectors available
 	hasVectors, _ := db.HasVectors()
 	availablePatterns := []string{"lexical"}
 	if hasVectors {
-		availablePatterns = append(availablePatterns, "semantic", "hybrid")
+		availablePatterns = append(availablePatterns, "hybrid")
 	}
 
 	fmt.Printf("Available patterns: %s\n", strings.Join(availablePatterns, ", "))
 	if !hasVectors {
-		fmt.Println("Note: Vectors not found. Run 'hawp search embed' first to enable semantic/hybrid search.")
+		fmt.Println("Note: Vectors not found. Run 'hawp search embed' first to enable hybrid search.")
 	}
 	fmt.Printf("Running %d queries across %d patterns...\n\n", len(benchmarkQueries), len(availablePatterns))
 
-	// Run benchmarks
+	var results []BenchmarkResult
 	for _, query := range benchmarkQueries {
 		for _, pattern := range availablePatterns {
-			result := benchmarkOneQuery(query.Query, pattern, db)
+			result := benchmarkOneQuery(query, pattern, db)
 			results = append(results, result)
-			fmt.Printf("✓ %s (%s): %dms, %d results\n", query.Intent, pattern, int(result.LatencyMS), result.ResultCount)
+			fmt.Printf("✓ %s (%s): %dms, %d results [%s]\n",
+				query.Intent, pattern, int(result.LatencyMS), result.ResultCount, result.TopResultQuality)
 		}
 	}
 
-	// Print summary table
 	printBenchmarkSummary(results)
-
 	return nil
 }
 
-// benchmarkOneQuery runs a single query on a specific pattern
-func benchmarkOneQuery(query string, pattern string, db *sqlite.IndexDB) BenchmarkResult {
-	result := BenchmarkResult{
-		Query:   query,
-		Pattern: pattern,
-	}
-
+// benchmarkOneQuery runs a single query using the real search path for the pattern.
+func benchmarkOneQuery(query BenchmarkQuery, pattern string, db *sqlite.IndexDB) BenchmarkResult {
+	result := BenchmarkResult{Query: query.Query, Pattern: pattern}
 	start := time.Now()
 
 	switch pattern {
 	case "lexical":
-		// Lexical: FTS5 only
-		lexicalResults, _ := db.QueryChunksLexical(query, 10)
-		result.ResultCount = len(lexicalResults)
-		result.TopResultQuality = assessQuality(query, lexicalResults, 0.7)
-
-	case "semantic":
-		// Semantic: Embed query, score all vectors (simulated)
-		// In real benchmark would embed and score all 2,445 vectors
-		// For now, simulate by doing lexical + dummy semantic
-		lexicalResults, _ := db.QueryChunksLexical(query, 100)
-		result.ResultCount = len(lexicalResults)
-		result.TopResultQuality = assessQuality(query, lexicalResults, 0.95)
+		rows, _ := db.QueryChunksLexical(query.Query, 10)
+		result.ResultCount = len(rows)
+		result.TopResultQuality = assessQuality(query.RelevantKeywords, rows)
 
 	case "hybrid":
-		// Hybrid: FTS5 + cosine (actual implementation)
-		lexicalResults, _ := db.QueryChunksLexical(query, 50)
-		result.ResultCount = len(lexicalResults)
-		result.TopResultQuality = assessQuality(query, lexicalResults, 0.96)
+		// Real hybrid path: lexical candidates → HybridRank (embeds query, cosine re-rank).
+		rows, _ := db.QueryChunksLexical(query.Query, 30)
+		if len(rows) > 0 {
+			rows = appsearch.HybridRank(rows, query.Query, db, 10)
+		}
+		result.ResultCount = len(rows)
+		result.TopResultQuality = assessQuality(query.RelevantKeywords, rows)
 	}
 
 	result.LatencyMS = float64(time.Since(start).Milliseconds())
-
 	return result
 }
 
-// assessQuality estimates result quality based on pattern and heuristics
-func assessQuality(query string, results []map[string]interface{}, expectedQuality float64) string {
-	if expectedQuality > 0.93 {
-		return "high"
-	} else if expectedQuality > 0.75 {
-		return "medium"
+// assessQuality checks whether the top result's text contains any of the
+// expected keywords. "high" = keyword found, "low" = no match or no results.
+func assessQuality(keywords []string, results []map[string]interface{}) string {
+	if len(results) == 0 {
+		return "low"
+	}
+	top := strings.ToLower(getStr(results[0], "text"))
+	for _, kw := range keywords {
+		if strings.Contains(top, strings.ToLower(kw)) {
+			return "high"
+		}
 	}
 	return "low"
 }
@@ -209,8 +176,7 @@ func printBenchmarkSummary(results []BenchmarkResult) {
 	fmt.Println("Pattern      | Avg Latency | Min/Max    | Queries | Quality (High/Medium/Low)")
 	fmt.Println("-------------|-------------|-----------|---------|-------------------------")
 
-	// Sort patterns for consistent output
-	patterns := []string{"lexical", "semantic", "hybrid"}
+	patterns := []string{"lexical", "hybrid"}
 	for _, pattern := range patterns {
 		latencies, ok := patternStats[pattern]
 		if !ok {
@@ -239,7 +205,7 @@ func printBenchmarkSummary(results []BenchmarkResult) {
 	if lexicalLatencies, ok := patternStats["lexical"]; ok {
 		lexicalAvg := averageFloat(lexicalLatencies)
 
-		for _, pattern := range []string{"semantic", "hybrid"} {
+		for _, pattern := range []string{"hybrid"} {
 			if latencies, ok := patternStats[pattern]; ok {
 				patternAvg := averageFloat(latencies)
 				multiple := patternAvg / lexicalAvg
@@ -249,13 +215,30 @@ func printBenchmarkSummary(results []BenchmarkResult) {
 		}
 	}
 
-	// Winner announcement
+	// Data-driven winner: highest high-quality count; tie-break on latency.
 	fmt.Println("\n" + "════════════════════════════════════════════════════════════════")
-	fmt.Println("BENCHMARK WINNER: HYBRID")
-	fmt.Println("════════════════════════════════════════════════════════════════")
-	fmt.Println("✓ 15-20ms latency (15x faster than semantic, acceptable vs lexical)")
-	fmt.Println("✓ 96% quality (1% better than semantic, 26% better than lexical)")
-	fmt.Println("✓ Best balance of speed and relevance")
+	winner := ""
+	winnerHigh := -1
+	winnerLatency := 1e9
+	for _, pattern := range patterns {
+		if _, ok := patternStats[pattern]; !ok {
+			continue
+		}
+		high := patternQuality[pattern]["high"]
+		avg := averageFloat(patternStats[pattern])
+		if high > winnerHigh || (high == winnerHigh && avg < winnerLatency) {
+			winner = pattern
+			winnerHigh = high
+			winnerLatency = avg
+		}
+	}
+	if winner != "" {
+		total := len(benchmarkQueries)
+		fmt.Printf("BENCHMARK WINNER: %s\n", strings.ToUpper(winner))
+		fmt.Println("════════════════════════════════════════════════════════════════")
+		fmt.Printf("✓ %.1fms avg latency\n", winnerLatency)
+		fmt.Printf("✓ %d/%d queries returned keyword-matched results\n", winnerHigh, total)
+	}
 	fmt.Println()
 }
 

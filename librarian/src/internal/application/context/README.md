@@ -40,7 +40,7 @@ output, err := pipeline.Reshape(ctx, block, maxTokens)
   `ContextReshaper.Reshape` skips the embed/LLM stages entirely rather than
   routing a no-op call through them, so it's genuinely zero network.
 - **`LLMClient` was deliberately not renamed to `Reshaper`** during the
-  v0.1.0 push — see `librarian/docs/v0.1.0_VISION.md`'s "Unified Interfaces"
+  v0.1.0 push — see `librarian/docs/v0.1.0-vision.md`'s "Unified Interfaces"
   section for why.
 
-See `librarian/docs/v0.1.0_VISION.md` for the full architecture writeup.
+See `librarian/docs/v0.1.0-vision.md` for the full architecture writeup.

@@ -101,6 +101,9 @@ func Run(args []string) error {
 	case command == "update" && sub == "verify":
 		return runUpdateVerify()
 
+	case command == "update" && containsArg(args[1:], "--check"):
+		return runUpdateVerify()
+
 	case command == "update":
 		return runUpdateFull(args[1:])
 
@@ -1233,6 +1236,7 @@ COMMANDS
   mcp                                   start stdio MCP server (JSON-RPC 2.0) for AI agent tool use
   version                               print the running hawp version
   update                                update binary + kit + all providers (--no-providers for kit-only)
+  update --check                        check whether an update is available without installing (exit 1 = update ready)
   update latest                         update binary only
   update sync [--provider <name>|all]   sync kit (+ providers if specified)
   update verify                         check whether an update is available (exit 1 = update ready)
@@ -1261,7 +1265,7 @@ WORK NORMALIZE OPTIONS
 SEARCH --CONTEXT OPTIONS (Phase 4)
   --context              output LLM-ready context block (deduped + formatted)
   --llm-reshape           additionally reshape via embeddings+LLM (implies --context;
-                          requires backends configured, see librarian/docs/BACKENDS.md;
+                          requires backends configured, see librarian/docs/backends.md;
                           falls back to unreshaped context with a warning if unavailable)
   --format markdown|json output format (default markdown)
   --max-tokens <n>       token budget for context block (default 2000)`

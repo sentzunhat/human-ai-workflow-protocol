@@ -13,7 +13,7 @@ import (
 // "input" (that field belongs to /api/embed instead). A prior regression
 // used the wrong field name and broke live embedding calls while unit tests
 // still passed, because nothing asserted on request shape. See
-// librarian/docs/CODE_REVIEW_v003.md Finding 2.
+// librarian/docs/code-review-v003.md Finding 2.
 func TestOllamaEmbedRequestUsesPromptField(t *testing.T) {
 	var gotBody map[string]interface{}
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

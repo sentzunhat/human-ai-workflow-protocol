@@ -267,7 +267,7 @@ Query: "show me the embedding reshaper"
 **Structure:**
 ```go
 FormattedResult{
-    Source:    "docs/BACKENDS.md:line42",     // File + location
+    Source:    "docs/backends.md:line42",     // File + location
     Title:     "Embeddings Backends > ONNX",  // Heading hierarchy
     Content:   "Status: Production-ready...", // Actual text
     Relevance: 0.87,                          // Search score
@@ -397,7 +397,7 @@ Could add:
 - `librarian/go/internal/domain/search/` — Search indexing
 
 **Documentation:**
-- `librarian/docs/BACKENDS.md` — Backend configuration
+- `librarian/docs/backends.md` — Backend configuration
 - `librarian/docs/CONTEXT_FLOW.md` — [if exists] Pipeline details
 - `.hawp/kit/usage/` — HAWP workflow guidance
 

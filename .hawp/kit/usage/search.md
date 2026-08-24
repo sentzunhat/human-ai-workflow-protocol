@@ -19,9 +19,9 @@ hawp search "backlog alignment rules" --hybrid
 
 ## Embedding backends
 
-| Backend | Model (default) | First embed | Warm embed | Quality |
-|---------|----------------|-------------|-----------|---------|
-| `ollama` | `nomic-embed-text` (768d) | ~110ms/chunk | ~110ms/chunk | 0.83 |
+| Backend | Model (default) | First embed | Warm embed (batch) | Quality |
+|---------|----------------|-------------|-------------------|---------|
+| `ollama` | `nomic-embed-text` (768d) | ~110ms/chunk | ~32ms/chunk | 0.83 |
 | `onnx` | `all-MiniLM-L6-v2` (384d) | ~476ms/batch | ~8ms/chunk | 0.70 |
 
 `--backend` is required. Ollama must be running for the `ollama` backend. ONNX runs offline (pure Go, no system deps).
