@@ -28,6 +28,8 @@ stdio MCP server (`hawp mcp`) and expanded `hawp init`.
 
 - Registry description for `init` and `update` updated to reflect new behavior.
 
+---
+
 ## [0.0.3] - 2026-08-24
 
 Provider update parity, cross-platform auto-update CI, search usage docs,
