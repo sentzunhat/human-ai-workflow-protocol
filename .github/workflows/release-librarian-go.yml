@@ -92,6 +92,13 @@ jobs:
           done
           tar -C "$stage" -czf librarian/src/bin/dist/hawp-kit-bundle.tar.gz kit providers
 
+      - name: Generate checksums.txt
+        run: |
+          cd librarian/src/bin/dist
+          sha256sum * > checksums.txt
+          echo "checksums.txt:"
+          cat checksums.txt
+
       - name: Extract changelog section for this version
         run: |
           awk -v ver="${{ steps.version.outputs.version }}" '
