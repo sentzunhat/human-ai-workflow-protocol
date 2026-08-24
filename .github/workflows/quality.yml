@@ -4,21 +4,21 @@ on:
     push:
         branches:
             - main
-            - dev
+            - development
         paths:
             - librarian/**
             - .hawp/work/**
             - .nvmrc
-            - .github/workflows/librarian-quality.yml
+            - .github/workflows/quality.yml
     pull_request:
         branches:
             - main
-            - dev
+            - development
         paths:
             - librarian/**
             - .hawp/work/**
             - .nvmrc
-            - .github/workflows/librarian-quality.yml
+            - .github/workflows/quality.yml
 
 jobs:
     quality:
