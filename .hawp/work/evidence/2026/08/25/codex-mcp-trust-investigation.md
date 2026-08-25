@@ -59,9 +59,31 @@
 
 ---
 
-## Open question
+## Root cause found — 2026-08-25 follow-up
 
-Whether an already-open desktop task surfaces tools from a freshly-started `hawp mcp`
-process via deferred `tool_search` vs. `/mcp`/composer surfaces. Not reproducible with
-HAWP alone — requires a trusted project that already has a known-good local MCP tool
-surfacing in a desktop task to compare against.
+The "0 tools in desktop task" failure was **not** a trust gate and not a Codex hot-reload
+issue. It was a **relative path resolution bug** in the generated `.codex/config.toml`:
+
+| Field | Old value | Effect |
+|-------|-----------|--------|
+| `command` | `"./.hawp/bin/hawp"` | Resolved relative to Codex app dir → binary not found |
+| `cwd` | `"."` | Also resolves to Codex app dir, not project root |
+
+Evidence: Codex SQLite log entry `omitting MCP server without an exact ready client server_name=hawp`.
+Contrast with `node_repl` (global config, absolute path) → `Service initialized as client`.
+
+Manual proof: running `"./.hawp/bin/hawp"` from `/tmp` → `no such file or directory`.
+Running from the actual project root → binary found and MCP handshake succeeds.
+
+### Fix applied
+
+- `local-print-farm/.codex/config.toml` updated to use absolute `command` and `cwd` (hand-patched)
+- `hawp init --provider codex` (Go source `mcp/config.go`) updated to write absolute paths using repo root
+- `writeCodexTOML` signature changed to `writeCodexTOML(path, repoRoot string)` — passes absolute paths
+- All tests updated and passing; binary rebuilt as v0.0.10
+- `local-print-farm/.hawp/bin/hawp-bin` updated to v0.0.10
+
+### Verification needed
+
+Start a fresh Codex task in `local-print-farm` and probe `hawp_search` via deferred tool
+inventory — should now surface rather than returning 0 tools.

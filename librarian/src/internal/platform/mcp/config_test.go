@@ -8,10 +8,10 @@ import (
 )
 
 func TestWriteCodexTOMLCreatesFile(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, ".codex/config.toml")
+	repoRoot := t.TempDir()
+	path := filepath.Join(repoRoot, ".codex/config.toml")
 
-	if err := writeCodexTOML(path); err != nil {
+	if err := writeCodexTOML(path, repoRoot); err != nil {
 		t.Fatal(err)
 	}
 
@@ -23,22 +23,23 @@ func TestWriteCodexTOMLCreatesFile(t *testing.T) {
 	if !strings.Contains(content, "[mcp_servers.hawp]") {
 		t.Errorf(".codex/config.toml missing [mcp_servers.hawp], got:\n%s", content)
 	}
-	if !strings.Contains(content, `command = ".hawp/bin/hawp"`) {
-		t.Errorf(".codex/config.toml missing command, got:\n%s", content)
+	expectedBin := filepath.Join(repoRoot, ".hawp", "bin", "hawp")
+	if !strings.Contains(content, `command = "`+expectedBin+`"`) {
+		t.Errorf(".codex/config.toml missing absolute command path, got:\n%s", content)
 	}
-	if !strings.Contains(content, `cwd = "."`) {
-		t.Errorf(".codex/config.toml missing cwd, got:\n%s", content)
+	if !strings.Contains(content, `cwd = "`+repoRoot+`"`) {
+		t.Errorf(".codex/config.toml missing absolute cwd, got:\n%s", content)
 	}
 }
 
 func TestWriteCodexTOMLIdempotent(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, ".codex/config.toml")
+	repoRoot := t.TempDir()
+	path := filepath.Join(repoRoot, ".codex/config.toml")
 
-	if err := writeCodexTOML(path); err != nil {
+	if err := writeCodexTOML(path, repoRoot); err != nil {
 		t.Fatal(err)
 	}
-	if err := writeCodexTOML(path); err != nil {
+	if err := writeCodexTOML(path, repoRoot); err != nil {
 		t.Fatal(err)
 	}
 
@@ -50,18 +51,18 @@ func TestWriteCodexTOMLIdempotent(t *testing.T) {
 }
 
 func TestWriteCodexTOMLAppendsToExisting(t *testing.T) {
-	dir := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(dir, ".codex"), 0o755); err != nil {
+	repoRoot := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(repoRoot, ".codex"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	path := filepath.Join(dir, ".codex/config.toml")
+	path := filepath.Join(repoRoot, ".codex/config.toml")
 
 	existing := "[model]\nname = \"o4-mini\"\n"
 	if err := os.WriteFile(path, []byte(existing), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := writeCodexTOML(path); err != nil {
+	if err := writeCodexTOML(path, repoRoot); err != nil {
 		t.Fatal(err)
 	}
 

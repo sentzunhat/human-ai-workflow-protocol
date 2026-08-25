@@ -8,13 +8,13 @@ import (
 	"strings"
 )
 
-// codexTOMLBlock is the TOML snippet appended to .codex/config.toml for the hawp server.
-const codexTOMLBlock = `
-[mcp_servers.hawp]
-command = ".hawp/bin/hawp"
-args = ["mcp"]
-cwd = "."
-`
+// codexTOMLBlock returns the TOML snippet appended to .codex/config.toml for the
+// hawp server. Codex does not resolve relative command paths or cwd relative to
+// the project root for project-scoped configs, so both must be absolute.
+func codexTOMLBlock(repoRoot string) string {
+	bin := filepath.Join(repoRoot, ".hawp", "bin", "hawp")
+	return "\n[mcp_servers.hawp]\ncommand = \"" + bin + "\"\nargs = [\"mcp\"]\ncwd = \"" + repoRoot + "\"\n"
+}
 
 // hawpServerEntry is the MCP server config block written for all providers
 // that support JSON-RPC MCP (Claude Code, Cursor).
@@ -68,7 +68,7 @@ func WriteProviderConfigs(repoRoot string, providers []string) error {
 			if err := os.MkdirAll(codexDir, 0o755); err != nil {
 				return fmt.Errorf("codex MCP config: %w", err)
 			}
-			if err := writeCodexTOML(filepath.Join(codexDir, "config.toml")); err != nil {
+			if err := writeCodexTOML(filepath.Join(codexDir, "config.toml"), repoRoot); err != nil {
 				return fmt.Errorf("codex MCP config: %w", err)
 			}
 			fmt.Println("MCP: wrote .codex/config.toml (Codex)")
@@ -94,7 +94,7 @@ func WriteProviderConfigs(repoRoot string, providers []string) error {
 // (creating the file if absent). Idempotent: skips when an [mcp_servers.hawp]
 // block is already present. We avoid a TOML library dependency by treating the
 // file as plain text — the block format is fixed, so a substring check is sufficient.
-func writeCodexTOML(path string) error {
+func writeCodexTOML(path, repoRoot string) error {
 	existing, err := os.ReadFile(path)
 	if err != nil && !os.IsNotExist(err) {
 		return err
@@ -108,7 +108,7 @@ func writeCodexTOML(path string) error {
 	if !strings.HasSuffix(content, "\n") && len(content) > 0 {
 		content += "\n"
 	}
-	content += codexTOMLBlock
+	content += codexTOMLBlock(repoRoot)
 
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err

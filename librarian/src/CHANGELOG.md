@@ -3,6 +3,19 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.10] - 2026-08-25
+
+Codex MCP absolute-path fix — project-scoped MCP servers require absolute paths.
+
+### Fixed
+
+- **Codex MCP absolute paths** — `hawp init --provider codex` now writes absolute paths for
+  both `command` and `cwd` in `.codex/config.toml`. Codex desktop does not resolve relative
+  paths in project-scoped MCP configs relative to the project root; they resolve relative to
+  the Codex app directory, causing the binary to be silently not found. The Codex session log
+  reports this as `omitting MCP server without an exact ready client server_name=hawp`. Fix:
+  `writeCodexTOML` now accepts `repoRoot` and embeds the absolute binary path and project root.
+
 ## [0.0.9] - 2026-08-25
 
 Codex MCP config path fix, binary wrapper URL fix, and install/update binary naming fix.

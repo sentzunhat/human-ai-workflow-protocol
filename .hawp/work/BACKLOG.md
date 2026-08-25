@@ -45,6 +45,7 @@ Limited to the last 10 items.
 
 | ID | Type | Title | Closed | Detail |
 | -- | ---- | ----- | ------ | ------ |
+| `hmcp0825` | investigation | Codex-side HAWP MCP tool visibility investigation | 2026-08-25 | [plan](closed/2026/08/25/hmcp0825.md) |
 | `1c743447` | feature | `--hybrid-ratio` flag: configurable lexical/semantic blend | 2026-08-25 | [plan](closed/2026/08/25/1c743447/plan.md) |
 | `0ca7cf49` | fix | Code cleanup: stale llm-reshape doc traces removed (3 files; all tests green) | 2026-08-24 | [plan](closed/2026/08/24/0ca7cf49/plan.md) |
 | `8672216a` | planning | Backlog audit: parked review, Recently Closed compacted 15→10 | 2026-08-24 | [plan](closed/2026/08/24/8672216a/plan.md) |
@@ -55,11 +56,6 @@ Limited to the last 10 items.
 | `f2d8a5c1` | fix | `hawp update --check` now read-only (was performing the update) | 2026-08-24 | [plan](closed/2026/08/24/f2d8a5c1/plan.md) |
 | `3b51837c` | feature | v0.0.4: `hawp init` + `hawp mcp` + provider MCP config auto-write (Codex, Claude, Cursor, Continue) | 2026-08-24 | [plan](closed/2026/08/24/3b51837c/plan.md) |
 | `j7h9e4l0` | test | Auto-update verification: `hawp update` 0.0.1 → 0.0.2 (darwin-arm64) | 2026-08-24 | [plan](closed/2026/08/24/j7h9e4l0/plan.md) |
-| `b7e2a4f9` | refactor | Rename `librarian/go/` → `src/` + retire TS validators | 2026-08-22 | [plan](closed/2026/08/22/b7e2a4f9/plan.md) |
-| `b8d3e1f0` | batch-close | All v0.0.1/0.0.2/0.0.3 planned work — shipped in 0.0.1 release (2026-08-21) | 2026-08-22 | [index](closed/2026/08/22/b8d3e1f0/plan.md) |
-| `w4x6y8z0` | fix | `--llm-reshape` wired into the CLI | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
-| `n4o6p8q0` | fix | `ReshapingConfig` now honors configured Ollama URL | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
-_(5 older v003-ship-audit fixes archived 2026-08-24 — see `closed/2026/07/26/v003-ship-audit/plan.md`)_
 
 ---
 
@@ -74,6 +70,10 @@ _(5 older v003-ship-audit fixes archived 2026-08-24 — see `closed/2026/07/26/v
 
 | ID | Type | Title | Closed | Detail |
 | -- | ---- | ----- | ------ | ------ |
+| `b7e2a4f9` | refactor | Rename `librarian/go/` → `src/` + retire TS validators | 2026-08-22 | [plan](closed/2026/08/22/b7e2a4f9/plan.md) |
+| `b8d3e1f0` | batch-close | All v0.0.1/0.0.2/0.0.3 planned work — shipped in 0.0.1 release (2026-08-21) | 2026-08-22 | [index](closed/2026/08/22/b8d3e1f0/plan.md) |
+| `w4x6y8z0` | fix | `--llm-reshape` wired into the CLI | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
+| `n4o6p8q0` | fix | `ReshapingConfig` now honors configured Ollama URL | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
 | `j2k4l6m8` | fix | `DefaultConfig()` no longer defaults to nonexistent ONNX LLM model | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
 | `a1b3c5d7` | fix | 8 failing Ollama LLM tests repaired | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
 | `e9f1g3h5` | fix | Token budget `1995/0` display bug fixed | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
