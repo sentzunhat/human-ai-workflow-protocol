@@ -54,6 +54,13 @@ func Run(args []string) error {
 		sub = args[1]
 	}
 
+	// Emit a non-blocking update notice after the command completes.
+	// Skip for mcp (long-running server), update (already handling updates),
+	// version (informational), and --no-update-check.
+	skipNotify := command == "mcp" || command == "update" || command == "version" ||
+		containsArg(args, "--no-update-check")
+	defer appupdate.CheckAndNotify(domainupdate.Version, skipNotify)
+
 	switch {
 	case command == "uuid":
 		return runUUID(args[1:])
