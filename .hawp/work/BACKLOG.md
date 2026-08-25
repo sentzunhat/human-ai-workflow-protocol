@@ -24,7 +24,8 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
-| — | — | — | — | — | — | — |
+| `c98518bb` | improvement | Hawp-first session workflow: document MCP search as default context strategy | `inbox` | Diego | — | 2026-08-24 |
+| `4c88f451` | improvement | Token reduction: smart context sizing + dedup-before-pack (v0.1.0 gate) | `inbox` | Diego | — | 2026-08-24 |
 
 ## Blocked / Parked
 

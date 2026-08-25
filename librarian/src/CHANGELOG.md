@@ -5,7 +5,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [0.0.8] - 2026-08-24
 
-`engine` as canonical JSON key for context config; `--llm-reshape` end-to-end verified.
+`engine` as canonical JSON key for context config; `--llm-reshape` removed from CLI.
 
 ### Fixed
 
@@ -16,9 +16,13 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
   both the struct and JSON, which conflicted with users who had written configs
   using `engine`. The struct field, JSON tag, all internal references, and tests
   are now consistently `engine`.
-- **`--llm-reshape` end-to-end verified** against Ollama (nomic-embed-text
-  embeddings + mistral LLM). Pipeline now correctly reads the home config at
-  `~/.hawp/config/context.json` and shows `pipeline: ollama-ollama` in output.
+
+### Removed
+
+- **`--llm-reshape` CLI flag** — removed from `hawp search`. The underlying RAG
+  pipeline and `ContextReshaper` remain in the codebase; only the CLI surface is
+  gone. Use `--context` to pack results into LLM-ready context blocks.
+  `context-reshaping.md` and `troubleshooting.md` removed from docs accordingly.
 
 ## [0.0.7] - 2026-08-24
 
