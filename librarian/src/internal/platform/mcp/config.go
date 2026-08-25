@@ -72,6 +72,9 @@ func WriteProviderConfigs(repoRoot string, providers []string) error {
 				return fmt.Errorf("codex MCP config: %w", err)
 			}
 			fmt.Println("MCP: wrote .codex/config.toml (Codex)")
+			fmt.Println("  Note: Codex only loads project MCP config for trusted projects.")
+			fmt.Println("  Trust this repo in Codex settings, then start a fresh task/session.")
+			fmt.Println("  CLI: `codex mcp list` confirms whether hawp is visible.")
 
 		case "github":
 			fmt.Println("MCP (github/Copilot): configure via VS Code MCP panel or .vscode/mcp.json — no file written.")
