@@ -6,7 +6,7 @@ Determine whether HAWP MCP is failing because of repo setup or because Codex is 
 
 ## Current State
 
-As of Tuesday, August 25, 2026, `beltrd/local-print-farm` appears correctly configured for HAWP MCP at the repo level, and host-side Codex CLI checks now confirm the `hawp` server is registered with `hawp_search`, `hawp_work_new`, and `hawp_work_validate` enabled. Even so, fresh Codex tasks still do not expose those tools in the live deferred tool inventory. Within the inspected evidence, the failure point is Codex-side MCP client readiness/session loading rather than repo HAWP registration.
+As of Tuesday, August 25, 2026, `beltrd/local-print-farm` appears correctly configured for HAWP MCP at the repo level, and host-side Codex CLI checks confirm the `hawp` server is registered with `hawp_search`, `hawp_work_new`, and `hawp_work_validate` enabled. A fresh host-side Codex task rooted at `local-print-farm` now sees those deferred tools. The remaining gap is whether the desktop GUI fresh-task path matches that host-side `codex exec` behavior.
 
 ## What Was Inspected
 
@@ -24,13 +24,14 @@ As of Tuesday, August 25, 2026, `beltrd/local-print-farm` appears correctly conf
 
 ## What Was Directly Verified
 
-- `beltrd/local-print-farm/.codex/config.toml` contains `[mcp_servers.hawp]` with `command = "./.hawp/bin/hawp"`, `args = ["mcp"]`, `enabled = true`, and `enabled_tools = ["hawp_search", "hawp_work_new", "hawp_work_validate"]`.
+- `beltrd/local-print-farm/.codex/config.toml` contains `[mcp_servers.hawp]` with `command = "/Users/beltrd/Desktop/projects/beltrd/local-print-farm/.hawp/bin/hawp"`, `args = ["mcp"]`, `cwd = "/Users/beltrd/Desktop/projects/beltrd/local-print-farm"`, `enabled = true`, and `enabled_tools = ["hawp_search", "hawp_work_new", "hawp_work_validate"]`.
 - Host-side `codex mcp list` shows `hawp` as `enabled`.
 - Host-side `codex mcp get hawp` reports:
   - `enabled: true`
   - `enabled_tools: hawp_search, hawp_work_new, hawp_work_validate`
   - `transport: stdio`
-  - `command: ./.hawp/bin/hawp`
+  - `command: /Users/beltrd/Desktop/projects/beltrd/local-print-farm/.hawp/bin/hawp`
+  - `cwd: /Users/beltrd/Desktop/projects/beltrd/local-print-farm`
 - Fresh-session deferred tool probes returned:
   - `hawp_search` -> `Found 0 tools`
   - `hawp_work_new` -> `Found 0 tools`
@@ -42,17 +43,21 @@ As of Tuesday, August 25, 2026, `beltrd/local-print-farm` appears correctly conf
 - Codex desktop log `~/Library/Logs/com.openai.codex/2026/08/25/codex-desktop-59822e4b-336e-49bf-b3ae-fd13fbd77fb1-70843-t0-i1-164858-0.log` records `mcpServerStatus/list` activity during the relevant session.
 - Codex SQLite log records repeated session-tool-catalog events stating `omitting MCP server without an exact ready client server_name=hawp`.
 - The same SQLite log store contains successful MCP client initialization records for `node_repl`, including `Service initialized as client ... server_name=node_repl`.
+- A fresh host-side Codex task launched with `'/Applications/ChatGPT.app/Contents/Resources/codex' exec --ephemeral --json -C /Users/beltrd/Desktop/projects/beltrd/local-print-farm` reported:
+  - `hawp_search: 1`
+  - `hawp_work_new: 1`
+  - `hawp_work_validate: 1`
+  - `hawp: 3`
+  - `node_repl: 3`
 
 ## Assessment
 
-Within the inspected scope, the failure point is Codex session MCP resolution, not repo HAWP registration. The host sees the `hawp` server and its enabled tools, but the live session omits `hawp` before tool surfacing because Codex does not have an exact ready client for that server.
+Within the inspected scope, the earlier failure point was Codex session MCP resolution, not repo HAWP registration. After the absolute-path Codex MCP config fix, a fresh host-side Codex task now sees the expected `hawp` deferred tools. This suggests the stdio MCP server/client model is sufficient and no extra server process is needed beyond the existing `hawp mcp` entry.
 
 ## What Remains Unproven
 
-- Why `hawp` is not reaching an exact ready client state inside Codex desktop
-- Whether the missing ready client is caused by trust/loading boundary behavior, stale desktop cache, or app-lifecycle timing
-- Whether a full desktop app restart is required before repo-scoped MCP tools appear in new tasks
-- Whether a second repo-scoped custom MCP server on the same host would reproduce the same ready-client failure
+- Whether a brand-new desktop GUI Codex task rooted at `local-print-farm` now shows the same `hawp*` visibility as the host-side `codex exec` task
+- Whether the desktop GUI requires a full app restart before it picks up the now-correct project-scoped MCP config
 
 ## Constraints
 
@@ -63,9 +68,9 @@ Within the inspected scope, the failure point is Codex session MCP resolution, n
 
 ## Help Wanted
 
-- Explain why `hawp` never reaches an exact ready client state while `node_repl` does.
-- Challenge the current Codex-side diagnosis if a later host-side ready-client trace for `hawp` appears.
-- Propose the next 2-3 highest-yield debugging steps after a full desktop restart and fresh-session retry.
+- Confirm desktop GUI parity with the now-successful host-side `codex exec` result.
+- Challenge the current “fix is effective” assessment only if a brand-new desktop GUI task still hides `hawp*`.
+- Propose the smallest desktop-side retry sequence if GUI parity still fails after restart.
 
 ## Suggested Next Step
 
@@ -79,10 +84,10 @@ Use a dedicated HAWP digital agent to investigate Codex host/session behavior on
    - `hawp_work_new`
    - `hawp_work_validate`
    - `hawp`
-5. Confirm in `~/.codex/logs_2.sqlite` whether `hawp` still logs `omitting MCP server without an exact ready client server_name=hawp`.
-6. Perform a full Codex desktop restart, then repeat the fresh-task deferred probes and log capture.
-7. If the post-restart session still omits `hawp`, compare against another repo-scoped custom MCP server on the same host.
-8. Do not spend more time changing `.mcp.json`, `.codex/config.toml`, or HAWP binaries unless a host-side ready-client test directly points back to them.
+5. Start a brand-new desktop GUI Codex task rooted at `/Users/beltrd/Desktop/projects/beltrd/local-print-farm`.
+6. Probe deferred inventory for `hawp_search`, `hawp_work_new`, `hawp_work_validate`, and `hawp`.
+7. If the GUI task still omits `hawp*`, perform one full desktop app restart and repeat the same probes.
+8. Do not spend more time changing `.mcp.json`, `.codex/config.toml`, HAWP binaries, or adding a separate server/client unless a fresh GUI task still contradicts the successful host-side `codex exec` result.
 
 ## Attached Artifact
 
