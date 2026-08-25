@@ -5,17 +5,29 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [0.0.8] - 2026-08-24
 
-`engine` as canonical JSON key for context config; `--llm-reshape` removed from CLI.
+`engine` key canonical; `--llm-reshape` removed; real context dedup + dynamic chunk cap.
+
+### Added
+
+- **`--verbose` / `-v` for `hawp search --context`** — prints a summary to stderr:
+  `context: N chunks, ~M tokens (saved ~K tokens via dedup)`. Token estimate uses
+  character-count/4 approximation; dedup savings reflect chunks dropped by Jaccard filter.
+- **`--hybrid-ratio <f>` for `hawp search`** — sets the lexical fraction of hybrid
+  scoring (default 0.3). `0.5` = equal blend, `0.7` = lexical-heavy. Must be in [0.0, 1.0].
+- **Hawp-first session workflow** — new kit doc at `.hawp/kit/usage/hawp-first-workflow.md`:
+  MCP search as default context strategy, session-start pattern, worktree cleanup pattern.
 
 ### Fixed
 
 - **Context config `engine` key** — `EmbeddingsConfig.Engine` and `LLMConfig.Engine`
   now use `json:"engine"` as the canonical JSON key (was `json:"backend"`).
-  `~/.hawp/config/context.json` and `.hawp/config/context.json` should use
-  `engine` for the backend selector. Previously the field was named `backend` in
-  both the struct and JSON, which conflicted with users who had written configs
-  using `engine`. The struct field, JSON tag, all internal references, and tests
-  are now consistently `engine`.
+- **`--context` dedup was a silent no-op** — `DeduplicateResults` used empty embedding
+  vectors (always `[]float32{}`), producing cosine similarity = 0 for every pair, so
+  nothing was ever dropped. Replaced with `ContentJaccardDedup` (word-set Jaccard > 0.70):
+  drops near-duplicate chunks before ContextBlock assembly. Measured ~30% token reduction
+  on queries returning 3+ near-duplicate results.
+- **Dynamic chunk cap for `--context`** — greedy selection stops when the next chunk
+  would exceed `--max-tokens`, preventing silent over-budget results.
 
 ### Removed
 

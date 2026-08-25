@@ -70,6 +70,19 @@ The index is fast (seconds for typical repo sizes); err on the side of re-indexi
 
 ---
 
+## Token budget and session continuity
+
+When approaching the context window limit mid-session:
+
+1. **Batch all remaining parallel work** — spawn agents or write commits for everything in flight before the window closes. Agents run in background and survive the context window reset.
+2. **Set a reminder** — use `/loop` or note the session state explicitly so the next session can pick up from a known checkpoint.
+3. **Commit early, commit often** — work on the manager branch is the handoff artifact. The next session reads `git log` and BACKLOG to reconstruct state.
+4. **Save lessons to memory** — anything non-obvious about the current task goes into a memory file *before* the window fills.
+
+The session transcript is the gold standard, but BACKLOG.md + memory files are the fastest cold-start for a new context.
+
+---
+
 ## Parallel agent worktrees
 
 When spawning agents with `isolation: "worktree"`, the worktree is auto-removed only
