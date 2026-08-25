@@ -4,6 +4,7 @@ package sqlite
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -452,6 +453,82 @@ func (ix *IndexDB) GetAllChunkVectors() (map[int64][]float32, error) {
 		vectors[chunkID] = vector
 	}
 	return vectors, rows.Err()
+}
+
+// QueryChunksByIDs fetches the full document/chunk rows for the given chunk IDs,
+// preserving the caller-provided order so semantic rankings survive the lookup.
+func (ix *IndexDB) QueryChunksByIDs(chunkIDs []int64) ([]map[string]interface{}, error) {
+	if len(chunkIDs) == 0 {
+		return nil, nil
+	}
+
+	placeholders := make([]string, len(chunkIDs))
+	args := make([]interface{}, len(chunkIDs))
+	for i, id := range chunkIDs {
+		placeholders[i] = "?"
+		args[i] = id
+	}
+
+	rows, err := ix.db.Query(fmt.Sprintf(`
+		SELECT c.id, c.document_id, c.chunk_idx, c.text, c.folder_context,
+		       d.category, d.type, d.path, d.folder_role,
+		       dm.work_uuid, dm.status, dm.closed_at,
+		       c.line_start, c.line_end
+		FROM chunks c
+		JOIN documents d ON c.document_id = d.id
+		LEFT JOIN documents_metadata dm ON d.id = dm.document_id
+		WHERE c.id IN (%s)
+	`, strings.Join(placeholders, ",")), args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	byID := make(map[int64]map[string]interface{}, len(chunkIDs))
+	for rows.Next() {
+		var id, docID, chunkIdx int64
+		var text, folderContext *string
+		var category, typ, path, folderRole *string
+		var workUUID, status, closedAt *string
+		var lineStart, lineEnd int64
+
+		if err := rows.Scan(&id, &docID, &chunkIdx, &text, &folderContext,
+			&category, &typ, &path, &folderRole, &workUUID, &status, &closedAt,
+			&lineStart, &lineEnd); err != nil {
+			continue
+		}
+
+		result := map[string]interface{}{
+			"id":             id,
+			"text":           text,
+			"folder_context": folderContext,
+			"path":           path,
+			"type":           typ,
+			"category":       category,
+			"folder_role":    folderRole,
+			"chunk_idx":      chunkIdx,
+			"line_start":     lineStart,
+			"line_end":       lineEnd,
+		}
+		if workUUID != nil {
+			result["work_uuid"] = workUUID
+			result["status"] = status
+			result["closed_at"] = closedAt
+		}
+		byID[id] = result
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	// Preserve caller-supplied order (semantic ranking order).
+	out := make([]map[string]interface{}, 0, len(chunkIDs))
+	for _, id := range chunkIDs {
+		if r, ok := byID[id]; ok {
+			out = append(out, r)
+		}
+	}
+	return out, nil
 }
 
 // HasVectors checks if the database contains any embeddings.

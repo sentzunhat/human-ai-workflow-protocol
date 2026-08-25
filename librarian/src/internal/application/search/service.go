@@ -63,6 +63,74 @@ func Query(repoRoot, query string, limit int) ([]domainsearch.Result, error) {
 	return results, nil
 }
 
+// SemanticSearch performs a pure-vector search: embeds the query using the same
+// backend/model recorded in the index, then ranks all stored chunk vectors by
+// cosine similarity and returns the top-limit rows.  No FTS5 is involved.
+// Returns nil (not an error) when vectors are absent, the embedder can't be
+// constructed, or the query fails — the caller decides how to handle that.
+func SemanticSearch(query string, db *sqlite.IndexDB, limit int) []map[string]interface{} {
+	meta, ok, err := db.GetEmbeddingMetadata()
+	if err != nil || !ok {
+		return nil
+	}
+
+	embedder, err := embeddings.NewEmbedder(meta.Backend, meta.Model)
+	if err != nil {
+		return nil
+	}
+	defer embedder.Close()
+
+	queryVectors, err := embedder.EmbedBatch(context.Background(), []string{query})
+	if err != nil || len(queryVectors) == 0 {
+		return nil
+	}
+	queryVector := queryVectors[0]
+
+	allVectors, err := db.GetAllChunkVectors()
+	if err != nil || len(allVectors) == 0 {
+		return nil
+	}
+
+	type scored struct {
+		id    int64
+		score float32
+	}
+	ranked := make([]scored, 0, len(allVectors))
+	for id, vec := range allVectors {
+		ranked = append(ranked, scored{id: id, score: domainsearch.CosineSimilarity(queryVector, vec)})
+	}
+	sort.Slice(ranked, func(i, j int) bool { return ranked[i].score > ranked[j].score })
+
+	if len(ranked) > limit {
+		ranked = ranked[:limit]
+	}
+
+	chunkIDs := make([]int64, len(ranked))
+	for i, s := range ranked {
+		chunkIDs[i] = s.id
+	}
+
+	rows, err := db.QueryChunksByIDs(chunkIDs)
+	if err != nil {
+		return nil
+	}
+
+	// Attach semantic score from the ranking so callers can display it.
+	scoreByID := make(map[int64]float32, len(ranked))
+	for _, s := range ranked {
+		scoreByID[s.id] = s.score
+	}
+	for _, row := range rows {
+		if id, ok := row["id"]; ok {
+			if idInt, ok := id.(int64); ok {
+				row["_semantic_score"] = float64(scoreByID[idInt])
+			}
+		}
+	}
+
+	return rows
+}
+
 // HybridRank blends lexical rank with semantic similarity: the query is
 // embedded with whichever backend/model actually embedded the index
 // (sqlite.IndexDB.GetEmbeddingMetadata) — a query vector from a different
