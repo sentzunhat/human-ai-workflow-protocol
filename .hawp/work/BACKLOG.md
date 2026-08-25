@@ -24,8 +24,7 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
-
----
+| `6de28bdd` | feature | Implement `--semantic` search mode (pure vector search, ONNX + Ollama) | in-progress | unassigned | [plan](active/6de28bdd/plan.md) | 2026-08-24 |
 
 ## Blocked / Parked
 
