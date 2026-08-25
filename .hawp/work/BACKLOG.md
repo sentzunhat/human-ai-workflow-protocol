@@ -26,14 +26,13 @@ Active coordination index for open work. Closed history is archived under `.hawp
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
 | `1c743447` | feature | Configurable `--hybrid-ratio` flag: tune lexical/semantic blend (30/70, 50/50, 70/30) | `in-progress` | Diego | — | 2026-08-24 |
 | `0ca7cf49` | fix | Code cleanup: remove stale llm-reshape traces, dead code, fix TODOs | `in-progress` | Diego | — | 2026-08-24 |
-| `8672216a` | planning | Backlog audit: review parked items, compact Recently Closed | `in-progress` | Diego | — | 2026-08-24 |
 
 ## Blocked / Parked
 
 | ID  | Type | Title | Reason | Detail | Updated |
 | --- | ---- | ----- | ------ | ------ | ------- |
 | `bee15107` | improvement | Defer CLI participant adapters for Codex, Claude, and GitHub | Not needed yet; provider packs are enough | [plan](parked/bee15107/plan.md) | 2026-07-06 |
-| `v010-3-3a` | feature | ONNX LLM Text2Text models (FLAN-T5-small) | No working ONNX text2text models available; deferred | [detail](parked/v010-3-3a/plan.md) | 2026-07-27 |
+| `v010-3-3a` | feature | ONNX LLM Text2Text models (FLAN-T5-small) | Plan ready (FLAN-T5-small feasible via ONNX); deferred per incremental-only patch strategy | [detail](parked/v010-3-3a/plan.md) | 2026-08-24 |
 | `v010-3-2c` | feature | OpenAI Embeddings (text-embedding-3-small/large) | Cloud-API tracks parked; see incremental-only strategy | [detail](parked/v010-3-2c/plan.md) | 2026-07-27 |
 | `v010-3-3c` | feature | OpenAI LLM (gpt-3.5-turbo, gpt-4-turbo) | Cloud-API tracks parked; see incremental-only strategy | [detail](parked/v010-3-3c/plan.md) | 2026-07-27 |
 | `v010-3-2d` | feature | Anthropic Embeddings Stub | Cloud-API tracks parked; see incremental-only strategy | [detail](parked/v010-3-2d/plan.md) | 2026-07-27 |
@@ -48,6 +47,7 @@ Limited to the last 10 items.
 
 | ID | Type | Title | Closed | Detail |
 | -- | ---- | ----- | ------ | ------ |
+| `8672216a` | planning | Backlog audit: parked review, Recently Closed compacted 15→10 | 2026-08-24 | [plan](closed/2026/08/24/8672216a/plan.md) |
 | `4c88f451` | improvement | Token reduction: Jaccard dedup + dynamic chunk cap (~30% savings) | 2026-08-24 | [plan](closed/2026/08/24/4c88f451/plan.md) |
 | `c98518bb` | improvement | Hawp-first session workflow: MCP search as default context strategy | 2026-08-24 | [plan](closed/2026/08/24/c98518bb/plan.md) |
 | `6de28bdd` | feature | Implement `--semantic` search mode (pure vector search, ONNX + Ollama) | 2026-08-24 | [plan](closed/2026/08/24/6de28bdd/plan.md) |
@@ -59,12 +59,7 @@ Limited to the last 10 items.
 | `b8d3e1f0` | batch-close | All v0.0.1/0.0.2/0.0.3 planned work — shipped in 0.0.1 release (2026-08-21) | 2026-08-22 | [index](closed/2026/08/22/b8d3e1f0/plan.md) |
 | `w4x6y8z0` | fix | `--llm-reshape` wired into the CLI | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
 | `n4o6p8q0` | fix | `ReshapingConfig` now honors configured Ollama URL | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
-| `j2k4l6m8` | fix | `DefaultConfig()` no longer defaults to nonexistent ONNX LLM model | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
-| `a1b3c5d7` | fix | 8 failing Ollama LLM tests repaired | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
-| `e9f1g3h5` | fix | Token budget `1995/0` display bug fixed | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
-| `i7j9k1l3` | fix | `aes256` silent downgrade now rejected at config validation | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
-| `r5s7t9u1` | fix | `Reshape()` empty-block guard fixed | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
-_(history older than 30 days archived in `closed/`)_
+_(5 older v003-ship-audit fixes archived 2026-08-24 — see `closed/2026/07/26/v003-ship-audit/plan.md`)_
 
 ---
 
@@ -74,6 +69,16 @@ _(history older than 30 days archived in `closed/`)_
 - Status reports: `status/`
 - Evidence: `evidence/`
 - Decisions: `decisions/`
+
+### Archived Recently-Closed (compacted 2026-08-24)
+
+| ID | Type | Title | Closed | Detail |
+| -- | ---- | ----- | ------ | ------ |
+| `j2k4l6m8` | fix | `DefaultConfig()` no longer defaults to nonexistent ONNX LLM model | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
+| `a1b3c5d7` | fix | 8 failing Ollama LLM tests repaired | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
+| `e9f1g3h5` | fix | Token budget `1995/0` display bug fixed | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
+| `i7j9k1l3` | fix | `aes256` silent downgrade now rejected at config validation | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
+| `r5s7t9u1` | fix | `Reshape()` empty-block guard fixed | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
 
 ## Notes
 
