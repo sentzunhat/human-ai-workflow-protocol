@@ -106,13 +106,13 @@ Configure MCP in `.mcp.json` at repo root:
 }
 ```
 
-Tool input:
+### Raw results mode (default)
 
 ```json
 { "query": "backlog alignment", "limit": 5 }
 ```
 
-Structured response schema:
+Returns structured chunks with relevance scores and line positions:
 
 ```json
 {
@@ -137,6 +137,33 @@ Structured response schema:
 - `lines.range` — full chunk span in the source file (1-indexed)
 - `lines.source` — line containing the best match for the query term
 - `context.window` — suggested read window (±40 lines around `lines.source`, clamped to file bounds)
+
+### Context mode (pre-shaped for LLM injection)
+
+Pass `context: true` to apply the same Jaccard dedup + greedy token cap + markdown formatting pipeline as the CLI `--context` flag. The result is a single pre-shaped block ready to inject directly into an LLM prompt — smaller and already deduplicated:
+
+```json
+{ "query": "backlog alignment", "limit": 5, "context": true, "max_tokens": 2000 }
+```
+
+Response:
+
+```json
+{
+  "query": "backlog alignment",
+  "content": "# Search Results: \"backlog alignment\"\n\n**Results:** 3 | **Tokens:** 847/2000\n\n…",
+  "token_count": 847,
+  "budget": 2000,
+  "chunks_used": 3,
+  "chunks_dropped": 1
+}
+```
+
+- `content` — markdown context block, ready for LLM injection
+- `token_count` — estimated tokens in the block (chars/4)
+- `chunks_dropped` — chunks removed by Jaccard dedup (>70% word-set overlap)
+
+`max_tokens` defaults to 2000. Use context mode when you want the search result to slot directly into a system prompt or retrieval step without post-processing.
 
 Other MCP tools: `hawp_work_new` (create work item), `hawp_work_validate` (validate kit + work integrity).
 
