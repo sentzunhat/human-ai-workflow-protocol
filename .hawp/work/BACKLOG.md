@@ -24,7 +24,6 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
-| `c98518bb` | improvement | Hawp-first session workflow: MCP search as default context strategy | `in-progress` | Diego | [plan](active/c98518bb/plan.md) | 2026-08-24 |
 | `4c88f451` | improvement | Token reduction: smart context sizing + dedup-before-pack (v0.1.0 gate) | `in-progress` | Diego | [plan](active/4c88f451/plan.md) | 2026-08-24 |
 
 ## Blocked / Parked
@@ -47,6 +46,7 @@ Limited to the last 10 items.
 
 | ID | Type | Title | Closed | Detail |
 | -- | ---- | ----- | ------ | ------ |
+| `c98518bb` | improvement | Hawp-first session workflow: MCP search as default context strategy | 2026-08-24 | [plan](closed/2026/08/24/c98518bb/plan.md) |
 | `6de28bdd` | feature | Implement `--semantic` search mode (pure vector search, ONNX + Ollama) | 2026-08-24 | [plan](closed/2026/08/24/6de28bdd/plan.md) |
 | `t5l7m9n1` | planning | Benchmarking infrastructure for v0.0.3+: harness scaffold + test data | 2026-08-24 | [plan](closed/2026/08/24/t5l7m9n1/plan.md) |
 | `f2d8a5c1` | fix | `hawp update --check` now read-only (was performing the update) | 2026-08-24 | [plan](closed/2026/08/24/f2d8a5c1/plan.md) |

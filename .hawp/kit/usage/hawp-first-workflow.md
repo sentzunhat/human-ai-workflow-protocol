@@ -70,6 +70,27 @@ The index is fast (seconds for typical repo sizes); err on the side of re-indexi
 
 ---
 
+## Parallel agent worktrees
+
+When spawning agents with `isolation: "worktree"`, the worktree is auto-removed only
+if the agent makes **no changes**. When agents commit work, the worktree persists and
+must be cleaned up manually after the branch is merged:
+
+```bash
+git worktree remove .claude/worktrees/agent-<id> --force
+```
+
+Pattern for managing parallel sub-branches:
+
+1. Create sub-branches from the manager branch (`feature/vX.Y.Z`).
+2. Spawn agents with `isolation: "worktree"` — one per sub-branch.
+3. On agent completion: squash-merge the sub-branch into the manager branch, then remove the worktree.
+4. Do not merge sub-branches into `development` or `main` — only into the manager branch.
+
+List live worktrees at any time: `git worktree list`
+
+---
+
 ## Quick reference
 
 | Situation | Action |
