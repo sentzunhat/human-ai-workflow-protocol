@@ -1154,9 +1154,7 @@ func runSearch(args []string) error {
 
 // toJSONReferences converts DocumentReferences into the JSON shape a
 // downstream retrieval step consumes as reference docs: source, title,
-// matched content excerpt, relevance, and line range (when known). Kept as
-// one conversion function so the raw-search and reshaped-output JSON paths
-// emit an identical "references" shape.
+// matched content excerpt, relevance, and line range (when known).
 func toJSONReferences(refs []appcontext.DocumentReference) []map[string]interface{} {
 	out := make([]map[string]interface{}, len(refs))
 	for i, r := range refs {
