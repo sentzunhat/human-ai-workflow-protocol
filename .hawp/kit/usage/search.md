@@ -14,7 +14,8 @@ hawp search embed --backend onnx     # offline fallback, no Ollama needed
 
 # 3. Search
 hawp search "how do I write a status report"
-hawp search "backlog alignment rules" --hybrid
+hawp search "backlog alignment rules"          # hybrid when vectors present
+hawp search "HAWP shape mission constraints" --semantic  # pure-vector
 ```
 
 ## Embedding backends
@@ -66,7 +67,7 @@ hawp search index         ingest configured paths into SQLite (reads .hawp/confi
 hawp search embed         generate and store embedding vectors
   --backend onnx|ollama   required: embedding backend to use
   --model <name>          override default model for the backend
-hawp search benchmark     run a 3-way speed + quality benchmark (lexical / semantic / hybrid)
+hawp search benchmark     3-way speed + quality benchmark (lexical / semantic / hybrid)
 ```
 
 ## Configuring index paths

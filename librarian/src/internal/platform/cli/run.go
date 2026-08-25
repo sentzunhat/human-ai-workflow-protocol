@@ -969,12 +969,11 @@ func runSearchEmbed(args []string) error {
 
 func runSearch(args []string) error {
 	if len(args) < 1 {
-		return errors.New("usage: hawp search <query> [--limit <n>] [--context] [--llm-reshape] [--format markdown|json] [--max-tokens <n>]")
+		return errors.New("usage: hawp search <query> [--limit <n>] [--semantic] [--context] [--format markdown|json] [--max-tokens <n>]")
 	}
 	query := args[0]
 	limit := 10
 	wantContext := false
-	wantReshape := false
 	wantSemantic := false
 	format := "markdown"
 	maxTokens := 2000
@@ -988,9 +987,6 @@ func runSearch(args []string) error {
 			i++
 		case args[i] == "--context":
 			wantContext = true
-		case args[i] == "--llm-reshape":
-			wantContext = true // reshaping implies --context; the underlying block is always built
-			wantReshape = true
 		case args[i] == "--semantic":
 			wantSemantic = true
 		case args[i] == "--format" && i+1 < len(args):
@@ -1088,15 +1084,6 @@ func runSearch(args []string) error {
 	// Format as context block
 	block := appcontext.FormatAsMarkdown(deduped, query, maxTokens)
 
-	// Optionally reshape via embeddings + LLM (Phase 3). Never silently
-	// ignored: any failure to load config, construct backends, or reshape
-	// prints an explicit warning to stderr and falls back to the unreshaped
-	// context block, so a broken --llm-reshape is always visible to the user.
-	var ragOutput *appcontext.RAGPipelineOutput
-	if wantReshape {
-		ragOutput = tryReshapeViaRAGPipeline(block, maxTokens)
-	}
-
 	// Output based on format
 	switch format {
 	case "json":
@@ -1113,26 +1100,13 @@ func runSearch(args []string) error {
 			"references":   toJSONReferences(block.References),
 			"metadata":     block.Metadata,
 		}
-		if ragOutput != nil {
-			jsonBlock["reshaped_content"] = ragOutput.Content
-			jsonBlock["key_concepts"] = ragOutput.KeyConcepts
-			jsonBlock["pipeline"] = ragOutput.Pipeline
-			// Reshaped references (from the RAG pipeline) supersede the raw
-			// ones above once reshaping ran, since they carry the same shape
-			// plus pipeline provenance.
-			jsonBlock["references"] = toJSONReferences(ragOutput.References)
-		}
 		out, err := json.MarshalIndent(jsonBlock, "", "  ")
 		if err != nil {
 			return fmt.Errorf("failed to marshal JSON: %w", err)
 		}
 		fmt.Println(string(out))
 	default: // markdown
-		if ragOutput != nil {
-			fmt.Println(renderReshapedWithReferences(block.Title, ragOutput))
-		} else {
-			fmt.Println(block.String())
-		}
+		fmt.Println(block.String())
 	}
 
 	return nil
@@ -1156,96 +1130,6 @@ func toJSONReferences(refs []appcontext.DocumentReference) []map[string]interfac
 		}
 	}
 	return out
-}
-
-// tryReshapeViaRAGPipeline loads context config and runs the full RAG pipeline
-// (retrieval → reshaping via embeddings+LLM) over the block. On any failure
-// (config, backend construction, or the reshape call itself) it prints an
-// explicit warning to stderr and returns nil so the caller falls back to the
-// unreshaped block — --llm-reshape must never fail silently.
-//
-// The RAG pipeline maintains references to original source documents throughout
-// the reshaping process, enabling attribution and source verification.
-func tryReshapeViaRAGPipeline(block appcontext.ContextBlock, maxTokens int) *appcontext.RAGPipelineOutput {
-	home, err := os.UserHomeDir()
-	hawpHome := ""
-	if err == nil {
-		hawpHome = filepath.Join(home, ".hawp")
-	}
-
-	root, _ := repo.FindBacklogRepoRoot(mustGetwd())
-
-	cfg, err := appcontext.LoadContextConfig(hawpHome, root)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: --llm-reshape config error: %v; using unreshaped context.\n", err)
-		return nil
-	}
-
-	pipeline, err := appcontext.NewDefaultRAGPipeline(appcontext.ReshapingConfig{
-		EmbeddingsBackend: cfg.Embeddings.Engine,
-		EmbeddingsModel:   cfg.Embeddings.Model,
-		EmbeddingsURL:     cfg.Backends.Ollama.URL,
-		LLMBackend:        cfg.LLM.Engine,
-		LLMModel:          cfg.LLM.Model,
-		LLMURL:            cfg.Backends.Ollama.URL,
-		MaxTokens:         maxTokens,
-		Temperature:       cfg.LLM.Temperature,
-	}, root)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: --llm-reshape unavailable (%v); using unreshaped context. "+
-			"Configure via ~/.hawp/config/context.json or HAWP_LLM_BACKEND/HAWP_EMBEDDINGS_BACKEND.\n", err)
-		return nil
-	}
-	defer pipeline.Close()
-
-	result, err := pipeline.Reshape(context.Background(), block, maxTokens)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: --llm-reshape failed (%v); using unreshaped context.\n", err)
-		return nil
-	}
-
-	return &result
-}
-
-// renderReshapedWithReferences formats a RAGPipelineOutput as markdown for
-// terminal output. Includes the reshaped content, key concepts, pipeline
-// info, and source references.
-//
-// Pipeline "none-none" is special-cased: Content is already the interleaved
-// reference+content body (see formatResultsInline / ContextReshaper.Reshape),
-// so a trailing references list here would just repeat it. Any pipeline that
-// ran embeddings and/or an LLM gets the trailing list, since its Content is
-// either merged LLM prose (no per-chunk attribution possible) or otherwise
-// doesn't already carry inline references.
-func renderReshapedWithReferences(title string, output *appcontext.RAGPipelineOutput) string {
-	var sb strings.Builder
-
-	if output.Pipeline == "none-none" {
-		fmt.Fprintf(&sb, "# %s\n\n", title)
-	} else {
-		fmt.Fprintf(&sb, "# %s (LLM-reshaped, pipeline: %s)\n\n", title, output.Pipeline)
-	}
-
-	if len(output.KeyConcepts) > 0 {
-		fmt.Fprintf(&sb, "**Key concepts:** %s\n\n", strings.Join(output.KeyConcepts, ", "))
-	}
-
-	sb.WriteString(output.Content)
-	sb.WriteString("\n")
-
-	if output.Pipeline != "none-none" && len(output.References) > 0 {
-		sb.WriteString("\n---\n\n")
-		sb.WriteString("## References\n\n")
-		for _, ref := range output.References {
-			fmt.Fprintf(&sb, "**Reference:** %s (%d%% relevant)\n", ref.Source, int(ref.Relevance*100))
-			if ref.LineStart > 0 || ref.LineEnd > 0 {
-				fmt.Fprintf(&sb, "    Lines: %d-%d\n", ref.LineStart, ref.LineEnd)
-			}
-			sb.WriteString("\n")
-		}
-	}
-
-	return sb.String()
 }
 
 // runSearchBenchmark runs benchmark tests on all 3 search patterns
@@ -1327,9 +1211,9 @@ COMMANDS
   index build [--scope all|work|kit] [--export <path>]  enrich kit/work docs with folder context
   search index                                     ingest configured paths into SQLite (reads .hawp/config/search.json)
   search embed --backend onnx|ollama [--model <name>]  embed all chunks with vectors
-  search <query> [--limit <n>] [--context] [--llm-reshape] [--format markdown|json] [--max-tokens <n>]
-                                                   lexical + vector hybrid search; --context for LLM-ready format,
-                                                   --llm-reshape to additionally restructure via embeddings+LLM
+  search <query> [--limit <n>] [--semantic] [--context] [--format markdown|json] [--max-tokens <n>]
+                                                   lexical + vector hybrid search; --semantic for pure-vector mode;
+                                                   --context for LLM-ready context block
   model pull <hf-org/repo> [--onnx-file <path>]   download any Hugging Face ONNX model into ~/.hawp/models
   embed <text>... [--model <hf-org/repo>]         embed text via a local model (default: all-MiniLM-L6-v2)
 
@@ -1342,11 +1226,9 @@ WORK NORMALIZE OPTIONS
   --export-research-queue <path>  write research queue JSON
   --force-dirty          skip the apply-mode dirty-tree guard
 
-SEARCH --CONTEXT OPTIONS (Phase 4)
+SEARCH --CONTEXT OPTIONS
   --context              output LLM-ready context block (deduped + formatted)
-  --llm-reshape           additionally reshape via embeddings+LLM (implies --context;
-                          requires backends configured, see librarian/docs/backends.md;
-                          falls back to unreshaped context with a warning if unavailable)
+  --semantic             pure-vector search (requires embed step; skips FTS5)
   --format markdown|json output format (default markdown)
   --max-tokens <n>       token budget for context block (default 2000)`
 }
