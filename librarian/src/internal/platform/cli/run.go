@@ -348,9 +348,9 @@ func runInit(args []string) error {
 	}
 	result := appprovision.Run(download.NewHTTPFetcher(), home, appprovision.DefaultRegistry())
 	fmt.Print(result.String())
-	if result.Failed() {
-		return ExitError{Code: 1}
-	}
+	// Asset failures are non-blocking: kit sync and provider config writes are
+	// independent of model/runtime downloads and must proceed regardless.
+	// We carry the failure forward and return exit 1 at the very end.
 
 	client := githubrelease.NewClient()
 	if err := doKitSync(client, providers); err != nil {
@@ -361,13 +361,14 @@ func runInit(args []string) error {
 		root, rerr := repo.FindBacklogRepoRoot(mustGetwd())
 		if rerr != nil {
 			fmt.Println("Not in a HAWP repo; skipping MCP config write.")
-			return nil
-		}
-		if err := appmcp.WriteProviderConfigs(root, providers); err != nil {
+		} else if err := appmcp.WriteProviderConfigs(root, providers); err != nil {
 			return err
 		}
 	}
 
+	if result.Failed() {
+		return ExitError{Code: 1}
+	}
 	return nil
 }
 
