@@ -102,6 +102,45 @@ Pattern for managing parallel sub-branches:
 
 List live worktrees at any time: `git worktree list`
 
+After squash-merging all sub-branches, delete the stale local and remote tracking branches:
+
+```bash
+# Delete stale local branches (not main, not the current feature branch)
+git branch -d feature/v008-some-subtask   # or -D if not fully merged
+# Delete corresponding remote branches
+git push origin --delete feature/v008-some-subtask
+```
+
+---
+
+## Lessons learned
+
+### hawp init: provision failure blocked provider config writes (v0.0.8)
+
+**What broke:** `hawp init --provider codex` exited 1 before writing `codex.toml` whenever
+any asset download failed — including BGE model files whose SHA-256 checksums had been
+placeholder values since v0.0.2 and could never verify correctly.
+
+**Root cause:** two independent bugs compounding:
+1. `runInit` returned `ExitError{Code:1}` immediately on any provision step failure, before
+   kit sync or `WriteProviderConfigs` ran. Provision and provider config are independent;
+   the early exit was wrong.
+2. BGE-base-en-v1.5 SHA-256s were fake hex strings (`// v0.0.2: verify from HuggingFace`)
+   that had never been replaced with real values. Every init attempt failed on BGE.
+
+**Fix:** decouple provision failure from provider config write — both steps always run;
+`ExitError{Code:1}` deferred to the end. Remove BGE from `ModelAssets` (moved to
+`BGEModelAssets` with empty SHA256 and TODO) so unverified assets can't silently block users.
+
+**Pattern to follow:** when a command has multiple independent phases (asset download,
+config write, kit sync), each phase must run to completion regardless of prior phase
+failures. Carry failures forward; report them at the end. Never gate unrelated work on
+optional steps.
+
+**Verification:** if `hawp init --provider <name>` exits 1 but the config file
+(`codex.toml`, `.mcp.json`, etc.) IS written, the command succeeded at its core job.
+Asset download failures are a separate concern and require separate remediation.
+
 ---
 
 ## Quick reference
