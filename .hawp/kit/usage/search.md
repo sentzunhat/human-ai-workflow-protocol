@@ -37,10 +37,9 @@ hawp search embed --backend onnx   --model all-MiniLM-L6-v2
 | Mode | Flag | Speed | Notes |
 |------|------|-------|-------|
 | Lexical (FTS5) | default | <1ms | No vectors needed |
-| Hybrid (lexical + semantic) | `--hybrid` | ~15–50ms | Requires embed step |
-| Semantic only | `--semantic` | ~100ms | Requires embed step |
+| Hybrid (lexical + semantic) | `--hybrid` | ~50–90ms | Requires embed step |
 
-Hybrid is recommended once vectors are built.
+Hybrid is recommended once vectors are built. With a pre-built vector index, `hawp search` automatically uses hybrid re-ranking when vectors are present — no flag required.
 
 ## Context packing
 
@@ -59,14 +58,32 @@ hawp search <query>
   --context               pack results into LLM-ready context block
   --format markdown|json  output format (default: markdown)
   --max-tokens <n>        token budget for context block (default: 8000)
-  --semantic              force semantic-only search
   --hybrid                force hybrid search (lexical + semantic blend)
 
-hawp search index         ingest documents into SQLite (no vectors)
+hawp search index         ingest configured paths into SQLite (reads .hawp/config/search.json)
 hawp search embed         generate and store embedding vectors
   --backend onnx|ollama   required: embedding backend to use
   --model <name>          override default model for the backend
 ```
+
+## Configuring index paths
+
+By default `hawp search index` ingests `.hawp/kit/` and `.hawp/work/`. To include additional directories or files, create `.hawp/config/search.json` in your repo:
+
+```json
+{
+  "index": {
+    "paths": [
+      ".hawp/kit",
+      ".hawp/work",
+      "librarian/docs",
+      "README.md"
+    ]
+  }
+}
+```
+
+Paths are relative to the repo root. Directories are walked recursively for `.md` files; individual files are indexed directly. Missing paths print a warning and are skipped. A home-level default can be set at `~/.hawp/config/search.json` — the project config overrides it.
 
 ## MCP tool: hawp_search
 
