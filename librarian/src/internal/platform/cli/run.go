@@ -111,6 +111,12 @@ func Run(args []string) error {
 	case command == "update" && containsArg(args[1:], "--check"):
 		return runUpdateVerify()
 
+	case command == "update" && containsArg(args[1:], "--disable-auto"):
+		return runUpdateAutoConfig(false)
+
+	case command == "update" && containsArg(args[1:], "--enable-auto"):
+		return runUpdateAutoConfig(true)
+
 	case command == "update":
 		return runUpdateFull(args[1:])
 
@@ -465,6 +471,22 @@ func runUpdateFull(args []string) error {
 	}
 	fmt.Printf("Updated binary to %s.\n", applied)
 	return doKitSync(client, providers)
+}
+
+// runUpdateAutoConfig writes ~/.hawp/config/update.json to enable or disable
+// the Phase-4 auto-install. Notices still print when disabled; only the
+// unattended install is suppressed.
+func runUpdateAutoConfig(enabled bool) error {
+	if err := appupdate.SetAutoUpdate(enabled); err != nil {
+		return fmt.Errorf("could not write update config: %w", err)
+	}
+	if enabled {
+		fmt.Println("Auto-update enabled. hawp will self-install after the 21-minute countdown.")
+	} else {
+		fmt.Println("Auto-update disabled. hawp will still notify you about new versions.")
+		fmt.Println("Run `hawp update --enable-auto` to re-enable, or `hawp update` to install manually.")
+	}
+	return nil
 }
 
 func parseProviderFlags(args []string) []string {
@@ -1257,6 +1279,8 @@ COMMANDS
   version                               print the running hawp version
   update                                update binary + kit + all providers (--no-providers for kit-only)
   update --check                        check whether an update is available without installing (exit 1 = update ready)
+  update --disable-auto                 disable the 21-min countdown auto-install (notices still print)
+  update --enable-auto                  re-enable the auto-install countdown
   update latest                         update binary only
   update sync [--provider <name>|all]   sync kit (+ providers if specified)
   update verify                         check whether an update is available (exit 1 = update ready)
