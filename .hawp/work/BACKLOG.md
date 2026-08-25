@@ -24,7 +24,6 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
-| `1c743447` | feature | Configurable `--hybrid-ratio` flag: tune lexical/semantic blend (30/70, 50/50, 70/30) | `in-progress` | Diego | — | 2026-08-24 |
 
 ## Blocked / Parked
 
@@ -46,6 +45,7 @@ Limited to the last 10 items.
 
 | ID | Type | Title | Closed | Detail |
 | -- | ---- | ----- | ------ | ------ |
+| `1c743447` | feature | `--hybrid-ratio` flag: configurable lexical/semantic blend | 2026-08-25 | [plan](closed/2026/08/25/1c743447/plan.md) |
 | `0ca7cf49` | fix | Code cleanup: stale llm-reshape doc traces removed (3 files; all tests green) | 2026-08-24 | [plan](closed/2026/08/24/0ca7cf49/plan.md) |
 | `8672216a` | planning | Backlog audit: parked review, Recently Closed compacted 15→10 | 2026-08-24 | [plan](closed/2026/08/24/8672216a/plan.md) |
 | `4c88f451` | improvement | Token reduction: Jaccard dedup + dynamic chunk cap (~30% savings) | 2026-08-24 | [plan](closed/2026/08/24/4c88f451/plan.md) |
