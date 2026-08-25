@@ -65,7 +65,7 @@ func toolSearch(args json.RawMessage, repoRoot string) rpcResponse {
 
 	hasVectors, _ := db.HasVectors()
 	if hasVectors {
-		rows = appsearch.HybridRank(rows, a.Query, db, a.Limit)
+		rows = appsearch.HybridRank(rows, a.Query, db, a.Limit, 0)
 	} else if len(rows) > a.Limit {
 		rows = rows[:a.Limit]
 	}

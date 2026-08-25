@@ -969,7 +969,7 @@ func runSearchEmbed(args []string) error {
 
 func runSearch(args []string) error {
 	if len(args) < 1 {
-		return errors.New("usage: hawp search <query> [--limit <n>] [--semantic] [--context] [--format markdown|json] [--max-tokens <n>] [--verbose|-v]")
+		return errors.New("usage: hawp search <query> [--limit <n>] [--semantic] [--context] [--format markdown|json] [--max-tokens <n>] [--verbose|-v] [--hybrid-ratio <f>]")
 	}
 	query := args[0]
 	limit := 10
@@ -978,6 +978,7 @@ func runSearch(args []string) error {
 	format := "markdown"
 	maxTokens := 2000
 	verbose := false
+	hybridRatio := 0.3 // default: 30% lexical, 70% semantic
 
 	for i := 1; i < len(args); i++ {
 		switch {
@@ -1000,6 +1001,16 @@ func runSearch(args []string) error {
 			i++
 		case args[i] == "--verbose" || args[i] == "-v":
 			verbose = true
+		case args[i] == "--hybrid-ratio" && i+1 < len(args):
+			f, err := strconv.ParseFloat(args[i+1], 64)
+			if err != nil {
+				return fmt.Errorf("--hybrid-ratio: %q is not a valid float", args[i+1])
+			}
+			if f < 0.0 || f > 1.0 {
+				return fmt.Errorf("--hybrid-ratio must be in [0.0, 1.0] (got %.4f); 0.0 = pure semantic, 1.0 = pure lexical", f)
+			}
+			hybridRatio = f
+			i++
 		}
 	}
 
@@ -1038,7 +1049,7 @@ func runSearch(args []string) error {
 			return fmt.Errorf("search failed: %w", err)
 		}
 		if hasVectors {
-			results = appsearch.HybridRank(results, query, db, limit)
+			results = appsearch.HybridRank(results, query, db, limit, float32(hybridRatio))
 		} else if len(results) > limit {
 			results = results[:limit]
 		}
@@ -1249,9 +1260,10 @@ COMMANDS
   index build [--scope all|work|kit] [--export <path>]  enrich kit/work docs with folder context
   search index                                     ingest configured paths into SQLite (reads .hawp/config/search.json)
   search embed --backend onnx|ollama [--model <name>]  embed all chunks with vectors
-  search <query> [--limit <n>] [--semantic] [--context] [--format markdown|json] [--max-tokens <n>]
+  search <query> [--limit <n>] [--semantic] [--context] [--format markdown|json] [--max-tokens <n>] [--hybrid-ratio <f>]
                                                    lexical + vector hybrid search; --semantic for pure-vector mode;
-                                                   --context for LLM-ready context block
+                                                   --context for LLM-ready context block;
+                                                   --hybrid-ratio tunes the lexical/semantic blend (default 0.3)
   model pull <hf-org/repo> [--onnx-file <path>]   download any Hugging Face ONNX model into ~/.hawp/models
   embed <text>... [--model <hf-org/repo>]         embed text via a local model (default: all-MiniLM-L6-v2)
 
@@ -1269,5 +1281,6 @@ SEARCH --CONTEXT OPTIONS
   --semantic             pure-vector search (requires embed step; skips FTS5)
   --format markdown|json output format (default markdown)
   --max-tokens <n>       token budget for context block (default 2000)
-  --verbose | -v         print token accounting summary to stderr (chunks, ~tokens, saved via dedup)`
+  --verbose | -v         print token accounting summary to stderr (chunks, ~tokens, saved via dedup)
+  --hybrid-ratio <f>     lexical fraction for hybrid blend [0.0, 1.0] (default 0.3)`
 }
