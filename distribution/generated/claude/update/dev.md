@@ -414,12 +414,89 @@ cp -R "$SRC/.hawp/kit/usage"      .hawp/kit/
 cp -R "$SRC/.hawp/kit/references" .hawp/kit/
 cp -R "$SRC/.hawp/kit/standards"  .hawp/kit/
 
-# --- 4b. Refresh .hawp/bin/ (hawp CLI wrapper; uuid works everywhere) ---
-if [ -f "$SRC/.hawp/bin/hawp" ]; then
+# --- 4b. Update hawp CLI binary (platform-detected from GitHub release) ---
+# Downloads the latest Go binary to .hawp/bin/hawp-bin (beside the shell
+# wrapper at .hawp/bin/hawp). Never copies the shell wrapper over the binary.
+update_hawp_binary() {
+  local _os _arch _asset _ext _dest _url _checksum_url _expected _actual
+
+  _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+  _arch="$(uname -m)"
+  _ext=""
+
+  case "$_os" in
+    linux)  _os="linux"  ;;
+    darwin) _os="darwin" ;;
+    mingw*|msys*|cygwin*|windows_nt*) _os="windows"; _ext=".exe" ;;
+    *)
+      echo "hawp update: unsupported OS '$_os' — skipping binary update."
+      return 0
+      ;;
+  esac
+
+  case "$_arch" in
+    x86_64|amd64)  _arch="amd64" ;;
+    aarch64|arm64) _arch="arm64" ;;
+    *)
+      echo "hawp update: unsupported arch '$_arch' — skipping binary update."
+      return 0
+      ;;
+  esac
+
+  _asset="hawp-${_os}-${_arch}${_ext}"
+  _dest=".hawp/bin/hawp-bin${_ext}"
+
+  local _tag
+  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" \
+    | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')"
+
+  if [ -z "$_tag" ]; then
+    echo "hawp update: could not resolve latest release tag — skipping binary update."
+    return 0
+  fi
+
+  _url="https://github.com/${OWNER}/${REPO}/releases/download/${_tag}/${_asset}"
+  _checksum_url="https://github.com/${OWNER}/${REPO}/releases/download/${_tag}/checksums.txt"
+
+  echo "hawp binary: ${_asset} (release ${_tag})"
   mkdir -p .hawp/bin
-  cp "$SRC/.hawp/bin/hawp" .hawp/bin/hawp
-  chmod +x .hawp/bin/hawp
-fi
+  curl -fsSL -o "${_dest}.tmp" "$_url" || {
+    echo "hawp update: download failed — skipping binary update."
+    return 0
+  }
+
+  if curl -fsSL -o /tmp/hawp-checksums.txt "$_checksum_url" 2>/dev/null; then
+    _expected="$(grep " ${_asset}$" /tmp/hawp-checksums.txt | awk '{print $1}')"
+    if [ -n "$_expected" ]; then
+      if command -v sha256sum >/dev/null 2>&1; then
+        _actual="$(sha256sum "${_dest}.tmp" | awk '{print $1}')"
+      elif command -v shasum >/dev/null 2>&1; then
+        _actual="$(shasum -a 256 "${_dest}.tmp" | awk '{print $1}')"
+      else
+        _actual=""
+      fi
+      if [ -n "$_actual" ] && [ "$_actual" != "$_expected" ]; then
+        echo "hawp update: SHA256 mismatch — aborting binary update."
+        rm -f "${_dest}.tmp"
+        return 1
+      fi
+      [ -n "$_actual" ] && echo "hawp binary: SHA256 verified."
+    fi
+    rm -f /tmp/hawp-checksums.txt
+  fi
+
+  mv "${_dest}.tmp" "$_dest"
+  chmod +x "$_dest"
+
+  # Install the shell wrapper alongside the binary (idempotent).
+  if [ -f "$SRC/.hawp/bin/hawp" ]; then
+    cp "$SRC/.hawp/bin/hawp" .hawp/bin/hawp
+    chmod +x .hawp/bin/hawp
+  fi
+
+  echo "hawp binary: updated to ${_tag} at ${_dest}"
+}
+update_hawp_binary
 
 rm -rf .hawp/templates .hawp/patterns .hawp/reviews .hawp/examples .hawp/types .hawp/usage
 rm -f .hawp/README.md .hawp/spec.md .hawp/start-here.md .hawp/authoring-patterns.md

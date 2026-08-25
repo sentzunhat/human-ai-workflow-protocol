@@ -3,6 +3,26 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.9] - 2026-08-25
+
+Codex MCP config path fix, binary wrapper URL fix, and install/update binary naming fix.
+
+### Fixed
+
+- **Codex MCP config path** — `hawp init --provider codex` now writes `.codex/config.toml`
+  (the path Codex actually reads) instead of `codex.toml` at the repo root. Added `cwd = "."`
+  to the TOML block per verified Codex config format. Idempotency check updated to match
+  the new path.
+- **Shell wrapper release URL** — `core/.hawp/bin/hawp` pointed to
+  `github.com/sentzunhat/hawp/releases` (404). Corrected to
+  `github.com/sentzunhat/human-ai-workflow-protocol/releases`.
+- **Update script clobbered Go binary** — the distribution update script was copying
+  `core/.hawp/bin/hawp` (the shell wrapper) over `.hawp/bin/hawp`, replacing the user's
+  real Go binary with a wrapper that then failed with `hawp: Go binary not found.` because
+  `hawp-bin` did not exist. Fix: update script now downloads the Go binary to `hawp-bin`
+  (matching the wrapper's lookup path) and installs the shell wrapper at `hawp` alongside it.
+  Install script updated identically.
+
 ## [0.0.8] - 2026-08-25
 
 `engine` key canonical; `--llm-reshape` removed; real context dedup + dynamic chunk cap;
