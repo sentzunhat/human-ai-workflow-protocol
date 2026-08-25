@@ -3,9 +3,10 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [0.0.8] - 2026-08-24
+## [0.0.8] - 2026-08-25
 
-`engine` key canonical; `--llm-reshape` removed; real context dedup + dynamic chunk cap.
+`engine` key canonical; `--llm-reshape` removed; real context dedup + dynamic chunk cap;
+MCP context mode; 48h auto-update notifier.
 
 ### Added
 
@@ -16,6 +17,28 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
   scoring (default 0.3). `0.5` = equal blend, `0.7` = lexical-heavy. Must be in [0.0, 1.0].
 - **Hawp-first session workflow** — new kit doc at `.hawp/kit/usage/hawp-first-workflow.md`:
   MCP search as default context strategy, session-start pattern, worktree cleanup pattern.
+- **MCP `hawp_search` context mode** — pass `context: true` (and optionally `max_tokens`)
+  to receive a single pre-shaped markdown block instead of raw results. Applies the same
+  Jaccard dedup (>70% word-set overlap) + greedy token cap + `FormatAsMarkdown()` pipeline
+  as the CLI `--context` flag. Response includes `token_count`, `chunks_used`, and
+  `chunks_dropped` for observability. Documented in `.hawp/kit/usage/search.md`.
+- **48h TTL update notifier** — after every non-MCP/update/version command, the CLI checks
+  `~/.hawp/cache/update-check.json` (refreshed in a background goroutine when stale) and
+  prints a countdown notice to stderr when a newer release is available. Four phases:
+  - Phase 1 (0–15 min): "auto-update in N min"
+  - Phase 2 (15–20 min): escalated notice, remaining minutes shown
+  - Phase 3 (20–21 min): last-chance notice mentioning `--disable-auto`
+  - Phase 4 (≥21 min): announces 3-second countdown, pauses, self-replaces binary
+- **`hawp update --disable-auto` / `--enable-auto`** — persists auto-update preference to
+  `~/.hawp/config/update.json`. When disabled, notices still print (Phases 1–3) but Phase 4
+  skips the install and shows "auto-update is disabled" instead.
+- **`make install` target in `librarian/src/Makefile`** — builds the binary then in-place
+  overwrites `.hawp/bin/hawp` via `dd` (preserves inode, required on macOS for sandbox ACLs).
+- **TS script deprecation** — `@deprecated` JSDoc added to the five TypeScript hawp scripts
+  in `librarian/scripts/hawp/`. All are superseded by the Go CLI; npm scripts call the
+  binary directly. The TS scripts remain for any tooling that imports them.
+- **Shell wrapper cleanup** — `core/.hawp/bin/hawp` replaced with a lean Go-binary delegator
+  that resolves the binary from the same directory, then falls back to PATH.
 
 ### Fixed
 
