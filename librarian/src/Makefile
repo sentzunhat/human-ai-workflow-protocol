@@ -8,7 +8,7 @@ VERSION ?= dev
 LDFLAGS := -s -w -X '$(VERSION_PKG).Version=$(VERSION)'
 PLATFORMS := darwin/arm64 darwin/amd64 linux/arm64 linux/amd64 windows/amd64 windows/arm64
 
-.PHONY: build test vet check clean dist
+.PHONY: build install test vet check clean dist
 
 # CGO_ENABLED=0 pinned explicitly: hugot's default pure-Go backend needs
 # no cgo, and this keeps `dist`'s single-runner cross-compile working
@@ -17,6 +17,9 @@ PLATFORMS := darwin/arm64 darwin/amd64 linux/arm64 linux/amd64 windows/amd64 win
 # in behind their own build tags and are not used here).
 build:
 	CGO_ENABLED=0 go build -trimpath -ldflags='$(LDFLAGS)' -o $(BIN_DIR)/$(BINARY) ./cmd/hawp
+
+install: build
+	dd if=$(BIN_DIR)/$(BINARY) of=../../.hawp/bin/$(BINARY) bs=1m 2>/dev/null && chmod +x ../../.hawp/bin/$(BINARY)
 
 test:
 	CGO_ENABLED=0 go test ./...

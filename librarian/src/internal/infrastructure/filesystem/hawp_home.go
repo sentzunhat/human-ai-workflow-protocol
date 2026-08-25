@@ -10,24 +10,32 @@ type HawpHome struct {
 	Models           string // Root/models — embedding and LLM model files
 	ModelsEmbedding  string // Root/models/embedding — embedding models (BGE, MiniLM, etc.)
 	ModelsLLM        string // Root/models/llm — LLM models (TinyLlama, Mistral, etc.)
-	Config           string // Root/config — global default config
+	Config           string // Root/config — global default config files
 	Runtime          string // Root/runtime — ONNX Runtime shared library
+	Cache            string // Root/cache — transient data (can be deleted safely)
 	Downloads        string // Root/cache/downloads — staging area for verified downloads
+	UpdateCacheFile  string // Root/cache/update-check.json — last release check result
+	UpdateConfigFile string // Root/config/update.json — update preferences
 }
 
 // ResolveHawpHome builds the ~/.hawp/ layout under the given home directory.
 func ResolveHawpHome(home string) HawpHome {
 	root := filepath.Join(home, ".hawp")
 	modelsRoot := filepath.Join(root, "models")
+	cacheRoot := filepath.Join(root, "cache")
+	configRoot := filepath.Join(root, "config")
 	return HawpHome{
 		Root:             root,
 		Index:            filepath.Join(root, "index"),
 		Models:           modelsRoot,
 		ModelsEmbedding:  filepath.Join(modelsRoot, "embedding"),
 		ModelsLLM:        filepath.Join(modelsRoot, "llm"),
-		Config:           filepath.Join(root, "config"),
+		Config:           configRoot,
 		Runtime:          filepath.Join(root, "runtime"),
-		Downloads:        filepath.Join(root, "cache", "downloads"),
+		Cache:            cacheRoot,
+		Downloads:        filepath.Join(cacheRoot, "downloads"),
+		UpdateCacheFile:  filepath.Join(cacheRoot, "update-check.json"),
+		UpdateConfigFile: filepath.Join(configRoot, "update.json"),
 	}
 }
 
@@ -41,6 +49,7 @@ func (h HawpHome) Dirs() []string {
 		h.ModelsLLM,
 		h.Config,
 		h.Runtime,
+		h.Cache,
 		h.Downloads,
 	}
 }
