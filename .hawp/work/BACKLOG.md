@@ -25,6 +25,9 @@ Active coordination index for open work. Closed history is archived under `.hawp
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
 | `4c88f451` | improvement | Token reduction: smart context sizing + dedup-before-pack (v0.1.0 gate) | `in-progress` | Diego | [plan](active/4c88f451/plan.md) | 2026-08-24 |
+| `1c743447` | feature | Configurable `--hybrid-ratio` flag: tune lexical/semantic blend (30/70, 50/50, 70/30) | `in-progress` | Diego | — | 2026-08-24 |
+| `0ca7cf49` | fix | Code cleanup: remove stale llm-reshape traces, dead code, fix TODOs in Go source | `in-progress` | Diego | — | 2026-08-24 |
+| `8672216a` | planning | Backlog audit: review parked items, compact Recently Closed, archive stale entries | `in-progress` | Diego | — | 2026-08-24 |
 
 ## Blocked / Parked
 
