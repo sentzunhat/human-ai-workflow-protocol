@@ -208,9 +208,14 @@ func printBenchmarkSummary(results []BenchmarkResult) {
 		for _, pattern := range []string{"hybrid"} {
 			if latencies, ok := patternStats[pattern]; ok {
 				patternAvg := averageFloat(latencies)
-				multiple := patternAvg / lexicalAvg
-				fmt.Printf("%s:  %.1fx slower than lexical (%.1fms vs %.1fms)\n",
-					pattern, multiple, patternAvg, lexicalAvg)
+				if lexicalAvg < 1 {
+					fmt.Printf("%s:  %.1fms avg (lexical sub-millisecond; relative multiple not meaningful)\n",
+						pattern, patternAvg)
+				} else {
+					multiple := patternAvg / lexicalAvg
+					fmt.Printf("%s:  %.1fx slower than lexical (%.1fms vs %.1fms)\n",
+						pattern, multiple, patternAvg, lexicalAvg)
+				}
 			}
 		}
 	}

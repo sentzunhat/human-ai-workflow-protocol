@@ -54,7 +54,7 @@ PRAGMA busy_timeout=30000;
 	schema := `
 CREATE TABLE IF NOT EXISTS documents (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    category TEXT NOT NULL CHECK(category IN ('kit', 'work')),
+    category TEXT NOT NULL CHECK(category IN ('kit', 'work', 'custom')),
     type TEXT NOT NULL,
     path TEXT NOT NULL UNIQUE,
     folder_role TEXT NOT NULL,
