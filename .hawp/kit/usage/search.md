@@ -37,9 +37,10 @@ hawp search embed --backend onnx   --model all-MiniLM-L6-v2
 | Mode | Flag | Speed | Notes |
 |------|------|-------|-------|
 | Lexical (FTS5) | default | <1ms | No vectors needed |
-| Hybrid (lexical + semantic) | `--hybrid` | ~50–90ms | Requires embed step |
+| Semantic (pure vector) | `--semantic` | ~480ms | Requires embed step; no FTS5 |
+| Hybrid (lexical + semantic) | auto / `--hybrid` | ~70ms | Requires embed step |
 
-Hybrid is recommended once vectors are built. With a pre-built vector index, `hawp search` automatically uses hybrid re-ranking when vectors are present — no flag required.
+Hybrid is the automatic default once vectors are built — `hawp search` upgrades to hybrid re-ranking when a vector index exists, no flag required. Use `--semantic` when a query has few keyword matches and you want full corpus coverage ranked by concept similarity.
 
 ## Context packing
 
@@ -54,16 +55,18 @@ Output includes source file, chunk, and relevance score per result.
 
 ```
 hawp search <query>
-  --limit <n>             max results (default: 5)
+  --limit <n>             max results (default: 10)
+  --semantic              pure-vector search — ranks all stored vectors by cosine similarity
+                          (no FTS5; requires embed step; ~480ms warm Ollama)
   --context               pack results into LLM-ready context block
   --format markdown|json  output format (default: markdown)
-  --max-tokens <n>        token budget for context block (default: 8000)
-  --hybrid                force hybrid search (lexical + semantic blend)
+  --max-tokens <n>        token budget for context block (default: 2000)
 
 hawp search index         ingest configured paths into SQLite (reads .hawp/config/search.json)
 hawp search embed         generate and store embedding vectors
   --backend onnx|ollama   required: embedding backend to use
   --model <name>          override default model for the backend
+hawp search benchmark     run a 3-way speed + quality benchmark (lexical / semantic / hybrid)
 ```
 
 ## Configuring index paths

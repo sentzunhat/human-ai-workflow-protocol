@@ -24,8 +24,7 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
-
----
+| — | — | — | — | — | — | — |
 
 ## Blocked / Parked
 
@@ -47,6 +46,7 @@ Limited to the last 10 items.
 
 | ID | Type | Title | Closed | Detail |
 | -- | ---- | ----- | ------ | ------ |
+| `6de28bdd` | feature | Implement `--semantic` search mode (pure vector search, ONNX + Ollama) | 2026-08-24 | [plan](closed/2026/08/24/6de28bdd/plan.md) |
 | `t5l7m9n1` | planning | Benchmarking infrastructure for v0.0.3+: harness scaffold + test data | 2026-08-24 | [plan](closed/2026/08/24/t5l7m9n1/plan.md) |
 | `f2d8a5c1` | fix | `hawp update --check` now read-only (was performing the update) | 2026-08-24 | [plan](closed/2026/08/24/f2d8a5c1/plan.md) |
 | `3b51837c` | feature | v0.0.4: `hawp init` + `hawp mcp` + provider MCP config auto-write (Codex, Claude, Cursor, Continue) | 2026-08-24 | [plan](closed/2026/08/24/3b51837c/plan.md) |
