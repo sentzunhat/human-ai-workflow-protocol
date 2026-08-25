@@ -1182,10 +1182,10 @@ func tryReshapeViaRAGPipeline(block appcontext.ContextBlock, maxTokens int) *app
 	}
 
 	pipeline, err := appcontext.NewDefaultRAGPipeline(appcontext.ReshapingConfig{
-		EmbeddingsBackend: cfg.Embeddings.Backend,
+		EmbeddingsBackend: cfg.Embeddings.Engine,
 		EmbeddingsModel:   cfg.Embeddings.Model,
 		EmbeddingsURL:     cfg.Backends.Ollama.URL,
-		LLMBackend:        cfg.LLM.Backend,
+		LLMBackend:        cfg.LLM.Engine,
 		LLMModel:          cfg.LLM.Model,
 		LLMURL:            cfg.Backends.Ollama.URL,
 		MaxTokens:         maxTokens,

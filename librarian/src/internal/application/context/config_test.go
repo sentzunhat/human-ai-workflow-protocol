@@ -9,8 +9,8 @@ import (
 func TestDefaultConfig(t *testing.T) {
 	cfg := DefaultConfig()
 
-	if cfg.Embeddings.Backend != "onnx" {
-		t.Errorf("default embeddings backend should be onnx, got %s", cfg.Embeddings.Backend)
+	if cfg.Embeddings.Engine != "onnx" {
+		t.Errorf("default embeddings backend should be onnx, got %s", cfg.Embeddings.Engine)
 	}
 	if cfg.Embeddings.Model != "bge-base-en-v1.5" {
 		t.Errorf("default embeddings model should be bge-base-en-v1.5, got %s", cfg.Embeddings.Model)
@@ -19,8 +19,8 @@ func TestDefaultConfig(t *testing.T) {
 	// LLM defaults to Ollama, not ONNX: llm.SupportedModels is empty (no ONNX
 	// text2text model ships yet), so an "onnx" default would make every
 	// reshape fail out of the box. See config.go DefaultConfig doc comment.
-	if cfg.LLM.Backend != "ollama" {
-		t.Errorf("default LLM backend should be ollama, got %s", cfg.LLM.Backend)
+	if cfg.LLM.Engine != "ollama" {
+		t.Errorf("default LLM backend should be ollama, got %s", cfg.LLM.Engine)
 	}
 	if cfg.LLM.Model != "mistral" {
 		t.Errorf("default LLM model should be mistral, got %s", cfg.LLM.Model)
@@ -63,7 +63,7 @@ func TestValidateConfig(t *testing.T) {
 
 	// Invalid: bad backend
 	badCfg := DefaultConfig()
-	badCfg.Embeddings.Backend = "invalid"
+	badCfg.Embeddings.Engine = "invalid"
 	if err := badCfg.Validate(); err == nil {
 		t.Error("config with invalid embeddings backend should fail validation")
 	}
@@ -84,7 +84,7 @@ func TestValidateConfig(t *testing.T) {
 
 	// Invalid: OpenAI backend without API key
 	badCfg = DefaultConfig()
-	badCfg.LLM.Backend = "openai"
+	badCfg.LLM.Engine = "openai"
 	badCfg.Backends.OpenAI.APIKey = ""
 	if err := badCfg.Validate(); err == nil {
 		t.Error("openai backend without API key should fail validation")
@@ -92,7 +92,7 @@ func TestValidateConfig(t *testing.T) {
 
 	// Valid: OpenAI backend with API key
 	goodCfg := DefaultConfig()
-	goodCfg.LLM.Backend = "openai"
+	goodCfg.LLM.Engine = "openai"
 	goodCfg.Backends.OpenAI.APIKey = "sk-test-key"
 	if err := goodCfg.Validate(); err != nil {
 		t.Errorf("openai backend with API key should be valid, got error: %v", err)
@@ -107,11 +107,11 @@ func TestLoadConfigFile(t *testing.T) {
 	// Write a test config
 	testConfigJSON := `{
 		"embeddings": {
-			"backend": "openai",
+			"engine": "openai",
 			"model": "text-embedding-3-large"
 		},
 		"llm": {
-			"backend": "anthropic",
+			"engine": "anthropic",
 			"model": "claude-3-opus",
 			"temperature": 0.5,
 			"maxTokens": 4000
@@ -128,11 +128,11 @@ func TestLoadConfigFile(t *testing.T) {
 		t.Fatalf("failed to load config file: %v", err)
 	}
 
-	if cfg.Embeddings.Backend != "openai" {
-		t.Errorf("loaded embeddings backend should be openai, got %s", cfg.Embeddings.Backend)
+	if cfg.Embeddings.Engine != "openai" {
+		t.Errorf("loaded embeddings backend should be openai, got %s", cfg.Embeddings.Engine)
 	}
-	if cfg.LLM.Backend != "anthropic" {
-		t.Errorf("loaded LLM backend should be anthropic, got %s", cfg.LLM.Backend)
+	if cfg.LLM.Engine != "anthropic" {
+		t.Errorf("loaded LLM backend should be anthropic, got %s", cfg.LLM.Engine)
 	}
 	if cfg.LLM.Temperature != 0.5 {
 		t.Errorf("loaded temperature should be 0.5, got %f", cfg.LLM.Temperature)
@@ -162,11 +162,11 @@ func TestLoadEnvConfig(t *testing.T) {
 		t.Fatalf("failed to load env config: %v", err)
 	}
 
-	if cfg.Embeddings.Backend != "openai" {
-		t.Errorf("env embeddings backend should be openai, got %s", cfg.Embeddings.Backend)
+	if cfg.Embeddings.Engine != "openai" {
+		t.Errorf("env embeddings backend should be openai, got %s", cfg.Embeddings.Engine)
 	}
-	if cfg.LLM.Backend != "anthropic" {
-		t.Errorf("env LLM backend should be anthropic, got %s", cfg.LLM.Backend)
+	if cfg.LLM.Engine != "anthropic" {
+		t.Errorf("env LLM backend should be anthropic, got %s", cfg.LLM.Engine)
 	}
 	if cfg.Backends.OpenAI.APIKey != "sk-test-openai" {
 		t.Errorf("env OpenAI key should be sk-test-openai, got %s", cfg.Backends.OpenAI.APIKey)
@@ -180,21 +180,21 @@ func TestMergeConfig(t *testing.T) {
 	base := DefaultConfig()
 	override := ContextConfig{
 		Embeddings: EmbeddingsConfig{
-			Backend: "openai",
+			Engine: "openai",
 			Model:   "text-embedding-3-large",
 		},
 		LLM: LLMConfig{
-			Backend: "anthropic",
+			Engine: "anthropic",
 		},
 	}
 
 	mergeConfig(&base, &override)
 
-	if base.Embeddings.Backend != "openai" {
-		t.Errorf("merged embeddings backend should be openai, got %s", base.Embeddings.Backend)
+	if base.Embeddings.Engine != "openai" {
+		t.Errorf("merged embeddings backend should be openai, got %s", base.Embeddings.Engine)
 	}
-	if base.LLM.Backend != "anthropic" {
-		t.Errorf("merged LLM backend should be anthropic, got %s", base.LLM.Backend)
+	if base.LLM.Engine != "anthropic" {
+		t.Errorf("merged LLM backend should be anthropic, got %s", base.LLM.Engine)
 	}
 	// LLM model should remain unchanged from default (override only set Backend)
 	if base.LLM.Model != "mistral" {
@@ -209,8 +209,8 @@ func TestConfigPriority(t *testing.T) {
 
 	// Write file config
 	fileConfigJSON := `{
-		"embeddings": {"backend": "openai", "model": "text-embedding-3-small"},
-		"llm": {"backend": "anthropic"}
+		"embeddings": {"engine": "openai", "model": "text-embedding-3-small"},
+		"llm": {"engine": "anthropic"}
 	}`
 	if err := os.WriteFile(fileConfigPath, []byte(fileConfigJSON), 0644); err != nil {
 		t.Fatalf("failed to write test config: %v", err)
@@ -230,12 +230,12 @@ func TestConfigPriority(t *testing.T) {
 	}
 
 	// Env should override file
-	if cfg.Embeddings.Backend != "ollama" {
-		t.Errorf("env should override file config, expected ollama, got %s", cfg.Embeddings.Backend)
+	if cfg.Embeddings.Engine != "ollama" {
+		t.Errorf("env should override file config, expected ollama, got %s", cfg.Embeddings.Engine)
 	}
 	// File should override default for LLM backend
-	if cfg.LLM.Backend != "anthropic" {
-		t.Errorf("file should override default for LLM backend, expected anthropic, got %s", cfg.LLM.Backend)
+	if cfg.LLM.Engine != "anthropic" {
+		t.Errorf("file should override default for LLM backend, expected anthropic, got %s", cfg.LLM.Engine)
 	}
 }
 

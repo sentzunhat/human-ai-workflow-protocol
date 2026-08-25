@@ -3,6 +3,23 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.8] - 2026-08-24
+
+`engine` as canonical JSON key for context config; `--llm-reshape` end-to-end verified.
+
+### Fixed
+
+- **Context config `engine` key** — `EmbeddingsConfig.Engine` and `LLMConfig.Engine`
+  now use `json:"engine"` as the canonical JSON key (was `json:"backend"`).
+  `~/.hawp/config/context.json` and `.hawp/config/context.json` should use
+  `engine` for the backend selector. Previously the field was named `backend` in
+  both the struct and JSON, which conflicted with users who had written configs
+  using `engine`. The struct field, JSON tag, all internal references, and tests
+  are now consistently `engine`.
+- **`--llm-reshape` end-to-end verified** against Ollama (nomic-embed-text
+  embeddings + mistral LLM). Pipeline now correctly reads the home config at
+  `~/.hawp/config/context.json` and shows `pipeline: ollama-ollama` in output.
+
 ## [0.0.7] - 2026-08-24
 
 Real `--semantic` search mode and three-way benchmark.
