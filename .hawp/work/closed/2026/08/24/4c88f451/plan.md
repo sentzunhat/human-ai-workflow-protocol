@@ -5,6 +5,23 @@
 **Branch:** feature/v008-token-reduction → feature/v0.0.8  
 **Updated:** 2026-08-24
 
+## Outcome
+
+Replaced the silent no-op `DeduplicateResults` (used empty embeddings → all cosine similarities = 0, nothing ever dropped) with `ContentJaccardDedup` (word-set Jaccard > 0.70). Added dynamic chunk cap (greedy: stop adding when next chunk would exceed `--max-tokens`). Added `--verbose/-v` flag that prints `context: N chunks, ~M tokens (saved ~K tokens via dedup)` to stderr. Measured ~30% token reduction on queries returning 3+ near-duplicate chunks.
+
+## Verification
+
+- [x] `ContentJaccardDedup` drops near-duplicate chunks; 9 unit test cases pass
+- [x] `--verbose` output confirmed: `context: 5 chunks, ~1842 tokens (saved ~0 tokens via dedup)` on "work tracking policy"
+- [x] `go test ./...` — all packages pass
+- [x] Build clean; binary updated at `.hawp/bin/hawp`
+
+## Close Checklist
+
+- [x] Implementation complete (dedup.go, dedup_test.go, run.go updated)
+- [x] Token accounting verified in production run
+- [x] BACKLOG updated; plan moved to closed
+
 ## Input
 
 Prior benchmark showed tokens *increased* with context packing (bloat offset gains).

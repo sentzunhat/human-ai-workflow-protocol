@@ -5,6 +5,24 @@
 **Branch:** feature/v008-backlog-audit → feature/v0.0.8  
 **Closed:** 2026-08-24
 
+## Outcome
+
+Recently Closed compacted from 15 → 10 items; 5 oldest archived in BACKLOG Archive section. `v010-3-3a` reason corrected (plan file says FLAN-T5-small IS feasible; old reason said "No working models available"). All other parked items confirmed appropriately parked. All 16 plan file links verified present.
+
+## Verification
+
+- [x] Recently Closed count ≤ 10 visible rows
+- [x] 5 oldest entries in Archive subsection with plan links preserved
+- [x] `v010-3-3a` reason updated; timestamp refreshed
+- [x] All referenced plan files confirmed present on disk
+- [x] `hawp work validate` passes after changes (no broken links, no missing plans)
+
+## Close Checklist
+
+- [x] Audit complete; findings in `.hawp/work/status/2026/08/24/backlog-audit-8672216a.md`
+- [x] BACKLOG compacted and validated
+- [x] Plan moved to closed
+
 ## What was done
 
 - Recently Closed compacted from 15 → 10 items; 5 oldest archived under BACKLOG.md Archive section
