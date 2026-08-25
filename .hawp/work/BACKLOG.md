@@ -22,13 +22,22 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 ## Active Work
 
+_Branch: `feature/v0.0.11` — items below are the v0.0.11 scope._
+
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
+| `cursor-mcp-type-wrapper` | fix | Cursor MCP: add `type: stdio` and `hawp-mcp` wrapper (relative command fails) | plan-ready | — | [plan](active/cursor-mcp-type-wrapper/plan.md) | 2026-08-25 |
+| `agents-seed-if-missing` | fix | AGENTS.md must not be overwritten on `hawp init` update | plan-ready | — | [plan](active/agents-seed-if-missing/plan.md) | 2026-08-25 |
+| `install-docs-embed-optional` | docs | Clarify: `hawp search index` first; embed is optional and slow | plan-ready | — | [plan](active/install-docs-embed-optional/plan.md) | 2026-08-25 |
+| `cursor-docs-ui-path` | docs | Fix stale Cursor MCP UI path: Customize → MCPs (not Settings → Tools & MCP) | plan-ready | — | [plan](active/cursor-docs-ui-path/plan.md) | 2026-08-25 |
+| `releases-prerelease-fallback` | investigation | Verify/fix: `/releases/latest` 404 when all GitHub releases are prerelease | analyzing | — | [plan](active/releases-prerelease-fallback/plan.md) | 2026-08-25 |
+| `manager-branch-kit-pattern` | improvement | Document optional manager-branch / worktree operating pattern in kit | plan-ready | — | [plan](active/manager-branch-kit-pattern/plan.md) | 2026-08-25 |
 
 ## Blocked / Parked
 
 | ID  | Type | Title | Reason | Detail | Updated |
 | --- | ---- | ----- | ------ | ------ | ------- |
+| `usage-tracking` | feature | `hawp usage` CLI + `hawp_usage` MCP tool for token/wall-clock metering | Scope too large for v0.0.11; belongs at v0.1.0 token-reduction gate | [plan](parked/usage-tracking/plan.md) | 2026-08-25 |
 | `bee15107` | improvement | Defer CLI participant adapters for Codex, Claude, and GitHub | Not needed yet; provider packs are enough | [plan](parked/bee15107/plan.md) | 2026-07-06 |
 | `v010-3-3a` | feature | ONNX LLM Text2Text models (FLAN-T5-small) | Plan ready (FLAN-T5-small feasible via ONNX); deferred per incremental-only patch strategy | [detail](parked/v010-3-3a/plan.md) | 2026-08-24 |
 | `v010-3-2c` | feature | OpenAI Embeddings (text-embedding-3-small/large) | Cloud-API tracks parked; see incremental-only strategy | [detail](parked/v010-3-2c/plan.md) | 2026-07-27 |
