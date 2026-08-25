@@ -49,13 +49,13 @@ func TestProviderConfigWrittenAfterProvisionFailure(t *testing.T) {
 		t.Fatalf("WriteProviderConfigs failed after provision failure: %v", err)
 	}
 
-	codexTOML := filepath.Join(repoRoot, "codex.toml")
-	data, err := os.ReadFile(codexTOML)
+	codexConfig := filepath.Join(repoRoot, ".codex", "config.toml")
+	data, err := os.ReadFile(codexConfig)
 	if err != nil {
-		t.Fatalf("codex.toml not written: %v — MCP integration is missing despite successful provider spec", err)
+		t.Fatalf(".codex/config.toml not written: %v — MCP integration is missing despite successful provider spec", err)
 	}
 	if !strings.Contains(string(data), "[mcp_servers.hawp]") {
-		t.Errorf("codex.toml missing hawp MCP block:\n%s", data)
+		t.Errorf(".codex/config.toml missing hawp MCP block:\n%s", data)
 	}
 }
 
@@ -83,7 +83,7 @@ func TestProviderConfigWrittenAfterProvisionFailure_AllProviders(t *testing.T) {
 	}{
 		{".mcp.json", `"hawp"`},
 		{".cursor/mcp.json", `"hawp"`},
-		{"codex.toml", "[mcp_servers.hawp]"},
+		{filepath.Join(".codex", "config.toml"), "[mcp_servers.hawp]"},
 	} {
 		data, err := os.ReadFile(filepath.Join(repoRoot, want.path))
 		if err != nil {

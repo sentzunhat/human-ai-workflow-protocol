@@ -9,7 +9,7 @@
 #   hawp update --check      # check for a newer release without installing
 #
 # Or download manually from:
-#   https://github.com/sentzunhat/hawp/releases
+#   https://github.com/sentzunhat/human-ai-workflow-protocol/releases
 
 set -e
 
@@ -22,7 +22,7 @@ if [ ! -x "$BIN" ]; then
     BIN="$(command -v hawp)"
   else
     echo "hawp: Go binary not found." >&2
-    echo "Download from https://github.com/sentzunhat/hawp/releases" >&2
+    echo "Download from https://github.com/sentzunhat/human-ai-workflow-protocol/releases" >&2
     echo "or run: hawp update" >&2
     exit 1
   fi

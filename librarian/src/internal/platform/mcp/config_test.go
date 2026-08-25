@@ -9,7 +9,7 @@ import (
 
 func TestWriteCodexTOMLCreatesFile(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "codex.toml")
+	path := filepath.Join(dir, ".codex/config.toml")
 
 	if err := writeCodexTOML(path); err != nil {
 		t.Fatal(err)
@@ -21,16 +21,19 @@ func TestWriteCodexTOMLCreatesFile(t *testing.T) {
 	}
 	content := string(data)
 	if !strings.Contains(content, "[mcp_servers.hawp]") {
-		t.Errorf("codex.toml missing [mcp_servers.hawp], got:\n%s", content)
+		t.Errorf(".codex/config.toml missing [mcp_servers.hawp], got:\n%s", content)
 	}
 	if !strings.Contains(content, `command = ".hawp/bin/hawp"`) {
-		t.Errorf("codex.toml missing command, got:\n%s", content)
+		t.Errorf(".codex/config.toml missing command, got:\n%s", content)
+	}
+	if !strings.Contains(content, `cwd = "."`) {
+		t.Errorf(".codex/config.toml missing cwd, got:\n%s", content)
 	}
 }
 
 func TestWriteCodexTOMLIdempotent(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "codex.toml")
+	path := filepath.Join(dir, ".codex/config.toml")
 
 	if err := writeCodexTOML(path); err != nil {
 		t.Fatal(err)
@@ -48,7 +51,10 @@ func TestWriteCodexTOMLIdempotent(t *testing.T) {
 
 func TestWriteCodexTOMLAppendsToExisting(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "codex.toml")
+	if err := os.MkdirAll(filepath.Join(dir, ".codex"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(dir, ".codex/config.toml")
 
 	existing := "[model]\nname = \"o4-mini\"\n"
 	if err := os.WriteFile(path, []byte(existing), 0o644); err != nil {
