@@ -39,7 +39,7 @@ hawp search embed --backend onnx   --model all-MiniLM-L6-v2
 |------|------|-------|-------|
 | Lexical (FTS5) | default | <1ms | No vectors needed |
 | Semantic (pure vector) | `--semantic` | ~480ms | Requires embed step; no FTS5 |
-| Hybrid (lexical + semantic) | auto / `--hybrid` | ~70ms | Requires embed step |
+| Hybrid (lexical + semantic) | auto / `--hybrid-ratio` | ~70ms | Requires embed step; ratio tunable |
 
 Hybrid is the automatic default once vectors are built — `hawp search` upgrades to hybrid re-ranking when a vector index exists, no flag required. Use `--semantic` when a query has few keyword matches and you want full corpus coverage ranked by concept similarity.
 
@@ -59,9 +59,12 @@ hawp search <query>
   --limit <n>             max results (default: 10)
   --semantic              pure-vector search — ranks all stored vectors by cosine similarity
                           (no FTS5; requires embed step; ~480ms warm Ollama)
+  --hybrid-ratio <f>      lexical fraction for hybrid blend, range [0.0, 1.0] (default: 0.3)
+                          0.3 = semantic-dominant (default); 0.5 = equal; 0.7 = lexical-heavy
   --context               pack results into LLM-ready context block
   --format markdown|json  output format (default: markdown)
   --max-tokens <n>        token budget for context block (default: 2000)
+  --verbose | -v          print token accounting to stderr: chunks, ~tokens, saved via dedup
 
 hawp search index         ingest configured paths into SQLite (reads .hawp/config/search.json)
 hawp search embed         generate and store embedding vectors
