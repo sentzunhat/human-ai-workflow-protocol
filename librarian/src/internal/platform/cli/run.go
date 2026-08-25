@@ -969,7 +969,7 @@ func runSearchEmbed(args []string) error {
 
 func runSearch(args []string) error {
 	if len(args) < 1 {
-		return errors.New("usage: hawp search <query> [--limit <n>] [--semantic] [--context] [--format markdown|json] [--max-tokens <n>]")
+		return errors.New("usage: hawp search <query> [--limit <n>] [--semantic] [--context] [--format markdown|json] [--max-tokens <n>] [--verbose|-v]")
 	}
 	query := args[0]
 	limit := 10
@@ -977,6 +977,7 @@ func runSearch(args []string) error {
 	wantSemantic := false
 	format := "markdown"
 	maxTokens := 2000
+	verbose := false
 
 	for i := 1; i < len(args); i++ {
 		switch {
@@ -997,6 +998,8 @@ func runSearch(args []string) error {
 				maxTokens = n
 			}
 			i++
+		case args[i] == "--verbose" || args[i] == "-v":
+			verbose = true
 		}
 	}
 
@@ -1074,15 +1077,52 @@ func runSearch(args []string) error {
 			Title:     getStr(r, "folder_role"),
 			Content:   getStr(r, "text"),
 			Relevance: float32(0.95), // Default high relevance
-			Embedding: []float32{},   // Not used in dedup for now
+			Embedding: []float32{},   // Not used in content-based dedup
 		}
 	}
 
-	// Deduplicate results
-	deduped := appcontext.DeduplicateResults(searchResults, 0.95)
+	// Pre-pack content dedup: drop chunks with >70% word-set Jaccard overlap
+	// against a higher-ranked chunk. No embeddings needed — fast word-set
+	// comparison catches near-duplicate paragraphs from the same document section.
+	deduped, droppedByDedup := appcontext.ContentJaccardDedup(searchResults, 0.70)
+
+	// Compute avg chunk token estimate (chars/4) across the full pre-dedup set
+	// for the verbose savings report. Done here so the value is accurate even
+	// when droppedByDedup is 0.
+	avgChunkTokens := 0
+	if len(searchResults) > 0 {
+		total := 0
+		for _, r := range searchResults {
+			total += (len(r.Content) + 3) / 4
+		}
+		avgChunkTokens = total / len(searchResults)
+	}
+
+	// Dynamic chunk cap: greedily include deduped chunks until the running token
+	// estimate (chars/4) would exceed the budget. Stopping early reduces
+	// per-result metadata overhead that FormatAsMarkdown adds, ensuring the
+	// wrapper cost doesn't cancel out the dedup savings.
+	capped := make([]domainsearch.Result, 0, len(deduped))
+	runningTokens := 0
+	for _, r := range deduped {
+		chunkEst := (len(r.Content) + 3) / 4
+		if len(capped) > 0 && runningTokens+chunkEst > maxTokens {
+			break
+		}
+		capped = append(capped, r)
+		runningTokens += chunkEst
+	}
+
+	// Verbose token accounting: print to stderr so it doesn't pollute stdout
+	// context block output (which may be piped to an LLM).
+	if verbose {
+		savedTokens := droppedByDedup * avgChunkTokens
+		fmt.Fprintf(os.Stderr, "context: %d chunks, ~%d tokens (saved ~%d tokens via dedup)\n",
+			len(capped), runningTokens, savedTokens)
+	}
 
 	// Format as context block
-	block := appcontext.FormatAsMarkdown(deduped, query, maxTokens)
+	block := appcontext.FormatAsMarkdown(capped, query, maxTokens)
 
 	// Output based on format
 	switch format {
@@ -1230,5 +1270,6 @@ SEARCH --CONTEXT OPTIONS
   --context              output LLM-ready context block (deduped + formatted)
   --semantic             pure-vector search (requires embed step; skips FTS5)
   --format markdown|json output format (default markdown)
-  --max-tokens <n>       token budget for context block (default 2000)`
+  --max-tokens <n>       token budget for context block (default 2000)
+  --verbose | -v         print token accounting summary to stderr (chunks, ~tokens, saved via dedup)`
 }
