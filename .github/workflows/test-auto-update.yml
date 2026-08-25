@@ -24,9 +24,8 @@ jobs:
           - os: macos-latest
             asset: hawp-darwin-arm64
             binary: hawp-darwin-arm64
-          - os: windows-latest
-            asset: hawp-windows-amd64.exe
-            binary: hawp-windows-amd64.exe
+          # Windows excluded: self-replace is not supported (binary locked while running).
+          # The hawp update command exits 1 on Windows by design; there is no CI path to verify it.
 
     runs-on: ${{ matrix.os }}
 
