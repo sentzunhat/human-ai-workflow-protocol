@@ -96,7 +96,21 @@ Paths are relative to the repo root. Directories are walked recursively for `.md
 
 When using Claude Code with the HAWP MCP server (`hawp mcp`), the `hawp_search` tool provides structured results with precise line positions and context windows — suitable for automated code navigation and documentation lookup.
 
-Configure MCP in `.mcp.json` at repo root:
+Run `hawp init --provider <name>` to write the correct config file for your agent:
+
+| Agent | Config file written | Command |
+|-------|--------------------|---------| 
+| Claude Code | `.mcp.json` | `hawp init --provider claude` |
+| Cursor | `.cursor/mcp.json` | `hawp init --provider cursor` |
+| Codex | `.codex/config.toml` | `hawp init --provider codex` |
+
+**Codex: project trust is required.** Codex only loads project-scoped MCP config
+(`.codex/config.toml`) for projects it considers trusted. If `codex mcp list` does not
+show `hawp` after writing the config, trust the project in Codex settings and start a
+fresh task or session. The desktop UI does not hot-reload MCP changes mid-session.
+Verify with the CLI: `codex mcp list` and `codex mcp get hawp`.
+
+For Claude Code, the config is:
 
 ```json
 {

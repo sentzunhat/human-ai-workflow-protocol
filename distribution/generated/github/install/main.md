@@ -522,7 +522,7 @@ install_hawp_binary() {
   esac
 
   _asset="hawp-${_os}-${_arch}${_ext}"
-  _dest=".hawp/bin/hawp${_ext}"
+  _dest=".hawp/bin/hawp-bin${_ext}"
 
   # Resolve latest release tag from GitHub API
   local _tag
@@ -567,6 +567,13 @@ install_hawp_binary() {
 
   mv "${_dest}.tmp" "$_dest"
   chmod +x "$_dest"
+
+  # Install the shell wrapper at .hawp/bin/hawp so it delegates to hawp-bin.
+  if [ -f "$SRC/.hawp/bin/hawp" ]; then
+    cp "$SRC/.hawp/bin/hawp" .hawp/bin/hawp
+    chmod +x .hawp/bin/hawp
+  fi
+
   echo "hawp binary: installed to ${_dest}"
 }
 install_hawp_binary
