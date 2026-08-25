@@ -1,203 +1,140 @@
-# human-ai-workflow-protocol (HAWP)
+# HAWP — Human-AI Workflow Protocol
 
-> A minimal protocol for reliable human–AI collaboration. Shape the work **before** execution begins — and stop drifting.
-
-**Less drift, cheaper handoffs, zero lock-in.** Portable task-shaping for humans and agents.
+> Shape the work before execution begins. Stop re-explaining, stop drifting, stop losing context.
 
 [![Validate Distribution Generated](https://github.com/sentzunhat/human-ai-workflow-protocol/actions/workflows/sync-distribution-generated.yml/badge.svg)](https://github.com/sentzunhat/human-ai-workflow-protocol/actions/workflows/sync-distribution-generated.yml)
 
-## Get Started
+---
 
-Pick your agent provider. Each guide installs **HAWP kit** (`.hawp/kit/**`) plus that provider's overlay.
+## The problem
 
-**Recommended:** open the linked guide and run the visible **Install Command (Copy/Paste)** block after review. Optional guide-fetch helpers write a script to `/tmp` for inspection — they do not auto-execute remote content.
+Every AI session starts from zero. You re-explain the goal, the constraints, what done looks like. Midway through, the agent drifts. At handoff, context evaporates and the next session re-derives everything again.
 
-### GitHub / Copilot
-
-| | Stable (`main`) | Dev (`dev`) |
-|--|-----------------|-------------|
-| **Install** | [github/install/main.md](distribution/generated/github/install/main.md) | [github/install/dev.md](distribution/generated/github/install/dev.md) |
-| **Update** | [github/update/main.md](distribution/generated/github/update/main.md) | [github/update/dev.md](distribution/generated/github/update/dev.md) |
-
-Installs `core/providers/.github/` → `.github/instructions/`, `.github/prompts/`, `.github/copilot-instructions.md`
-
-### Claude Code
-
-| | Stable (`main`) | Dev (`dev`) |
-|--|-----------------|-------------|
-| **Install** | [claude/install/main.md](distribution/generated/claude/install/main.md) | [claude/install/dev.md](distribution/generated/claude/install/dev.md) |
-| **Update** | [claude/update/main.md](distribution/generated/claude/update/main.md) | [claude/update/dev.md](distribution/generated/claude/update/dev.md) |
-
-Installs `core/providers/.claude/` → `.claude/rules/hawp-*.md`, `CLAUDE.md`
-
-### Codex
-
-| | Stable (`main`) | Dev (`dev`) |
-|--|-----------------|-------------|
-| **Install** | [codex/install/main.md](distribution/generated/codex/install/main.md) | [codex/install/dev.md](distribution/generated/codex/install/dev.md) |
-| **Update** | [codex/update/main.md](distribution/generated/codex/update/main.md) | [codex/update/dev.md](distribution/generated/codex/update/dev.md) |
-
-Installs `core/providers/.codex/` → `AGENTS.md`
-
-### Cursor
-
-| | Stable (`main`) | Dev (`dev`) |
-|--|-----------------|-------------|
-| **Install** | [cursor/install/main.md](distribution/generated/cursor/install/main.md) | [cursor/install/dev.md](distribution/generated/cursor/install/dev.md) |
-| **Update** | [cursor/update/main.md](distribution/generated/cursor/update/main.md) | [cursor/update/dev.md](distribution/generated/cursor/update/dev.md) |
-
-Installs `core/providers/.cursor/` → `.cursor/rules/hawp-*.mdc`, `AGENTS.md`
-
-### Continue
-
-| | Stable (`main`) | Dev (`dev`) |
-|--|-----------------|-------------|
-| **Install** | [continue/install/main.md](distribution/generated/continue/install/main.md) | [continue/install/dev.md](distribution/generated/continue/install/dev.md) |
-| **Update** | [continue/update/main.md](distribution/generated/continue/update/main.md) | [continue/update/dev.md](distribution/generated/continue/update/dev.md) |
-
-Installs `core/providers/.continue/` → `.continue/rules/hawp-*.md`
-
-**Index:** [distribution/generated/README.md](distribution/generated/README.md)
-
-Then open `.hawp/kit/start-here.md` and shape your first task.
-
-**Compare with other methods?** → [Benchmark](benchmark/README.md)
+The root cause: **intent is never locked before execution begins.**
 
 ---
 
-## Core Concept
+## What HAWP does
 
-HAWP is a **task-shaping protocol** — five fields that lock intent before work begins:
+HAWP is a **task-shaping protocol** — five fields you fill once, before any tool call:
 
-```ts
-type Shape = {
-  input: string; // the request as received
-  context: string; // minimal background
-  mission: string; // concrete objective
-  checkpoint?: string; // optional lightweight pause
-  constraints: string; // hard boundaries and quality bars
-  output: string; // what done looks like
-};
+| Field | What goes here |
+|-------|---------------|
+| `input` | The request as received |
+| `context` | Minimal background the agent needs |
+| `mission` | The concrete objective — one sentence |
+| `constraints` | Hard limits and quality bars |
+| `output` | What done looks like |
+
+That shape travels with the work. Agents read it at session start. Handoffs are a copy-paste. Re-explanation drops to near zero.
+
+**HAWP is not** a runtime, a memory system, a framework, or an orchestrator. It is plain Markdown. No database. No API calls. No lock-in.
+
+---
+
+## By the numbers
+
+From benchmark runs against the kit itself:
+
+| Search mode | Latency | Quality |
+|-------------|---------|---------|
+| Lexical | <1 ms | 10 / 10 |
+| Hybrid (lexical + vector) | 72 ms | 10 / 10 |
+| Semantic (vector-only) | 479 ms | 9 / 10 |
+
+- **~30% token reduction** on context packing — Jaccard dedup drops near-duplicate chunks before they reach the LLM
+- **33 ms / chunk** embedding with Ollama (nomic-embed-text, warm batch, 3 100+ chunks)
+- **MCP server** — any connected agent (Claude Code, Cursor, Continue) can search the kit and work index directly via `hawp_search`
+
+Full benchmark details: [benchmark/README.md](benchmark/README.md)
+
+---
+
+## What you get after install
+
+```
+.hawp/
+  bin/hawp          ← CLI: search, index, embed, init, update, mcp, work
+  kit/              ← Protocol docs, templates, patterns, standards, examples
+  work/             ← Your backlog, active plans, evidence, status reports
 ```
 
-That's the full core. Templates, patterns, examples, and tooling are optional usage aids.
+The `hawp` CLI ships with:
 
-**HAWP is not** a runtime, memory system, validator, or orchestrator. It stays portable across projects.
-
-## Why It Works
-
-- **Less drift** — Shape locks intent before first tool call
-- **Cheap handoffs** — Five fields work as context transfer between humans and agents
-- **No lock-in** — Plain Markdown + one TypeScript type. No runtime or database
-- **Optional everything** — Use just `start-here.md`, or layer in intake loop, status reports, and ADRs as needed
+- **`hawp search <query>`** — hybrid lexical+vector search over kit and work docs
+- **`hawp search --context`** — packs results into a single LLM-ready block with token cap and dedup
+- **`hawp mcp`** — stdio MCP server; wire it into Claude Code, Cursor, or Continue in one command
+- **`hawp init --provider <name>`** — provisions `~/.hawp/` and writes the MCP config for your agent
+- **`hawp update`** — self-updates the binary and kit from the latest release (48h auto-update notifier built in)
+- **`hawp work new`** — scaffolds a new work item with UUID, plan file, and BACKLOG row
 
 ---
 
-## Next Steps
+## Install — pick your agent
 
-After install:
+Each guide is a single copy-paste block. Safe to re-run. Never overwrites `.hawp/work/`.
 
-1. **Shape work:** Edit `.hawp/kit/start-here.md` to fill the five fields
-2. **Track it:** Add rows to `.hawp/work/BACKLOG.md`
-3. **Use patterns:** Reuse templates from `.hawp/kit/templates/` for recurring shapes
-4. **Handle handoffs:** Use `.hawp/kit/templates/status-report.md` to transfer context
-5. **Review safety:** Check `.hawp/kit/standards/` for domain-specific guidance
+| Provider | Install | Update |
+|----------|---------|--------|
+| Claude Code | [claude/install/main.md](distribution/generated/claude/install/main.md) | [claude/update/main.md](distribution/generated/claude/update/main.md) |
+| GitHub Copilot | [github/install/main.md](distribution/generated/github/install/main.md) | [github/update/main.md](distribution/generated/github/update/main.md) |
+| Cursor | [cursor/install/main.md](distribution/generated/cursor/install/main.md) | [cursor/update/main.md](distribution/generated/cursor/update/main.md) |
+| Codex | [codex/install/main.md](distribution/generated/codex/install/main.md) | [codex/update/main.md](distribution/generated/codex/update/main.md) |
+| Continue | [continue/install/main.md](distribution/generated/continue/install/main.md) | [continue/update/main.md](distribution/generated/continue/update/main.md) |
 
-See `.hawp/kit/examples/` for concrete filled shapes.
-
----
-
-## Repository Layout (Source)
-
-**Install and update:**
-
-- `distribution/generated/` — per-provider install/update guides by branch (`github/install/main.md`, etc.; auto-generated)
-- `distribution/sources/` — authoritative sources for install/update scripts and provider fragments
-
-**Reusable kit (installed to downstream `.hawp/kit/`):**
-
-- `core/.hawp/kit/` — protocol docs, templates, patterns, standards, examples, usage guides
-
-**Agent provider packs (installed downstream per guide):**
-
-- `core/providers/.claude/` → `.claude/rules/`, `CLAUDE.md`
-- `core/providers/.codex/` → `AGENTS.md`
-- `core/providers/.github/` → `.github/`
-- `core/providers/.cursor/` → `.cursor/rules/`, `AGENTS.md`
-- `core/providers/.continue/` → `.continue/rules/`
-
-**This repo's working state (NOT installed downstream):**
-
-- `.hawp/work/` — backlog, active tasks, closed work, decisions, evidence
-
-**Tooling and reference:**
-
-- `.github/` — Copilot instructions and prompt library
-- `librarian/` — distribution validation and backlog tooling (see [librarian/README.md](librarian/README.md))
-- `librarian/src/` — Go source for the `hawp` CLI (build with `cd librarian/src && make build`)
-- `.hawp/bin/hawp` — repo-local CLI wrapper (`kit validate`, `kit normalize`, `work validate`, `work normalize`, plus `backlog` aliases)
-- `benchmark/` — optional HAWP vs other methods comparison
+Dev channel guides: [distribution/generated/README.md](distribution/generated/README.md)
 
 ---
 
-## Contributing
-
-**Distribution maintenance:**
-
-Shared agent behaviors live in `core/providers/shared/behaviors/` and materialize into provider packs.
-
-Install scripts are composed per provider:
-
-- `distribution/sources/install/script-core.md` + `providers/<provider>/script-install.md` + `install/script-footer.md`
-- `distribution/sources/update/script-core.md` + `providers/<provider>/script-update.md` + `update/script-footer.md`
-
-After editing shared behaviors or distribution sources:
+## First five minutes
 
 ```bash
-npm --prefix librarian run providers:sync
-npm --prefix librarian run distribution:sync
+# 1. Open your project, install for your provider (example: Claude Code)
+#    → run the Install command from the table above
+
+# 2. Index and embed the kit
+hawp search index
+hawp search embed --backend ollama   # or --backend onnx for offline
+
+# 3. Wire up MCP (one-time per provider)
+hawp init --provider claude   # writes .mcp.json
+
+# 4. Shape your first task
+open .hawp/kit/start-here.md
 ```
 
-`librarian/` is a repo-local source tree for HAWP maintenance. You do not install it separately; the commands above run against the checked-in workspace and materialize the provider files used by the generated install/update guides.
+After that: use `hawp_search` from your agent instead of reading kit files directly. Ranked chunks at the token budget you set — no skimming.
 
-(`distribution:sync` runs `providers:sync` first — materializes generated provider overlays from shared behaviors.)
+---
 
-Both install and update are single copy/paste blocks per provider guide (`PROVIDER` is set in each generated bash block). Safe to re-run. They never overwrite `.hawp/work/`. Provider overlays install only the paths for that provider (see [distribution/generated/README.md](distribution/generated/README.md)).
+## Why it works
 
-**Validation:**
+**Before HAWP:** agent starts cold, re-asks for context, drifts mid-task, produces output that doesn't match the original intent.
 
-GitHub Actions runs on `main`/`dev` pushes and pull requests:
+**With HAWP:** the shape is in the repo. The agent reads it once. Constraints are visible before the first tool call. Handoffs are the shape file plus a status report — both already written.
 
-- `Validate Distribution Generated` — fails if generated guides or materialized provider overlays drift from sources.
-- `Librarian Quality` — typechecks, runs the librarian unit tests, and validates `.hawp/work/` workflow state.
+The protocol is five fields. The kit adds templates and patterns. The CLI adds search, indexing, and MCP access. All three layers are optional: use just the shape, or use all of it.
 
 ---
 
 ## Roadmap
 
-Active development tracked in [`.hawp/work/BACKLOG.md`](.hawp/work/BACKLOG.md). Recent focus: provider packs and shared behavior materialization (Claude Code, Codex, GitHub, Cursor, Continue), public/private standards boundaries, and tooling hardening. UUID migration for parallel-safe work items remains on the roadmap.
+Active development in [`.hawp/work/BACKLOG.md`](.hawp/work/BACKLOG.md). Next focus: smart context sizing and dynamic chunk cap to push measurable token reduction beyond the current 30% dedup baseline.
 
-## Local Setup
+---
 
-The repo targets Node 26 and npm 11.17.0. Use `nvm` to select the version before running librarian commands:
+## Contributing
+
+Shared agent behaviors: `core/providers/shared/behaviors/` → materialize into provider packs with:
 
 ```bash
-nvm install
-nvm use
+npm --prefix librarian run distribution:sync
 ```
 
-If you do not use `nvm`, make sure your active Node runtime satisfies `librarian/package.json` and `.nvmrc`.
-
-## Git Publishing
-
-For publish flows in this repository, prefer GitKraken CLI (`gk`) or the GitHub connector/tools when they are available.
-
-- Use `gk` for terminal-based auth, provider sync, and GitKraken-managed publishing.
-- Use GitHub tooling when you need repo or PR operations through the GitHub connector.
-- Fall back to plain `git` only when the GitKraken or GitHub paths are unavailable.
+See [librarian/README.md](librarian/README.md) for tooling details and validation commands.
 
 ---
 
 ## License
 
-Apache 2.0 — see [LICENSE](./LICENSE). Installed kit ships its own `.hawp/LICENSE` copy.
+Apache 2.0 — see [LICENSE](./LICENSE).
