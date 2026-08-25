@@ -2,10 +2,11 @@
 work-item: t5l7m9n1
 type: planning
 title: "Benchmarking Infrastructure for v0.0.4+ — Comprehensive Provider Matrix"
-status: plan-ready
+status: done
 owner: unassigned
 created: 2026-07-26
-updated: 2026-07-26
+updated: 2026-08-24
+closed: 2026-08-24
 ---
 
 # Benchmarking Plan: v0.0.4+ Provider Matrix
@@ -168,3 +169,23 @@ v0.0.4+ will add incrementally:
 **Full Plan:** `librarian/docs/benchmark-plan-v004plus.md`  
 **v0.0.3 Baseline:** `librarian/docs/benchmarks-v003.md`  
 **Backend Status:** `librarian/docs/backends.md`
+
+---
+
+## Outcome
+
+Benchmarking infrastructure shipped as `hawp search benchmark` in the Go CLI (v0.0.5). The harness runs real search paths (lexical FTS5 + real HybridRank), uses 10 HAWP corpus-representative queries verified to return results, and produces keyword-based quality scoring against actual top-result text. Results are recorded in `librarian/docs/benchmarks-v004.md` and `librarian/docs/benchmarks-v006.md`. The CI/CD and cloud-API matrix phases are out of scope for the incremental patch strategy and remain deferred to v0.1.0.
+
+## Verification
+
+- [x] `hawp search benchmark` runs end-to-end with real HybridRank (v0.0.5, 2026-08-24)
+- [x] 10/10 queries return results against HAWP corpus (v0.0.5 + v0.0.6, 2026-08-24)
+- [x] Benchmark results recorded in `librarian/docs/benchmarks-v004.md` and `librarian/docs/benchmarks-v006.md`
+- [x] Evidence: `.hawp/work/evidence/2026/08/24/search-benchmark-v004.md` and `search-benchmark-v006.md`
+
+## Close Checklist
+
+- [x] Implementation complete (`hawp search benchmark` shipped in v0.0.5)
+- [x] Results documented in `librarian/docs/`
+- [x] BACKLOG updated (moved to Recently Closed)
+- [x] Plan file updated to `status: done`

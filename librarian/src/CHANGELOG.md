@@ -3,6 +3,41 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.6] - 2026-08-24
+
+Configurable index paths, release title rename, and `--semantic` removal.
+
+### Added
+
+- **Configurable index paths** — `hawp search index` now reads
+  `.hawp/config/search.json` (project) and `~/.hawp/config/search.json`
+  (home) to determine which paths to walk. Project config overrides home;
+  missing config files fall back to the default (`[".hawp/kit", ".hawp/work"]`).
+  Extra paths (anything other than kit/work) are walked generically as
+  `"custom"` corpus — directories recursed for `.md` files, single files
+  indexed directly. Missing paths warn and skip rather than failing.
+- Added `.hawp/config/search.json` to this repo, adding `librarian/docs/`
+  and `README.md` to the search corpus (392 docs / 3064 chunks).
+
+### Fixed
+
+- **SQLite schema** — `documents.category` CHECK constraint extended to
+  include `'custom'` so user-configured paths can be indexed. Existing
+  indexes must be rebuilt (`hawp search index`).
+- **Benchmark relative-performance display** — when lexical avg < 1ms,
+  the division produced `+Inf`. Now prints absolute hybrid latency with a
+  note that the ratio is not meaningful at sub-millisecond speeds.
+
+### Changed
+
+- **Release title** renamed from `librarian-go vX.Y.Z` to
+  `HAWP librarian vX.Y.Z`.
+- **`--semantic` flag removed** from registry and docs — it was never
+  implemented as a separate code path (silently fell through to lexical).
+  Search automatically uses hybrid re-ranking when vectors are present.
+- **`search.md`** updated: removed phantom `--semantic` row, corrected
+  hybrid latency range to 50–90ms, added configurable paths section.
+
 ## [0.0.5] - 2026-08-24
 
 `hawp update --check` read-only fix, benchmark rewrite, and docs naming cleanup.

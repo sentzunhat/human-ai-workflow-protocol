@@ -73,7 +73,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "$tag" -m "librarian-go $tag (via workflow_dispatch)"
+          git tag -a "$tag" -m "HAWP $tag (via workflow_dispatch)"
           git push origin "$tag"
 
       - name: Build release binaries
@@ -115,7 +115,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: "librarian-go v${{ steps.version.outputs.version }}"
+          name: "HAWP librarian v${{ steps.version.outputs.version }}"
           body_path: /tmp/release-notes.md
           prerelease: ${{ steps.version.outputs.prerelease }}
           draft: ${{ github.event.inputs.draft == 'true' }}

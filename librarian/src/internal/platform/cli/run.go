@@ -724,10 +724,20 @@ func runSearchIndex(args []string) error {
 		return nil
 	}
 
-	fmt.Println("Building enriched document index from .hawp/kit/ and .hawp/work/...")
+	home, _ := os.UserHomeDir()
+	hawpHome := ""
+	if home != "" {
+		hawpHome = filepath.Join(home, ".hawp")
+	}
+	searchCfg, err := appsearch.LoadSearchConfig(hawpHome, root)
+	if err != nil {
+		return fmt.Errorf("load search config: %w", err)
+	}
+
+	fmt.Printf("Building enriched document index from: %s\n", strings.Join(searchCfg.Index.Paths, ", "))
 
 	// Build corpus from actual files
-	corpus, err := buildCorpusFromRepo(root)
+	corpus, err := buildCorpusFromRepo(root, searchCfg.Index.Paths)
 	if err != nil {
 		return fmt.Errorf("build corpus: %w", err)
 	}
@@ -747,20 +757,28 @@ func runSearchIndex(args []string) error {
 	return nil
 }
 
-// buildCorpusFromRepo walks .hawp/kit/ and .hawp/work/ and builds an enriched corpus.
-func buildCorpusFromRepo(repoRoot string) (*appindex.EnrichedCorpus, error) {
+// buildCorpusFromRepo walks each configured path and builds an enriched corpus.
+// Paths are relative to repoRoot. ".hawp/kit" and ".hawp/work" get their
+// enriched walkers; all other paths are walked generically as "custom" corpus.
+func buildCorpusFromRepo(repoRoot string, paths []string) (*appindex.EnrichedCorpus, error) {
 	corpus := &appindex.EnrichedCorpus{}
 
-	// Index kit files
-	kitPath := filepath.Join(repoRoot, ".hawp", "kit")
-	if err := walkKitFiles(kitPath, corpus); err != nil {
-		return nil, err
-	}
-
-	// Index work files (BACKLOG + active plans + evidence + closed)
-	workPath := filepath.Join(repoRoot, ".hawp", "work")
-	if err := walkWorkFiles(workPath, corpus); err != nil {
-		return nil, err
+	for _, p := range paths {
+		abs := filepath.Join(repoRoot, filepath.FromSlash(p))
+		switch filepath.ToSlash(p) {
+		case ".hawp/kit":
+			if err := walkKitFiles(abs, corpus); err != nil {
+				return nil, err
+			}
+		case ".hawp/work":
+			if err := walkWorkFiles(abs, corpus); err != nil {
+				return nil, err
+			}
+		default:
+			if err := walkCustomPath(abs, p, corpus); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	return corpus, nil
@@ -817,6 +835,55 @@ func walkWorkFiles(workPath string, corpus *appindex.EnrichedCorpus) error {
 			FolderRole: folderRole,
 			Content:    string(content),
 			Status:     strPtr("closed"), // simplified; real parse needed
+			Metadata:   map[string]interface{}{"file": filepath.Base(path)},
+		})
+		return nil
+	})
+}
+
+// walkCustomPath walks a user-configured path (file or directory) and adds any
+// .md files to the corpus under the "custom" category.
+func walkCustomPath(abs, configuredPath string, corpus *appindex.EnrichedCorpus) error {
+	info, err := os.Stat(abs)
+	if os.IsNotExist(err) {
+		fmt.Printf("warning: configured index path not found, skipping: %s\n", configuredPath)
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+
+	if !info.IsDir() {
+		// Single file — index it directly if it's a .md file.
+		if filepath.Ext(abs) != ".md" {
+			return nil
+		}
+		content, _ := os.ReadFile(abs)
+		corpus.Documents = append(corpus.Documents, appindex.EnrichedDocument{
+			Path:       configuredPath,
+			Type:       "document",
+			Category:   "custom",
+			FolderRole: "custom/" + filepath.Dir(configuredPath),
+			Content:    string(content),
+			Metadata:   map[string]interface{}{"file": filepath.Base(abs)},
+		})
+		return nil
+	}
+
+	return filepath.Walk(abs, func(path string, fi os.FileInfo, err error) error {
+		if err != nil || fi.IsDir() || filepath.Ext(path) != ".md" {
+			return err
+		}
+		content, _ := os.ReadFile(path)
+		rel := strings.TrimPrefix(filepath.ToSlash(path), filepath.ToSlash(abs))
+		rel = strings.TrimPrefix(rel, "/")
+		docPath := filepath.ToSlash(filepath.Join(configuredPath, rel))
+		corpus.Documents = append(corpus.Documents, appindex.EnrichedDocument{
+			Path:       docPath,
+			Type:       "document",
+			Category:   "custom",
+			FolderRole: "custom/" + filepath.ToSlash(filepath.Dir(rel)),
+			Content:    string(content),
 			Metadata:   map[string]interface{}{"file": filepath.Base(path)},
 		})
 		return nil
@@ -1245,7 +1312,7 @@ COMMANDS
   backlog upgrade                      alias for work normalize
   db init                              plan the ~/.hawp home layout (scaffold)
   index build [--scope all|work|kit] [--export <path>]  enrich kit/work docs with folder context
-  search index                                     ingest kit + work documents into SQLite (no vectors yet)
+  search index                                     ingest configured paths into SQLite (reads .hawp/config/search.json)
   search embed --backend onnx|ollama [--model <name>]  embed all chunks with vectors
   search <query> [--limit <n>] [--context] [--llm-reshape] [--format markdown|json] [--max-tokens <n>]
                                                    lexical + vector hybrid search; --context for LLM-ready format,
