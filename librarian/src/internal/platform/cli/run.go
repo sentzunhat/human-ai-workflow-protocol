@@ -975,6 +975,7 @@ func runSearch(args []string) error {
 	limit := 10
 	wantContext := false
 	wantReshape := false
+	wantSemantic := false
 	format := "markdown"
 	maxTokens := 2000
 
@@ -990,6 +991,8 @@ func runSearch(args []string) error {
 		case args[i] == "--llm-reshape":
 			wantContext = true // reshaping implies --context; the underlying block is always built
 			wantReshape = true
+		case args[i] == "--semantic":
+			wantSemantic = true
 		case args[i] == "--format" && i+1 < len(args):
 			format = args[i+1]
 			i++
@@ -1015,26 +1018,36 @@ func runSearch(args []string) error {
 	}
 	defer db.Close()
 
-	// Lexical search (FTS5)
-	results, err := db.QueryChunksLexical(query, limit*3) // Get more candidates for re-ranking
-	if err != nil {
-		return fmt.Errorf("search failed: %w", err)
+	hasVectors, _ := db.HasVectors()
+
+	var results []map[string]interface{}
+	if wantSemantic {
+		if !hasVectors {
+			fmt.Println("No vectors found. Run `hawp search embed` first to enable semantic search.")
+			return nil
+		}
+		results = appsearch.SemanticSearch(query, db, limit)
+		if results == nil {
+			fmt.Printf("Semantic search failed for %q — check that your embedding backend is running.\n", query)
+			return nil
+		}
+	} else {
+		// Lexical search (FTS5), with hybrid re-ranking when vectors exist.
+		var err error
+		results, err = db.QueryChunksLexical(query, limit*3)
+		if err != nil {
+			return fmt.Errorf("search failed: %w", err)
+		}
+		if hasVectors {
+			results = appsearch.HybridRank(results, query, db, limit)
+		} else if len(results) > limit {
+			results = results[:limit]
+		}
 	}
 
 	if len(results) == 0 {
 		fmt.Printf("No results found for %q\n", query)
 		return nil
-	}
-
-	// Check if vectors exist for hybrid search
-	hasVectors, _ := db.HasVectors()
-	if hasVectors {
-		results = appsearch.HybridRank(results, query, db, limit)
-	} else {
-		// Keep only top-limit results from lexical search
-		if len(results) > limit {
-			results = results[:limit]
-		}
 	}
 
 	if !wantContext {

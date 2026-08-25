@@ -82,21 +82,21 @@ var benchmarkQueries = []BenchmarkQuery{
 	},
 }
 
-// RunBenchmark executes benchmark tests across lexical and hybrid patterns.
+// RunBenchmark executes benchmark tests across lexical, semantic, and hybrid patterns.
 func RunBenchmark(db *sqlite.IndexDB) error {
 	fmt.Println("\n╔════════════════════════════════════════════════════════════════╗")
-	fmt.Println("║           SEARCH BENCHMARK: LEXICAL vs HYBRID                 ║")
+	fmt.Println("║        SEARCH BENCHMARK: LEXICAL / SEMANTIC / HYBRID          ║")
 	fmt.Println("╚════════════════════════════════════════════════════════════════╝")
 
 	hasVectors, _ := db.HasVectors()
 	availablePatterns := []string{"lexical"}
 	if hasVectors {
-		availablePatterns = append(availablePatterns, "hybrid")
+		availablePatterns = append(availablePatterns, "semantic", "hybrid")
 	}
 
 	fmt.Printf("Available patterns: %s\n", strings.Join(availablePatterns, ", "))
 	if !hasVectors {
-		fmt.Println("Note: Vectors not found. Run 'hawp search embed' first to enable hybrid search.")
+		fmt.Println("Note: Vectors not found. Run 'hawp search embed' first to enable semantic and hybrid search.")
 	}
 	fmt.Printf("Running %d queries across %d patterns...\n\n", len(benchmarkQueries), len(availablePatterns))
 
@@ -122,6 +122,12 @@ func benchmarkOneQuery(query BenchmarkQuery, pattern string, db *sqlite.IndexDB)
 	switch pattern {
 	case "lexical":
 		rows, _ := db.QueryChunksLexical(query.Query, 10)
+		result.ResultCount = len(rows)
+		result.TopResultQuality = assessQuality(query.RelevantKeywords, rows)
+
+	case "semantic":
+		// Pure vector path: embed query → cosine rank all stored vectors → top-10.
+		rows := appsearch.SemanticSearch(query.Query, db, 10)
 		result.ResultCount = len(rows)
 		result.TopResultQuality = assessQuality(query.RelevantKeywords, rows)
 
@@ -176,7 +182,7 @@ func printBenchmarkSummary(results []BenchmarkResult) {
 	fmt.Println("Pattern      | Avg Latency | Min/Max    | Queries | Quality (High/Medium/Low)")
 	fmt.Println("-------------|-------------|-----------|---------|-------------------------")
 
-	patterns := []string{"lexical", "hybrid"}
+	patterns := []string{"lexical", "semantic", "hybrid"}
 	for _, pattern := range patterns {
 		latencies, ok := patternStats[pattern]
 		if !ok {
@@ -205,7 +211,7 @@ func printBenchmarkSummary(results []BenchmarkResult) {
 	if lexicalLatencies, ok := patternStats["lexical"]; ok {
 		lexicalAvg := averageFloat(lexicalLatencies)
 
-		for _, pattern := range []string{"hybrid"} {
+		for _, pattern := range []string{"semantic", "hybrid"} {
 			if latencies, ok := patternStats[pattern]; ok {
 				patternAvg := averageFloat(latencies)
 				if lexicalAvg < 1 {

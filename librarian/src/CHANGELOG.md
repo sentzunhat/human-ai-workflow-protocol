@@ -3,6 +3,32 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.7] - 2026-08-24
+
+Real `--semantic` search mode and three-way benchmark.
+
+### Added
+
+- **`--semantic` flag** — pure-vector search: embeds the query using the same
+  backend/model recorded in the index, ranks all stored chunk vectors by cosine
+  similarity, and returns the top-N results. No FTS5 involved. Works with both
+  ONNX and Ollama backends. Useful for conceptual queries with few keyword
+  matches: in the v0.0.7 benchmark, queries that returned 1–4 FTS5 results
+  returned 10 semantic results at 9/10 quality.
+- **`QueryChunksByIDs`** in `infrastructure/sqlite/index.go` — fetches full
+  document/chunk rows for a list of IDs in caller-supplied order, so semantic
+  ranking survives the SQLite lookup.
+- **Three-way benchmark** — `hawp search benchmark` now covers
+  lexical / semantic / hybrid. v0.0.7 results: lexical 0.1ms 10/10,
+  semantic 478.6ms 9/10, hybrid 72.0ms 10/10.
+
+### Changed
+
+- Benchmark header updated to "LEXICAL / SEMANTIC / HYBRID".
+- Registry search description updated to document `--semantic`.
+- `search.md` modes table updated with semantic row and corrected flag
+  reference block.
+
 ## [0.0.6] - 2026-08-24
 
 Configurable index paths, release title rename, and `--semantic` removal.
