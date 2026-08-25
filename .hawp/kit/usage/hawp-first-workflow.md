@@ -143,6 +143,38 @@ Asset download failures are a separate concern and require separate remediation.
 
 ---
 
+## Co-authoring conventions
+
+When an AI agent authors or co-authors a commit, include a `Co-Authored-By` trailer so
+attribution is visible in git history and on GitHub. Use the format:
+
+```
+Co-Authored-By: <Model Name> (<Company>) <noreply@company.com>
+```
+
+Common agents:
+
+| Agent | Trailer |
+|-------|---------|
+| Claude (Anthropic) | `Co-Authored-By: Claude Sonnet 4.6 (Anthropic) <noreply@anthropic.com>` |
+| GPT-4o (OpenAI) | `Co-Authored-By: GPT-4o (OpenAI) <noreply@openai.com>` |
+| o3 / Codex (OpenAI) | `Co-Authored-By: Codex (OpenAI) <noreply@openai.com>` |
+| Gemini (Google) | `Co-Authored-By: Gemini 2.5 Pro (Google) <noreply@google.com>` |
+| Cursor (Anysphere) | `Co-Authored-By: Cursor (Anysphere) <noreply@cursor.sh>` |
+| Continue | `Co-Authored-By: Continue (Continue) <noreply@continue.dev>` |
+
+Update the model name (e.g. `Sonnet 4.6` → `Opus 5`) when the version changes; the company
+and email stay stable per vendor.
+
+For human + AI pair sessions, include both authors:
+
+```
+Co-Authored-By: Diego Beltran <beltrd@gmail.com>
+Co-Authored-By: Claude Sonnet 4.6 (Anthropic) <noreply@anthropic.com>
+```
+
+---
+
 ## Quick reference
 
 | Situation | Action |
