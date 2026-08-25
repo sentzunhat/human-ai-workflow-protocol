@@ -2,6 +2,7 @@ package context
 
 import (
 	"math"
+	"strings"
 
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
 )
@@ -59,6 +60,79 @@ func GroupBySource(results []search.Result) map[string][]search.Result {
 	}
 
 	return groups
+}
+
+// ContentJaccardDedup removes near-duplicate search results using word-set
+// Jaccard similarity on chunk content. Results are assumed to be in rank order
+// (index 0 = highest rank). Any chunk whose Jaccard overlap with a
+// higher-ranked kept chunk exceeds threshold is dropped.
+//
+// Jaccard similarity: |A ∩ B| / |A ∪ B|, where A and B are the word sets
+// of two chunks. A threshold of 0.70 catches near-duplicate paragraphs from
+// the same document section without requiring embeddings.
+//
+// Returns the kept results and the count of dropped chunks.
+func ContentJaccardDedup(results []search.Result, threshold float64) ([]search.Result, int) {
+	if len(results) == 0 {
+		return results, 0
+	}
+
+	kept := make([]search.Result, 0, len(results))
+	keptSets := make([]map[string]struct{}, 0, len(results))
+	dropped := 0
+
+	for _, r := range results {
+		words := wordSet(r.Content)
+		isDuplicate := false
+		for _, ks := range keptSets {
+			if jaccardSim(words, ks) > threshold {
+				isDuplicate = true
+				break
+			}
+		}
+		if isDuplicate {
+			dropped++
+		} else {
+			kept = append(kept, r)
+			keptSets = append(keptSets, words)
+		}
+	}
+
+	return kept, dropped
+}
+
+// wordSet lowercases text and returns the set of alphanumeric tokens longer
+// than one character. Single-character tokens (articles, punctuation remnants)
+// are excluded to reduce noise.
+func wordSet(text string) map[string]struct{} {
+	lower := strings.ToLower(text)
+	set := make(map[string]struct{})
+	for _, word := range strings.FieldsFunc(lower, func(r rune) bool {
+		return !('a' <= r && r <= 'z') && !('0' <= r && r <= '9')
+	}) {
+		if len(word) > 1 {
+			set[word] = struct{}{}
+		}
+	}
+	return set
+}
+
+// jaccardSim computes |A ∩ B| / |A ∪ B| for two word sets.
+func jaccardSim(a, b map[string]struct{}) float64 {
+	if len(a) == 0 && len(b) == 0 {
+		return 1.0
+	}
+	intersection := 0
+	for w := range a {
+		if _, ok := b[w]; ok {
+			intersection++
+		}
+	}
+	union := len(a) + len(b) - intersection
+	if union == 0 {
+		return 0
+	}
+	return float64(intersection) / float64(union)
 }
 
 // cosineSimilarity calculates the cosine similarity between two vectors.

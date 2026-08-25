@@ -233,7 +233,6 @@ Regenerated on demand if the codebase changes.
 
   hawp search "query" --context              # LLM-ready markdown
   hawp search "query" --context --format json # JSON output
-  hawp search "query" --context --llm-reshape # AI-improved context (v0.0.3+)
 `
 }
 

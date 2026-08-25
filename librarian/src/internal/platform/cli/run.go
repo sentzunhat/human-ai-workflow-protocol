@@ -54,6 +54,13 @@ func Run(args []string) error {
 		sub = args[1]
 	}
 
+	// Emit a non-blocking update notice after the command completes.
+	// Skip for mcp (long-running server), update (already handling updates),
+	// version (informational), and --no-update-check.
+	skipNotify := command == "mcp" || command == "update" || command == "version" ||
+		containsArg(args, "--no-update-check")
+	defer appupdate.CheckAndNotify(domainupdate.Version, skipNotify)
+
 	switch {
 	case command == "uuid":
 		return runUUID(args[1:])
@@ -103,6 +110,12 @@ func Run(args []string) error {
 
 	case command == "update" && containsArg(args[1:], "--check"):
 		return runUpdateVerify()
+
+	case command == "update" && containsArg(args[1:], "--disable-auto"):
+		return runUpdateAutoConfig(false)
+
+	case command == "update" && containsArg(args[1:], "--enable-auto"):
+		return runUpdateAutoConfig(true)
 
 	case command == "update":
 		return runUpdateFull(args[1:])
@@ -335,9 +348,9 @@ func runInit(args []string) error {
 	}
 	result := appprovision.Run(download.NewHTTPFetcher(), home, appprovision.DefaultRegistry())
 	fmt.Print(result.String())
-	if result.Failed() {
-		return ExitError{Code: 1}
-	}
+	// Asset failures are non-blocking: kit sync and provider config writes are
+	// independent of model/runtime downloads and must proceed regardless.
+	// We carry the failure forward and return exit 1 at the very end.
 
 	client := githubrelease.NewClient()
 	if err := doKitSync(client, providers); err != nil {
@@ -348,13 +361,14 @@ func runInit(args []string) error {
 		root, rerr := repo.FindBacklogRepoRoot(mustGetwd())
 		if rerr != nil {
 			fmt.Println("Not in a HAWP repo; skipping MCP config write.")
-			return nil
-		}
-		if err := appmcp.WriteProviderConfigs(root, providers); err != nil {
+		} else if err := appmcp.WriteProviderConfigs(root, providers); err != nil {
 			return err
 		}
 	}
 
+	if result.Failed() {
+		return ExitError{Code: 1}
+	}
 	return nil
 }
 
@@ -458,6 +472,22 @@ func runUpdateFull(args []string) error {
 	}
 	fmt.Printf("Updated binary to %s.\n", applied)
 	return doKitSync(client, providers)
+}
+
+// runUpdateAutoConfig writes ~/.hawp/config/update.json to enable or disable
+// the Phase-4 auto-install. Notices still print when disabled; only the
+// unattended install is suppressed.
+func runUpdateAutoConfig(enabled bool) error {
+	if err := appupdate.SetAutoUpdate(enabled); err != nil {
+		return fmt.Errorf("could not write update config: %w", err)
+	}
+	if enabled {
+		fmt.Println("Auto-update enabled. hawp will self-install after the 21-minute countdown.")
+	} else {
+		fmt.Println("Auto-update disabled. hawp will still notify you about new versions.")
+		fmt.Println("Run `hawp update --enable-auto` to re-enable, or `hawp update` to install manually.")
+	}
+	return nil
 }
 
 func parseProviderFlags(args []string) []string {
@@ -969,15 +999,16 @@ func runSearchEmbed(args []string) error {
 
 func runSearch(args []string) error {
 	if len(args) < 1 {
-		return errors.New("usage: hawp search <query> [--limit <n>] [--context] [--llm-reshape] [--format markdown|json] [--max-tokens <n>]")
+		return errors.New("usage: hawp search <query> [--limit <n>] [--semantic] [--context] [--format markdown|json] [--max-tokens <n>] [--verbose|-v] [--hybrid-ratio <f>]")
 	}
 	query := args[0]
 	limit := 10
 	wantContext := false
-	wantReshape := false
 	wantSemantic := false
 	format := "markdown"
 	maxTokens := 2000
+	verbose := false
+	hybridRatio := 0.3 // default: 30% lexical, 70% semantic
 
 	for i := 1; i < len(args); i++ {
 		switch {
@@ -988,9 +1019,6 @@ func runSearch(args []string) error {
 			i++
 		case args[i] == "--context":
 			wantContext = true
-		case args[i] == "--llm-reshape":
-			wantContext = true // reshaping implies --context; the underlying block is always built
-			wantReshape = true
 		case args[i] == "--semantic":
 			wantSemantic = true
 		case args[i] == "--format" && i+1 < len(args):
@@ -1000,6 +1028,18 @@ func runSearch(args []string) error {
 			if n, err := strconv.Atoi(args[i+1]); err == nil {
 				maxTokens = n
 			}
+			i++
+		case args[i] == "--verbose" || args[i] == "-v":
+			verbose = true
+		case args[i] == "--hybrid-ratio" && i+1 < len(args):
+			f, err := strconv.ParseFloat(args[i+1], 64)
+			if err != nil {
+				return fmt.Errorf("--hybrid-ratio: %q is not a valid float", args[i+1])
+			}
+			if f < 0.0 || f > 1.0 {
+				return fmt.Errorf("--hybrid-ratio must be in [0.0, 1.0] (got %.4f); 0.0 = pure semantic, 1.0 = pure lexical", f)
+			}
+			hybridRatio = f
 			i++
 		}
 	}
@@ -1039,7 +1079,7 @@ func runSearch(args []string) error {
 			return fmt.Errorf("search failed: %w", err)
 		}
 		if hasVectors {
-			results = appsearch.HybridRank(results, query, db, limit)
+			results = appsearch.HybridRank(results, query, db, limit, float32(hybridRatio))
 		} else if len(results) > limit {
 			results = results[:limit]
 		}
@@ -1078,24 +1118,52 @@ func runSearch(args []string) error {
 			Title:     getStr(r, "folder_role"),
 			Content:   getStr(r, "text"),
 			Relevance: float32(0.95), // Default high relevance
-			Embedding: []float32{},   // Not used in dedup for now
+			Embedding: []float32{},   // Not used in content-based dedup
 		}
 	}
 
-	// Deduplicate results
-	deduped := appcontext.DeduplicateResults(searchResults, 0.95)
+	// Pre-pack content dedup: drop chunks with >70% word-set Jaccard overlap
+	// against a higher-ranked chunk. No embeddings needed — fast word-set
+	// comparison catches near-duplicate paragraphs from the same document section.
+	deduped, droppedByDedup := appcontext.ContentJaccardDedup(searchResults, 0.70)
+
+	// Compute avg chunk token estimate (chars/4) across the full pre-dedup set
+	// for the verbose savings report. Done here so the value is accurate even
+	// when droppedByDedup is 0.
+	avgChunkTokens := 0
+	if len(searchResults) > 0 {
+		total := 0
+		for _, r := range searchResults {
+			total += (len(r.Content) + 3) / 4
+		}
+		avgChunkTokens = total / len(searchResults)
+	}
+
+	// Dynamic chunk cap: greedily include deduped chunks until the running token
+	// estimate (chars/4) would exceed the budget. Stopping early reduces
+	// per-result metadata overhead that FormatAsMarkdown adds, ensuring the
+	// wrapper cost doesn't cancel out the dedup savings.
+	capped := make([]domainsearch.Result, 0, len(deduped))
+	runningTokens := 0
+	for _, r := range deduped {
+		chunkEst := (len(r.Content) + 3) / 4
+		if len(capped) > 0 && runningTokens+chunkEst > maxTokens {
+			break
+		}
+		capped = append(capped, r)
+		runningTokens += chunkEst
+	}
+
+	// Verbose token accounting: print to stderr so it doesn't pollute stdout
+	// context block output (which may be piped to an LLM).
+	if verbose {
+		savedTokens := droppedByDedup * avgChunkTokens
+		fmt.Fprintf(os.Stderr, "context: %d chunks, ~%d tokens (saved ~%d tokens via dedup)\n",
+			len(capped), runningTokens, savedTokens)
+	}
 
 	// Format as context block
-	block := appcontext.FormatAsMarkdown(deduped, query, maxTokens)
-
-	// Optionally reshape via embeddings + LLM (Phase 3). Never silently
-	// ignored: any failure to load config, construct backends, or reshape
-	// prints an explicit warning to stderr and falls back to the unreshaped
-	// context block, so a broken --llm-reshape is always visible to the user.
-	var ragOutput *appcontext.RAGPipelineOutput
-	if wantReshape {
-		ragOutput = tryReshapeViaRAGPipeline(block, maxTokens)
-	}
+	block := appcontext.FormatAsMarkdown(capped, query, maxTokens)
 
 	// Output based on format
 	switch format {
@@ -1113,26 +1181,13 @@ func runSearch(args []string) error {
 			"references":   toJSONReferences(block.References),
 			"metadata":     block.Metadata,
 		}
-		if ragOutput != nil {
-			jsonBlock["reshaped_content"] = ragOutput.Content
-			jsonBlock["key_concepts"] = ragOutput.KeyConcepts
-			jsonBlock["pipeline"] = ragOutput.Pipeline
-			// Reshaped references (from the RAG pipeline) supersede the raw
-			// ones above once reshaping ran, since they carry the same shape
-			// plus pipeline provenance.
-			jsonBlock["references"] = toJSONReferences(ragOutput.References)
-		}
 		out, err := json.MarshalIndent(jsonBlock, "", "  ")
 		if err != nil {
 			return fmt.Errorf("failed to marshal JSON: %w", err)
 		}
 		fmt.Println(string(out))
 	default: // markdown
-		if ragOutput != nil {
-			fmt.Println(renderReshapedWithReferences(block.Title, ragOutput))
-		} else {
-			fmt.Println(block.String())
-		}
+		fmt.Println(block.String())
 	}
 
 	return nil
@@ -1140,9 +1195,7 @@ func runSearch(args []string) error {
 
 // toJSONReferences converts DocumentReferences into the JSON shape a
 // downstream retrieval step consumes as reference docs: source, title,
-// matched content excerpt, relevance, and line range (when known). Kept as
-// one conversion function so the raw-search and reshaped-output JSON paths
-// emit an identical "references" shape.
+// matched content excerpt, relevance, and line range (when known).
 func toJSONReferences(refs []appcontext.DocumentReference) []map[string]interface{} {
 	out := make([]map[string]interface{}, len(refs))
 	for i, r := range refs {
@@ -1156,96 +1209,6 @@ func toJSONReferences(refs []appcontext.DocumentReference) []map[string]interfac
 		}
 	}
 	return out
-}
-
-// tryReshapeViaRAGPipeline loads context config and runs the full RAG pipeline
-// (retrieval → reshaping via embeddings+LLM) over the block. On any failure
-// (config, backend construction, or the reshape call itself) it prints an
-// explicit warning to stderr and returns nil so the caller falls back to the
-// unreshaped block — --llm-reshape must never fail silently.
-//
-// The RAG pipeline maintains references to original source documents throughout
-// the reshaping process, enabling attribution and source verification.
-func tryReshapeViaRAGPipeline(block appcontext.ContextBlock, maxTokens int) *appcontext.RAGPipelineOutput {
-	home, err := os.UserHomeDir()
-	hawpHome := ""
-	if err == nil {
-		hawpHome = filepath.Join(home, ".hawp")
-	}
-
-	root, _ := repo.FindBacklogRepoRoot(mustGetwd())
-
-	cfg, err := appcontext.LoadContextConfig(hawpHome, root)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: --llm-reshape config error: %v; using unreshaped context.\n", err)
-		return nil
-	}
-
-	pipeline, err := appcontext.NewDefaultRAGPipeline(appcontext.ReshapingConfig{
-		EmbeddingsBackend: cfg.Embeddings.Backend,
-		EmbeddingsModel:   cfg.Embeddings.Model,
-		EmbeddingsURL:     cfg.Backends.Ollama.URL,
-		LLMBackend:        cfg.LLM.Backend,
-		LLMModel:          cfg.LLM.Model,
-		LLMURL:            cfg.Backends.Ollama.URL,
-		MaxTokens:         maxTokens,
-		Temperature:       cfg.LLM.Temperature,
-	}, root)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: --llm-reshape unavailable (%v); using unreshaped context. "+
-			"Configure via ~/.hawp/config/context.json or HAWP_LLM_BACKEND/HAWP_EMBEDDINGS_BACKEND.\n", err)
-		return nil
-	}
-	defer pipeline.Close()
-
-	result, err := pipeline.Reshape(context.Background(), block, maxTokens)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Warning: --llm-reshape failed (%v); using unreshaped context.\n", err)
-		return nil
-	}
-
-	return &result
-}
-
-// renderReshapedWithReferences formats a RAGPipelineOutput as markdown for
-// terminal output. Includes the reshaped content, key concepts, pipeline
-// info, and source references.
-//
-// Pipeline "none-none" is special-cased: Content is already the interleaved
-// reference+content body (see formatResultsInline / ContextReshaper.Reshape),
-// so a trailing references list here would just repeat it. Any pipeline that
-// ran embeddings and/or an LLM gets the trailing list, since its Content is
-// either merged LLM prose (no per-chunk attribution possible) or otherwise
-// doesn't already carry inline references.
-func renderReshapedWithReferences(title string, output *appcontext.RAGPipelineOutput) string {
-	var sb strings.Builder
-
-	if output.Pipeline == "none-none" {
-		fmt.Fprintf(&sb, "# %s\n\n", title)
-	} else {
-		fmt.Fprintf(&sb, "# %s (LLM-reshaped, pipeline: %s)\n\n", title, output.Pipeline)
-	}
-
-	if len(output.KeyConcepts) > 0 {
-		fmt.Fprintf(&sb, "**Key concepts:** %s\n\n", strings.Join(output.KeyConcepts, ", "))
-	}
-
-	sb.WriteString(output.Content)
-	sb.WriteString("\n")
-
-	if output.Pipeline != "none-none" && len(output.References) > 0 {
-		sb.WriteString("\n---\n\n")
-		sb.WriteString("## References\n\n")
-		for _, ref := range output.References {
-			fmt.Fprintf(&sb, "**Reference:** %s (%d%% relevant)\n", ref.Source, int(ref.Relevance*100))
-			if ref.LineStart > 0 || ref.LineEnd > 0 {
-				fmt.Fprintf(&sb, "    Lines: %d-%d\n", ref.LineStart, ref.LineEnd)
-			}
-			sb.WriteString("\n")
-		}
-	}
-
-	return sb.String()
 }
 
 // runSearchBenchmark runs benchmark tests on all 3 search patterns
@@ -1317,6 +1280,8 @@ COMMANDS
   version                               print the running hawp version
   update                                update binary + kit + all providers (--no-providers for kit-only)
   update --check                        check whether an update is available without installing (exit 1 = update ready)
+  update --disable-auto                 disable the 21-min countdown auto-install (notices still print)
+  update --enable-auto                  re-enable the auto-install countdown
   update latest                         update binary only
   update sync [--provider <name>|all]   sync kit (+ providers if specified)
   update verify                         check whether an update is available (exit 1 = update ready)
@@ -1327,9 +1292,10 @@ COMMANDS
   index build [--scope all|work|kit] [--export <path>]  enrich kit/work docs with folder context
   search index                                     ingest configured paths into SQLite (reads .hawp/config/search.json)
   search embed --backend onnx|ollama [--model <name>]  embed all chunks with vectors
-  search <query> [--limit <n>] [--context] [--llm-reshape] [--format markdown|json] [--max-tokens <n>]
-                                                   lexical + vector hybrid search; --context for LLM-ready format,
-                                                   --llm-reshape to additionally restructure via embeddings+LLM
+  search <query> [--limit <n>] [--semantic] [--context] [--format markdown|json] [--max-tokens <n>] [--hybrid-ratio <f>]
+                                                   lexical + vector hybrid search; --semantic for pure-vector mode;
+                                                   --context for LLM-ready context block;
+                                                   --hybrid-ratio tunes the lexical/semantic blend (default 0.3)
   model pull <hf-org/repo> [--onnx-file <path>]   download any Hugging Face ONNX model into ~/.hawp/models
   embed <text>... [--model <hf-org/repo>]         embed text via a local model (default: all-MiniLM-L6-v2)
 
@@ -1342,11 +1308,11 @@ WORK NORMALIZE OPTIONS
   --export-research-queue <path>  write research queue JSON
   --force-dirty          skip the apply-mode dirty-tree guard
 
-SEARCH --CONTEXT OPTIONS (Phase 4)
+SEARCH --CONTEXT OPTIONS
   --context              output LLM-ready context block (deduped + formatted)
-  --llm-reshape           additionally reshape via embeddings+LLM (implies --context;
-                          requires backends configured, see librarian/docs/backends.md;
-                          falls back to unreshaped context with a warning if unavailable)
+  --semantic             pure-vector search (requires embed step; skips FTS5)
   --format markdown|json output format (default markdown)
-  --max-tokens <n>       token budget for context block (default 2000)`
+  --max-tokens <n>       token budget for context block (default 2000)
+  --verbose | -v         print token accounting summary to stderr (chunks, ~tokens, saved via dedup)
+  --hybrid-ratio <f>     lexical fraction for hybrid blend [0.0, 1.0] (default 0.3)`
 }

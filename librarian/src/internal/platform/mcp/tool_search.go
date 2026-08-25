@@ -6,7 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	appcontext "github.com/sentzunhat/hawp/librarian/src/internal/application/context"
 	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
+	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
 )
 
@@ -15,7 +17,7 @@ const contextRadius = 40 // lines above/below source line for context window
 func searchToolDef() map[string]any {
 	return map[string]any{
 		"name":        "hawp_search",
-		"description": "Search indexed HAWP kit and work documents. Returns structured results with source path, relevance, chunk content, precise line positions, and a suggested read window for context expansion. Run `hawp search index` then `hawp search embed` first to build the index.",
+		"description": "Search indexed HAWP kit and work documents. By default returns structured results with source path, relevance, chunk content, and line positions. Pass context:true to instead receive a single deduplicated, token-capped markdown block ready for LLM injection (Jaccard dedup + greedy token cap applied before formatting). Run `hawp search index` then `hawp search embed` first to build the index.",
 		"inputSchema": map[string]any{
 			"type": "object",
 			"properties": map[string]any{
@@ -27,6 +29,14 @@ func searchToolDef() map[string]any {
 					"type":        "integer",
 					"description": "Max results to return (default 5)",
 				},
+				"context": map[string]any{
+					"type":        "boolean",
+					"description": "When true, return a pre-shaped markdown context block (deduplicated + token-capped) instead of raw results",
+				},
+				"max_tokens": map[string]any{
+					"type":        "integer",
+					"description": "Token budget for the context block when context:true (default 2000)",
+				},
 			},
 			"required": []string{"query"},
 		},
@@ -35,8 +45,10 @@ func searchToolDef() map[string]any {
 
 func toolSearch(args json.RawMessage, repoRoot string) rpcResponse {
 	var a struct {
-		Query string `json:"query"`
-		Limit int    `json:"limit"`
+		Query     string `json:"query"`
+		Limit     int    `json:"limit"`
+		Context   bool   `json:"context"`
+		MaxTokens int    `json:"max_tokens"`
 	}
 	if err := json.Unmarshal(args, &a); err != nil {
 		return toolErr("invalid args: " + err.Error())
@@ -46,6 +58,13 @@ func toolSearch(args json.RawMessage, repoRoot string) rpcResponse {
 	}
 	if a.Limit <= 0 {
 		a.Limit = 5
+	}
+	if a.MaxTokens <= 0 {
+		a.MaxTokens = 2000
+	}
+
+	if a.Context {
+		return toolSearchContext(a.Query, a.Limit, a.MaxTokens, repoRoot)
 	}
 
 	dbPath := filepath.Join(repoRoot, ".hawp", "db", "index.sqlite")
@@ -65,7 +84,7 @@ func toolSearch(args json.RawMessage, repoRoot string) rpcResponse {
 
 	hasVectors, _ := db.HasVectors()
 	if hasVectors {
-		rows = appsearch.HybridRank(rows, a.Query, db, a.Limit)
+		rows = appsearch.HybridRank(rows, a.Query, db, a.Limit, 0)
 	} else if len(rows) > a.Limit {
 		rows = rows[:a.Limit]
 	}
@@ -101,6 +120,41 @@ func toolSearch(args json.RawMessage, repoRoot string) rpcResponse {
 	}
 
 	return jsonResult(SearchResponse{Query: a.Query, Results: results})
+}
+
+// toolSearchContext runs dedup + dynamic token cap + markdown format and returns
+// a single pre-shaped context block ready for LLM injection.
+func toolSearchContext(query string, limit, maxTokens int, repoRoot string) rpcResponse {
+	results, err := appsearch.Query(repoRoot, query, limit)
+	if err != nil {
+		return toolErr("search failed: " + err.Error())
+	}
+	if len(results) == 0 {
+		return jsonResult(ContextSearchResponse{Query: query, Budget: maxTokens})
+	}
+
+	deduped, dropped := appcontext.ContentJaccardDedup(results, 0.70)
+
+	capped := make([]domainsearch.Result, 0, len(deduped))
+	runningTokens := 0
+	for _, r := range deduped {
+		chunkEst := (len(r.Content) + 3) / 4
+		if len(capped) > 0 && runningTokens+chunkEst > maxTokens {
+			break
+		}
+		capped = append(capped, r)
+		runningTokens += chunkEst
+	}
+
+	block := appcontext.FormatAsMarkdown(capped, query, maxTokens)
+	return jsonResult(ContextSearchResponse{
+		Query:         query,
+		Content:       block.String(),
+		TokenCount:    block.TokenCount,
+		Budget:        maxTokens,
+		ChunksUsed:    block.ResultCount,
+		ChunksDropped: dropped,
+	})
 }
 
 // findSourceLine returns the 1-indexed line in the source file where the first

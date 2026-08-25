@@ -41,7 +41,7 @@ func Query(repoRoot, query string, limit int) ([]domainsearch.Result, error) {
 
 	hasVectors, _ := db.HasVectors()
 	if hasVectors {
-		rows = HybridRank(rows, query, db, limit)
+		rows = HybridRank(rows, query, db, limit, 0)
 	} else if len(rows) > limit {
 		rows = rows[:limit]
 	}
@@ -135,15 +135,23 @@ func SemanticSearch(query string, db *sqlite.IndexDB, limit int) []map[string]in
 // embedded with whichever backend/model actually embedded the index
 // (sqlite.IndexDB.GetEmbeddingMetadata) — a query vector from a different
 // model would be comparing an incompatible vector space, even when
-// dimensions happen to match — then blended 30% lexical-rank / 70%
-// semantic-cosine-similarity. Falls back to lexical order alone if no
-// embedding metadata is recorded yet, the embedder can't be constructed, or
-// query embedding fails, so hybrid ranking degrades gracefully rather than
-// erroring the whole search.
-func HybridRank(lexicalResults []map[string]interface{}, query string, db *sqlite.IndexDB, limit int) []map[string]interface{} {
+// dimensions happen to match — then blended by lexicalWeight (lexical-rank
+// fraction) and (1 - lexicalWeight) (semantic cosine-similarity fraction).
+// When lexicalWeight <= 0 the default 30% lexical / 70% semantic blend is
+// used. Falls back to lexical order alone if no embedding metadata is
+// recorded yet, the embedder can't be constructed, or query embedding fails,
+// so hybrid ranking degrades gracefully rather than erroring the whole search.
+func HybridRank(lexicalResults []map[string]interface{}, query string, db *sqlite.IndexDB, limit int, lexicalWeight float32) []map[string]interface{} {
 	if len(lexicalResults) == 0 {
 		return lexicalResults
 	}
+	// Default blend: 30% lexical, 70% semantic.
+	lw := float64(lexicalWeight)
+	if lw <= 0 {
+		lw = 0.3
+	}
+	sw := 1.0 - lw
+
 	fallback := func() []map[string]interface{} {
 		if len(lexicalResults) > limit {
 			return lexicalResults[:limit]
@@ -188,10 +196,10 @@ func HybridRank(lexicalResults []map[string]interface{}, query string, db *sqlit
 			// Cosine similarity (0 to 1)
 			semanticScore := float64(domainsearch.CosineSimilarity(queryVector, chunkVec))
 
-			// Hybrid blend: 30% lexical rank (normalized), 70% semantic score.
+			// Hybrid blend: lw lexical rank (normalized), sw semantic score.
 			// Lexical rank is implicit in FTS5 order; use position as proxy.
 			lexicalRank := 1.0 / (1.0 + float64(i)/10.0) // Decay by position
-			blendedScore := (lexicalRank * 0.3) + (semanticScore * 0.7)
+			blendedScore := (lexicalRank * lw) + (semanticScore * sw)
 
 			result["_semantic_score"] = semanticScore
 			result["_lexical_rank"] = lexicalRank
@@ -201,7 +209,7 @@ func HybridRank(lexicalResults []map[string]interface{}, query string, db *sqlit
 			lexicalRank := 1.0 / (1.0 + float64(i)/10.0)
 			result["_semantic_score"] = 0.0
 			result["_lexical_rank"] = lexicalRank
-			result["_hybrid_score"] = lexicalRank * 0.3
+			result["_hybrid_score"] = lexicalRank * lw
 		}
 	}
 

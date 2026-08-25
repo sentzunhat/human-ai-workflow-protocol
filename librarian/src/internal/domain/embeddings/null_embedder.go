@@ -7,8 +7,7 @@ import "context"
 // caller wants structured search/reference output (deduplicated results,
 // source references) without running any embedding model at all, e.g. a
 // user with no ONNX model downloaded and no Ollama server running who still
-// wants --context output, or a deliberate "just give me the reference
-// links" mode for --llm-reshape.
+// wants --context output.
 type NullEmbedder struct{}
 
 // NewNullEmbedder creates a NullEmbedder. Never fails — no model or network

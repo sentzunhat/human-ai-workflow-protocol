@@ -69,3 +69,14 @@ type LineRange struct {
 type ContextInfo struct {
 	Window LineRange `json:"window"`
 }
+
+// ContextSearchResponse is returned by hawp_search when context:true.
+// The content field is a pre-shaped markdown block ready for LLM injection.
+type ContextSearchResponse struct {
+	Query         string `json:"query"`
+	Content       string `json:"content"`
+	TokenCount    int    `json:"token_count"`
+	Budget        int    `json:"budget"`
+	ChunksUsed    int    `json:"chunks_used"`
+	ChunksDropped int    `json:"chunks_dropped"`
+}

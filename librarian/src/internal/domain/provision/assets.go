@@ -106,35 +106,16 @@ func RuntimeAsset() (Asset, error) {
 	return asset, nil
 }
 
-// ModelAssets are all embedding models provisioned by hawp init.
-// Includes both BGE-base-en-v1.5 (default, 768-dim) and all-MiniLM-L6-v2 (fast, 384-dim).
-// BGE files go to ~/.hawp/models/bge/ subdirectory; MiniLM to ~/.hawp/models/minilm/.
+// ModelAssets are the embedding model files provisioned by hawp init.
+// Only models with verified SHA-256 checksums are included here.
+// all-MiniLM-L6-v2 files go to ~/.hawp/models/minilm/.
 // Verified 2026-07-22 against HuggingFace repos.
+//
+// BGE-base-en-v1.5 (768-dim) is tracked separately in BGEModelAssets.
+// Its checksums were never verified; it is excluded from the default
+// provision set to prevent guaranteed download failures blocking init.
 var ModelAssets = []Asset{
-	// BGE-base-en-v1.5: better quality (default)
-	{
-		Name:     "bge_model.onnx",
-		URL:      "https://huggingface.co/Xenova/bge-base-en-v1.5/resolve/main/onnx/model.onnx",
-		SHA256:   "6a9dde9e8b9e2c2b9e8b9e2c2b9e8b9e2c2b9e8b9e2c2b9e8b9e2c2b9e8b9e00", // v0.0.2: verify from HuggingFace
-		Size:     130000000,                                                         // approx 130 MB
-		DestName: "bge/model.onnx",
-	},
-	{
-		Name:     "bge_tokenizer.json",
-		URL:      "https://huggingface.co/Xenova/bge-base-en-v1.5/resolve/main/tokenizer.json",
-		SHA256:   "9e8b9e2c2b9e8b9e2c2b9e8b9e2c2b9e8b9e2c2b9e8b9e2c2b9e8b9e2c2b9e00", // v0.0.2: verify from HuggingFace
-		Size:     800000,                                                            // approx
-		DestName: "bge/tokenizer.json",
-	},
-	{
-		Name:     "bge_config.json",
-		URL:      "https://huggingface.co/Xenova/bge-base-en-v1.5/resolve/main/config.json",
-		SHA256:   "2b9e8b9e2c2b9e8b9e2c2b9e8b9e2c2b9e8b9e2c2b9e8b9e2c2b9e8b9e2c2b00", // v0.0.2: verify from HuggingFace
-		Size:     700,
-		DestName: "bge/config.json",
-	},
-
-	// all-MiniLM-L6-v2: fast iteration (fallback)
+	// all-MiniLM-L6-v2: 384-dim, verified checksums
 	{
 		Name:     "minilm_model.onnx",
 		URL:      "https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main/onnx/model_quantized.onnx",
@@ -155,5 +136,33 @@ var ModelAssets = []Asset{
 		SHA256:   "7135149f7cffa1a573466c6e4d8423ed73b62fd2332c575bf738a0d033f70df7",
 		Size:     650,
 		DestName: "minilm/config.json",
+	},
+}
+
+// BGEModelAssets describes the BGE-base-en-v1.5 (768-dim) model files.
+// These are NOT included in the default provision set because their SHA-256
+// checksums have never been verified against the upstream HuggingFace repo.
+// Add them to a custom Registry once real checksums are obtained.
+var BGEModelAssets = []Asset{
+	{
+		Name:     "bge_model.onnx",
+		URL:      "https://huggingface.co/Xenova/bge-base-en-v1.5/resolve/main/onnx/model.onnx",
+		SHA256:   "", // TODO: verify from HuggingFace before use
+		Size:     130000000,
+		DestName: "bge/model.onnx",
+	},
+	{
+		Name:     "bge_tokenizer.json",
+		URL:      "https://huggingface.co/Xenova/bge-base-en-v1.5/resolve/main/tokenizer.json",
+		SHA256:   "", // TODO: verify from HuggingFace before use
+		Size:     800000,
+		DestName: "bge/tokenizer.json",
+	},
+	{
+		Name:     "bge_config.json",
+		URL:      "https://huggingface.co/Xenova/bge-base-en-v1.5/resolve/main/config.json",
+		SHA256:   "", // TODO: verify from HuggingFace before use
+		Size:     700,
+		DestName: "bge/config.json",
 	},
 }

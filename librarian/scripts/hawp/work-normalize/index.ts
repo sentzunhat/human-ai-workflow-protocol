@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
 /**
- * Backlog Upgrade CLI Entry Point
+ * @deprecated Superseded by the Go CLI (`hawp work normalize`). This TypeScript
+ * implementation remains for reference only and is no longer invoked by
+ * the npm scripts. Use `hawp work normalize` or `npm run work:normalize` instead.
  *
- * Main executable for the backlog upgrade command.
- * Delegates to TypeScript implementation via tsx runtime.
+ * Backlog Upgrade CLI Entry Point — delegates to TypeScript implementation.
  */
 
 import { runCLI } from "./cli.js";

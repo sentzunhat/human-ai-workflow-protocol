@@ -18,14 +18,14 @@ type ContextConfig struct {
 
 // EmbeddingsConfig specifies which embedding backend to use and which model.
 type EmbeddingsConfig struct {
-	Backend  string `json:"backend"`  // "onnx" | "ollama" | "openai" | "anthropic"
+	Engine   string `json:"engine"`   // "onnx" | "ollama" | "openai" | "anthropic"
 	Model    string `json:"model"`    // Model name/ID per backend
 	CacheDir string `json:"cacheDir"` // Where to store cached embeddings (optional)
 }
 
 // LLMConfig specifies which LLM backend to use and parameters.
 type LLMConfig struct {
-	Backend     string  `json:"backend"`     // "onnx" | "ollama" | "openai" | "anthropic"
+	Engine      string  `json:"engine"`      // "onnx" | "ollama" | "openai" | "anthropic"
 	Model       string  `json:"model"`       // Model name per backend
 	Temperature float32 `json:"temperature"` // 0.0-1.0, default 0.3
 	MaxTokens   int     `json:"maxTokens"`   // Output token limit, default 2000
@@ -66,11 +66,11 @@ type SecurityConfig struct {
 func DefaultConfig() ContextConfig {
 	return ContextConfig{
 		Embeddings: EmbeddingsConfig{
-			Backend: "onnx",
-			Model:   "bge-base-en-v1.5",
+			Engine: "onnx",
+			Model:  "bge-base-en-v1.5",
 		},
 		LLM: LLMConfig{
-			Backend:     "ollama",
+			Engine:      "ollama",
 			Model:       "mistral",
 			Temperature: 0.3,
 			MaxTokens:   2000,
@@ -154,8 +154,8 @@ func loadConfigFile(path string, cfg *ContextConfig) error {
 // mergeConfig merges fileCfg into baseCfg, with fileCfg taking precedence.
 func mergeConfig(baseCfg, fileCfg *ContextConfig) {
 	// Embeddings
-	if fileCfg.Embeddings.Backend != "" {
-		baseCfg.Embeddings.Backend = fileCfg.Embeddings.Backend
+	if fileCfg.Embeddings.Engine != "" {
+		baseCfg.Embeddings.Engine = fileCfg.Embeddings.Engine
 	}
 	if fileCfg.Embeddings.Model != "" {
 		baseCfg.Embeddings.Model = fileCfg.Embeddings.Model
@@ -165,8 +165,8 @@ func mergeConfig(baseCfg, fileCfg *ContextConfig) {
 	}
 
 	// LLM
-	if fileCfg.LLM.Backend != "" {
-		baseCfg.LLM.Backend = fileCfg.LLM.Backend
+	if fileCfg.LLM.Engine != "" {
+		baseCfg.LLM.Engine = fileCfg.LLM.Engine
 	}
 	if fileCfg.LLM.Model != "" {
 		baseCfg.LLM.Model = fileCfg.LLM.Model
@@ -209,7 +209,7 @@ func mergeConfig(baseCfg, fileCfg *ContextConfig) {
 func loadEnvConfig(cfg *ContextConfig) error {
 	// Embeddings
 	if backend := os.Getenv("HAWP_EMBEDDINGS_BACKEND"); backend != "" {
-		cfg.Embeddings.Backend = backend
+		cfg.Embeddings.Engine = backend
 	}
 	if model := os.Getenv("HAWP_EMBEDDINGS_MODEL"); model != "" {
 		cfg.Embeddings.Model = model
@@ -217,7 +217,7 @@ func loadEnvConfig(cfg *ContextConfig) error {
 
 	// LLM
 	if backend := os.Getenv("HAWP_LLM_BACKEND"); backend != "" {
-		cfg.LLM.Backend = backend
+		cfg.LLM.Engine = backend
 	}
 	if model := os.Getenv("HAWP_LLM_MODEL"); model != "" {
 		cfg.LLM.Model = model
@@ -240,12 +240,12 @@ func loadEnvConfig(cfg *ContextConfig) error {
 // Validate checks configuration consistency and backend availability.
 func (c *ContextConfig) Validate() error {
 	// Validate embeddings backend
-	if err := validateBackend(c.Embeddings.Backend, "embeddings"); err != nil {
+	if err := validateBackend(c.Embeddings.Engine, "embeddings"); err != nil {
 		return err
 	}
 
 	// Validate LLM backend
-	if err := validateBackend(c.LLM.Backend, "llm"); err != nil {
+	if err := validateBackend(c.LLM.Engine, "llm"); err != nil {
 		return err
 	}
 
@@ -260,10 +260,10 @@ func (c *ContextConfig) Validate() error {
 	}
 
 	// Validate API keys for API backends (if present)
-	if c.LLM.Backend == "openai" && c.Backends.OpenAI.APIKey == "" {
+	if c.LLM.Engine == "openai" && c.Backends.OpenAI.APIKey == "" {
 		return fmt.Errorf("openai backend selected but no API key provided (set HAWP_OPENAI_API_KEY or config)")
 	}
-	if c.LLM.Backend == "anthropic" && c.Backends.Anthropic.APIKey == "" {
+	if c.LLM.Engine == "anthropic" && c.Backends.Anthropic.APIKey == "" {
 		return fmt.Errorf("anthropic backend selected but no API key provided (set HAWP_ANTHROPIC_API_KEY or config)")
 	}
 
@@ -329,7 +329,7 @@ func (c *ContextConfig) String() string {
   Embeddings: %s (%s) [%s]
   LLM: %s (%s) [%s, temp=%.1f, maxTokens=%d]
   Encryption: %s`,
-		c.Embeddings.Backend, c.Embeddings.Model, BackendCategory(c.Embeddings.Backend),
-		c.LLM.Backend, c.LLM.Model, BackendCategory(c.LLM.Backend), c.LLM.Temperature, c.LLM.MaxTokens,
+		c.Embeddings.Engine, c.Embeddings.Model, BackendCategory(c.Embeddings.Engine),
+		c.LLM.Engine, c.LLM.Model, BackendCategory(c.LLM.Engine), c.LLM.Temperature, c.LLM.MaxTokens,
 		c.Security.EncryptionMethod)
 }

@@ -135,7 +135,7 @@ func benchmarkOneQuery(query BenchmarkQuery, pattern string, db *sqlite.IndexDB)
 		// Real hybrid path: lexical candidates → HybridRank (embeds query, cosine re-rank).
 		rows, _ := db.QueryChunksLexical(query.Query, 30)
 		if len(rows) > 0 {
-			rows = appsearch.HybridRank(rows, query.Query, db, 10)
+			rows = appsearch.HybridRank(rows, query.Query, db, 10, 0)
 		}
 		result.ResultCount = len(rows)
 		result.TopResultQuality = assessQuality(query.RelevantKeywords, rows)
