@@ -102,6 +102,9 @@ Pattern for managing parallel sub-branches:
 
 List live worktrees at any time: `git worktree list`
 
+For teams that also separate HAWP coordination from a product integration branch,
+see [manager-branch.md](manager-branch.md) for the optional manager-branch pattern.
+
 After squash-merging all sub-branches, delete the stale local and remote tracking branches:
 
 ```bash

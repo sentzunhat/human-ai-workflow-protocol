@@ -112,7 +112,7 @@ func TestWriteMCPJSONCreatesFile(t *testing.T) {
 	repoRoot := t.TempDir()
 	path := filepath.Join(repoRoot, ".mcp.json")
 
-	if err := writeMCPJSON(path, repoRoot); err != nil {
+	if err := writeMCPJSON(path, claudeServerEntry(repoRoot)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -146,7 +146,7 @@ func TestWriteMCPJSONUpgradesExistingRelativeCommand(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := writeMCPJSON(path, repoRoot); err != nil {
+	if err := writeMCPJSON(path, claudeServerEntry(repoRoot)); err != nil {
 		t.Fatal(err)
 	}
 
@@ -168,15 +168,40 @@ func TestWriteMCPJSONIdempotent(t *testing.T) {
 	repoRoot := t.TempDir()
 	path := filepath.Join(repoRoot, ".mcp.json")
 
-	if err := writeMCPJSON(path, repoRoot); err != nil {
+	if err := writeMCPJSON(path, claudeServerEntry(repoRoot)); err != nil {
 		t.Fatal(err)
 	}
 	before, _ := os.ReadFile(path)
-	if err := writeMCPJSON(path, repoRoot); err != nil {
+	if err := writeMCPJSON(path, claudeServerEntry(repoRoot)); err != nil {
 		t.Fatal(err)
 	}
 	after, _ := os.ReadFile(path)
 	if string(before) != string(after) {
 		t.Errorf("writeMCPJSON not idempotent:\nbefore:\n%s\nafter:\n%s", before, after)
+	}
+}
+
+func TestWriteCursorMCPJSONUsesStdioWrapper(t *testing.T) {
+	repoRoot := t.TempDir()
+	path := filepath.Join(repoRoot, ".cursor", "mcp.json")
+
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeMCPJSON(path, cursorServerEntry(repoRoot)); err != nil {
+		t.Fatal(err)
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	content := string(data)
+	if !strings.Contains(content, `"type": "stdio"`) {
+		t.Errorf("cursor MCP config missing stdio type, got:\n%s", content)
+	}
+	expected := filepath.Join(repoRoot, ".hawp", "bin", "hawp-mcp")
+	if !strings.Contains(content, `"command": "`+expected+`"`) {
+		t.Errorf("cursor MCP config missing wrapper path %q, got:\n%s", expected, content)
 	}
 }

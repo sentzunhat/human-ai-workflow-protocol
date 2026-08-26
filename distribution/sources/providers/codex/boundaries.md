@@ -10,7 +10,7 @@ This guide sets `PROVIDER=codex`. Only the Codex overlay is installed — not Gi
 
 | Source | Installs to | Install | Update |
 |--------|-------------|---------|--------|
-| `AGENTS.md.seed` | `AGENTS.md` (repo root) | seed if missing | refresh |
+| `AGENTS.md.seed` | `AGENTS.md` (repo root) | seed if missing | seed if missing |
 
 ## Not touched by this guide
 
@@ -25,4 +25,3 @@ This guide sets `PROVIDER=codex`. Only the Codex overlay is installed — not Gi
 ```text
 core/providers/.codex/  ->  AGENTS.md
 ```
-

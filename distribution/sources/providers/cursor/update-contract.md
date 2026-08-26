@@ -2,7 +2,7 @@
 
 ## Work item goal
 
-Refresh HAWP kit plus **Cursor overlays** from the selected branch. This refreshes `core/providers/.cursor/` into `.cursor/rules/` and `AGENTS.md`.
+Refresh HAWP kit plus **Cursor overlays** from the selected branch. This refreshes `core/providers/.cursor/rules/` into `.cursor/rules/` and seeds `AGENTS.md` only when it is missing.
 
 ## Agent execution
 
@@ -12,7 +12,9 @@ Refresh HAWP kit plus **Cursor overlays** from the selected branch. This refresh
 
 ## Provider-specific rules
 
-- Refreshes all provider-pack `.mdc` rules and `AGENTS.md` on every update.
+- Refreshes all provider-pack `.mdc` rules on every update.
+- Seeds `AGENTS.md` only when it is missing; existing custom `AGENTS.md` content is preserved.
+- If you want new HAWP instruction wording in an already-customized `AGENTS.md`, blend it manually instead of expecting update to overwrite the file.
 - Does not modify `.github/`.
 
 ## Auto-dispatch

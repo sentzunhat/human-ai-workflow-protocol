@@ -12,7 +12,7 @@ import (
 // `-ldflags="-X .../update.Version=vX.Y.Z"` (see librarian/src/Makefile).
 // "dev" marks a local, non-release build — update checks still work but
 // comparisons against it always report an update available.
-var Version = "0.0.10"
+var Version = "0.0.11"
 
 // Repo is the GitHub "owner/repo" this binary updates from.
 const Repo = "sentzunhat/human-ai-workflow-protocol"

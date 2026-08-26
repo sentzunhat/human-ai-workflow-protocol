@@ -86,6 +86,7 @@ HAWP is a **shaping protocol**, not a runtime. Better results come from stronger
 4. **[usage/workflow-loop.md](usage/workflow-loop.md)** — multi-iteration work across sessions (instruction-based; autonomous or gated; review/approve/retry without CLI)
 5. **[usage/search.md](usage/search.md)** — index and search kit/work documents via CLI or MCP (`hawp_search` tool)
 6. **[usage/hawp-first-workflow.md](usage/hawp-first-workflow.md)** — hawp-first session workflow: use `hawp_search` as the default context strategy instead of direct file reads
+7. **[usage/manager-branch.md](usage/manager-branch.md)** — optional manager-branch / worktree pattern for teams separating HAWP coordination from product branches
 
 ### Templates by Task Type
 

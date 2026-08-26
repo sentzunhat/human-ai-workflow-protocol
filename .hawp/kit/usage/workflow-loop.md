@@ -125,7 +125,7 @@ Do **not** create new runtime folders (`loop-runs/`, per-field shape folders, et
 | Artifact | Location | Purpose |
 | -------- | -------- | ------- |
 | Coordination index | `.hawp/work/BACKLOG.md` | Status: `in-progress`, `plan-ready`, `parked`, etc. |
-| Source of truth | `.hawp/work/active/<ID>.md` | Plan + **Iteration Log** section (append each pass) |
+| Source of truth | `.hawp/work/active/<ID>/plan.md` | Plan + **Iteration Log** section (append each pass) |
 | Iteration handoff | `.hawp/work/status/YYYY/MM/DD/<ID>-iter-<NNN>.md` | Compact continuity for the next session |
 | Reflection on retry | Same status file or plan Iteration Log | What failed, what to try next |
 | Evidence | `.hawp/work/evidence/YYYY/MM/DD/<ID>-*.md` | Large verification output |
@@ -139,7 +139,7 @@ Template: [../templates/workflow-loop-handoff.md](../templates/workflow-loop-han
 
 Prerequisites (from intake workflow):
 
-1. Backlog row exists with plan file in `work/active/<ID>.md`
+1. Backlog row exists with plan file in `work/active/<ID>/plan.md`
 2. Investigation and plan are complete; risk level set
 3. Plan approved (or low-risk auto-approved)
 
@@ -158,13 +158,13 @@ Add to the plan file (full snippet: [../templates/workflow-loop-plan-section.md]
 **Auto-approve:** false
 ```
 
-**Plan file path:** Prefer `.hawp/work/active/<Legacy ID>.md` (e.g. `TASK-079.md`) so `hawp backlog validate` and loop Continue steps resolve the plan by ID. If the plan uses a descriptive filename, keep the BACKLOG **Plan File** link accurate and expect the validator to flag a missing plan until renamed or aliased.
+**Plan file path:** Prefer `.hawp/work/active/<ID>/plan.md`. Legacy flat files may remain in historical work records, but new loop work should use the folder form and keep the BACKLOG **Plan File** link accurate.
 
 Set BACKLOG status to `in-progress`.
 
 ### Quick Start (first iteration)
 
-1. Confirm plan at `.hawp/work/active/<Legacy ID>.md` and BACKLOG row `in-progress`
+1. Confirm plan at `.hawp/work/active/<ID>/plan.md` and BACKLOG row `in-progress`
 2. Add **Workflow Loop** block + empty **Iteration Log** table to the plan (see above)
 3. Set **Current iteration** to `0`; open a new executor session
 4. **Continue:** increment to `1`, read BACKLOG → plan → latest handoff
@@ -180,7 +180,7 @@ Set BACKLOG status to `in-progress`.
 **Executor or new session** reads in order:
 
 1. `.hawp/work/BACKLOG.md` — confirm item is active
-2. `.hawp/work/active/<ID>.md` — mission, constraints, **Loop Contract** fields, Iteration Log
+2. `.hawp/work/active/<ID>/plan.md` — mission, constraints, **Loop Contract** fields, Iteration Log
 3. Latest `.hawp/work/status/.../<ID>-iter-*.md` if any
 4. Linked evidence files
 
@@ -198,7 +198,7 @@ input: |
   Execute only this pass scope: <one-line objective>
 
 context: |
-  Plan: .hawp/work/active/<ID>.md
+  Plan: .hawp/work/active/<ID>/plan.md
   Prior handoff: .hawp/work/status/YYYY/MM/DD/<ID>-iter-<NNN>.md (latest, if exists)
   Loop mode: (from plan — autonomous | gated)
   Iteration budget: (from plan — 3 | 5 | 8)

@@ -6,15 +6,17 @@ Stable update of HAWP kit plus Codex `AGENTS.md` instructions.
 
 1. Open your target repository root in a terminal.
 2. Run the **Update Command (Copy/Paste)** block below (`REF="main"`, `PROVIDER="codex"`).
-3. Confirm `.hawp/kit/` and `AGENTS.md` reflect the selected branch.
+3. Confirm `.hawp/kit/` reflects the selected branch and that `AGENTS.md` exists if you wanted the HAWP seed installed.
+4. If your repo already had `AGENTS.md`, keep it and manually blend in any HAWP wording you want from the provider seed.
 
 ## What Was Updated
 
 - `.hawp/kit/**` — refreshed from HAWP core.
-- `AGENTS.md` — refreshed from `core/providers/.codex/AGENTS.md.seed`.
+- `AGENTS.md` — seeded from `core/providers/.codex/AGENTS.md.seed` only when missing.
 
 ## What Was NOT Changed
 
+- Existing `AGENTS.md` content.
 - `.github/**`
 - `.cursor/**`
 - `.continue/**`
@@ -28,4 +30,3 @@ Stable update of HAWP kit plus Codex `AGENTS.md` instructions.
 - GitHub/Copilot: `distribution/generated/github/update/main.md`
 - Cursor: `distribution/generated/cursor/update/main.md`
 - Continue: `distribution/generated/continue/update/main.md`
-

@@ -20,14 +20,25 @@ func codexTOMLBlock(repoRoot string) string {
 	return "\n[mcp_servers.hawp]\ncommand = \"" + bin + "\"\nargs = [\"mcp\"]\ncwd = \"" + repoRoot + "\"\n"
 }
 
-// hawpServerEntry returns the MCP server config block written for JSON-RPC MCP
-// providers that use JSON config files. We write an absolute command path so
-// the config remains reliable regardless of the app's current working
-// directory; each machine/project computes its own path at init/update time.
-func hawpServerEntry(repoRoot string) map[string]any {
+// claudeServerEntry returns the MCP server config block written for Claude
+// Code. We write an absolute command path so the config remains reliable
+// regardless of the app's current working directory; each machine/project
+// computes its own path at init/update time.
+func claudeServerEntry(repoRoot string) map[string]any {
 	return map[string]any{
 		"command": hawpBinaryPath(repoRoot),
 		"args":    []string{"mcp"},
+	}
+}
+
+// Cursor requires an explicit stdio type and a command that resolves outside
+// the repo-root cwd assumptions used by Claude Code. The wrapper changes into
+// the repo root before execing `hawp mcp`, so the MCP server sees the correct
+// project tree regardless of Cursor's own spawn cwd.
+func cursorServerEntry(repoRoot string) map[string]any {
+	return map[string]any{
+		"type":    "stdio",
+		"command": filepath.Join(repoRoot, ".hawp", "bin", "hawp-mcp"),
 	}
 }
 
@@ -48,7 +59,7 @@ func WriteProviderConfigs(repoRoot string, providers []string) error {
 
 		switch p {
 		case "claude":
-			if err := writeMCPJSON(filepath.Join(repoRoot, ".mcp.json"), repoRoot); err != nil {
+			if err := writeMCPJSON(filepath.Join(repoRoot, ".mcp.json"), claudeServerEntry(repoRoot)); err != nil {
 				return fmt.Errorf("claude MCP config: %w", err)
 			}
 			fmt.Println("MCP: wrote .mcp.json (Claude Code)")
@@ -58,10 +69,13 @@ func WriteProviderConfigs(repoRoot string, providers []string) error {
 			if err := os.MkdirAll(dir, 0o755); err != nil {
 				return fmt.Errorf("cursor MCP config: %w", err)
 			}
-			if err := writeMCPJSON(filepath.Join(dir, "mcp.json"), repoRoot); err != nil {
+			if err := writeMCPJSON(filepath.Join(dir, "mcp.json"), cursorServerEntry(repoRoot)); err != nil {
 				return fmt.Errorf("cursor MCP config: %w", err)
 			}
 			fmt.Println("MCP: wrote .cursor/mcp.json (Cursor)")
+			fmt.Println("  Cursor expects `type: stdio` and an absolute command path.")
+			fmt.Println("  Open Customize → MCPs and enable the workspace server.")
+			fmt.Println("  If tools still do not appear, open a new chat or reload Cursor.")
 
 		case "continue":
 			fmt.Println("MCP (Continue): add this block to .continue/config.yaml:")
@@ -155,8 +169,8 @@ func upsertCodexTOML(content, repoRoot string) string {
 
 // writeMCPJSON merges the hawp server entry into a JSON MCP config file.
 // Creates the file when missing; patches it when present; upgrades any
-// existing hawp entry to the current absolute-path form.
-func writeMCPJSON(path, repoRoot string) error {
+// existing hawp entry to the current desired server shape.
+func writeMCPJSON(path string, serverEntry map[string]any) error {
 	config := map[string]any{}
 
 	data, err := os.ReadFile(path)
@@ -173,7 +187,7 @@ func writeMCPJSON(path, repoRoot string) error {
 		servers = map[string]any{}
 	}
 
-	servers["hawp"] = hawpServerEntry(repoRoot)
+	servers["hawp"] = serverEntry
 	config["mcpServers"] = servers
 
 	out, err := json.MarshalIndent(config, "", "  ")

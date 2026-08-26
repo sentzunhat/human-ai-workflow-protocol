@@ -56,6 +56,9 @@ Codex uses `AGENTS.md` for repo-local instructions. This guide only manages the 
 
 Do not create `.codex/` folders or runtime adapter files from this provider guide.
 
+`AGENTS.md` is seeded only when missing, on both install and update. Existing
+repo-local Codex instructions must be preserved.
+
 # Kit and Work Boundaries (All Providers)
 
 Every provider install/update guide refreshes the agent-neutral kit and preserves project work.
@@ -91,7 +94,7 @@ This guide sets `PROVIDER=codex`. Only the Codex overlay is installed — not Gi
 
 | Source | Installs to | Install | Update |
 |--------|-------------|---------|--------|
-| `AGENTS.md.seed` | `AGENTS.md` (repo root) | seed if missing | refresh |
+| `AGENTS.md.seed` | `AGENTS.md` (repo root) | seed if missing | seed if missing |
 
 ## Not touched by this guide
 
@@ -169,7 +172,7 @@ Composed from `distribution/sources/update/script-core.md` + `providers/<provide
 
 ## Work item goal
 
-Refresh HAWP kit plus the **Codex overlay** from the selected branch. This refreshes `core/providers/.codex/AGENTS.md.seed` into `AGENTS.md`.
+Refresh HAWP kit plus the **Codex overlay** from the selected branch. This seeds `core/providers/.codex/AGENTS.md.seed` into `AGENTS.md` only when the target repo does not already have one.
 
 ## Agent execution
 
@@ -179,7 +182,8 @@ Refresh HAWP kit plus the **Codex overlay** from the selected branch. This refre
 
 ## Provider-specific rules
 
-- Refreshes `AGENTS.md` on every update.
+- Seeds `AGENTS.md` only when it is missing; existing custom `AGENTS.md` content is preserved.
+- If you want new HAWP instruction wording in an already-customized `AGENTS.md`, blend it manually instead of expecting update to overwrite the file.
 - Does not modify `.github/`, `.cursor/`, `.continue/`, or `.claude/`.
 - Does not create runtime CLI participant adapters.
 
@@ -195,15 +199,17 @@ Stable update of HAWP kit plus Codex `AGENTS.md` instructions.
 
 1. Open your target repository root in a terminal.
 2. Run the **Update Command (Copy/Paste)** block below (`REF="main"`, `PROVIDER="codex"`).
-3. Confirm `.hawp/kit/` and `AGENTS.md` reflect the selected branch.
+3. Confirm `.hawp/kit/` reflects the selected branch and that `AGENTS.md` exists if you wanted the HAWP seed installed.
+4. If your repo already had `AGENTS.md`, keep it and manually blend in any HAWP wording you want from the provider seed.
 
 ## What Was Updated
 
 - `.hawp/kit/**` — refreshed from HAWP core.
-- `AGENTS.md` — refreshed from `core/providers/.codex/AGENTS.md.seed`.
+- `AGENTS.md` — seeded from `core/providers/.codex/AGENTS.md.seed` only when missing.
 
 ## What Was NOT Changed
 
+- Existing `AGENTS.md` content.
 - `.github/**`
 - `.cursor/**`
 - `.continue/**`
@@ -424,6 +430,7 @@ cp -R "$SRC/.hawp/kit/standards"  .hawp/kit/
 # wrapper at .hawp/bin/hawp). Never copies the shell wrapper over the binary.
 update_hawp_binary() {
   local _os _arch _asset _ext _dest _url _checksum_url _expected _actual
+  local _tag
 
   _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
   _arch="$(uname -m)"
@@ -451,9 +458,13 @@ update_hawp_binary() {
   _asset="hawp-${_os}-${_arch}${_ext}"
   _dest=".hawp/bin/hawp-bin${_ext}"
 
-  local _tag
-  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" \
-    | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')"
+  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" 2>/dev/null \
+    | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' || true)"
+  if [ -z "$_tag" ]; then
+    _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases?per_page=1" 2>/dev/null \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' || true)"
+    [ -n "$_tag" ] && echo "hawp update: /releases/latest unavailable; using releases list fallback."
+  fi
 
   if [ -z "$_tag" ]; then
     echo "hawp update: could not resolve latest release tag — skipping binary update."
@@ -498,6 +509,10 @@ update_hawp_binary() {
     cp "$SRC/.hawp/bin/hawp" .hawp/bin/hawp
     chmod +x .hawp/bin/hawp
   fi
+  if [ -f "$SRC/.hawp/bin/hawp-mcp" ]; then
+    cp "$SRC/.hawp/bin/hawp-mcp" .hawp/bin/hawp-mcp
+    chmod +x .hawp/bin/hawp-mcp
+  fi
 
   echo "hawp binary: updated to ${_tag} at ${_dest}"
 }
@@ -531,11 +546,11 @@ resolve_provider_pack() {
 }
 update_provider_overlay() {
   pack="$(resolve_provider_pack)" || return 1
-  cp "$pack/AGENTS.md.seed" AGENTS.md
-  echo "  refreshed: core/providers/.codex/ -> AGENTS.md"
+  copy_file_no_clobber "$pack/AGENTS.md.seed" AGENTS.md
+  echo "  seeded if missing: core/providers/.codex/ -> AGENTS.md"
 }
 update_provider_overlay || exit 1
-echo "Provider overlay: AGENTS.md"
+echo "Provider overlay: AGENTS.md (seed if missing)"
 
 if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
   rm -rf "$TMP_DIR"

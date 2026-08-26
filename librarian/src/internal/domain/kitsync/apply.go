@@ -16,12 +16,13 @@ func SyncKit(bundleKitDir, repoRoot string) (int, error) {
 	return copyTree(bundleKitDir, destRoot, "")
 }
 
-// ApplyProviderUpdate refreshes providerName's update:refresh rules from
-// bundleRoot (the extracted release bundle's top-level directory,
-// containing both "kit/" and "providers/" — provider.Source, e.g.
-// "providers/.claude", is already relative to this root) into repoRoot,
-// per the manifest. update:skip rules (e.g. a customized CLAUDE.md) are
-// left untouched.
+// ApplyProviderUpdate applies providerName's update rules from bundleRoot
+// (the extracted release bundle's top-level directory, containing both
+// "kit/" and "providers/" — provider.Source, e.g. "providers/.claude",
+// is already relative to this root) into repoRoot, per the manifest.
+// update:refresh overwrites from the provider pack; update:seed-if-missing
+// writes only when the destination is absent; update:skip leaves the path
+// untouched.
 func ApplyProviderUpdate(bundleRoot, repoRoot string, manifest *Manifest, providerName string) (int, []string, error) {
 	provider, ok := manifest.Providers[providerName]
 	if !ok {
@@ -33,8 +34,33 @@ func ApplyProviderUpdate(bundleRoot, repoRoot string, manifest *Manifest, provid
 	sourceBase := filepath.Join(bundleRoot, provider.Source)
 
 	for _, rule := range provider.InstallsTo {
-		if !rule.ShouldRefreshOnUpdate() {
+		switch rule.UpdateMode() {
+		case "skip":
 			skipped = append(skipped, providerName+":"+rule.Dest)
+			continue
+		case "seed-if-missing":
+			srcPath := filepath.Join(sourceBase, rule.From)
+			destPath := filepath.Join(repoRoot, rule.Dest)
+
+			info, err := os.Stat(srcPath)
+			if err != nil {
+				return written, skipped, fmt.Errorf("provider %s rule %s: source %s: %w", providerName, rule.Dest, srcPath, err)
+			}
+
+			if info.IsDir() {
+				count, err := seedTree(srcPath, destPath, rule.Pattern)
+				if err != nil {
+					return written, skipped, err
+				}
+				written += count
+			} else {
+				if _, statErr := os.Stat(destPath); os.IsNotExist(statErr) {
+					if err := copyFile(srcPath, destPath); err != nil {
+						return written, skipped, err
+					}
+					written++
+				}
+			}
 			continue
 		}
 

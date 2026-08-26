@@ -55,7 +55,7 @@ If your repository has an older HAWP layout, migration runs automatically:
 This guide installs the Cursor provider pack only.
 
 - Refreshes `.cursor/rules/hawp-*.mdc` from `core/providers/.cursor/rules/` on every install and update.
-- Seeds `AGENTS.md` from `AGENTS.md.seed` on install only when missing; refreshes it on every update.
+- Seeds `AGENTS.md` from `AGENTS.md.seed` only when missing, on both install and update.
 - Does not modify `.github/` or `.continue/`.
 - Non-HAWP rules already in `.cursor/rules/` are left unchanged.
 
@@ -95,7 +95,7 @@ This guide sets `PROVIDER=cursor`. Only the Cursor overlay is installed — not 
 | Source | Installs to | Install | Update |
 |--------|-------------|---------|--------|
 | `rules/*.mdc` | `.cursor/rules/` | refresh | refresh |
-| `AGENTS.md.seed` | `AGENTS.md` (repo root) | seed if missing | refresh |
+| `AGENTS.md.seed` | `AGENTS.md` (repo root) | seed if missing | seed if missing |
 
 ## Not touched by this guide
 
@@ -172,7 +172,7 @@ Composed from `distribution/sources/update/script-core.md` + `providers/<provide
 
 ## Work item goal
 
-Refresh HAWP kit plus **Cursor overlays** from the selected branch. This refreshes `core/providers/.cursor/` into `.cursor/rules/` and `AGENTS.md`.
+Refresh HAWP kit plus **Cursor overlays** from the selected branch. This refreshes `core/providers/.cursor/rules/` into `.cursor/rules/` and seeds `AGENTS.md` only when it is missing.
 
 ## Agent execution
 
@@ -182,7 +182,9 @@ Refresh HAWP kit plus **Cursor overlays** from the selected branch. This refresh
 
 ## Provider-specific rules
 
-- Refreshes all provider-pack `.mdc` rules and `AGENTS.md` on every update.
+- Refreshes all provider-pack `.mdc` rules on every update.
+- Seeds `AGENTS.md` only when it is missing; existing custom `AGENTS.md` content is preserved.
+- If you want new HAWP instruction wording in an already-customized `AGENTS.md`, blend it manually instead of expecting update to overwrite the file.
 - Does not modify `.github/`.
 
 ## Auto-dispatch
@@ -409,6 +411,7 @@ cp -R "$SRC/.hawp/kit/standards"  .hawp/kit/
 # wrapper at .hawp/bin/hawp). Never copies the shell wrapper over the binary.
 update_hawp_binary() {
   local _os _arch _asset _ext _dest _url _checksum_url _expected _actual
+  local _tag
 
   _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
   _arch="$(uname -m)"
@@ -436,9 +439,13 @@ update_hawp_binary() {
   _asset="hawp-${_os}-${_arch}${_ext}"
   _dest=".hawp/bin/hawp-bin${_ext}"
 
-  local _tag
-  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" \
-    | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')"
+  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" 2>/dev/null \
+    | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' || true)"
+  if [ -z "$_tag" ]; then
+    _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases?per_page=1" 2>/dev/null \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' || true)"
+    [ -n "$_tag" ] && echo "hawp update: /releases/latest unavailable; using releases list fallback."
+  fi
 
   if [ -z "$_tag" ]; then
     echo "hawp update: could not resolve latest release tag — skipping binary update."
@@ -483,6 +490,10 @@ update_hawp_binary() {
     cp "$SRC/.hawp/bin/hawp" .hawp/bin/hawp
     chmod +x .hawp/bin/hawp
   fi
+  if [ -f "$SRC/.hawp/bin/hawp-mcp" ]; then
+    cp "$SRC/.hawp/bin/hawp-mcp" .hawp/bin/hawp-mcp
+    chmod +x .hawp/bin/hawp-mcp
+  fi
 
   echo "hawp binary: updated to ${_tag} at ${_dest}"
 }
@@ -520,11 +531,12 @@ update_provider_overlay() {
   if [ -d "$pack/rules" ]; then
     cp "$pack/rules/"*.mdc .cursor/rules/ 2>/dev/null || true
   fi
-  cp "$pack/AGENTS.md.seed" AGENTS.md
-  echo "  refreshed: core/providers/.cursor/ -> .cursor/rules/, AGENTS.md"
+  copy_file_no_clobber "$pack/AGENTS.md.seed" AGENTS.md
+  echo "  refreshed: core/providers/.cursor/ -> .cursor/rules/"
+  echo "  seeded if missing: core/providers/.cursor/ -> AGENTS.md"
 }
 update_provider_overlay || exit 1
-echo "Provider overlay: .cursor/rules/*, AGENTS.md"
+echo "Provider overlay: .cursor/rules/*, AGENTS.md (seed if missing)"
 
 if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
   rm -rf "$TMP_DIR"

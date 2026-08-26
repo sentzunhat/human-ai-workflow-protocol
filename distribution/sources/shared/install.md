@@ -38,6 +38,9 @@ Install when you want HAWP kit plus agent overlays in a repository that does not
 
 - Does not overwrite `.hawp/work/**`.
 - Does not install other providers' overlays (e.g. a Cursor guide does not write `.github/`).
+- Does not build the search index for you. If you plan to use `hawp search` or
+  `hawp_search` right away, run `hawp search index` after install. `hawp search embed`
+  is optional and only needed for semantic or hybrid search.
 
 ## Install Is Safe to Re-Run
 

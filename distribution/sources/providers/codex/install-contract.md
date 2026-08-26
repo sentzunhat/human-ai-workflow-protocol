@@ -15,6 +15,7 @@ Install HAWP kit plus the **Codex overlay only**. This seeds `core/providers/.co
 ## Provider-specific rules
 
 - Seed `AGENTS.md` on install when it is missing.
+- If your repo already has `AGENTS.md`, HAWP preserves it. Manually blend in any desired HAWP guidance from the provider seed instead of overwriting your existing file.
 - Do **not** expect `.github/`, `.cursor/`, `.continue/`, or `.claude/` changes from this guide.
 - Do **not** create runtime CLI participant adapters.
 
@@ -56,4 +57,3 @@ echo "Script written: $SCRIPT"
 echo "Review it, then run:"
 echo "  bash \"$SCRIPT\""
 ````
-
