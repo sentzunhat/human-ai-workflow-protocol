@@ -6,15 +6,12 @@ name: Release
 #      "version" input (e.g. "0.1.0") — the workflow creates and pushes
 #      the tag itself, so no local `git tag`/`git push` is needed.
 #
-# Either way, the job builds the cross-platform hawp binaries (make
-# dist) and publishes a GitHub Release. By default the release publishes
-# immediately (auto-approved) — set the "draft" input to true on a
-# manual dispatch to require a maintainer to review the built binaries
-# and changelog on GitHub and click "Publish release" before it goes
-# live. A draft release is invisible to unauthenticated API requests —
-# including the ones `hawp update` makes — so nothing is downloadable
-# until it's published. GitHub computes a SHA-256 digest for each
-# uploaded asset automatically, which `hawp update` verifies against.
+# Either way, the job builds the cross-platform hawp binaries and
+# publishes a GitHub Release. The release includes:
+#   - Standard binaries (CGO_ENABLED=0, no ONNX LLM) for all 6 platforms
+#   - ORT tarballs (CGO_ENABLED=1, -tags ORT, ONNX LLM enabled) for
+#     linux/amd64 and darwin/arm64 — other platforms lack official ORT
+#     GenAI prebuilts (darwin/amd64) or are bundled as a follow-up.
 on:
   push:
     tags:
@@ -33,9 +30,21 @@ on:
 permissions:
   contents: write
 
+# Native lib versions for the ORT build jobs.
+# Update these when bumping hugot or knights-analytics/ortgenai.
+env:
+  ORT_VERSION: "1.19.2"
+  ORT_GENAI_VERSION: "0.4.0"
+  TOKENIZERS_VERSION: "0.13.0"
+
 jobs:
-  build-and-release:
+  # ── Standard build (all 6 platforms, CGO_ENABLED=0, no ORT) ──────────────
+  build-std:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -55,8 +64,6 @@ jobs:
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=$version" >> "$GITHUB_OUTPUT"
-          # 0.0.x tags are test/pre-release builds validating the release
-          # and self-update mechanism itself, not a real product release.
           if [[ "$version" == 0.0.* ]]; then
             echo "prerelease=true" >> "$GITHUB_OUTPUT"
           else
@@ -76,9 +83,203 @@ jobs:
           git tag -a "$tag" -m "HAWP $tag (via workflow_dispatch)"
           git push origin "$tag"
 
-      - name: Build release binaries
+      - name: Build standard release binaries (all platforms, no ORT)
         working-directory: librarian/src
         run: make dist VERSION=${{ steps.version.outputs.version }}
+
+      - name: Upload standard dist artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-std
+          path: librarian/src/bin/dist/
+          retention-days: 1
+
+  # ── ORT build: linux/amd64 ────────────────────────────────────────────────
+  build-ort-linux-amd64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download ORT native libs (linux/amd64)
+        run: |
+          set -e
+          NATIVE="$HOME/.hawp/native/linux-amd64"
+          mkdir -p "$NATIVE/lib" "$NATIVE/include"
+
+          # onnxruntime
+          ORT_URL="https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-x64-${ORT_VERSION}.tgz"
+          curl -fsSL "$ORT_URL" | tar xz -C "$NATIVE" --strip-components=1
+
+          # onnxruntime-genai
+          GENAI_URL="https://github.com/microsoft/onnxruntime-genai/releases/download/v${ORT_GENAI_VERSION}/onnxruntime-genai-${ORT_GENAI_VERSION}-linux-x64.tar.gz"
+          curl -fsSL "$GENAI_URL" | tar xz -C "$NATIVE" --strip-components=1
+
+          # libtokenizers (static; from daulet/tokenizers releases)
+          TOK_URL="https://github.com/daulet/tokenizers/releases/download/v${TOKENIZERS_VERSION}/libtokenizers.linux-amd64.tar.gz"
+          curl -fsSL "$TOK_URL" | tar xz -C "$NATIVE/lib"
+
+          ls "$NATIVE/lib"
+
+      - name: Build ORT binary (linux/amd64)
+        working-directory: librarian/src
+        env:
+          NATIVE: ${{ env.HOME }}/.hawp/native/linux-amd64
+        run: |
+          set -e
+          LDFLAGS="-s -w -X 'github.com/sentzunhat/hawp/librarian/src/internal/domain/update.Version=${{ steps.version.outputs.version }}'"
+          CGO_ENABLED=1 \
+          CGO_CFLAGS="-I$NATIVE/include" \
+          CGO_LDFLAGS="-L$NATIVE/lib -lonnxruntime -lonnxruntime-genai -ltokenizers -ldl -lm -lstdc++" \
+          go build -tags ORT -trimpath -ldflags="$LDFLAGS" -o bin/hawp-ort-linux-amd64 ./cmd/hawp
+
+      - name: Package ORT tarball (linux/amd64)
+        env:
+          NATIVE: ${{ env.HOME }}/.hawp/native/linux-amd64
+        run: |
+          set -e
+          mkdir -p stage/lib
+          cp librarian/src/bin/hawp-ort-linux-amd64 stage/hawp
+          cp "$NATIVE"/lib/libonnxruntime.so* stage/lib/ 2>/dev/null || true
+          cp "$NATIVE"/lib/libonnxruntime-genai.so* stage/lib/ 2>/dev/null || true
+          cat > stage/README.txt <<'EOF'
+          HAWP linux/amd64 — ORT build (ONNX LLM reshaping enabled)
+
+          Copy lib/ next to the hawp binary, or run:
+            sudo cp lib/* /usr/local/lib/ && sudo ldconfig
+
+          Then set llm.backend: "onnx" in ~/.hawp/config/context.json to
+          use local ONNX LLM reshaping (hawp search --context).
+          EOF
+          tar -C stage -czf librarian/src/bin/hawp-linux-amd64-ort.tar.gz .
+
+      - name: Upload ORT artifact (linux/amd64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-ort-linux-amd64
+          path: librarian/src/bin/hawp-linux-amd64-ort.tar.gz
+          retention-days: 1
+
+  # ── ORT build: darwin/arm64 ───────────────────────────────────────────────
+  build-ort-darwin-arm64:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Download ORT native libs (darwin/arm64)
+        run: |
+          set -e
+          NATIVE="$HOME/.hawp/native/darwin-arm64"
+          mkdir -p "$NATIVE/lib" "$NATIVE/include"
+
+          # onnxruntime (Apple Silicon)
+          ORT_URL="https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-osx-arm64-${ORT_VERSION}.tgz"
+          curl -fsSL "$ORT_URL" | tar xz -C "$NATIVE" --strip-components=1
+
+          # onnxruntime-genai (Apple Silicon)
+          GENAI_URL="https://github.com/microsoft/onnxruntime-genai/releases/download/v${ORT_GENAI_VERSION}/onnxruntime-genai-${ORT_GENAI_VERSION}-osx-arm64.tar.gz"
+          curl -fsSL "$GENAI_URL" | tar xz -C "$NATIVE" --strip-components=1
+
+          # libtokenizers (static)
+          TOK_URL="https://github.com/daulet/tokenizers/releases/download/v${TOKENIZERS_VERSION}/libtokenizers.darwin-arm64.tar.gz"
+          curl -fsSL "$TOK_URL" | tar xz -C "$NATIVE/lib"
+
+          ls "$NATIVE/lib"
+
+      - name: Build ORT binary (darwin/arm64)
+        working-directory: librarian/src
+        run: |
+          set -e
+          NATIVE="$HOME/.hawp/native/darwin-arm64"
+          LDFLAGS="-s -w -X 'github.com/sentzunhat/hawp/librarian/src/internal/domain/update.Version=${{ steps.version.outputs.version }}'"
+          CGO_ENABLED=1 \
+          CGO_CFLAGS="-I$NATIVE/include" \
+          CGO_LDFLAGS="-L$NATIVE/lib -Wl,-rpath,@executable_path/lib -lonnxruntime -lonnxruntime-genai -ltokenizers -ldl -lm -lc++" \
+          go build -tags ORT -trimpath -ldflags="$LDFLAGS" -o bin/hawp-ort-darwin-arm64 ./cmd/hawp
+
+      - name: Package ORT tarball (darwin/arm64)
+        run: |
+          set -e
+          NATIVE="$HOME/.hawp/native/darwin-arm64"
+          mkdir -p stage/lib
+          cp librarian/src/bin/hawp-ort-darwin-arm64 stage/hawp
+          cp "$NATIVE"/lib/libonnxruntime*.dylib stage/lib/ 2>/dev/null || true
+          cp "$NATIVE"/lib/libonnxruntime-genai*.dylib stage/lib/ 2>/dev/null || true
+          cat > stage/README.txt <<'EOF'
+          HAWP darwin/arm64 — ORT build (ONNX LLM reshaping enabled)
+
+          Keep lib/ in the same directory as hawp (the rpath is set to @executable_path/lib),
+          or install system-wide:
+            sudo cp lib/*.dylib /usr/local/lib/
+
+          Then set llm.backend: "onnx" in ~/.hawp/config/context.json to
+          use local ONNX LLM reshaping (hawp search --context).
+          EOF
+          tar -C stage -czf librarian/src/bin/hawp-darwin-arm64-ort.tar.gz .
+
+      - name: Upload ORT artifact (darwin/arm64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-ort-darwin-arm64
+          path: librarian/src/bin/hawp-darwin-arm64-ort.tar.gz
+          retention-days: 1
+
+  # ── Publish GitHub Release ─────────────────────────────────────────────────
+  release:
+    needs: [build-std, build-ort-linux-amd64, build-ort-darwin-arm64]
+    runs-on: ubuntu-latest
+    # Allow ORT jobs to fail without blocking the standard release.
+    # ORT builds depend on 3rd-party lib availability; failure means
+    # the ORT tarballs are simply absent from the release, not that
+    # the standard binaries are broken.
+    if: always() && needs.build-std.result == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download standard dist artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-std
+          path: dist/
+
+      - name: Download ORT artifact (linux/amd64)
+        if: needs.build-ort-linux-amd64.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-ort-linux-amd64
+          path: dist/
+
+      - name: Download ORT artifact (darwin/arm64)
+        if: needs.build-ort-darwin-arm64.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-ort-darwin-arm64
+          path: dist/
 
       - name: Package kit + provider overlay bundle
         run: |
@@ -90,34 +291,35 @@ jobs:
           for provider in .claude .codex .cursor .continue .github; do
             cp -r "core/providers/$provider" "$stage/providers/$provider"
           done
-          tar -C "$stage" -czf librarian/src/bin/dist/hawp-kit-bundle.tar.gz kit providers
+          tar -C "$stage" -czf dist/hawp-kit-bundle.tar.gz kit providers
 
       - name: Generate checksums.txt
         run: |
-          cd librarian/src/bin/dist
+          cd dist
           sha256sum * > checksums.txt
           echo "checksums.txt:"
           cat checksums.txt
 
       - name: Extract changelog section for this version
         run: |
-          awk -v ver="${{ steps.version.outputs.version }}" '
+          ver="${{ needs.build-std.outputs.version }}"
+          awk -v ver="$ver" '
             $0 ~ "^## \\[" ver "\\]" { found=1; print; next }
             found && /^## \[/ { exit }
             found { print }
           ' librarian/src/CHANGELOG.md > /tmp/release-notes.md
           if [ ! -s /tmp/release-notes.md ]; then
-            echo "::error::No librarian/src/CHANGELOG.md section found for version ${{ steps.version.outputs.version }} — add one before releasing." >&2
+            echo "::error::No librarian/src/CHANGELOG.md section found for version $ver — add one before releasing." >&2
             exit 1
           fi
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.version.outputs.tag }}
-          name: "HAWP librarian v${{ steps.version.outputs.version }}"
+          tag_name: ${{ needs.build-std.outputs.tag }}
+          name: "HAWP librarian v${{ needs.build-std.outputs.version }}"
           body_path: /tmp/release-notes.md
-          prerelease: ${{ steps.version.outputs.prerelease }}
+          prerelease: ${{ needs.build-std.outputs.prerelease }}
           draft: ${{ github.event.inputs.draft == 'true' }}
-          files: librarian/src/bin/dist/*
+          files: dist/*
           generate_release_notes: true

@@ -3,6 +3,38 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.13] - 2026-08-25
+
+ORT release build — ONNX LLM reshaping now ships in official release tarballs.
+
+### Added
+
+- **ORT release tarballs** — the GitHub Actions release workflow now builds two additional
+  tarballs per release: `hawp-linux-amd64-ort.tar.gz` and `hawp-darwin-arm64-ort.tar.gz`.
+  Each tarball contains a `hawp` binary built with `-tags ORT` (CGO_ENABLED=1) and a `lib/`
+  directory with the three required native libraries (`libonnxruntime`, `libonnxruntime-genai`,
+  `libtokenizers`). The standard six-platform CGO_ENABLED=0 binaries are unchanged.
+- **ORT build jobs** — two parallel CI jobs (`build-ort-linux-amd64` on ubuntu-latest,
+  `build-ort-darwin-arm64` on macos-14) download Microsoft ORT and ORT-GenAI prebuilts plus
+  a static `libtokenizers` (daulet/tokenizers), then build with `-tags ORT` and package the
+  result. Native lib versions: onnxruntime 1.19.2, onnxruntime-genai 0.4.0, tokenizers 0.13.0.
+- **Fault-isolated release job** — the publish step runs even when ORT build jobs fail
+  (`if: always() && needs.build-std.result == 'success'`), so a transient lib-download failure
+  does not block the standard binaries from shipping. ORT tarballs are simply absent from that
+  release; standard tarballs are always present.
+- **darwin/amd64 stays CGO_ENABLED=0** — no official Microsoft prebuilts exist for Intel Mac;
+  ONNX LLM is unavailable there. hugot returns a clear "build with -tags ORT" error when
+  `llm.backend: "onnx"` is requested on a non-ORT binary, so no panic.
+- **rpath for macOS** — darwin ORT binaries set `@executable_path/lib` so the `.dylib` files
+  can live next to the `hawp` binary without any `DYLD_LIBRARY_PATH` configuration.
+
+### Notes
+
+- Model: `homen3/SmolLM2-360M-Instruct-ort-genai-int4-cpu` (verified working 2026-07-27,
+  ~1.1s/reshape on arm64). Pull it with `hawp model pull homen3/SmolLM2-360M-Instruct-ort-genai-int4-cpu`.
+- Set `llm.backend: "onnx"` in `~/.hawp/config/context.json` to activate local LLM reshaping
+  for `hawp search --context`.
+
 ## [0.0.12] - 2026-08-25
 
 Local MCP call log with token estimates — opt-in, SQLite-backed, never blocks tool responses.
