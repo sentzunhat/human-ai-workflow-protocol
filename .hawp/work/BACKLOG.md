@@ -22,16 +22,12 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 ## Active Work
 
-_Branch: `feature/v0.0.11` — items below are the v0.0.11 scope._
+_v0.0.12 on `feature/v0.0.12` · v0.0.13 on `feature/v0.0.13`_
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
-| `cursor-mcp-type-wrapper` | fix | Cursor MCP: add `type: stdio` and `hawp-mcp` wrapper (relative command fails) | plan-ready | — | [plan](active/cursor-mcp-type-wrapper/plan.md) | 2026-08-25 |
-| `agents-seed-if-missing` | fix | AGENTS.md must not be overwritten on `hawp init` update | plan-ready | — | [plan](active/agents-seed-if-missing/plan.md) | 2026-08-25 |
-| `install-docs-embed-optional` | docs | Clarify: `hawp search index` first; embed is optional and slow | plan-ready | — | [plan](active/install-docs-embed-optional/plan.md) | 2026-08-25 |
-| `cursor-docs-ui-path` | docs | Fix stale Cursor MCP UI path: Customize → MCPs (not Settings → Tools & MCP) | plan-ready | — | [plan](active/cursor-docs-ui-path/plan.md) | 2026-08-25 |
-| `releases-prerelease-fallback` | investigation | Verify/fix: `/releases/latest` 404 when all GitHub releases are prerelease | analyzing | — | [plan](active/releases-prerelease-fallback/plan.md) | 2026-08-25 |
-| `manager-branch-kit-pattern` | improvement | Document optional manager-branch / worktree operating pattern in kit | plan-ready | — | [plan](active/manager-branch-kit-pattern/plan.md) | 2026-08-25 |
+| `usage-log` | feature | Local MCP call log with token counts (`hawp usage`) | `in-progress` | — | [plan](active/usage-log/plan.md) | 2026-08-25 |
+| `onnx-llm-release-build` | feature | Ship ONNX LLM in release binary (CI + native lib bundling) | `plan-ready` | — | [plan](active/onnx-llm-release-build/plan.md) | 2026-08-25 |
 
 ## Blocked / Parked
 
