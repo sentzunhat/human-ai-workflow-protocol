@@ -19,7 +19,7 @@ build:
 	CGO_ENABLED=0 go build -trimpath -ldflags='$(LDFLAGS)' -o $(BIN_DIR)/$(BINARY) ./cmd/hawp
 
 install: build
-	dd if=$(BIN_DIR)/$(BINARY) of=../../.hawp/bin/$(BINARY) bs=1m 2>/dev/null && chmod +x ../../.hawp/bin/$(BINARY)
+	cp -f $(BIN_DIR)/$(BINARY) ../../.hawp/bin/$(BINARY) && chmod +x ../../.hawp/bin/$(BINARY)
 
 test:
 	CGO_ENABLED=0 go test ./...
