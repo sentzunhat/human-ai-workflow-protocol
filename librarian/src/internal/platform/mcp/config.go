@@ -8,19 +8,27 @@ import (
 	"strings"
 )
 
+func hawpBinaryPath(repoRoot string) string {
+	return filepath.Join(repoRoot, ".hawp", "bin", "hawp")
+}
+
 // codexTOMLBlock returns the TOML snippet appended to .codex/config.toml for the
 // hawp server. Codex does not resolve relative command paths or cwd relative to
 // the project root for project-scoped configs, so both must be absolute.
 func codexTOMLBlock(repoRoot string) string {
-	bin := filepath.Join(repoRoot, ".hawp", "bin", "hawp")
+	bin := hawpBinaryPath(repoRoot)
 	return "\n[mcp_servers.hawp]\ncommand = \"" + bin + "\"\nargs = [\"mcp\"]\ncwd = \"" + repoRoot + "\"\n"
 }
 
-// hawpServerEntry is the MCP server config block written for all providers
-// that support JSON-RPC MCP (Claude Code, Cursor).
-var hawpServerEntry = map[string]any{
-	"command": ".hawp/bin/hawp",
-	"args":    []string{"mcp"},
+// hawpServerEntry returns the MCP server config block written for JSON-RPC MCP
+// providers that use JSON config files. We write an absolute command path so
+// the config remains reliable regardless of the app's current working
+// directory; each machine/project computes its own path at init/update time.
+func hawpServerEntry(repoRoot string) map[string]any {
+	return map[string]any{
+		"command": hawpBinaryPath(repoRoot),
+		"args":    []string{"mcp"},
+	}
 }
 
 // WriteProviderConfigs writes (or merges) the hawp MCP server entry into the
@@ -40,7 +48,7 @@ func WriteProviderConfigs(repoRoot string, providers []string) error {
 
 		switch p {
 		case "claude":
-			if err := writeMCPJSON(filepath.Join(repoRoot, ".mcp.json")); err != nil {
+			if err := writeMCPJSON(filepath.Join(repoRoot, ".mcp.json"), repoRoot); err != nil {
 				return fmt.Errorf("claude MCP config: %w", err)
 			}
 			fmt.Println("MCP: wrote .mcp.json (Claude Code)")
@@ -50,7 +58,7 @@ func WriteProviderConfigs(repoRoot string, providers []string) error {
 			if err := os.MkdirAll(dir, 0o755); err != nil {
 				return fmt.Errorf("cursor MCP config: %w", err)
 			}
-			if err := writeMCPJSON(filepath.Join(dir, "mcp.json")); err != nil {
+			if err := writeMCPJSON(filepath.Join(dir, "mcp.json"), repoRoot); err != nil {
 				return fmt.Errorf("cursor MCP config: %w", err)
 			}
 			fmt.Println("MCP: wrote .cursor/mcp.json (Cursor)")
@@ -91,24 +99,17 @@ func WriteProviderConfigs(repoRoot string, providers []string) error {
 }
 
 // writeCodexTOML appends the hawp MCP server entry to .codex/config.toml
-// (creating the file if absent). Idempotent: skips when an [mcp_servers.hawp]
-// block is already present. We avoid a TOML library dependency by treating the
-// file as plain text — the block format is fixed, so a substring check is sufficient.
+// (creating the file if absent). Existing hawp blocks are replaced in place so
+// relative or stale paths are upgraded to the current absolute-path form.
+// We avoid a TOML library dependency by treating the file as plain text — the
+// block format is fixed and isolated, so targeted replacement is sufficient.
 func writeCodexTOML(path, repoRoot string) error {
 	existing, err := os.ReadFile(path)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
 
-	if strings.Contains(string(existing), "[mcp_servers.hawp]") {
-		return nil // already configured
-	}
-
-	content := string(existing)
-	if !strings.HasSuffix(content, "\n") && len(content) > 0 {
-		content += "\n"
-	}
-	content += codexTOMLBlock(repoRoot)
+	content := upsertCodexTOML(string(existing), repoRoot)
 
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
@@ -116,10 +117,46 @@ func writeCodexTOML(path, repoRoot string) error {
 	return os.WriteFile(path, []byte(content), 0o644)
 }
 
+func upsertCodexTOML(content, repoRoot string) string {
+	block := strings.TrimPrefix(codexTOMLBlock(repoRoot), "\n")
+	lines := strings.Split(content, "\n")
+	start := -1
+	end := -1
+	for i, line := range lines {
+		if line == "[mcp_servers.hawp]" {
+			start = i
+			end = len(lines)
+			for j := i + 1; j < len(lines); j++ {
+				if strings.HasPrefix(lines[j], "[") {
+					end = j
+					break
+				}
+			}
+			break
+		}
+	}
+	if start >= 0 {
+		blockLines := strings.Split(strings.TrimSuffix(block, "\n"), "\n")
+		updatedLines := append([]string{}, lines[:start]...)
+		updatedLines = append(updatedLines, blockLines...)
+		updatedLines = append(updatedLines, lines[end:]...)
+		updated := strings.Join(updatedLines, "\n")
+		if !strings.HasSuffix(updated, "\n") {
+			updated += "\n"
+		}
+		return updated
+	}
+	if !strings.HasSuffix(content, "\n") && len(content) > 0 {
+		content += "\n"
+	}
+	content += codexTOMLBlock(repoRoot)
+	return content
+}
+
 // writeMCPJSON merges the hawp server entry into a JSON MCP config file.
-// Creates the file when missing; patches it when present; no-ops when the
-// hawp entry already exists.
-func writeMCPJSON(path string) error {
+// Creates the file when missing; patches it when present; upgrades any
+// existing hawp entry to the current absolute-path form.
+func writeMCPJSON(path, repoRoot string) error {
 	config := map[string]any{}
 
 	data, err := os.ReadFile(path)
@@ -136,11 +173,7 @@ func writeMCPJSON(path string) error {
 		servers = map[string]any{}
 	}
 
-	if _, exists := servers["hawp"]; exists {
-		return nil // already configured
-	}
-
-	servers["hawp"] = hawpServerEntry
+	servers["hawp"] = hawpServerEntry(repoRoot)
 	config["mcpServers"] = servers
 
 	out, err := json.MarshalIndent(config, "", "  ")
