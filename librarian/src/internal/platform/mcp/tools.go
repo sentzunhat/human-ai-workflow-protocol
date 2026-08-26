@@ -1,6 +1,12 @@
 package mcp
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"os"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/usage"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
+)
 
 func toolDefs() []map[string]any {
 	return []map[string]any{
@@ -46,14 +52,41 @@ func callTool(params json.RawMessage, repoRoot string) rpcResponse {
 	if err := json.Unmarshal(params, &p); err != nil {
 		return errResp(-32602, "invalid params: "+err.Error())
 	}
+
+	var resp rpcResponse
 	switch p.Name {
 	case "hawp_search":
-		return toolSearch(p.Arguments, repoRoot)
+		resp = toolSearch(p.Arguments, repoRoot)
 	case "hawp_work_new":
-		return toolWorkNew(p.Arguments, repoRoot)
+		resp = toolWorkNew(p.Arguments, repoRoot)
 	case "hawp_work_validate":
-		return toolWorkValidate(repoRoot)
+		resp = toolWorkValidate(repoRoot)
 	default:
 		return errResp(-32602, "unknown tool: "+p.Name)
 	}
+
+	// Fire-and-forget: log the call; never block or error the response.
+	go logCall(p.Name, p.Arguments, resp)
+
+	return resp
+}
+
+func logCall(tool string, inputArgs json.RawMessage, resp rpcResponse) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return
+	}
+	h := filesystem.ResolveHawpHome(home)
+	cfg := usage.LoadConfig(h.UsageConfigFile)
+	if !cfg.Enabled {
+		return
+	}
+	store, err := usage.Open(h.UsageDB)
+	if err != nil {
+		return
+	}
+	defer store.Close()
+
+	outJSON, _ := json.Marshal(resp.Result)
+	_ = store.Write(tool, inputArgs, outJSON, cfg.LogBodies)
 }

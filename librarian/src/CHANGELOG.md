@@ -3,6 +3,26 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.12] - 2026-08-25
+
+Local MCP call log with token estimates — opt-in, SQLite-backed, never blocks tool responses.
+
+### Added
+
+- **`hawp usage`** — show totals across all recorded MCP calls: total calls, estimated
+  tokens in, estimated tokens out, and estimated tokens saved via context shaping.
+- **`hawp usage log`** — tail the 20 most recent entries (timestamp, tool, tokens in/out, query summary).
+- **`hawp usage enable`** — opt into call logging. Config stored in `~/.hawp/config/usage.json`.
+  Pass `--log-bodies` to also store raw input/output JSON (disabled by default — bodies may
+  contain sensitive prompt text).
+- **`hawp usage disable`** / **`hawp usage clear`** — turn off logging or truncate the log.
+- **`~/.hawp/usage.db`** — SQLite log file, created on first recorded call (not at binary launch).
+  Separate from the search index so `hawp search index` never touches it.
+- **MCP auto-log** — after every `hawp_search`, `hawp_work_new`, and `hawp_work_validate`
+  tool call, a goroutine writes an entry to the log. Fire-and-forget: log write failures are
+  silent and never block or error the tool response.
+- Token estimates use the `len(JSON)/4` character approximation — no tokenizer dependency.
+
 ## [0.0.11] - 2026-08-25
 
 Cursor MCP `type:stdio` + wrapper, AGENTS.md seed-if-missing, embed-optional docs, install lessons from downstream.
