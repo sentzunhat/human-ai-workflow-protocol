@@ -34,8 +34,8 @@ permissions:
 # Update these when bumping hugot or knights-analytics/ortgenai.
 env:
   ORT_VERSION: "1.19.2"
-  ORT_GENAI_VERSION: "0.4.0"
-  TOKENIZERS_VERSION: "0.13.0"
+  ORT_GENAI_VERSION: "0.13.1"
+  TOKENIZERS_VERSION: "1.27.0"
 
 jobs:
   # ── Standard build (all 6 platforms, CGO_ENABLED=0, no ORT) ──────────────
@@ -115,7 +115,7 @@ jobs:
 
       - name: Download ORT native libs (linux/amd64)
         run: |
-          set -e
+          set -euo pipefail
           NATIVE="$HOME/.hawp/native/linux-amd64"
           mkdir -p "$NATIVE/lib" "$NATIVE/include"
 
@@ -125,7 +125,7 @@ jobs:
 
           # onnxruntime-genai
           GENAI_URL="https://github.com/microsoft/onnxruntime-genai/releases/download/v${ORT_GENAI_VERSION}/onnxruntime-genai-${ORT_GENAI_VERSION}-linux-x64.tar.gz"
-          curl -fsSL "$GENAI_URL" | tar xz -C "$NATIVE" --strip-components=1
+          curl -fsSL "$GENAI_URL" | tar xz -C "$NATIVE" --strip-components=2
 
           # libtokenizers (static; from daulet/tokenizers releases)
           TOK_URL="https://github.com/daulet/tokenizers/releases/download/v${TOKENIZERS_VERSION}/libtokenizers.linux-amd64.tar.gz"
@@ -193,7 +193,7 @@ jobs:
 
       - name: Download ORT native libs (darwin/arm64)
         run: |
-          set -e
+          set -euo pipefail
           NATIVE="$HOME/.hawp/native/darwin-arm64"
           mkdir -p "$NATIVE/lib" "$NATIVE/include"
 
@@ -203,7 +203,7 @@ jobs:
 
           # onnxruntime-genai (Apple Silicon)
           GENAI_URL="https://github.com/microsoft/onnxruntime-genai/releases/download/v${ORT_GENAI_VERSION}/onnxruntime-genai-${ORT_GENAI_VERSION}-osx-arm64.tar.gz"
-          curl -fsSL "$GENAI_URL" | tar xz -C "$NATIVE" --strip-components=1
+          curl -fsSL "$GENAI_URL" | tar xz -C "$NATIVE" --strip-components=2
 
           # libtokenizers (static)
           TOK_URL="https://github.com/daulet/tokenizers/releases/download/v${TOKENIZERS_VERSION}/libtokenizers.darwin-arm64.tar.gz"
