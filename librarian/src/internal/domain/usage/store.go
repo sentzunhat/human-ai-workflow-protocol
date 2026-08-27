@@ -60,13 +60,29 @@ type Totals struct {
 	TokensOut int
 }
 
-// Store wraps the usage SQLite DB.
-type Store struct {
+// Store is the port (interface) for reading and writing usage log entries.
+// The concrete SQLite implementation is in sqliteStore; callers depend only
+// on this interface so the storage backend can be swapped or stubbed in tests.
+type Store interface {
+	Write(tool string, inputJSON, outputJSON []byte, logBodies bool) error
+	Recent(n int) ([]Entry, error)
+	GetTotals() (Totals, error)
+	GetReport() (Report, error)
+	Clear() error
+	Close()
+}
+
+// sqliteStore is the SQLite-backed implementation of Store.
+// It directly imports database/sql and modernc.org/sqlite; callers that want
+// a pure-domain boundary should depend on the Store interface, not this type.
+// Moving Open() to infrastructure/sqlite is tracked in the arch audit.
+type sqliteStore struct {
 	db *sql.DB
 }
 
 // Open opens (or creates) the usage DB at path. Creates parent dirs as needed.
-func Open(path string) (*Store, error) {
+// Returns a Store interface so callers don't depend on the concrete sqliteStore type.
+func Open(path string) (Store, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return nil, err
 	}
@@ -82,11 +98,11 @@ func Open(path string) (*Store, error) {
 	// SQLite returns "duplicate column name" when the column already exists;
 	// that error is expected and safe to ignore.
 	_, _ = db.Exec(migrateQueryText)
-	return &Store{db: db}, nil
+	return &sqliteStore{db: db}, nil
 }
 
 // Close releases the DB handle.
-func (s *Store) Close() { s.db.Close() }
+func (s *sqliteStore) Close() { s.db.Close() }
 
 // extractQueryText pulls the first 256 chars of the "query" (or "title")
 // field from an input JSON blob. Returns nil when neither field is present.
@@ -109,7 +125,7 @@ func extractQueryText(inputJSON []byte) *string {
 // Write inserts one log entry. inputJSON and outputJSON are the raw JSON
 // bytes of the request arguments and response result. When logBodies is
 // false the bodies are stored as NULL.
-func (s *Store) Write(tool string, inputJSON, outputJSON []byte, logBodies bool) error {
+func (s *sqliteStore) Write(tool string, inputJSON, outputJSON []byte, logBodies bool) error {
 	h := sha256.Sum256(inputJSON)
 	queryHash := fmt.Sprintf("%x", h[:8]) // 16 hex chars — enough for dedup, not full fingerprint
 	tokensIn := (len(inputJSON) + 3) / 4
@@ -135,7 +151,7 @@ func (s *Store) Write(tool string, inputJSON, outputJSON []byte, logBodies bool)
 }
 
 // Recent returns up to n most recent entries, newest first.
-func (s *Store) Recent(n int) ([]Entry, error) {
+func (s *sqliteStore) Recent(n int) ([]Entry, error) {
 	rows, err := s.db.Query(
 		`SELECT id, ts, tool, query_hash, query_text, tokens_in, tokens_out, input_body, output_body
          FROM usage_log ORDER BY id DESC LIMIT ?`, n,
@@ -159,7 +175,7 @@ func (s *Store) Recent(n int) ([]Entry, error) {
 }
 
 // GetTotals returns aggregate counts across the whole log.
-func (s *Store) GetTotals() (Totals, error) {
+func (s *sqliteStore) GetTotals() (Totals, error) {
 	var t Totals
 	err := s.db.QueryRow(
 		`SELECT COUNT(*), COALESCE(SUM(tokens_in),0), COALESCE(SUM(tokens_out),0) FROM usage_log`,
@@ -187,7 +203,7 @@ type Report struct {
 }
 
 // GetReport returns aggregate and per-tool stats, plus the top recent entries.
-func (s *Store) GetReport() (Report, error) {
+func (s *sqliteStore) GetReport() (Report, error) {
 	var r Report
 
 	// Overall totals
@@ -292,7 +308,7 @@ func FormatReport(rep Report) string {
 }
 
 // Clear truncates the log. Irreversible.
-func (s *Store) Clear() error {
+func (s *sqliteStore) Clear() error {
 	_, err := s.db.Exec(`DELETE FROM usage_log`)
 	return err
 }

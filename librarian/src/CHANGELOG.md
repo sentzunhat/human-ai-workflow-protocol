@@ -3,6 +3,24 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.20] - 2026-08-27
+
+Architecture audit + ports-and-adapters fix for `domain/usage`.
+
+### Changed
+
+- **`domain/usage.Store`** — extracted as a port interface (`Write`, `Recent`,
+  `GetTotals`, `GetReport`, `Clear`, `Close`). The concrete SQLite implementation
+  is now the unexported `sqliteStore` type. `Open()` returns `Store` (interface)
+  so callers no longer depend on the concrete type.
+- **`domain/usage/store_test.go`** — `openTemp` return type updated to `Store`.
+
+### Added
+
+- **Architecture audit evidence** at `.hawp/work/evidence/2026/08/27/v0020-arch-audit.md`:
+  full gap analysis vs. mictlan's area-first ports-and-adapters pattern, with
+  compliance table and recommended next steps per patch.
+
 ## [0.0.19] - 2026-08-27
 
 `hawp search benchmark --token` — token-savings benchmark measuring context
