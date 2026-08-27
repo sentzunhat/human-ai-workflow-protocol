@@ -3,6 +3,24 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.19] - 2026-08-27
+
+`hawp search benchmark --token` — token-savings benchmark measuring context
+shaping reduction vs raw result text. Closes the v0014-token-speed-bench gate.
+
+### Added
+
+- **`hawp search benchmark --token`** — runs the 10-query benchmark set through
+  the full shaping pipeline (`FormatAsMarkdown` at 2000-token budget) and
+  reports raw vs shaped token counts per query, plus aggregate savings.
+  `--export <path>` writes the Markdown table as an evidence artifact.
+- **`RunTokenBenchmark(db, exportPath)`** in `internal/platform/cli/benchmark` —
+  drives lexical/hybrid search, converts to `domainsearch.Result`, calls
+  `appcontext.FormatAsMarkdown`, and renders the `formatTokenReport` Markdown.
+- **Evidence artifact** at `.hawp/work/evidence/2026/08/27/v0019-token-savings-benchmark.md`
+  — real run against the live index: **19% overall token reduction** (10 queries,
+  2000-token budget; up to 38% on dense queries, negative on sparse results).
+
 ## [0.0.18] - 2026-08-27
 
 `hawp usage report` — Markdown usage summary with per-tool breakdowns and
