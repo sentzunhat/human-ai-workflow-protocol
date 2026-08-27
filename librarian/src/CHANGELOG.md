@@ -3,7 +3,7 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [0.0.13] - 2026-08-25
+## [0.0.14] - 2026-08-27
 
 ORT release build — ONNX LLM reshaping now ships in official release tarballs.
 
