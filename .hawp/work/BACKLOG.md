@@ -22,12 +22,13 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 ## Active Work
 
-_v0.0.12 on `feature/v0.0.12` · v0.0.13 on `feature/v0.0.13`_
+_v0.0.13 on `main` · next patch on `feature/v0.0.14`_
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
 | `usage-log` | feature | Local MCP call log with token counts (`hawp usage`) | `in-progress` | — | [plan](active/usage-log/plan.md) | 2026-08-25 |
 | `onnx-llm-release-build` | feature | Ship ONNX LLM in release binary (CI + native lib bundling) | `plan-ready` | — | [plan](active/onnx-llm-release-build/plan.md) | 2026-08-25 |
+| `v0014-ort-release-fix` | fix | Repair ORT release lanes after `v0.0.13` release failure | `plan-ready` | — | [plan](active/v0014-ort-release-fix/plan.md) | 2026-08-27 |
 | `release-benchmark-backfill` | planning | Benchmark evidence gate for `v0.0.11` through `v0.0.13` | `plan-ready` | — | [plan](active/release-benchmark-backfill/plan.md) | 2026-08-26 |
 | `v0014-token-speed-bench` | feature | `v0.0.14` token-savings and speed benchmark gate | `plan-ready` | — | [plan](active/v0014-token-speed-bench/plan.md) | 2026-08-26 |
 
