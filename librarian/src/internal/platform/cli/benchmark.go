@@ -3,10 +3,13 @@ package cli
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
+	appcontext "github.com/sentzunhat/hawp/librarian/src/internal/application/context"
 	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
+	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
 )
 
@@ -289,4 +292,128 @@ func maxFloat(vals []float64) float64 {
 		}
 	}
 	return max
+}
+
+// ─── Token-Savings Benchmark ─────────────────────────────────────────────────
+
+// tokenBenchResult records shaping savings for one query.
+type tokenBenchResult struct {
+	Query        string
+	Intent       string
+	ResultCount  int
+	RawTokens    int
+	ShapedTokens int
+}
+
+// RunTokenBenchmark measures how much context shaping reduces token count vs.
+// returning all raw result text verbatim. For each benchmark query it:
+//  1. Runs lexical (+ hybrid if vectors exist) search → sum raw content tokens
+//  2. Runs FormatAsMarkdown with a 2000-token budget → reads shaped token count
+//  3. Reports the difference as evidence of shaping effectiveness
+//
+// If exportPath is non-empty the Markdown report is also written to that file.
+func RunTokenBenchmark(db *sqlite.IndexDB, exportPath string) error {
+	fmt.Println("\n╔════════════════════════════════════════════════════════════════╗")
+	fmt.Println("║       TOKEN-SAVINGS BENCHMARK: RAW vs SHAPED CONTEXT          ║")
+	fmt.Println("╚════════════════════════════════════════════════════════════════╝")
+	const budget = 2000
+	fmt.Printf("Shape budget: %d tokens  |  Queries: %d\n\n", budget, len(benchmarkQueries))
+
+	hasVectors, _ := db.HasVectors()
+	results := make([]tokenBenchResult, 0, len(benchmarkQueries))
+
+	for _, q := range benchmarkQueries {
+		rows, err := db.QueryChunksLexical(q.Query, 30)
+		if err != nil || len(rows) == 0 {
+			results = append(results, tokenBenchResult{Query: q.Query, Intent: q.Intent})
+			fmt.Printf("  %-45s  (no results)\n", q.Intent)
+			continue
+		}
+		if hasVectors {
+			rows = appsearch.HybridRank(rows, q.Query, db, 10, 0)
+		} else if len(rows) > 10 {
+			rows = rows[:10]
+		}
+
+		domainResults := make([]domainsearch.Result, len(rows))
+		rawTokens := 0
+		for i, r := range rows {
+			text := getStr(r, "text")
+			var score float32
+			if v, ok := r["_hybrid_score"].(float64); ok {
+				score = float32(v)
+			}
+			domainResults[i] = domainsearch.Result{
+				Source:    getStr(r, "path"),
+				Title:     getStr(r, "folder_role"),
+				Content:   text,
+				Relevance: score,
+			}
+			rawTokens += (len(text) + 3) / 4
+		}
+
+		block := appcontext.FormatAsMarkdown(domainResults, q.Query, budget)
+		saved := rawTokens - block.TokenCount
+		pct := 0.0
+		if rawTokens > 0 {
+			pct = float64(saved) / float64(rawTokens) * 100
+		}
+		results = append(results, tokenBenchResult{
+			Query:        q.Query,
+			Intent:       q.Intent,
+			ResultCount:  len(rows),
+			RawTokens:    rawTokens,
+			ShapedTokens: block.TokenCount,
+		})
+		fmt.Printf("  %-45s  raw=%4d  shaped=%4d  saved=%4d (%3.0f%%)\n",
+			q.Intent, rawTokens, block.TokenCount, saved, pct)
+	}
+
+	report := formatTokenReport(results, budget)
+	fmt.Print("\n" + report)
+
+	if exportPath != "" {
+		if err := os.WriteFile(exportPath, []byte(report), 0o644); err != nil {
+			return fmt.Errorf("export: %w", err)
+		}
+		fmt.Printf("Evidence written to: %s\n", exportPath)
+	}
+	return nil
+}
+
+// formatTokenReport renders the token-savings results as a Markdown table
+// suitable for committing as a work evidence artifact.
+func formatTokenReport(results []tokenBenchResult, budget int) string {
+	var sb strings.Builder
+	fmt.Fprintf(&sb, "# Token-Savings Benchmark\n\n")
+	fmt.Fprintf(&sb, "Shape budget: **%d tokens** | Token estimate: `(len(text)+3)/4`\n\n", budget)
+	fmt.Fprintln(&sb, "| # | Query (intent) | Results | Raw tokens | Shaped tokens | Saved | % saved |")
+	fmt.Fprintln(&sb, "|---|----------------|---------|------------|---------------|-------|---------|")
+
+	totalRaw, totalShaped := 0, 0
+	for i, r := range results {
+		saved := r.RawTokens - r.ShapedTokens
+		pct := 0.0
+		if r.RawTokens > 0 {
+			pct = float64(saved) / float64(r.RawTokens) * 100
+		}
+		fmt.Fprintf(&sb, "| %d | %s | %d | %d | %d | %d | %.0f%% |\n",
+			i+1, r.Intent, r.ResultCount, r.RawTokens, r.ShapedTokens, saved, pct)
+		totalRaw += r.RawTokens
+		totalShaped += r.ShapedTokens
+	}
+
+	totalSaved := totalRaw - totalShaped
+	totalPct := 0.0
+	if totalRaw > 0 {
+		totalPct = float64(totalSaved) / float64(totalRaw) * 100
+	}
+	fmt.Fprintf(&sb, "| — | **TOTAL** | — | **%d** | **%d** | **%d** | **%.0f%%** |\n\n",
+		totalRaw, totalShaped, totalSaved, totalPct)
+
+	fmt.Fprintln(&sb, "_Context shaping applies deduplication + token-budget truncation._")
+	fmt.Fprintln(&sb, "_Raw tokens = sum of `len(chunk text)/4` across all ranked results._")
+	fmt.Fprintln(&sb, "_Shaped tokens = `ContextBlock.TokenCount` after `FormatAsMarkdown`._")
+	fmt.Fprintln(&sb, "_Negative savings = sparse result set already under budget; shaper adds Markdown formatting overhead._")
+	return sb.String()
 }

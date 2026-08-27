@@ -1230,8 +1230,23 @@ func toJSONReferences(refs []appcontext.DocumentReference) []map[string]interfac
 	return out
 }
 
-// runSearchBenchmark runs benchmark tests on all 3 search patterns
+// runSearchBenchmark runs benchmark tests on all 3 search patterns, or
+// the token-savings benchmark when --token is passed.
 func runSearchBenchmark(args []string) error {
+	tokenMode := false
+	exportPath := ""
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--token":
+			tokenMode = true
+		case "--export":
+			if i+1 < len(args) {
+				exportPath = args[i+1]
+				i++
+			}
+		}
+	}
+
 	root, err := repo.FindBacklogRepoRoot(mustGetwd())
 	if err != nil {
 		fmt.Println("Not in a HAWP repo; no index to benchmark.")
@@ -1246,6 +1261,12 @@ func runSearchBenchmark(args []string) error {
 	}
 	defer db.Close()
 
+	if !tokenMode && exportPath != "" {
+		fmt.Println("Note: --export is only used with --token; ignoring.")
+	}
+	if tokenMode {
+		return RunTokenBenchmark(db, exportPath)
+	}
 	return RunBenchmark(db)
 }
 
