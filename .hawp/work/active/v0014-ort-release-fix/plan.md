@@ -1,8 +1,8 @@
 # v0014-ort-release-fix — repair ORT release lanes after `v0.0.13` failure
 
 **Type:** fix
-**Status:** plan-ready
-**Branch:** `feature/v0.0.14`
+**Status:** in-progress
+**Branch:** `feature/v0.0.15`
 **Opened:** 2026-08-27
 
 ## Problem
@@ -56,3 +56,8 @@ refresh the checked-in binary from a published release asset.
   - darwin ORT lane used a nonexistent `onnxruntime-genai` asset pattern from
     `v0.4.0`; the `curl | tar` pipeline also lacked `pipefail`, so the missing
     archive was only surfaced later at link time
+  - after shipping `0.0.14`, GitHub Actions run `33093186035` showed the Linux
+    ORT build and package shell steps still resolved `NATIVE` as
+    `/.hawp/native/linux-amd64` via workflow `env:` expansion; the follow-up
+    patch moves that path computation into the shell steps with
+    `NATIVE="$HOME/.hawp/native/linux-amd64"`

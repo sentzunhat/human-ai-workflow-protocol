@@ -3,6 +3,21 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.15] - 2026-08-27
+
+Linux ORT release path fix so the GitHub Release workflow can package the
+`hawp-linux-amd64-ort.tar.gz` artifact from the correct native-lib directory.
+
+### Fixed
+
+- **Linux ORT native-lib path on Actions** — the `build-ort-linux-amd64` job no
+  longer relies on workflow-level `${{ env.HOME }}` expansion for `NATIVE`,
+  which resolved to `/.hawp/native/linux-amd64` in the failing `0.0.14`
+  release run. The build and package shell steps now set
+  `NATIVE="$HOME/.hawp/native/linux-amd64"` directly before invoking the linker
+  and copying shared libraries, so `libonnxruntime`, `libonnxruntime-genai`,
+  and `libtokenizers` are resolved from the downloaded native bundle path.
+
 ## [0.0.14] - 2026-08-27
 
 ORT release build — ONNX LLM reshaping now ships in official release tarballs.
