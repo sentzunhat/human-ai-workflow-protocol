@@ -16,6 +16,8 @@ type HawpHome struct {
 	Downloads        string // Root/cache/downloads — staging area for verified downloads
 	UpdateCacheFile  string // Root/cache/update-check.json — last release check result
 	UpdateConfigFile string // Root/config/update.json — update preferences
+	UsageConfigFile  string // Root/config/usage.json — usage logging preferences
+	UsageDB          string // Root/usage.db — call log (separate from search index)
 }
 
 // ResolveHawpHome builds the ~/.hawp/ layout under the given home directory.
@@ -36,6 +38,8 @@ func ResolveHawpHome(home string) HawpHome {
 		Downloads:        filepath.Join(cacheRoot, "downloads"),
 		UpdateCacheFile:  filepath.Join(cacheRoot, "update-check.json"),
 		UpdateConfigFile: filepath.Join(configRoot, "update.json"),
+		UsageConfigFile:  filepath.Join(configRoot, "usage.json"),
+		UsageDB:          filepath.Join(root, "usage.db"),
 	}
 }
 

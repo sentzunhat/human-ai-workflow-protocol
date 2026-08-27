@@ -29,6 +29,7 @@ import (
 	domainindex "github.com/sentzunhat/hawp/librarian/src/internal/domain/index"
 	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
 	domainupdate "github.com/sentzunhat/hawp/librarian/src/internal/domain/update"
+	domainusage "github.com/sentzunhat/hawp/librarian/src/internal/domain/usage"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/download"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/githubrelease"
@@ -158,6 +159,21 @@ func Run(args []string) error {
 
 	case command == "search":
 		return runSearch(args[1:])
+
+	case command == "usage" && sub == "enable":
+		return runUsageEnable(args[2:])
+
+	case command == "usage" && sub == "disable":
+		return runUsageDisable()
+
+	case command == "usage" && sub == "log":
+		return runUsageLog()
+
+	case command == "usage" && sub == "clear":
+		return runUsageClear()
+
+	case command == "usage":
+		return runUsageTotals()
 	}
 
 	return errors.New("unknown command\n\n" + helpText())
@@ -1298,6 +1314,11 @@ COMMANDS
                                                    --hybrid-ratio tunes the lexical/semantic blend (default 0.3)
   model pull <hf-org/repo> [--onnx-file <path>]   download any Hugging Face ONNX model into ~/.hawp/models
   embed <text>... [--model <hf-org/repo>]         embed text via a local model (default: all-MiniLM-L6-v2)
+  usage                                           show MCP call log totals (opt-in; run hawp usage enable first)
+  usage log                                       tail 20 most recent logged calls
+  usage enable [--log-bodies]                     enable call logging (--log-bodies also stores raw input/output)
+  usage disable                                   stop recording new calls
+  usage clear                                     delete all stored log entries (irreversible)
 
 WORK NORMALIZE OPTIONS
   --dry-run | --apply    detection only (default) | normalize closed records
@@ -1315,4 +1336,126 @@ SEARCH --CONTEXT OPTIONS
   --max-tokens <n>       token budget for context block (default 2000)
   --verbose | -v         print token accounting summary to stderr (chunks, ~tokens, saved via dedup)
   --hybrid-ratio <f>     lexical fraction for hybrid blend [0.0, 1.0] (default 0.3)`
+}
+
+func usageHome() (filesystem.HawpHome, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return filesystem.HawpHome{}, fmt.Errorf("could not resolve home directory: %w", err)
+	}
+	return filesystem.ResolveHawpHome(home), nil
+}
+
+func runUsageTotals() error {
+	h, err := usageHome()
+	if err != nil {
+		return err
+	}
+	cfg := domainusage.LoadConfig(h.UsageConfigFile)
+	if !cfg.Enabled {
+		fmt.Println("Usage logging is disabled. Run `hawp usage enable` to start recording calls.")
+		return nil
+	}
+	store, err := domainusage.Open(h.UsageDB)
+	if err != nil {
+		return fmt.Errorf("usage db: %w", err)
+	}
+	defer store.Close()
+	totals, err := store.GetTotals()
+	if err != nil {
+		return err
+	}
+	fmt.Print(domainusage.FormatTotals(totals))
+	return nil
+}
+
+func runUsageLog() error {
+	h, err := usageHome()
+	if err != nil {
+		return err
+	}
+	store, err := domainusage.Open(h.UsageDB)
+	if err != nil {
+		return fmt.Errorf("usage db: %w", err)
+	}
+	defer store.Close()
+	entries, err := store.Recent(20)
+	if err != nil {
+		return err
+	}
+	if len(entries) == 0 {
+		fmt.Println("No entries recorded yet.")
+		return nil
+	}
+	for _, e := range entries {
+		summary := domainusage.QuerySummary([]byte("{}"), e.QueryHash)
+		if e.InputBody != nil {
+			summary = domainusage.QuerySummary([]byte(*e.InputBody), e.QueryHash)
+		}
+		fmt.Printf("%s  %-22s  in=%-5d out=%-5d  %s\n",
+			e.TS.Format("2006-01-02 15:04:05"),
+			e.Tool, e.TokensIn, e.TokensOut, summary)
+	}
+	return nil
+}
+
+func runUsageEnable(args []string) error {
+	h, err := usageHome()
+	if err != nil {
+		return err
+	}
+	cfg := domainusage.LoadConfig(h.UsageConfigFile)
+	cfg.Enabled = true
+	for _, a := range args {
+		if a == "--log-bodies" {
+			cfg.LogBodies = true
+		}
+	}
+	if err := domainusage.SaveConfig(h.UsageConfigFile, cfg); err != nil {
+		return err
+	}
+	msg := "Usage logging enabled."
+	if cfg.LogBodies {
+		msg += " Body capture on (raw input/output stored)."
+	}
+	fmt.Println(msg)
+	return nil
+}
+
+func runUsageDisable() error {
+	h, err := usageHome()
+	if err != nil {
+		return err
+	}
+	cfg := domainusage.LoadConfig(h.UsageConfigFile)
+	cfg.Enabled = false
+	if err := domainusage.SaveConfig(h.UsageConfigFile, cfg); err != nil {
+		return err
+	}
+	fmt.Println("Usage logging disabled.")
+	return nil
+}
+
+func runUsageClear() error {
+	h, err := usageHome()
+	if err != nil {
+		return err
+	}
+	store, err := domainusage.Open(h.UsageDB)
+	if err != nil {
+		return fmt.Errorf("usage db: %w", err)
+	}
+	defer store.Close()
+	fmt.Print("Delete all usage log entries? [y/N] ")
+	var answer string
+	fmt.Scanln(&answer)
+	if strings.ToLower(strings.TrimSpace(answer)) != "y" {
+		fmt.Println("Cancelled.")
+		return nil
+	}
+	if err := store.Clear(); err != nil {
+		return err
+	}
+	fmt.Println("Usage log cleared.")
+	return nil
 }
