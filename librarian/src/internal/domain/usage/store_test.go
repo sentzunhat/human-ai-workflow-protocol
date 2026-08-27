@@ -9,7 +9,7 @@ import (
 
 func strPtr(s string) *string { return &s }
 
-func openTemp(t *testing.T) *Store {
+func openTemp(t *testing.T) Store {
 	t.Helper()
 	s, err := Open(filepath.Join(t.TempDir(), "usage.db"))
 	if err != nil {
