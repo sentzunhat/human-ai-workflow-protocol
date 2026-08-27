@@ -22,15 +22,12 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 ## Active Work
 
-_v0.0.15 on `main` · next patch on `feature/v0.0.16`_
+_v0.0.16 on `main` · next patch on `feature/v0.0.17`_
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
-| `usage-log` | feature | Local MCP call log with token counts (`hawp usage`) | `in-progress` | — | [plan](active/usage-log/plan.md) | 2026-08-25 |
-| `onnx-llm-release-build` | feature | Ship ONNX LLM in release binary (CI + native lib bundling) | `plan-ready` | — | [plan](active/onnx-llm-release-build/plan.md) | 2026-08-25 |
-| `v0014-ort-release-fix` | fix | Repair ORT release lanes after `v0.0.13` release failure | `in-progress` | — | [plan](active/v0014-ort-release-fix/plan.md) | 2026-08-27 |
-| `release-benchmark-backfill` | planning | Benchmark evidence gate for `v0.0.11` through `v0.0.13` | `plan-ready` | — | [plan](active/release-benchmark-backfill/plan.md) | 2026-08-26 |
-| `v0014-token-speed-bench` | feature | `v0.0.14` token-savings and speed benchmark gate | `plan-ready` | — | [plan](active/v0014-token-speed-bench/plan.md) | 2026-08-26 |
+| `release-benchmark-backfill` | planning | Benchmark evidence gate for `v0.0.11` through `v0.0.16` | `plan-ready` | — | [plan](active/release-benchmark-backfill/plan.md) | 2026-08-27 |
+| `v0014-token-speed-bench` | feature | Token-savings and speed benchmark gate | `plan-ready` | — | [plan](active/v0014-token-speed-bench/plan.md) | 2026-08-27 |
 
 ## Blocked / Parked
 
@@ -53,6 +50,9 @@ Limited to the last 10 items.
 
 | ID | Type | Title | Closed | Detail |
 | -- | ---- | ----- | ------ | ------ |
+| `v0014-ort-release-fix` | fix | Repair ORT release lanes — shipped v0.0.14–v0.0.16 | 2026-08-27 | [plan](closed/2026/08/27/v0014-ort-release-fix/plan.md) |
+| `onnx-llm-release-build` | feature | Ship ONNX LLM in release binary (ORT tarballs) — shipped v0.0.14 | 2026-08-27 | [plan](closed/2026/08/27/onnx-llm-release-build/plan.md) |
+| `usage-log` | feature | Local MCP call log with token counts (`hawp usage`) — shipped v0.0.12 | 2026-08-27 | [plan](closed/2026/08/27/usage-log/plan.md) |
 | `archive-uuid-structure-audit` | investigation | Review mixed `closed/` and `evidence/` archive structure vs UUID-folder guidance | 2026-08-25 | [plan](closed/2026/08/25/archive-uuid-structure-audit/plan.md) |
 | `releases-prerelease-fallback` | investigation | Verify/fix: `/releases/latest` 404 when all GitHub releases are prerelease | 2026-08-25 | [plan](closed/2026/08/25/releases-prerelease-fallback/plan.md) |
 | `manager-branch-kit-pattern` | improvement | Document optional manager-branch / worktree operating pattern in kit | 2026-08-25 | [plan](closed/2026/08/25/manager-branch-kit-pattern/plan.md) |
@@ -60,9 +60,6 @@ Limited to the last 10 items.
 | `install-docs-embed-optional` | docs | Clarify: `hawp search index` first; embed is optional and slow | 2026-08-25 | [plan](closed/2026/08/25/install-docs-embed-optional/plan.md) |
 | `cursor-docs-ui-path` | docs | Fix stale Cursor MCP UI path: Customize → MCPs (not Settings → Tools & MCP) | 2026-08-25 | [plan](closed/2026/08/25/cursor-docs-ui-path/plan.md) |
 | `cursor-mcp-type-wrapper` | fix | Cursor MCP: add `type: stdio` and `hawp-mcp` wrapper (relative command fails) | 2026-08-25 | [plan](closed/2026/08/25/cursor-mcp-type-wrapper/plan.md) |
-| `hmcp0825` | investigation | Codex-side HAWP MCP tool visibility investigation | 2026-08-25 | [plan](closed/2026/08/25/hmcp0825.md) |
-| `1c743447` | feature | `--hybrid-ratio` flag: configurable lexical/semantic blend | 2026-08-25 | [plan](closed/2026/08/25/1c743447/plan.md) |
-| `0ca7cf49` | fix | Code cleanup: stale llm-reshape doc traces removed (3 files; all tests green) | 2026-08-24 | [plan](closed/2026/08/24/0ca7cf49/plan.md) |
 
 ---
 

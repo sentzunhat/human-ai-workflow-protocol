@@ -67,3 +67,27 @@ refresh the checked-in binary from a published release asset.
     `onnxruntime-genai-0.13.1-linux-x64.tar.gz` archive layout differs from the
     macOS archive, so `--strip-components=2` extracted the shared library into
     `$NATIVE/` instead of `$NATIVE/lib/`
+
+## Outcome
+
+Root cause confirmed and fixed across three patch versions:
+- v0.0.14: nonexistent tokenizers tag (`v0.13.0` → `v1.27.0`) and missing `pipefail` fixed
+- v0.0.15: `${{ env.HOME }}` expansion resolved to `/.hawp/` on Actions; replaced with `$HOME` in shell steps
+- v0.0.16: Linux `onnxruntime-genai` archive uses `--strip-components=1` (not `2`); fixed extraction path
+
+All acceptance criteria met. ORT release lanes verified green at v0.0.16.
+
+## Verification
+
+- [x] GitHub Actions run 33093186035 — v0.0.14 ORT tarballs published
+- [x] GitHub Actions run 33099207198 — v0.0.15 linux path fix confirmed
+- [x] GitHub Actions run 33101055988 — v0.0.16 linux ORT-GenAI extraction confirmed
+- [x] Published release `0.0.16` contains `hawp-linux-amd64-ort.tar.gz` and `hawp-darwin-arm64-ort.tar.gz`
+- [x] Checked-in `.hawp/bin/hawp` refreshed from v0.0.16 release asset (commit 86d2a0e)
+
+## Close Checklist
+
+- [x] Outcome recorded
+- [x] Verification covers CI run evidence for all three fix versions
+- [x] ORT release lanes stable at v0.0.16
+- [x] Ready to stay in closed history

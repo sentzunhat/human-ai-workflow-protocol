@@ -6,6 +6,8 @@ import (
 	"testing"
 )
 
+func strPtr(s string) *string { return &s }
+
 func openTemp(t *testing.T) *Store {
 	t.Helper()
 	s, err := Open(filepath.Join(t.TempDir(), "usage.db"))
@@ -53,6 +55,57 @@ func TestWriteAndRecent(t *testing.T) {
 	}
 	if e.InputBody != nil {
 		t.Error("input_body should be nil when logBodies=false")
+	}
+	// query_text should be stored even when bodies are off
+	if e.QueryText == nil || *e.QueryText != "kubernetes deployments" {
+		t.Errorf("query_text: got %v, want %q", e.QueryText, "kubernetes deployments")
+	}
+}
+
+func TestExtractQueryText(t *testing.T) {
+	cases := []struct {
+		input []byte
+		want  *string
+	}{
+		{[]byte(`{"query":"find something"}`), strPtr("find something")},
+		{[]byte(`{"title":"My work item"}`), strPtr("My work item")},
+		{[]byte(`{"other":"field"}`), nil},
+		{[]byte(`not json`), nil},
+	}
+	for _, c := range cases {
+		got := extractQueryText(c.input)
+		if c.want == nil && got != nil {
+			t.Errorf("extractQueryText(%s) = %q, want nil", c.input, *got)
+		} else if c.want != nil && (got == nil || *got != *c.want) {
+			gotStr := "<nil>"
+			if got != nil {
+				gotStr = *got
+			}
+			t.Errorf("extractQueryText(%s) = %q, want %q", c.input, gotStr, *c.want)
+		}
+	}
+}
+
+func TestEntrySummary(t *testing.T) {
+	qt := "kubernetes pods"
+	body := `{"query":"from body"}`
+
+	// query_text wins over body
+	e1 := Entry{QueryText: &qt, QueryHash: "abc"}
+	if EntrySummary(e1) != "kubernetes pods" {
+		t.Errorf("expected query_text to win: %q", EntrySummary(e1))
+	}
+
+	// no query_text → body fallback
+	e2 := Entry{InputBody: &body, QueryHash: "abc"}
+	if EntrySummary(e2) != "from body" {
+		t.Errorf("expected body fallback: %q", EntrySummary(e2))
+	}
+
+	// no query_text, no body → hash
+	e3 := Entry{QueryHash: "abc123"}
+	if EntrySummary(e3) != "abc123" {
+		t.Errorf("expected hash fallback: %q", EntrySummary(e3))
 	}
 }
 
