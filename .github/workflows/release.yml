@@ -135,10 +135,9 @@ jobs:
 
       - name: Build ORT binary (linux/amd64)
         working-directory: librarian/src
-        env:
-          NATIVE: ${{ env.HOME }}/.hawp/native/linux-amd64
         run: |
           set -e
+          NATIVE="$HOME/.hawp/native/linux-amd64"
           LDFLAGS="-s -w -X 'github.com/sentzunhat/hawp/librarian/src/internal/domain/update.Version=${{ steps.version.outputs.version }}'"
           CGO_ENABLED=1 \
           CGO_CFLAGS="-I$NATIVE/include" \
@@ -146,10 +145,9 @@ jobs:
           go build -tags ORT -trimpath -ldflags="$LDFLAGS" -o bin/hawp-ort-linux-amd64 ./cmd/hawp
 
       - name: Package ORT tarball (linux/amd64)
-        env:
-          NATIVE: ${{ env.HOME }}/.hawp/native/linux-amd64
         run: |
           set -e
+          NATIVE="$HOME/.hawp/native/linux-amd64"
           mkdir -p stage/lib
           cp librarian/src/bin/hawp-ort-linux-amd64 stage/hawp
           cp "$NATIVE"/lib/libonnxruntime.so* stage/lib/ 2>/dev/null || true
