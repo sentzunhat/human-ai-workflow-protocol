@@ -20,7 +20,6 @@ prompt format). It has never shipped in a release binary because:
 Everything from Go source through hugot is already working. This is a
 CI/packaging task.
 
-<<<<<<< HEAD
 ## What "working" means (already verified 2026-07-27)
 
 - `hawp search "query" --context` with `llm.backend: "onnx"` and
@@ -107,8 +106,8 @@ Three ORT jobs added to `.github/workflows/release.yml`:
 
 Native lib versions (update on hugot/ortgenai bump):
 - onnxruntime 1.19.2
-- onnxruntime-genai 0.4.0
-- tokenizers 0.13.0 (daulet/tokenizers)
+- onnxruntime-genai 0.13.1
+- tokenizers 1.27.0 (daulet/tokenizers)
 
 First CI run will confirm download URL correctness. If a URL 404s, check the Microsoft release
 page and update `ORT_VERSION` / `ORT_GENAI_VERSION` env vars in the workflow.

@@ -17,7 +17,7 @@ ORT release build — ONNX LLM reshaping now ships in official release tarballs.
 - **ORT build jobs** — two parallel CI jobs (`build-ort-linux-amd64` on ubuntu-latest,
   `build-ort-darwin-arm64` on macos-14) download Microsoft ORT and ORT-GenAI prebuilts plus
   a static `libtokenizers` (daulet/tokenizers), then build with `-tags ORT` and package the
-  result. Native lib versions: onnxruntime 1.19.2, onnxruntime-genai 0.4.0, tokenizers 0.13.0.
+  result. Native lib versions: onnxruntime 1.19.2, onnxruntime-genai 0.13.1, tokenizers 1.27.0.
 - **Fault-isolated release job** — the publish step runs even when ORT build jobs fail
   (`if: always() && needs.build-std.result == 'success'`), so a transient lib-download failure
   does not block the standard binaries from shipping. ORT tarballs are simply absent from that

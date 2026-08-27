@@ -49,3 +49,10 @@ refresh the checked-in binary from a published release asset.
   merged `v0.0.13` branch train.
 - Preserve the exact failing workflow evidence from 2026-08-27 when diagnosing
   the regression so the fix targets the real release-path breakage.
+- Root cause confirmed on 2026-08-27:
+  - linux ORT lane used a nonexistent `daulet/tokenizers` release tag
+    (`v0.13.0` instead of the module-aligned `v1.27.0`), causing the download
+    step to 404
+  - darwin ORT lane used a nonexistent `onnxruntime-genai` asset pattern from
+    `v0.4.0`; the `curl | tar` pipeline also lacked `pipefail`, so the missing
+    archive was only surfaced later at link time
