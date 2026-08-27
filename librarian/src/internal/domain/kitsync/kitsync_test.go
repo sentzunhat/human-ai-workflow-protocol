@@ -23,6 +23,13 @@ providers:
         from: CLAUDE.md.seed
         install: seed-if-missing
         update: skip
+  codex:
+    source: providers/.codex
+    installs_to:
+      - dest: AGENTS.md
+        from: AGENTS.md.seed
+        install: seed-if-missing
+        update: seed-if-missing
   github:
     source: providers/.github
     installs_to:
@@ -73,19 +80,21 @@ func TestParseManifestMatchesRealShape(t *testing.T) {
 	}
 }
 
-func TestShouldRefreshOnUpdate(t *testing.T) {
+func TestUpdateMode(t *testing.T) {
 	cases := []struct {
 		update string
-		want   bool
+		want   string
 	}{
-		{"refresh", true},
-		{"skip", false},
-		{"", true}, // missing field (github instructions/) defaults to refresh
+		{"refresh", "refresh"},
+		{"skip", "skip"},
+		{"seed-if-missing", "seed-if-missing"},
+		{"seed_if_missing", "seed-if-missing"},
+		{"", "refresh"}, // missing field (github instructions/) defaults to refresh
 	}
 	for _, c := range cases {
 		rule := InstallRule{Update: c.update}
-		if got := rule.ShouldRefreshOnUpdate(); got != c.want {
-			t.Errorf("ShouldRefreshOnUpdate(update=%q) = %v, want %v", c.update, got, c.want)
+		if got := rule.UpdateMode(); got != c.want {
+			t.Errorf("UpdateMode(update=%q) = %q, want %q", c.update, got, c.want)
 		}
 	}
 }
@@ -183,6 +192,58 @@ func TestApplyProviderUpdateUnknownProvider(t *testing.T) {
 	}
 }
 
+func TestApplyProviderUpdateSeedIfMissingDoesNotOverwriteExisting(t *testing.T) {
+	manifest := parseSample(t)
+
+	bundleRoot := writeTree(t, map[string]string{
+		"providers/.codex/AGENTS.md.seed": "# fresh HAWP AGENTS\n",
+	})
+	repoRoot := writeTree(t, map[string]string{
+		"AGENTS.md": "# repo-specific instructions\n",
+	})
+
+	written, skipped, err := ApplyProviderUpdate(bundleRoot, repoRoot, manifest, "codex")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if written != 0 {
+		t.Fatalf("written = %d, want 0", written)
+	}
+	if len(skipped) != 0 {
+		t.Fatalf("skipped = %v, want none", skipped)
+	}
+
+	content, err := os.ReadFile(filepath.Join(repoRoot, "AGENTS.md"))
+	if err != nil || string(content) != "# repo-specific instructions\n" {
+		t.Fatalf("AGENTS.md was overwritten: %v %q", err, content)
+	}
+}
+
+func TestApplyProviderUpdateSeedIfMissingCreatesAbsentFile(t *testing.T) {
+	manifest := parseSample(t)
+
+	bundleRoot := writeTree(t, map[string]string{
+		"providers/.codex/AGENTS.md.seed": "# fresh HAWP AGENTS\n",
+	})
+	repoRoot := t.TempDir()
+
+	written, skipped, err := ApplyProviderUpdate(bundleRoot, repoRoot, manifest, "codex")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if written != 1 {
+		t.Fatalf("written = %d, want 1", written)
+	}
+	if len(skipped) != 0 {
+		t.Fatalf("skipped = %v, want none", skipped)
+	}
+
+	content, err := os.ReadFile(filepath.Join(repoRoot, "AGENTS.md"))
+	if err != nil || string(content) != "# fresh HAWP AGENTS\n" {
+		t.Fatalf("AGENTS.md was not seeded on update: %v %q", err, content)
+	}
+}
+
 // --- ApplyProviderInstall ---
 
 func TestApplyProviderInstallCreatesAllFiles(t *testing.T) {
@@ -271,7 +332,7 @@ func TestIsSeedIfMissing(t *testing.T) {
 func TestAllProviderNames(t *testing.T) {
 	manifest := parseSample(t)
 	names := manifest.AllProviderNames()
-	if len(names) != 2 { // claude + github from sampleManifest
-		t.Fatalf("AllProviderNames() = %v, want 2 entries", names)
+	if len(names) != 3 { // claude + codex + github from sampleManifest
+		t.Fatalf("AllProviderNames() = %v, want 3 entries", names)
 	}
 }

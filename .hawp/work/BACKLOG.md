@@ -22,6 +22,8 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 ## Active Work
 
+_Branch: `feature/v0.0.11` — items below are the v0.0.11 scope._
+
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
 
@@ -29,6 +31,7 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 | ID  | Type | Title | Reason | Detail | Updated |
 | --- | ---- | ----- | ------ | ------ | ------- |
+| `usage-tracking` | feature | `hawp usage` CLI + `hawp_usage` MCP tool for token/wall-clock metering | Scope too large for v0.0.11; belongs at v0.1.0 token-reduction gate | [plan](parked/usage-tracking/plan.md) | 2026-08-25 |
 | `bee15107` | improvement | Defer CLI participant adapters for Codex, Claude, and GitHub | Not needed yet; provider packs are enough | [plan](parked/bee15107/plan.md) | 2026-07-06 |
 | `v010-3-3a` | feature | ONNX LLM Text2Text models (FLAN-T5-small) | Plan ready (FLAN-T5-small feasible via ONNX); deferred per incremental-only patch strategy | [detail](parked/v010-3-3a/plan.md) | 2026-08-24 |
 | `v010-3-2c` | feature | OpenAI Embeddings (text-embedding-3-small/large) | Cloud-API tracks parked; see incremental-only strategy | [detail](parked/v010-3-2c/plan.md) | 2026-07-27 |
@@ -45,17 +48,16 @@ Limited to the last 10 items.
 
 | ID | Type | Title | Closed | Detail |
 | -- | ---- | ----- | ------ | ------ |
+| `archive-uuid-structure-audit` | investigation | Review mixed `closed/` and `evidence/` archive structure vs UUID-folder guidance | 2026-08-25 | [plan](closed/2026/08/25/archive-uuid-structure-audit/plan.md) |
+| `releases-prerelease-fallback` | investigation | Verify/fix: `/releases/latest` 404 when all GitHub releases are prerelease | 2026-08-25 | [plan](closed/2026/08/25/releases-prerelease-fallback/plan.md) |
+| `manager-branch-kit-pattern` | improvement | Document optional manager-branch / worktree operating pattern in kit | 2026-08-25 | [plan](closed/2026/08/25/manager-branch-kit-pattern/plan.md) |
+| `agents-seed-if-missing` | fix | AGENTS.md must not be overwritten on `hawp init` update | 2026-08-25 | [plan](closed/2026/08/25/agents-seed-if-missing/plan.md) |
+| `install-docs-embed-optional` | docs | Clarify: `hawp search index` first; embed is optional and slow | 2026-08-25 | [plan](closed/2026/08/25/install-docs-embed-optional/plan.md) |
+| `cursor-docs-ui-path` | docs | Fix stale Cursor MCP UI path: Customize → MCPs (not Settings → Tools & MCP) | 2026-08-25 | [plan](closed/2026/08/25/cursor-docs-ui-path/plan.md) |
+| `cursor-mcp-type-wrapper` | fix | Cursor MCP: add `type: stdio` and `hawp-mcp` wrapper (relative command fails) | 2026-08-25 | [plan](closed/2026/08/25/cursor-mcp-type-wrapper/plan.md) |
 | `hmcp0825` | investigation | Codex-side HAWP MCP tool visibility investigation | 2026-08-25 | [plan](closed/2026/08/25/hmcp0825.md) |
 | `1c743447` | feature | `--hybrid-ratio` flag: configurable lexical/semantic blend | 2026-08-25 | [plan](closed/2026/08/25/1c743447/plan.md) |
 | `0ca7cf49` | fix | Code cleanup: stale llm-reshape doc traces removed (3 files; all tests green) | 2026-08-24 | [plan](closed/2026/08/24/0ca7cf49/plan.md) |
-| `8672216a` | planning | Backlog audit: parked review, Recently Closed compacted 15→10 | 2026-08-24 | [plan](closed/2026/08/24/8672216a/plan.md) |
-| `4c88f451` | improvement | Token reduction: Jaccard dedup + dynamic chunk cap (~30% savings) | 2026-08-24 | [plan](closed/2026/08/24/4c88f451/plan.md) |
-| `c98518bb` | improvement | Hawp-first session workflow: MCP search as default context strategy | 2026-08-24 | [plan](closed/2026/08/24/c98518bb/plan.md) |
-| `6de28bdd` | feature | Implement `--semantic` search mode (pure vector search, ONNX + Ollama) | 2026-08-24 | [plan](closed/2026/08/24/6de28bdd/plan.md) |
-| `t5l7m9n1` | planning | Benchmarking infrastructure for v0.0.3+: harness scaffold + test data | 2026-08-24 | [plan](closed/2026/08/24/t5l7m9n1/plan.md) |
-| `f2d8a5c1` | fix | `hawp update --check` now read-only (was performing the update) | 2026-08-24 | [plan](closed/2026/08/24/f2d8a5c1/plan.md) |
-| `3b51837c` | feature | v0.0.4: `hawp init` + `hawp mcp` + provider MCP config auto-write (Codex, Claude, Cursor, Continue) | 2026-08-24 | [plan](closed/2026/08/24/3b51837c/plan.md) |
-| `j7h9e4l0` | test | Auto-update verification: `hawp update` 0.0.1 → 0.0.2 (darwin-arm64) | 2026-08-24 | [plan](closed/2026/08/24/j7h9e4l0/plan.md) |
 
 ---
 

@@ -14,9 +14,10 @@ update_provider_overlay() {
   if [ -d "$pack/rules" ]; then
     cp "$pack/rules/"*.mdc .cursor/rules/ 2>/dev/null || true
   fi
-  cp "$pack/AGENTS.md.seed" AGENTS.md
-  echo "  refreshed: core/providers/.cursor/ -> .cursor/rules/, AGENTS.md"
+  copy_file_no_clobber "$pack/AGENTS.md.seed" AGENTS.md
+  echo "  refreshed: core/providers/.cursor/ -> .cursor/rules/"
+  echo "  seeded if missing: core/providers/.cursor/ -> AGENTS.md"
 }
 update_provider_overlay || exit 1
-echo "Provider overlay: .cursor/rules/*, AGENTS.md"
+echo "Provider overlay: .cursor/rules/*, AGENTS.md (seed if missing)"
 ```

@@ -195,6 +195,7 @@ cp -R "$SRC/.hawp/kit/standards"  .hawp/kit/
 # --- 4b. Install hawp CLI binary (platform-detected from GitHub release) ---
 install_hawp_binary() {
   local _os _arch _asset _ext _dest _url _checksum_url _expected _actual
+  local _tag
 
   _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
   _arch="$(uname -m)"
@@ -222,10 +223,14 @@ install_hawp_binary() {
   _asset="hawp-${_os}-${_arch}${_ext}"
   _dest=".hawp/bin/hawp-bin${_ext}"
 
-  # Resolve latest release tag from GitHub API
-  local _tag
-  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" \
-    | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')"
+  # Resolve latest release tag from GitHub API.
+  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" 2>/dev/null \
+    | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' || true)"
+  if [ -z "$_tag" ]; then
+    _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases?per_page=1" 2>/dev/null \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' || true)"
+    [ -n "$_tag" ] && echo "hawp install: /releases/latest unavailable; using releases list fallback."
+  fi
 
   if [ -z "$_tag" ]; then
     echo "hawp install: could not resolve latest release tag — skipping binary install."
@@ -270,6 +275,10 @@ install_hawp_binary() {
   if [ -f "$SRC/.hawp/bin/hawp" ]; then
     cp "$SRC/.hawp/bin/hawp" .hawp/bin/hawp
     chmod +x .hawp/bin/hawp
+  fi
+  if [ -f "$SRC/.hawp/bin/hawp-mcp" ]; then
+    cp "$SRC/.hawp/bin/hawp-mcp" .hawp/bin/hawp-mcp
+    chmod +x .hawp/bin/hawp-mcp
   fi
 
   echo "hawp binary: installed to ${_dest}"

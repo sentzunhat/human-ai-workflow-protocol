@@ -20,7 +20,7 @@ Last verified: 2026-06-04 against vendor docs linked below.
 | Project rules | `.cursor/rules/*.mdc` | [Cursor Rules](https://cursor.com/docs/context/rules) |
 | Agent instructions | `AGENTS.md` (repo root) | [Cursor AGENTS.md](https://cursor.com/docs/context/rules#agentsmd) |
 
-**HAWP behavior:** refresh all provider-pack `.mdc` rules on install/update; seed `AGENTS.md` on install only when missing and refresh it on update. Plain `.md` in `.cursor/rules/` is ignored by Cursor — use `.mdc` or `AGENTS.md`.
+**HAWP behavior:** refresh all provider-pack `.mdc` rules on install/update; seed `AGENTS.md` only when missing on both install and update. Plain `.md` in `.cursor/rules/` is ignored by Cursor — use `.mdc` or `AGENTS.md`.
 
 Frontmatter: `description`, `globs`, `alwaysApply` per rule type table in Cursor docs.
 

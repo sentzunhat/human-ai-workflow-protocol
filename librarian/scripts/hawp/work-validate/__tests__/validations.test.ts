@@ -319,6 +319,96 @@ test("checkBacklogConsistency matches multiple rows against one shared closed re
   });
 });
 
+test("checkBacklogConsistency resolves slug-named closed folders", () => {
+  withTempWorkDir((workDir) => {
+    const dir = join(
+      workDir,
+      "closed",
+      "2026",
+      "08",
+      "25",
+      "manager-branch-kit-pattern",
+    );
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      join(dir, "plan.md"),
+      [
+        "# manager-branch-kit-pattern",
+        "",
+        "## Outcome",
+        "",
+        "Documented.",
+        "",
+        "## Verification",
+        "",
+        "- [x] checked. Evidence: output captured",
+        "",
+        "## Close Checklist",
+        "",
+        "- [x] done",
+        "",
+      ].join("\n"),
+      "utf-8",
+    );
+
+    const result = checkBacklogConsistency(workDir, {
+      active: [],
+      closed: [
+        {
+          id: "manager-branch-kit-pattern",
+          type: "improvement",
+          title: "manager branch guide",
+          status: "done",
+          detail: "[plan](closed/2026/08/25/manager-branch-kit-pattern/plan.md)",
+        },
+      ],
+      parked: [],
+    });
+    assert.equal(result.status, "PASS");
+    assert.equal(result.recentlyClosed.found, 1);
+  });
+});
+
+test("checkClosedTaskCompleteness accepts slug-named closed folders", () => {
+  withTempWorkDir((workDir) => {
+    const dir = join(
+      workDir,
+      "closed",
+      "2026",
+      "08",
+      "25",
+      "releases-prerelease-fallback",
+    );
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(
+      join(dir, "plan.md"),
+      [
+        "# releases-prerelease-fallback",
+        "",
+        "## Outcome",
+        "",
+        "Fallback documented.",
+        "",
+        "## Verification",
+        "",
+        "- [x] checked. Evidence: output captured",
+        "",
+        "## Close Checklist",
+        "",
+        "- [x] done",
+        "",
+      ].join("\n"),
+      "utf-8",
+    );
+
+    const result = checkClosedTaskCompleteness(workDir, []);
+    assert.equal(result.total, 1);
+    assert.equal(result.untypedCurrent.length, 0);
+    assert.equal(result.failing.length, 0);
+    assert.equal(result.status, "PASS");
+  });
+});
+
 test("checkClosedTaskCompleteness fails post-cutoff plans missing required sections", () => {
   withTempWorkDir((workDir) => {
     writeClosedPlan(

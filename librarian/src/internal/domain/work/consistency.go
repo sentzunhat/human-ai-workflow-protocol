@@ -219,6 +219,11 @@ func findClosedFile(closedDir, id string) bool {
 					entryPath := filepath.Join(dayPath, entry.Name())
 					if entry.IsDir() {
 						// Folder-per-item: closed/YYYY/MM/DD/{id}/plan.md
+						if strings.EqualFold(entry.Name(), id) {
+							if _, err := os.Stat(filepath.Join(entryPath, "plan.md")); err == nil {
+								return true
+							}
+						}
 						dirID := ExtractIDFromFilename(entry.Name())
 						if dirID != "" && IDsMatch(id, dirID) {
 							if _, err := os.Stat(filepath.Join(entryPath, "plan.md")); err == nil {

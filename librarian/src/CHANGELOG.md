@@ -3,6 +3,35 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.11] - 2026-08-25
+
+Cursor MCP `type:stdio` + wrapper, AGENTS.md seed-if-missing, embed-optional docs, install lessons from downstream.
+
+### Fixed
+
+- **Cursor MCP `type: stdio`** — `hawp init --provider cursor` now writes `"type": "stdio"` in
+  `.cursor/mcp.json`. Cursor requires this field explicitly; without it the entry is ignored.
+- **Cursor `hawp-mcp` wrapper** — Added `core/.hawp/bin/hawp-mcp` wrapper script that `cd`s to the
+  repo root before exec-ing `hawp mcp`, so Cursor's spawn cwd does not affect the server's
+  working directory. The wrapper is the `command` in `.cursor/mcp.json`; its path is absolute.
+- **AGENTS.md seed-if-missing** — `hawp init` no longer overwrites an existing `AGENTS.md` on update.
+  The `install:seed-if-missing` rule in `ApplyProviderInstall` skips the file when the destination
+  already exists.
+
+### Docs
+
+- **Embed step optional** — `search.md` and install guides clarify that `hawp search index` must
+  run first; `hawp search embed` is optional and can be very slow on CPU (~1 chunk/s). Hybrid/semantic
+  search only require embed if you want those modes.
+- **Cursor MCP UI path** — Updated to `Customize → MCPs` (was `Settings → Tools & MCP`).
+- **Manager-branch pattern** — Added `.hawp/kit/usage/manager-branch.md` documenting the optional
+  manager-branch / worktree operating pattern.
+
+### Changed
+
+- **`/releases/latest` fallback** — Install script now falls back to `/releases?per_page=1` when
+  `/releases/latest` returns 404 (e.g. all releases are marked pre-release on GitHub).
+
 ## [0.0.10] - 2026-08-25
 
 Codex MCP absolute-path fix — project-scoped MCP servers require absolute paths.

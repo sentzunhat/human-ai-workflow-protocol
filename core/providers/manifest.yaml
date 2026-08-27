@@ -20,7 +20,7 @@ providers:
       - dest: AGENTS.md
         from: AGENTS.md.seed
         install: seed-if-missing
-        update: refresh
+        update: seed-if-missing
   github:
     source: providers/.github
     installs_to:
@@ -43,7 +43,7 @@ providers:
       - dest: AGENTS.md
         from: AGENTS.md.seed
         install: seed-if-missing
-        update: refresh
+        update: seed-if-missing
   continue:
     source: providers/.continue
     installs_to:

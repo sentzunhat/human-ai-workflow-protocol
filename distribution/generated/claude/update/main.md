@@ -427,6 +427,7 @@ cp -R "$SRC/.hawp/kit/standards"  .hawp/kit/
 # wrapper at .hawp/bin/hawp). Never copies the shell wrapper over the binary.
 update_hawp_binary() {
   local _os _arch _asset _ext _dest _url _checksum_url _expected _actual
+  local _tag
 
   _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
   _arch="$(uname -m)"
@@ -454,9 +455,13 @@ update_hawp_binary() {
   _asset="hawp-${_os}-${_arch}${_ext}"
   _dest=".hawp/bin/hawp-bin${_ext}"
 
-  local _tag
-  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" \
-    | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')"
+  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" 2>/dev/null \
+    | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' || true)"
+  if [ -z "$_tag" ]; then
+    _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases?per_page=1" 2>/dev/null \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' || true)"
+    [ -n "$_tag" ] && echo "hawp update: /releases/latest unavailable; using releases list fallback."
+  fi
 
   if [ -z "$_tag" ]; then
     echo "hawp update: could not resolve latest release tag — skipping binary update."
@@ -500,6 +505,10 @@ update_hawp_binary() {
   if [ -f "$SRC/.hawp/bin/hawp" ]; then
     cp "$SRC/.hawp/bin/hawp" .hawp/bin/hawp
     chmod +x .hawp/bin/hawp
+  fi
+  if [ -f "$SRC/.hawp/bin/hawp-mcp" ]; then
+    cp "$SRC/.hawp/bin/hawp-mcp" .hawp/bin/hawp-mcp
+    chmod +x .hawp/bin/hawp-mcp
   fi
 
   echo "hawp binary: updated to ${_tag} at ${_dest}"

@@ -82,7 +82,7 @@ func TestProviderConfigWrittenAfterProvisionFailure_AllProviders(t *testing.T) {
 		text string
 	}{
 		{".mcp.json", `"hawp"`},
-		{".cursor/mcp.json", `"hawp"`},
+		{".cursor/mcp.json", `"type": "stdio"`},
 		{filepath.Join(".codex", "config.toml"), "[mcp_servers.hawp]"},
 	} {
 		data, err := os.ReadFile(filepath.Join(repoRoot, want.path))

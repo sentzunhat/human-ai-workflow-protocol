@@ -18,10 +18,12 @@ Refresh HAWP kit and Cursor provider overlays from `main`.
 1. Repository root in terminal.
 2. Run **Update Command (Copy/Paste)** (`REF="main"`, `PROVIDER="cursor"`).
 3. Verify `.hawp/work/` intact and Cursor rules updated.
+4. If your repo already had `AGENTS.md`, keep it and manually blend in any HAWP wording you want from the provider seed.
 
 ## Preserved
 
 - `.hawp/work/**` — never overwritten.
+- Existing `AGENTS.md` content — update seeds only when the file is missing.
 
 ## Other guides
 

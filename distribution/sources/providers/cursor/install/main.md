@@ -30,6 +30,9 @@ Optional: `export HAWP_LOCAL_CORE="/absolute/path/to/human-ai-workflow-protocol/
 - `AGENTS.md` — from `core/providers/.cursor/AGENTS.md.seed`.
 - `.hawp/work/` scaffold — seeded once when missing.
 
+If your repo already has `AGENTS.md`, HAWP preserves it. Manually blend in any
+HAWP guidance you want from the provider seed instead of overwriting your file.
+
 ## What Was NOT Changed
 
 - Non-HAWP files under `.cursor/rules/` (only `hawp-*.mdc` from the provider pack are copied).

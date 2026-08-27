@@ -110,17 +110,12 @@ show `hawp` after writing the config, trust the project in Codex settings and st
 fresh task or session. The desktop UI does not hot-reload MCP changes mid-session.
 Verify with the CLI: `codex mcp list` and `codex mcp get hawp`.
 
-For Claude Code, `hawp init --provider claude` writes `.mcp.json` with an
-absolute path to this repo's `.hawp/bin/hawp`, computed from the current repo
-root on the local machine. A representative shape is:
+For Claude Code, the config is:
 
 ```json
 {
   "mcpServers": {
-    "hawp": {
-      "command": "/abs/path/to/repo/.hawp/bin/hawp",
-      "args": ["mcp"]
-    }
+    "hawp": { "command": ".hawp/bin/hawp", "args": ["mcp"] }
   }
 }
 ```

@@ -223,6 +223,10 @@ function classifyClosedFile(
     return { kind: "plan", id };
   }
 
+  if (isSlugId(nameLower) && hasPlanMetadata(content)) {
+    return { kind: "plan", id: nameLower };
+  }
+
   if (isLegacy) {
     return {
       kind: "legacy-untyped",
@@ -236,6 +240,14 @@ function classifyClosedFile(
     id: nameWithoutExt,
     reason: "current file without TASK-/BUG-style ID",
   };
+}
+
+function isSlugId(value: string): boolean {
+  return /^[a-z0-9]+(?:-[a-z0-9]+)+$/i.test(value);
+}
+
+function hasPlanMetadata(content: string): boolean {
+  return /^\*\*Type:\*\*/m.test(content) && /^\*\*Status:\*\*/m.test(content);
 }
 
 interface RequiredHeadingMatches {

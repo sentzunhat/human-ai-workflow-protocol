@@ -18,7 +18,7 @@ type InstallRule struct {
 	From    string `yaml:"from"`
 	Pattern string `yaml:"pattern"`
 	Install string `yaml:"install"` // "refresh" | "seed-if-missing" | "seed_if_missing" | ""
-	Update  string `yaml:"update"`  // "refresh" | "skip" | "" (missing = always refresh)
+	Update  string `yaml:"update"`  // "refresh" | "seed-if-missing" | "seed_if_missing" | "skip" | "" (missing = always refresh)
 }
 
 // Provider is one provider's manifest entry.
@@ -33,13 +33,20 @@ type Manifest struct {
 	Providers map[string]Provider `yaml:"providers"`
 }
 
-// ShouldRefreshOnUpdate reports whether this rule should be applied
-// during an update pass. Missing Update (as with github's instructions/
-// and prompts/ entries, which have no install/update fields at all)
-// defaults to true — those are always-synced plain content, not
-// seed-once files.
-func (r InstallRule) ShouldRefreshOnUpdate() bool {
-	return r.Update != "skip"
+// UpdateMode reports how this rule behaves during an update pass:
+//   - "refresh": always overwrite from the provider pack
+//   - "seed-if-missing": write only when the destination is absent
+//   - "skip": never touch the destination on update
+// Missing Update defaults to "refresh" for ordinary synced content.
+func (r InstallRule) UpdateMode() string {
+	switch r.Update {
+	case "skip":
+		return "skip"
+	case "seed-if-missing", "seed_if_missing":
+		return "seed-if-missing"
+	default:
+		return "refresh"
+	}
 }
 
 // IsSeedIfMissing reports whether this rule is a seed-once placement:

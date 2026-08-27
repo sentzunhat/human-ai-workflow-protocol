@@ -10,10 +10,9 @@ resolve_provider_pack() {
 }
 update_provider_overlay() {
   pack="$(resolve_provider_pack)" || return 1
-  cp "$pack/AGENTS.md.seed" AGENTS.md
-  echo "  refreshed: core/providers/.codex/ -> AGENTS.md"
+  copy_file_no_clobber "$pack/AGENTS.md.seed" AGENTS.md
+  echo "  seeded if missing: core/providers/.codex/ -> AGENTS.md"
 }
 update_provider_overlay || exit 1
-echo "Provider overlay: AGENTS.md"
+echo "Provider overlay: AGENTS.md (seed if missing)"
 ```
-

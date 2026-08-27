@@ -14,7 +14,8 @@ Install HAWP kit plus **Cursor overlays only**. This refreshes `core/providers/.
 
 ## Provider-specific rules
 
-- Refresh all `hawp-*.mdc` rules from the provider pack and `AGENTS.md` on every install.
+- Refresh all `hawp-*.mdc` rules from the provider pack on install.
+- Seed `AGENTS.md` only when missing. If your repo already has `AGENTS.md`, keep it and manually blend in any HAWP guidance you want from the provider seed.
 - Do **not** expect `.github/` changes from this guide.
 
 ## Guide fetch (review-first)

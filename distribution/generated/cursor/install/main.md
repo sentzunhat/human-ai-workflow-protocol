@@ -55,7 +55,7 @@ If your repository has an older HAWP layout, migration runs automatically:
 This guide installs the Cursor provider pack only.
 
 - Refreshes `.cursor/rules/hawp-*.mdc` from `core/providers/.cursor/rules/` on every install and update.
-- Seeds `AGENTS.md` from `AGENTS.md.seed` on install only when missing; refreshes it on every update.
+- Seeds `AGENTS.md` from `AGENTS.md.seed` only when missing, on both install and update.
 - Does not modify `.github/` or `.continue/`.
 - Non-HAWP rules already in `.cursor/rules/` are left unchanged.
 
@@ -95,7 +95,7 @@ This guide sets `PROVIDER=cursor`. Only the Cursor overlay is installed — not 
 | Source | Installs to | Install | Update |
 |--------|-------------|---------|--------|
 | `rules/*.mdc` | `.cursor/rules/` | refresh | refresh |
-| `AGENTS.md.seed` | `AGENTS.md` (repo root) | seed if missing | refresh |
+| `AGENTS.md.seed` | `AGENTS.md` (repo root) | seed if missing | seed if missing |
 
 ## Not touched by this guide
 
@@ -150,6 +150,9 @@ Install when you want HAWP kit plus agent overlays in a repository that does not
 
 - Does not overwrite `.hawp/work/**`.
 - Does not install other providers' overlays (e.g. a Cursor guide does not write `.github/`).
+- Does not build the search index for you. If you plan to use `hawp search` or
+  `hawp_search` right away, run `hawp search index` after install. `hawp search embed`
+  is optional and only needed for semantic or hybrid search.
 
 ## Install Is Safe to Re-Run
 
@@ -189,7 +192,8 @@ Install HAWP kit plus **Cursor overlays only**. This refreshes `core/providers/.
 
 ## Provider-specific rules
 
-- Refresh all `hawp-*.mdc` rules from the provider pack and `AGENTS.md` on every install.
+- Refresh all `hawp-*.mdc` rules from the provider pack on install.
+- Seed `AGENTS.md` only when missing. If your repo already has `AGENTS.md`, keep it and manually blend in any HAWP guidance you want from the provider seed.
 - Do **not** expect `.github/` changes from this guide.
 
 ## Guide fetch (review-first)
@@ -262,6 +266,9 @@ Optional: `export HAWP_LOCAL_CORE="/absolute/path/to/human-ai-workflow-protocol/
 - `.cursor/rules/hawp-*.mdc` — Cursor rules from `core/providers/.cursor/rules/`.
 - `AGENTS.md` — from `core/providers/.cursor/AGENTS.md.seed`.
 - `.hawp/work/` scaffold — seeded once when missing.
+
+If your repo already has `AGENTS.md`, HAWP preserves it. Manually blend in any
+HAWP guidance you want from the provider seed instead of overwriting your file.
 
 ## What Was NOT Changed
 
@@ -475,6 +482,7 @@ cp -R "$SRC/.hawp/kit/standards"  .hawp/kit/
 # --- 4b. Install hawp CLI binary (platform-detected from GitHub release) ---
 install_hawp_binary() {
   local _os _arch _asset _ext _dest _url _checksum_url _expected _actual
+  local _tag
 
   _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
   _arch="$(uname -m)"
@@ -502,10 +510,14 @@ install_hawp_binary() {
   _asset="hawp-${_os}-${_arch}${_ext}"
   _dest=".hawp/bin/hawp-bin${_ext}"
 
-  # Resolve latest release tag from GitHub API
-  local _tag
-  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" \
-    | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')"
+  # Resolve latest release tag from GitHub API.
+  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" 2>/dev/null \
+    | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' || true)"
+  if [ -z "$_tag" ]; then
+    _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases?per_page=1" 2>/dev/null \
+      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' || true)"
+    [ -n "$_tag" ] && echo "hawp install: /releases/latest unavailable; using releases list fallback."
+  fi
 
   if [ -z "$_tag" ]; then
     echo "hawp install: could not resolve latest release tag — skipping binary install."
@@ -550,6 +562,10 @@ install_hawp_binary() {
   if [ -f "$SRC/.hawp/bin/hawp" ]; then
     cp "$SRC/.hawp/bin/hawp" .hawp/bin/hawp
     chmod +x .hawp/bin/hawp
+  fi
+  if [ -f "$SRC/.hawp/bin/hawp-mcp" ]; then
+    cp "$SRC/.hawp/bin/hawp-mcp" .hawp/bin/hawp-mcp
+    chmod +x .hawp/bin/hawp-mcp
   fi
 
   echo "hawp binary: installed to ${_dest}"

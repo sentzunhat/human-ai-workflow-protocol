@@ -11,7 +11,7 @@ This guide sets `PROVIDER=cursor`. Only the Cursor overlay is installed — not 
 | Source | Installs to | Install | Update |
 |--------|-------------|---------|--------|
 | `rules/*.mdc` | `.cursor/rules/` | refresh | refresh |
-| `AGENTS.md.seed` | `AGENTS.md` (repo root) | seed if missing | refresh |
+| `AGENTS.md.seed` | `AGENTS.md` (repo root) | seed if missing | seed if missing |
 
 ## Not touched by this guide
 

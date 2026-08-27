@@ -9,8 +9,16 @@ closed/
   YYYY/
     MM/
       DD/
-        BUG-001.md
-        TASK-002.md
+        <work-id>/
+          plan.md
 ```
 
-To close an item: move its file from `../active/` into the appropriate date folder.
+Current preferred shape is one folder per work item, with the final detail file at
+`closed/YYYY/MM/DD/<work-id>/plan.md`.
+
+Historical flat files such as `TASK-002.md` may remain in the archive. They are
+legacy records, not a requirement for new closures.
+
+To close an item: move its plan from `../active/<work-id>/plan.md` into the
+appropriate date folder. Preserve historical archive records; do not bulk-rename
+old entries unless a dedicated normalization task explicitly covers that work.
