@@ -169,6 +169,9 @@ func Run(args []string) error {
 	case command == "usage" && sub == "log":
 		return runUsageLog()
 
+	case command == "usage" && sub == "report":
+		return runUsageReport(args[2:])
+
 	case command == "usage" && sub == "clear":
 		return runUsageClear()
 
@@ -1316,6 +1319,7 @@ COMMANDS
   embed <text>... [--model <hf-org/repo>]         embed text via a local model (default: all-MiniLM-L6-v2)
   usage                                           show MCP call log totals (opt-in; run hawp usage enable first)
   usage log                                       tail 20 most recent logged calls
+  usage report [--export <path>]                  full Markdown report: totals, per-tool breakdown, recent queries
   usage enable [--log-bodies]                     enable call logging (--log-bodies also stores raw input/output)
   usage disable                                   stop recording new calls
   usage clear                                     delete all stored log entries (irreversible)
@@ -1429,6 +1433,43 @@ func runUsageDisable() error {
 		return err
 	}
 	fmt.Println("Usage logging disabled.")
+	return nil
+}
+
+func runUsageReport(args []string) error {
+	exportPath := ""
+	for i := 0; i < len(args); i++ {
+		if args[i] == "--export" && i+1 < len(args) {
+			exportPath = args[i+1]
+			i++
+		}
+	}
+
+	h, err := usageHome()
+	if err != nil {
+		return err
+	}
+	store, err := domainusage.Open(h.UsageDB)
+	if err != nil {
+		return fmt.Errorf("usage db: %w", err)
+	}
+	defer store.Close()
+	rep, err := store.GetReport()
+	if err != nil {
+		return err
+	}
+	out := domainusage.FormatReport(rep)
+	fmt.Print(out)
+
+	if exportPath != "" {
+		if err := os.MkdirAll(filepath.Dir(exportPath), 0o755); err != nil {
+			return fmt.Errorf("create export dir: %w", err)
+		}
+		if err := os.WriteFile(exportPath, []byte(out), 0o644); err != nil {
+			return fmt.Errorf("write report: %w", err)
+		}
+		fmt.Printf("\nReport written to %s\n", exportPath)
+	}
 	return nil
 }
 

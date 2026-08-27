@@ -3,6 +3,24 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.18] - 2026-08-27
+
+`hawp usage report` — Markdown usage summary with per-tool breakdowns and
+token estimates, suitable for evidence artifacts.
+
+### Added
+
+- **`hawp usage report`** — new subcommand that prints a full Markdown usage
+  summary: overall totals, per-tool breakdown table, and a recent-queries
+  table with estimated token counts. Pass `--export <path>` to write the
+  report to a file for inclusion in `.hawp/work/evidence/`.
+- **`GetReport()` / `FormatReport()`** in `internal/domain/usage` — produce
+  aggregate and per-tool `ToolStat` breakdowns from the local SQLite log.
+- **`TestRunUsageReport`** in `cli` package — covers empty log output and
+  `--export` path round-trip.
+- **`TestGetReport` / `TestFormatReportEmpty`** in `usage` package — cover
+  aggregate stats and Markdown rendering.
+
 ## [0.0.17] - 2026-08-27
 
 Usage log query visibility — `hawp usage log` now shows the actual query text
