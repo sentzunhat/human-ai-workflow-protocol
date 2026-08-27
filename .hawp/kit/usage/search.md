@@ -5,16 +5,16 @@
 ## Quick start (CLI)
 
 ```bash
-# 1. Index documents (required before CLI/MCP search returns repo results)
+# 1. Index documents (run once, re-run after content changes)
 hawp search index
 
-# 2. Optional: embed documents for semantic/hybrid search (--backend is required)
+# 2. Embed documents for semantic/hybrid search (--backend is required)
 hawp search embed --backend ollama   # recommended: fast + high quality
 hawp search embed --backend onnx     # offline fallback, no Ollama needed
 
 # 3. Search
-hawp search "how do I write a status report"   # lexical works right after step 1
-hawp search "backlog alignment rules"          # hybrid only when vectors exist
+hawp search "how do I write a status report"
+hawp search "backlog alignment rules"          # hybrid when vectors present
 hawp search "HAWP shape mission constraints" --semantic  # pure-vector
 ```
 
@@ -26,9 +26,6 @@ hawp search "HAWP shape mission constraints" --semantic  # pure-vector
 | `onnx` | `all-MiniLM-L6-v2` (384d) | ~476ms/batch | ~8ms/chunk | 0.70 |
 
 `--backend` is required. Ollama must be running for the `ollama` backend. ONNX runs offline (pure Go, no system deps).
-Treat the timings above as machine-specific measurements, not guarantees. CPU-only
-setups can be much slower, so embed is best treated as optional background prep rather
-than a blocker for first lexical search.
 
 ```bash
 # Override model
@@ -99,10 +96,6 @@ Paths are relative to the repo root. Directories are walked recursively for `.md
 
 When using Claude Code with the HAWP MCP server (`hawp mcp`), the `hawp_search` tool provides structured results with precise line positions and context windows — suitable for automated code navigation and documentation lookup.
 
-Run `hawp search index` before expecting `hawp_search` to return repo content.
-Embedding is optional for MCP lexical search; only semantic/hybrid behavior depends
-on `hawp search embed`.
-
 Run `hawp init --provider <name>` to write the correct config file for your agent:
 
 | Agent | Config file written | Command |
@@ -117,23 +110,12 @@ show `hawp` after writing the config, trust the project in Codex settings and st
 fresh task or session. The desktop UI does not hot-reload MCP changes mid-session.
 Verify with the CLI: `codex mcp list` and `codex mcp get hawp`.
 
-**Cursor: enable the workspace server in the UI.** After `hawp init --provider cursor`,
-open sidebar **Customize → MCPs** and enable the workspace `hawp` server. Cursor expects
-`.cursor/mcp.json` to declare `type: stdio`; HAWP also points Cursor at a repo-local
-`hawp-mcp` wrapper so the server starts from the project root. If the tools still do not
-appear, open a new chat or reload the window.
-
-For Claude Code, `hawp init --provider claude` writes `.mcp.json` with an
-absolute path to this repo's `.hawp/bin/hawp`, computed from the current repo
-root on the local machine. A representative shape is:
+For Claude Code, the config is:
 
 ```json
 {
   "mcpServers": {
-    "hawp": {
-      "command": "/abs/path/to/repo/.hawp/bin/hawp",
-      "args": ["mcp"]
-    }
+    "hawp": { "command": ".hawp/bin/hawp", "args": ["mcp"] }
   }
 }
 ```
@@ -196,27 +178,17 @@ Response:
 - `chunks_dropped` — chunks removed by Jaccard dedup (>70% word-set overlap)
 
 `max_tokens` defaults to 2000. Use context mode when you want the search result to slot directly into a system prompt or retrieval step without post-processing.
-This is a context-packing budget estimate, not an agent-subscription or provider-billing meter.
-
-`--verbose` prints the same packing-side accounting to stderr so you can see chunk count,
-estimated tokens, and dedup savings while shaping context.
 
 Other MCP tools: `hawp_work_new` (create work item), `hawp_work_validate` (validate kit + work integrity).
 
 ## Typical agent workflow
 
 ```bash
-# At session start (required once after install, then re-run index after content changes)
-hawp search index
-
-# Optional background prep for semantic/hybrid search
-hawp search embed --backend ollama
+# At session start (once per session, if content changed)
+hawp search index && hawp search embed --backend ollama
 
 # During work
 hawp search "backlog alignment rules" --hybrid --context --max-tokens 6000
 ```
 
 The index is idempotent — re-running after content changes upserts new chunks. Vectors persist across sessions.
-Running Ollama locally only affects search/embed execution when you actually use the
-Ollama backend; it does not automatically change which model your editor agent uses or
-reduce that agent's cloud-token spend.

@@ -6,6 +6,8 @@
 **Closed:** 2026-08-25
 **Target:** v0.0.11
 
+**Closes:** `releases-prerelease-fallback`
+
 ## Goal
 
 Confirm whether the current `hawp update` and install script handle the
@@ -39,3 +41,10 @@ unavailable, while preserving the existing SHA256 verification flow.
 - Verified the CLI update client was already prerelease-safe
 - Added prerelease-safe tag resolution to the install/update shell templates
 - Regenerated all provider install/update guides so downstream copy-paste flows inherit the fix
+
+## Close Checklist
+
+- [x] Outcome recorded
+- [x] Verification includes code/test/distribution evidence
+- [x] No additional follow-up required for this scoped fix
+- [x] Ready to stay in closed history

@@ -6,6 +6,8 @@
 **Closed:** 2026-08-25
 **Target:** v0.0.11
 
+**Closes:** `archive-uuid-structure-audit`
+
 ## Input
 
 The repo now uses active work item paths like `active/{uuid}/plan.md` and recent
@@ -64,3 +66,10 @@ Bounded fix applied in this slice:
 - Completed the structure audit and separated forward guidance from historical tolerance
 - Fixed repo-local doc drift around active/closed path conventions
 - Clarified that evidence remains flat-by-date rather than per-item folders
+
+## Close Checklist
+
+- [x] Outcome recorded
+- [x] Verification ties the audit to observed repo files and commands
+- [x] Historical records preserved without bulk rename
+- [x] Ready to stay in closed history

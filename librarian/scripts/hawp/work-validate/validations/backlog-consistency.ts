@@ -170,6 +170,12 @@ function findClosedFile(closedDir: string, id: string): boolean {
 
             if (entryStat.isDirectory()) {
               // Folder-per-item layout: closed/YYYY/MM/DD/{id}/plan.md
+              if (
+                entry.toLowerCase() === id.toLowerCase() &&
+                existsSync(join(entryPath, "plan.md"))
+              ) {
+                return true;
+              }
               const dirId = extractIdFromFilename(entry);
               if (dirId && idsMatch(id, dirId)) {
                 if (existsSync(join(entryPath, "plan.md"))) return true;

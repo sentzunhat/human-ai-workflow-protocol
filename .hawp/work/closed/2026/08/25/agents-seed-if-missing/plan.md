@@ -6,6 +6,8 @@
 **Closed:** 2026-08-25
 **Target:** v0.0.11
 
+**Closes:** `agents-seed-if-missing`
+
 ## Goal
 
 `hawp init` (including `--provider` re-runs and `hawp update --provider`) must
@@ -37,3 +39,10 @@ update/re-init could clobber a blended or product-owned `AGENTS.md`.
 - Changed `core/providers/manifest.yaml` so Cursor and Codex `AGENTS.md` rules use update-time `seed-if-missing`
 - Updated source templates and generated Cursor/Codex update guides to use no-clobber AGENTS behavior
 - Updated provider safety/boundary/doc-verification text to match the new rule
+
+## Close Checklist
+
+- [x] Outcome recorded
+- [x] Verification includes code and generated-output evidence
+- [x] Existing `AGENTS.md` preservation rule captured explicitly
+- [x] Ready to stay in closed history

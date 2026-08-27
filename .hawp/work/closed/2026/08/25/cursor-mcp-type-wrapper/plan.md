@@ -6,6 +6,8 @@
 **Closed:** 2026-08-25
 **Target:** v0.0.11
 
+**Closes:** `cursor-mcp-type-wrapper`
+
 ## Goal
 
 `hawp init --provider cursor` generates a `.cursor/mcp.json` that Cursor
@@ -41,3 +43,10 @@ do not appear immediately.
 - Updated Cursor-oriented notes in `.hawp/kit/usage/search.md`
 - Updated install/update source templates so downstream repos receive `hawp-mcp`
 - Regenerated checked-in distribution outputs from source templates
+
+## Close Checklist
+
+- [x] Outcome recorded
+- [x] Verification covers code, docs, and generated outputs
+- [x] Provider-specific behavior is documented
+- [x] Ready to stay in closed history

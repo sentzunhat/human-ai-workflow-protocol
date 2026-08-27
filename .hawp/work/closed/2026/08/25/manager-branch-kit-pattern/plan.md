@@ -6,6 +6,8 @@
 **Closed:** 2026-08-25
 **Target:** v0.0.11
 
+**Closes:** `manager-branch-kit-pattern`
+
 ## Goal
 
 Add an optional kit doc (e.g. `.hawp/kit/usage/manager-branch.md` or as a
@@ -38,3 +40,10 @@ when they need a broader coordination pattern around parallel worktrees.
 - Added an optional manager-branch guide covering when to use the pattern, manager ownership, product worktree ownership, and guardrails
 - Linked the pattern from the top-level start guide and from the existing parallel-worktree guidance
 - Regenerated distribution outputs and confirmed no source-template drift from the new doc links
+
+## Close Checklist
+
+- [x] Outcome recorded
+- [x] Verification captures both the successful and unproven checks
+- [x] Optional-pattern scope stays documented
+- [x] Ready to stay in closed history

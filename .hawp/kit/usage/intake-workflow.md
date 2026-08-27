@@ -191,7 +191,7 @@ Reference evidence files by name in the Verification section so a reader can fin
 ## Parked / Deferred
 
 To defer an item without closing it, move the plan file to `work/parked/<ID>.md` and mark the backlog row `parked`.
-When it becomes active again, move it back to `work/active/<ID>/plan.md` and update the backlog row.
+When it becomes active again, move it back to `work/active/<ID>.md` and update the backlog row.
 
 ---
 
@@ -201,14 +201,14 @@ When it becomes active again, move it back to `work/active/<ID>/plan.md` and upd
 
 Close is a structured handoff:
 
-1. **Update the plan file** (`work/active/<ID>/plan.md`):
+1. **Update the plan file** (`work/active/<ID>.md`):
    - Fill Outcome section (what was actually implemented)
    - Complete Verification section (all checks with direct evidence or "unproven" notes)
    - Check the Close Checklist
    - Mark all boxes ✓
 
 2. **Move the plan file:**
-   - From `work/active/<ID>/plan.md` to `work/closed/YYYY/MM/DD/<ID>/plan.md`
+   - From `work/active/<ID>.md` to `work/closed/YYYY/MM/DD/<ID>.md`
    - Use the close date for the folder
 
 3. **Link evidence** (if exists):

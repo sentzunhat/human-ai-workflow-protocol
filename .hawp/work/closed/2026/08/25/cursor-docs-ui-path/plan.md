@@ -6,6 +6,8 @@
 **Closed:** 2026-08-25
 **Target:** v0.0.11
 
+**Closes:** `cursor-docs-ui-path`
+
 ## Goal
 
 Kit docs show the correct Cursor UI path and include the reload note.
@@ -28,3 +30,10 @@ references remain under `.hawp/kit/` or `distribution/`.
 
 - Added the current Cursor MCP enable path and reload guidance to `.hawp/kit/usage/search.md`
 - Confirmed stale Cursor UI wording is absent in the checked kit and distribution docs
+
+## Close Checklist
+
+- [x] Outcome recorded
+- [x] Verification captures the grep-based absence check
+- [x] Docs-only scope preserved
+- [x] Ready to stay in closed history

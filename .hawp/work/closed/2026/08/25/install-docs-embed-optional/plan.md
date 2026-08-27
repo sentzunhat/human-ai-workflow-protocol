@@ -6,6 +6,8 @@
 **Closed:** 2026-08-25
 **Target:** v0.0.11
 
+**Closes:** `install-docs-embed-optional`
+
 ## Goal
 
 After this fix, install docs and `usage/search.md` give clear, accurate guidance:
@@ -42,3 +44,10 @@ post-install `hawp search index` step.
 - Clarified hardware-dependent embed timings and that local Ollama does not automatically reduce editor-agent cloud-token spend
 - Clarified `--max-tokens` / `--verbose` as context-packing estimates
 - Added post-install shared guide note so generated install docs set the same expectation
+
+## Close Checklist
+
+- [x] Outcome recorded
+- [x] Verification includes source and generated install-guide evidence
+- [x] Lexical-first guidance is captured explicitly
+- [x] Ready to stay in closed history

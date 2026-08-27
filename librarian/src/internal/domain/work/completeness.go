@@ -151,10 +151,23 @@ func classifyClosedFile(filename, date, content string) classification {
 		return classification{"plan", id, ""}
 	}
 
+	if isSlugID(nameLower) && hasPlanMetadata(content) {
+		return classification{"plan", nameLower, ""}
+	}
+
 	if isLegacy {
 		return classification{"legacy-untyped", nameWithoutExt, "legacy file without TASK-/BUG-style ID"}
 	}
 	return classification{"current-untyped", nameWithoutExt, "current file without TASK-/BUG-style ID"}
+}
+
+func isSlugID(value string) bool {
+	matched, _ := regexp.MatchString(`^[a-z0-9]+(?:-[a-z0-9]+)+$`, value)
+	return matched
+}
+
+func hasPlanMetadata(content string) bool {
+	return strings.Contains(content, "**Type:**") && strings.Contains(content, "**Status:**")
 }
 
 func findRequiredHeadings(content string) (outcome, verification, checklist bool) {

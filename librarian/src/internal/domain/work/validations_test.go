@@ -69,6 +69,22 @@ func TestBacklogConsistencyPassAndFail(t *testing.T) {
 	}
 }
 
+func TestBacklogConsistencyMatchesSlugClosedFolder(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"closed/2026/08/25/manager-branch-kit-pattern/plan.md": closedPlanComplete,
+	})
+	backlog := &Backlog{
+		Closed: []BacklogRow{{ID: "manager-branch-kit-pattern"}},
+	}
+	result := CheckBacklogConsistency(workDir, backlog)
+	if result.Status != StatusPass {
+		t.Fatalf("status = %s, want PASS: %+v", result.Status, result)
+	}
+	if result.RecentlyClosed.Found != 1 {
+		t.Fatalf("closed found = %d, want 1", result.RecentlyClosed.Found)
+	}
+}
+
 func TestClosedTaskCompleteness(t *testing.T) {
 	workDir := buildWorkDir(t, map[string]string{
 		"closed/2026/07/03/TASK-086.md":         closedPlanComplete,
@@ -98,6 +114,38 @@ func TestClosedTaskCompleteness(t *testing.T) {
 	})
 	if got := CheckClosedTaskCompleteness(passDir); got.Status != StatusPass {
 		t.Errorf("all-complete status = %s, want PASS", got.Status)
+	}
+}
+
+func TestClosedTaskCompletenessAcceptsSlugPlanFolders(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"closed/2026/08/25/releases-prerelease-fallback/plan.md": `# releases-prerelease-fallback
+
+**Type:** investigation
+**Status:** done
+
+## Outcome
+
+Done.
+
+## Verification
+
+- [x] ok (Evidence: output captured)
+
+## Close Checklist
+
+- [x] done
+`,
+	})
+	result := CheckClosedTaskCompleteness(workDir)
+	if result.Total != 1 {
+		t.Fatalf("total plans = %d, want 1", result.Total)
+	}
+	if len(result.UntypedCurrent) != 0 {
+		t.Fatalf("untyped current = %+v, want none", result.UntypedCurrent)
+	}
+	if result.Status != StatusPass {
+		t.Fatalf("status = %s, want PASS", result.Status)
 	}
 }
 
