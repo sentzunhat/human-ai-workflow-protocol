@@ -1388,13 +1388,9 @@ func runUsageLog() error {
 		return nil
 	}
 	for _, e := range entries {
-		summary := domainusage.QuerySummary([]byte("{}"), e.QueryHash)
-		if e.InputBody != nil {
-			summary = domainusage.QuerySummary([]byte(*e.InputBody), e.QueryHash)
-		}
 		fmt.Printf("%s  %-22s  in=%-5d out=%-5d  %s\n",
 			e.TS.Format("2006-01-02 15:04:05"),
-			e.Tool, e.TokensIn, e.TokensOut, summary)
+			e.Tool, e.TokensIn, e.TokensOut, domainusage.EntrySummary(e))
 	}
 	return nil
 }

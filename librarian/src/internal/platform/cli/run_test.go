@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"os"
 	"strings"
 	"testing"
 )
@@ -74,6 +75,58 @@ func TestRunIndexBuild(t *testing.T) {
 		if err := Run(args); err != nil {
 			t.Errorf("Run(%v) returned error: %v", args, err)
 		}
+	}
+}
+
+func TestRunUsage(t *testing.T) {
+	// Point HOME at a temp dir so usage commands read/write an isolated DB
+	// and config — no side effects on the developer's real ~/.hawp.
+	t.Setenv("HOME", t.TempDir())
+
+	// enable → should succeed and print confirmation
+	if err := Run([]string{"usage", "enable"}); err != nil {
+		t.Fatalf("usage enable: %v", err)
+	}
+	// enable with --log-bodies
+	if err := Run([]string{"usage", "enable", "--log-bodies"}); err != nil {
+		t.Fatalf("usage enable --log-bodies: %v", err)
+	}
+	// totals on empty log (enabled)
+	if err := Run([]string{"usage"}); err != nil {
+		t.Fatalf("usage totals: %v", err)
+	}
+	// log on empty DB
+	if err := Run([]string{"usage", "log"}); err != nil {
+		t.Fatalf("usage log: %v", err)
+	}
+	// disable
+	if err := Run([]string{"usage", "disable"}); err != nil {
+		t.Fatalf("usage disable: %v", err)
+	}
+	// totals while disabled
+	if err := Run([]string{"usage"}); err != nil {
+		t.Fatalf("usage totals (disabled): %v", err)
+	}
+}
+
+func TestRunUsageClearCancelled(t *testing.T) {
+	// Pipe /dev/null as stdin so fmt.Scanln sees EOF → answer is empty → "Cancelled."
+	old := os.Stdin
+	t.Cleanup(func() { os.Stdin = old })
+	f, err := os.Open(os.DevNull)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	os.Stdin = f
+
+	t.Setenv("HOME", t.TempDir())
+	if err := Run([]string{"usage", "enable"}); err != nil {
+		t.Fatalf("usage enable: %v", err)
+	}
+	// clear with no "y" → should succeed (cancelled, not an error)
+	if err := Run([]string{"usage", "clear"}); err != nil {
+		t.Fatalf("usage clear (cancelled): %v", err)
 	}
 }
 

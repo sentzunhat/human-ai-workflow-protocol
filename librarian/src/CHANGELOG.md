@@ -3,6 +3,30 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.17] - 2026-08-27
+
+Usage log query visibility — `hawp usage log` now shows the actual query text
+for every entry, even when body capture is disabled (the default).
+
+### Added
+
+- **`query_text` column in usage log** — the first 256 characters of the
+  `query` (or `title`) field from every MCP tool call are now stored directly
+  in the usage log without requiring `--log-bodies`. The column is added to
+  existing databases via a safe idempotent `ALTER TABLE` migration on open.
+- **`EntrySummary` helper** — `internal/domain/usage` exposes `EntrySummary(e Entry) string`
+  that returns the best display string: stored `query_text` wins, then falls
+  back to the body (when available), then the hash.
+- **CLI tests for `hawp usage` subcommands** — `TestRunUsage` and
+  `TestRunUsageClearCancelled` cover enable/disable/totals/log/clear against
+  an isolated `$HOME`, exercising the full CLI dispatch path.
+
+### Changed
+
+- **`hawp usage log`** — entries now show the stored query text instead of
+  a truncated hash when body capture is off (the common case). Output format
+  and column layout are unchanged.
+
 ## [0.0.16] - 2026-08-27
 
 Linux ORT GenAI archive-layout fix so the release workflow places

@@ -21,12 +21,17 @@ CREATE TABLE IF NOT EXISTS usage_log (
   ts          TEXT    NOT NULL,
   tool        TEXT    NOT NULL,
   query_hash  TEXT    NOT NULL,
+  query_text  TEXT,
   tokens_in   INTEGER NOT NULL,
   tokens_out  INTEGER NOT NULL,
   input_body  TEXT,
   output_body TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_usage_log_ts ON usage_log(ts DESC);
+`
+
+const migrateQueryText = `
+ALTER TABLE usage_log ADD COLUMN query_text TEXT;
 `
 
 // Config is the user preference file at ~/.hawp/config/usage.json.
@@ -41,6 +46,7 @@ type Entry struct {
 	TS         time.Time
 	Tool       string
 	QueryHash  string
+	QueryText  *string // first 256 chars of the query field; always stored when present
 	TokensIn   int
 	TokensOut  int
 	InputBody  *string
@@ -72,11 +78,33 @@ func Open(path string) (*Store, error) {
 		db.Close()
 		return nil, fmt.Errorf("usage schema: %w", err)
 	}
+	// Idempotent migration: add query_text column to existing databases.
+	// SQLite returns "duplicate column name" when the column already exists;
+	// that error is expected and safe to ignore.
+	_, _ = db.Exec(migrateQueryText)
 	return &Store{db: db}, nil
 }
 
 // Close releases the DB handle.
 func (s *Store) Close() { s.db.Close() }
+
+// extractQueryText pulls the first 256 chars of the "query" (or "title")
+// field from an input JSON blob. Returns nil when neither field is present.
+func extractQueryText(inputJSON []byte) *string {
+	var m map[string]any
+	if err := json.Unmarshal(inputJSON, &m); err != nil {
+		return nil
+	}
+	for _, key := range []string{"query", "title"} {
+		if v, ok := m[key].(string); ok && v != "" {
+			if len(v) > 256 {
+				v = v[:256]
+			}
+			return &v
+		}
+	}
+	return nil
+}
 
 // Write inserts one log entry. inputJSON and outputJSON are the raw JSON
 // bytes of the request arguments and response result. When logBodies is
@@ -87,6 +115,8 @@ func (s *Store) Write(tool string, inputJSON, outputJSON []byte, logBodies bool)
 	tokensIn := (len(inputJSON) + 3) / 4
 	tokensOut := (len(outputJSON) + 3) / 4
 
+	queryText := extractQueryText(inputJSON)
+
 	var inBody, outBody *string
 	if logBodies {
 		in := string(inputJSON)
@@ -96,10 +126,10 @@ func (s *Store) Write(tool string, inputJSON, outputJSON []byte, logBodies bool)
 	}
 
 	_, err := s.db.Exec(
-		`INSERT INTO usage_log (ts, tool, query_hash, tokens_in, tokens_out, input_body, output_body)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		`INSERT INTO usage_log (ts, tool, query_hash, query_text, tokens_in, tokens_out, input_body, output_body)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 		time.Now().UTC().Format(time.RFC3339),
-		tool, queryHash, tokensIn, tokensOut, inBody, outBody,
+		tool, queryHash, queryText, tokensIn, tokensOut, inBody, outBody,
 	)
 	return err
 }
@@ -107,7 +137,7 @@ func (s *Store) Write(tool string, inputJSON, outputJSON []byte, logBodies bool)
 // Recent returns up to n most recent entries, newest first.
 func (s *Store) Recent(n int) ([]Entry, error) {
 	rows, err := s.db.Query(
-		`SELECT id, ts, tool, query_hash, tokens_in, tokens_out, input_body, output_body
+		`SELECT id, ts, tool, query_hash, query_text, tokens_in, tokens_out, input_body, output_body
          FROM usage_log ORDER BY id DESC LIMIT ?`, n,
 	)
 	if err != nil {
@@ -118,7 +148,7 @@ func (s *Store) Recent(n int) ([]Entry, error) {
 	for rows.Next() {
 		var e Entry
 		var tsStr string
-		if err := rows.Scan(&e.ID, &tsStr, &e.Tool, &e.QueryHash,
+		if err := rows.Scan(&e.ID, &tsStr, &e.Tool, &e.QueryHash, &e.QueryText,
 			&e.TokensIn, &e.TokensOut, &e.InputBody, &e.OutputBody); err != nil {
 			return nil, err
 		}
@@ -189,6 +219,25 @@ func QuerySummary(inputJSON []byte, queryHash string) string {
 		return t
 	}
 	return queryHash
+}
+
+// EntrySummary returns the best display string for an entry's query.
+// Prefers the always-stored query_text field; falls back to QuerySummary
+// against the input body (when bodies are enabled); finally falls back to
+// the hash. This means `hawp usage log` shows a human-readable query even
+// when body capture is disabled (the default).
+func EntrySummary(e Entry) string {
+	if e.QueryText != nil && *e.QueryText != "" {
+		s := *e.QueryText
+		if len(s) > 60 {
+			s = s[:57] + "..."
+		}
+		return s
+	}
+	if e.InputBody != nil {
+		return QuerySummary([]byte(*e.InputBody), e.QueryHash)
+	}
+	return e.QueryHash
 }
 
 // FormatTotals returns a human-readable totals summary.
