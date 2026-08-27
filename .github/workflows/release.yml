@@ -125,7 +125,7 @@ jobs:
 
           # onnxruntime-genai
           GENAI_URL="https://github.com/microsoft/onnxruntime-genai/releases/download/v${ORT_GENAI_VERSION}/onnxruntime-genai-${ORT_GENAI_VERSION}-linux-x64.tar.gz"
-          curl -fsSL "$GENAI_URL" | tar xz -C "$NATIVE" --strip-components=2
+          curl -fsSL "$GENAI_URL" | tar xz -C "$NATIVE" --strip-components=1
 
           # libtokenizers (static; from daulet/tokenizers releases)
           TOK_URL="https://github.com/daulet/tokenizers/releases/download/v${TOKENIZERS_VERSION}/libtokenizers.linux-amd64.tar.gz"

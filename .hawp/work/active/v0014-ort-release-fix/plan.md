@@ -2,7 +2,7 @@
 
 **Type:** fix
 **Status:** in-progress
-**Branch:** `feature/v0.0.15`
+**Branch:** `feature/v0.0.16`
 **Opened:** 2026-08-27
 
 ## Problem
@@ -61,3 +61,9 @@ refresh the checked-in binary from a published release asset.
     `/.hawp/native/linux-amd64` via workflow `env:` expansion; the follow-up
     patch moves that path computation into the shell steps with
     `NATIVE="$HOME/.hawp/native/linux-amd64"`
+  - after shipping `0.0.15`, GitHub Actions run `33099207198` showed the Linux
+    ORT native downloads succeeded, but the linker still failed with
+    `cannot find -lonnxruntime-genai`; the Linux
+    `onnxruntime-genai-0.13.1-linux-x64.tar.gz` archive layout differs from the
+    macOS archive, so `--strip-components=2` extracted the shared library into
+    `$NATIVE/` instead of `$NATIVE/lib/`

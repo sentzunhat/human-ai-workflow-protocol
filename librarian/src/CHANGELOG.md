@@ -3,6 +3,22 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.16] - 2026-08-27
+
+Linux ORT GenAI archive-layout fix so the release workflow places
+`libonnxruntime-genai.so` under `lib/` before linking and packaging.
+
+### Fixed
+
+- **Linux ORT-GenAI extraction path** — the Linux
+  `onnxruntime-genai-0.13.1-linux-x64.tar.gz` archive does not include the
+  leading `./` path segment that the macOS archive uses. With
+  `--strip-components=2`, GitHub Actions extracted `libonnxruntime-genai.so`
+  into `$NATIVE/` instead of `$NATIVE/lib/`, so the linker failed with
+  `cannot find -lonnxruntime-genai`. The Linux download step now uses
+  `--strip-components=1`, which preserves the `lib/` and `include/` layout
+  expected by the build and packaging steps.
+
 ## [0.0.15] - 2026-08-27
 
 Linux ORT release path fix so the GitHub Release workflow can package the

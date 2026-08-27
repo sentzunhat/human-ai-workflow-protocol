@@ -22,7 +22,7 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 ## Active Work
 
-_v0.0.14 on `main` · next patch on `feature/v0.0.15`_
+_v0.0.15 on `main` · next patch on `feature/v0.0.16`_
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
