@@ -3,6 +3,7 @@ package usage
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -199,6 +200,55 @@ func TestLoadSaveConfig(t *testing.T) {
 	c2 := LoadConfig(configFile)
 	if !c2.Enabled || !c2.LogBodies {
 		t.Error("reloaded config should have enabled=true, log_bodies=true")
+	}
+}
+
+func TestGetReport(t *testing.T) {
+	s := openTemp(t)
+
+	tools := []string{"hawp_search", "hawp_search", "hawp_work_new"}
+	// large input, small output → guaranteed savings
+	longInput := []byte(`{"query":"find all kubernetes deployment configs and service mesh patterns that apply to this workflow"}`)
+	shortOutput := []byte(`{"text":"ok"}`)
+	for _, tool := range tools {
+		if err := s.Write(tool, longInput, shortOutput, false); err != nil {
+			t.Fatalf("Write: %v", err)
+		}
+	}
+
+	rep, err := s.GetReport()
+	if err != nil {
+		t.Fatalf("GetReport: %v", err)
+	}
+	if rep.Calls != 3 {
+		t.Errorf("calls: got %d want 3", rep.Calls)
+	}
+	if rep.TokensIn <= 0 {
+		t.Error("tokens_in should be > 0")
+	}
+	if len(rep.ByTool) != 2 {
+		t.Errorf("by_tool: got %d distinct tools, want 2", len(rep.ByTool))
+	}
+	if rep.Since == nil || rep.Until == nil {
+		t.Error("since/until should be set when log has entries")
+	}
+	if len(rep.TopEntries) != 3 {
+		t.Errorf("top_entries: got %d, want 3", len(rep.TopEntries))
+	}
+
+	// FormatReport smoke test
+	out := FormatReport(rep)
+	for _, want := range []string{"# HAWP Usage Report", "hawp_search", "hawp_work_new", "Tokens saved"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("FormatReport missing %q", want)
+		}
+	}
+}
+
+func TestFormatReportEmpty(t *testing.T) {
+	out := FormatReport(Report{})
+	if out == "" {
+		t.Error("FormatReport(empty) should return non-empty string")
 	}
 }
 

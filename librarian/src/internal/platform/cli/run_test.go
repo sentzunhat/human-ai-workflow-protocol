@@ -109,6 +109,30 @@ func TestRunUsage(t *testing.T) {
 	}
 }
 
+func TestRunUsageReport(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	// enable so the DB is created, then run report on empty log
+	if err := Run([]string{"usage", "enable"}); err != nil {
+		t.Fatalf("usage enable: %v", err)
+	}
+	if err := Run([]string{"usage", "report"}); err != nil {
+		t.Fatalf("usage report (empty): %v", err)
+	}
+	// export to a file
+	dir := t.TempDir()
+	exportPath := dir + "/report.md"
+	if err := Run([]string{"usage", "report", "--export", exportPath}); err != nil {
+		t.Fatalf("usage report --export: %v", err)
+	}
+	data, err := os.ReadFile(exportPath)
+	if err != nil {
+		t.Fatalf("read exported report: %v", err)
+	}
+	if string(data) == "" {
+		t.Error("exported report should be non-empty")
+	}
+}
+
 func TestRunUsageClearCancelled(t *testing.T) {
 	// Pipe /dev/null as stdin so fmt.Scanln sees EOF → answer is empty → "Cancelled."
 	old := os.Stdin

@@ -167,6 +167,130 @@ func (s *Store) GetTotals() (Totals, error) {
 	return t, err
 }
 
+// ToolStat holds per-tool aggregate counts.
+type ToolStat struct {
+	Tool      string
+	Calls     int
+	TokensIn  int
+	TokensOut int
+}
+
+// Report is the full usage summary for the report subcommand.
+type Report struct {
+	Calls      int
+	TokensIn   int
+	TokensOut  int
+	ByTool     []ToolStat
+	TopEntries []Entry // up to 20 most recent, for query listing
+	Since      *time.Time
+	Until      *time.Time
+}
+
+// GetReport returns aggregate and per-tool stats, plus the top recent entries.
+func (s *Store) GetReport() (Report, error) {
+	var r Report
+
+	// Overall totals
+	if err := s.db.QueryRow(
+		`SELECT COUNT(*), COALESCE(SUM(tokens_in),0), COALESCE(SUM(tokens_out),0) FROM usage_log`,
+	).Scan(&r.Calls, &r.TokensIn, &r.TokensOut); err != nil {
+		return r, err
+	}
+
+	// Time range
+	var first, last string
+	if err := s.db.QueryRow(`SELECT MIN(ts), MAX(ts) FROM usage_log`).Scan(&first, &last); err == nil && first != "" {
+		t1, _ := time.Parse(time.RFC3339, first)
+		t2, _ := time.Parse(time.RFC3339, last)
+		r.Since = &t1
+		r.Until = &t2
+	}
+
+	// Per-tool breakdown
+	rows, err := s.db.Query(
+		`SELECT tool, COUNT(*), COALESCE(SUM(tokens_in),0), COALESCE(SUM(tokens_out),0)
+         FROM usage_log GROUP BY tool ORDER BY COUNT(*) DESC`,
+	)
+	if err != nil {
+		return r, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var ts ToolStat
+		if err := rows.Scan(&ts.Tool, &ts.Calls, &ts.TokensIn, &ts.TokensOut); err != nil {
+			return r, err
+		}
+		r.ByTool = append(r.ByTool, ts)
+	}
+	if err := rows.Err(); err != nil {
+		return r, err
+	}
+
+	// Top 20 recent entries for query listing
+	r.TopEntries, err = s.Recent(20)
+	return r, err
+}
+
+// FormatReport renders a Report as human-readable Markdown. The result is
+// suitable for printing to stdout or committing as an evidence artifact.
+func FormatReport(rep Report) string {
+	if rep.Calls == 0 {
+		return "No calls recorded. Run `hawp usage enable` then make some MCP tool calls.\n"
+	}
+
+	var sb strings.Builder
+	fmt.Fprintln(&sb, "# HAWP Usage Report")
+	fmt.Fprintln(&sb)
+	if rep.Since != nil && rep.Until != nil {
+		fmt.Fprintf(&sb, "Period: %s → %s\n", rep.Since.Format("2006-01-02 15:04 UTC"), rep.Until.Format("2006-01-02 15:04 UTC"))
+	}
+	fmt.Fprintln(&sb)
+	fmt.Fprintln(&sb, "## Totals")
+	fmt.Fprintln(&sb)
+	fmt.Fprintf(&sb, "| Metric | Value |\n|--------|-------|\n")
+	fmt.Fprintf(&sb, "| Calls | %d |\n", rep.Calls)
+	fmt.Fprintf(&sb, "| Tokens in (est.) | ~%d |\n", rep.TokensIn)
+	fmt.Fprintf(&sb, "| Tokens out (est.) | ~%d |\n", rep.TokensOut)
+	saved := rep.TokensIn - rep.TokensOut
+	if saved > 0 {
+		pct := float64(saved) / float64(rep.TokensIn) * 100
+		fmt.Fprintf(&sb, "| Tokens saved (est.) | ~%d (~%.0f%%) |\n", saved, pct)
+	}
+	fmt.Fprintln(&sb)
+
+	if len(rep.ByTool) > 0 {
+		fmt.Fprintln(&sb, "## By Tool")
+		fmt.Fprintln(&sb)
+		fmt.Fprintln(&sb, "| Tool | Calls | Tokens In | Tokens Out | Saved |")
+		fmt.Fprintln(&sb, "|------|-------|-----------|------------|-------|")
+		for _, ts := range rep.ByTool {
+			s := ts.TokensIn - ts.TokensOut
+			pct := 0.0
+			if ts.TokensIn > 0 {
+				pct = float64(s) / float64(ts.TokensIn) * 100
+			}
+			fmt.Fprintf(&sb, "| %s | %d | ~%d | ~%d | ~%d (~%.0f%%) |\n",
+				ts.Tool, ts.Calls, ts.TokensIn, ts.TokensOut, s, pct)
+		}
+		fmt.Fprintln(&sb)
+	}
+
+	if len(rep.TopEntries) > 0 {
+		fmt.Fprintln(&sb, "## Recent Queries")
+		fmt.Fprintln(&sb)
+		fmt.Fprintln(&sb, "| # | Time | Tool | Tokens In | Tokens Out | Query |")
+		fmt.Fprintln(&sb, "|---|------|------|-----------|------------|-------|")
+		for i, e := range rep.TopEntries {
+			fmt.Fprintf(&sb, "| %d | %s | %s | %d | %d | %s |\n",
+				i+1, e.TS.Format("01-02 15:04"), e.Tool, e.TokensIn, e.TokensOut, EntrySummary(e))
+		}
+		fmt.Fprintln(&sb)
+	}
+
+	fmt.Fprintln(&sb, "_Token estimates: chars/4 (MCP request/response JSON byte length)_")
+	return sb.String()
+}
+
 // Clear truncates the log. Irreversible.
 func (s *Store) Clear() error {
 	_, err := s.db.Exec(`DELETE FROM usage_log`)
