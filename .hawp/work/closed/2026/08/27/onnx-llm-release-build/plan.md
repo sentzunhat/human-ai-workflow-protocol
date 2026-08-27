@@ -122,3 +122,25 @@ page and update `ORT_VERSION` / `ORT_GENAI_VERSION` env vars in the workflow.
 
 Completing this item closes the last Tier 1 Core gate in the v0.1.0 vision doc.
 After this + usage-log token evidence, v0.1.0 is ready to tag.
+
+## Outcome
+
+Shipped in v0.0.14 (2026-08-27). Two ORT release tarballs now publish per release:
+`hawp-linux-amd64-ort.tar.gz` and `hawp-darwin-arm64-ort.tar.gz`, each containing
+a `-tags ORT` binary and `lib/` with the three native libraries. darwin/amd64 stays
+CGO_ENABLED=0 (no official Microsoft prebuilts). Post-v0.0.14 fixes (v0.0.15, v0.0.16)
+corrected ORT release-lane path issues; all lanes verified green at v0.0.16.
+
+## Verification
+
+- [x] v0.0.14 Release workflow published ORT tarballs (run 33093186035 via CI)
+- [x] v0.0.15 fixed linux ORT native-lib path (run 33099207198)
+- [x] v0.0.16 fixed linux ORT-GenAI extraction strip-components (run 33101055988)
+- [x] `go test ./...` — green on all versions
+
+## Close Checklist
+
+- [x] Outcome recorded
+- [x] Verification covers CI run evidence across three patch versions
+- [x] ORT build lanes stable as of v0.0.16
+- [x] Ready to stay in closed history

@@ -107,3 +107,25 @@ In the MCP handler dispatch loop, after each tool call returns:
 Usage totals from this log are the evidence base for the token-reduction gate.
 Once a downstream team can run `hawp usage` and see "saved N tokens this week",
 the v0.1.0 milestone becomes verifiable.
+
+## Outcome
+
+Shipped in v0.0.12 (2026-08-25). `hawp usage`, `hawp usage log`, `hawp usage enable/disable/clear`
+all wired and tested. SQLite store at `~/.hawp/usage.db`, config at `~/.hawp/config/usage.json`.
+MCP wire-in logs every `hawp_search`, `hawp_work_new`, and `hawp_work_validate` call
+asynchronously (fire-and-forget goroutine; log failure never blocks the tool response).
+v0.0.17 extended with `query_text` column for always-readable query summaries.
+
+## Verification
+
+- [x] `go test ./internal/domain/usage/...` — 11 tests pass
+- [x] `go test ./internal/platform/cli/...` — includes TestRunUsage, TestRunUsageClearCancelled
+- [x] `go test ./internal/platform/mcp/...` — MCP e2e tests pass
+- [x] `go test ./...` — full suite green
+
+## Close Checklist
+
+- [x] Outcome recorded
+- [x] Verification covers domain, CLI, and MCP layers
+- [x] Feature shipped in v0.0.12; query_text enhancement in v0.0.17
+- [x] Ready to stay in closed history
