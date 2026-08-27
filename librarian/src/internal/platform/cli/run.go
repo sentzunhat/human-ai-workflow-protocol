@@ -1261,6 +1261,9 @@ func runSearchBenchmark(args []string) error {
 	}
 	defer db.Close()
 
+	if !tokenMode && exportPath != "" {
+		fmt.Println("Note: --export is only used with --token; ignoring.")
+	}
 	if tokenMode {
 		return RunTokenBenchmark(db, exportPath)
 	}

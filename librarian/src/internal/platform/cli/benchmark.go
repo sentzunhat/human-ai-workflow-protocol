@@ -414,5 +414,6 @@ func formatTokenReport(results []tokenBenchResult, budget int) string {
 	fmt.Fprintln(&sb, "_Context shaping applies deduplication + token-budget truncation._")
 	fmt.Fprintln(&sb, "_Raw tokens = sum of `len(chunk text)/4` across all ranked results._")
 	fmt.Fprintln(&sb, "_Shaped tokens = `ContextBlock.TokenCount` after `FormatAsMarkdown`._")
+	fmt.Fprintln(&sb, "_Negative savings = sparse result set already under budget; shaper adds Markdown formatting overhead._")
 	return sb.String()
 }
