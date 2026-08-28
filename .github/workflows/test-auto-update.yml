@@ -39,7 +39,7 @@ jobs:
           API="https://api.github.com/repos/sentzunhat/human-ai-workflow-protocol"
           AUTH=(-H "Authorization: Bearer ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json")
           # /releases/latest excludes pre-releases; use /releases list to get newest tag
-          LATEST=$(curl -fsSL "${AUTH[@]}" "$API/releases" | awk -F'"' '/"tag_name"/ { print $4; exit }')
+          LATEST=$(curl -fsSL "${AUTH[@]}" "$API/releases?per_page=1" | python3 -c 'import json, sys; data = json.load(sys.stdin); print(data[0]["tag_name"])')
           echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
           # Drop -f so curl exits 0 regardless of HTTP status; we read $STATUS ourselves
           STATUS=$(curl -o /dev/null -w "%{http_code}" -sSL "${AUTH[@]}" "$API/releases/tags/0.0.1")
