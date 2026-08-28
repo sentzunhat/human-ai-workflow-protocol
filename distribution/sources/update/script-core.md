@@ -229,10 +229,10 @@ update_hawp_binary() {
   _dest=".hawp/bin/hawp-bin${_ext}"
 
   _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" 2>/dev/null \
-    | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' || true)"
+    | awk -F'"' '/"tag_name"/ { print $4; exit }' || true)"
   if [ -z "$_tag" ]; then
     _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases?per_page=1" 2>/dev/null \
-      | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/' || true)"
+      | awk -F'"' '/"tag_name"/ { print $4; exit }' || true)"
     [ -n "$_tag" ] && echo "hawp update: /releases/latest unavailable; using releases list fallback."
   fi
 

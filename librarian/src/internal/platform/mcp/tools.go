@@ -11,6 +11,7 @@ import (
 func toolDefs() []map[string]any {
 	return []map[string]any{
 		searchToolDef(),
+		usageToolDef(),
 		{
 			"name":        "hawp_work_new",
 			"description": "Create a new HAWP work item. Generates a UUID, writes active/{uuid}/plan.md from the intake template, and adds an inbox row to BACKLOG.md. Returns the UUID and plan file path.",
@@ -61,12 +62,16 @@ func callTool(params json.RawMessage, repoRoot string) rpcResponse {
 		resp = toolWorkNew(p.Arguments, repoRoot)
 	case "hawp_work_validate":
 		resp = toolWorkValidate(repoRoot)
+	case "hawp_usage":
+		resp = toolUsage(p.Arguments)
 	default:
 		return errResp(-32602, "unknown tool: "+p.Name)
 	}
 
-	// Fire-and-forget: log the call; never block or error the response.
-	go logCall(p.Name, p.Arguments, resp)
+	// Log synchronously: sqlite writes complete in <1ms and the goroutine
+	// approach caused entries to be lost when the process exited before the
+	// goroutine ran (observed with hawp_work_validate in short-lived sessions).
+	logCall(p.Name, p.Arguments, resp)
 
 	return resp
 }
