@@ -7,6 +7,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/usage"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
 )
 
@@ -65,6 +67,12 @@ func must(t *testing.T, err error) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+// resolveTestHome returns the hawp home paths for a given HOME directory.
+func resolveTestHome(t *testing.T, home string) filesystem.HawpHome {
+	t.Helper()
+	return filesystem.ResolveHawpHome(home)
 }
 
 // TestToolSearchReturnsStructuredJSON verifies that hawp_search returns the
@@ -190,5 +198,61 @@ func TestToolWorkNewMissingTitle(t *testing.T) {
 	res := resp.Result.(toolResult)
 	if !res.IsError {
 		t.Error("expected error for missing title")
+	}
+}
+
+// TestToolUsageDisabled returns a helpful message when logging is off.
+func TestToolUsageDisabled(t *testing.T) {
+	// Point HOME at a temp dir with no usage config → logging disabled by default.
+	t.Setenv("HOME", t.TempDir())
+	resp := toolUsage(nil)
+	res := resp.Result.(toolResult)
+	if res.IsError {
+		t.Fatalf("expected non-error response: %s", res.Content[0].Text)
+	}
+	if !strings.Contains(res.Content[0].Text, "disabled") {
+		t.Errorf("expected 'disabled' in response, got: %s", res.Content[0].Text)
+	}
+}
+
+// TestToolUsageTotals returns totals when logging is enabled.
+func TestToolUsageTotals(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+
+	// Enable logging by writing the config directly.
+	h := resolveTestHome(t, home)
+	if err := usage.SaveConfig(h.UsageConfigFile, usage.Config{Enabled: true}); err != nil {
+		t.Fatalf("SaveConfig: %v", err)
+	}
+
+	resp := toolUsage(nil)
+	res := resp.Result.(toolResult)
+	if res.IsError {
+		t.Fatalf("expected non-error: %s", res.Content[0].Text)
+	}
+	if res.Content[0].Text == "" {
+		t.Error("expected non-empty totals response")
+	}
+}
+
+// TestToolUsageReport returns full Markdown report when report:true.
+func TestToolUsageReport(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+
+	h := resolveTestHome(t, home)
+	if err := usage.SaveConfig(h.UsageConfigFile, usage.Config{Enabled: true}); err != nil {
+		t.Fatalf("SaveConfig: %v", err)
+	}
+
+	args, _ := json.Marshal(map[string]any{"report": true})
+	resp := toolUsage(args)
+	res := resp.Result.(toolResult)
+	if res.IsError {
+		t.Fatalf("expected non-error: %s", res.Content[0].Text)
+	}
+	if res.Content[0].Text == "" {
+		t.Error("expected non-empty report response")
 	}
 }
