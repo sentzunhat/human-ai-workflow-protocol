@@ -33,13 +33,16 @@ jobs:
       - name: Resolve baseline (0.0.1) and latest release
         id: releases
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           API="https://api.github.com/repos/sentzunhat/human-ai-workflow-protocol"
+          AUTH=(-H "Authorization: Bearer ${GITHUB_TOKEN}" -H "Accept: application/vnd.github+json")
           # /releases/latest excludes pre-releases; use /releases list to get newest tag
-          LATEST=$(curl -fsSL "$API/releases" | grep '"tag_name"' | head -1 | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
+          LATEST=$(curl -fsSL "${AUTH[@]}" "$API/releases" | awk -F'"' '/"tag_name"/ { print $4; exit }')
           echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
           # Drop -f so curl exits 0 regardless of HTTP status; we read $STATUS ourselves
-          STATUS=$(curl -o /dev/null -w "%{http_code}" -sSL "$API/releases/tags/0.0.1")
+          STATUS=$(curl -o /dev/null -w "%{http_code}" -sSL "${AUTH[@]}" "$API/releases/tags/0.0.1")
           echo "baseline_exists=$([ "$STATUS" = "200" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
       - name: Skip if baseline release missing
