@@ -3,6 +3,32 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.22] - 2026-08-27
+
+`hawp_usage` MCP reporting, synchronous usage logging, prerelease-safe install/update parsing, and authenticated auto-update release discovery.
+
+### Added
+
+- **`hawp_usage` MCP tool** — returns either one-line totals or a full Markdown
+  usage report from the local HAWP usage log. Accepts `{"report": true}` for the
+  detailed report form and explains how to enable logging when the usage DB is
+  disabled.
+- **MCP usage tests** in `internal/platform/mcp/tools_e2e_test.go` — cover
+  disabled logging, totals mode, and report mode through the tool surface.
+
+### Changed
+
+- **Synchronous MCP usage logging** — `callTool()` now records usage inline
+  instead of fire-and-forget goroutines so short-lived MCP sessions do not lose
+  log entries before process exit.
+- **Install/update release-tag parsing** — distribution script sources and all
+  generated provider guides now use `awk`-based `tag_name` extraction for the
+  prerelease fallback path, avoiding brittle shell backreference parsing during
+  downstream binary installs.
+- **`Auto-update integration test` workflow** — GitHub release discovery now
+  uses the Actions token for API reads and the same `awk`-based tag parsing so
+  macOS runners do not fail latest-release resolution with unauthenticated 403s.
+
 ## [0.0.20] - 2026-08-27
 
 Architecture audit + ports-and-adapters fix for `domain/usage`.
