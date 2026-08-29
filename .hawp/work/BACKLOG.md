@@ -28,6 +28,9 @@ _v0.0.16 on `main` · next patch on `feature/v0.0.17`_
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
 | `release-benchmark-backfill` | planning | Benchmark evidence gate for `v0.0.11` through `v0.0.16` | `plan-ready` | — | [plan](active/release-benchmark-backfill/plan.md) | 2026-08-27 |
 | `v0014-token-speed-bench` | feature | Token-savings and speed benchmark gate | `plan-ready` | — | [plan](active/v0014-token-speed-bench/plan.md) | 2026-08-27 |
+| `387a37b7` | — | improvement | v0.0.23 refactor search pipeline and layout unification | in-progress | unassigned | [plan](active/387a37b7-v0-0-23-refactor-search-pipeline-and-layout-unification.md) | 2026-08-29 |
+| `c804eec0` | — | test | v0.0.23 benchmark evidence and release artifact refresh | analyzing | unassigned | [plan](active/c804eec0-v0-0-23-benchmark-evidence-and-release-artifact-refresh.md) | 2026-08-29 |
+| `5957aaf4` | — | task | v0.0.23 follow-up architecture audit and simplification queue | analyzing | unassigned | [plan](active/5957aaf4-v0-0-23-follow-up-architecture-audit-and-simplification-queu.md) | 2026-08-29 |
 
 ## Blocked / Parked
 

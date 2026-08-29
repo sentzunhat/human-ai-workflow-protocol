@@ -7,12 +7,11 @@ import (
 )
 
 // HawpProject is the resolved .hawp/ layout for a project.
-// Contains project-specific data, work tracking, and patterns.
+// Contains project-specific runtime data, work tracking, and patterns.
 type HawpProject struct {
 	Root   string // .hawp/ directory in the project root
-	Data   string // .hawp/.data — auto-created runtime data (NOT in git)
-	Config string // .hawp/.data/config — project-specific config
-	DB     string // .hawp/.data/db — project-specific database
+	DB     string // .hawp/db — project-specific database
+	Config string // .hawp/config — project-specific config
 
 	Work string // .hawp/work — work tracking (in git)
 	Kit  string // .hawp/kit — patterns and standards (in git)
@@ -21,35 +20,36 @@ type HawpProject struct {
 // ResolveHawpProject builds the .hawp/ layout for a project.
 func ResolveHawpProject(projectRoot string) HawpProject {
 	hawpRoot := filepath.Join(projectRoot, ".hawp")
-	dataRoot := filepath.Join(hawpRoot, ".data")
 	return HawpProject{
 		Root:   hawpRoot,
-		Data:   dataRoot,
-		Config: filepath.Join(dataRoot, "config"),
-		DB:     filepath.Join(dataRoot, "db"),
+		DB:     filepath.Join(hawpRoot, "db"),
+		Config: filepath.Join(hawpRoot, "config"),
 		Work:   filepath.Join(hawpRoot, "work"),
 		Kit:    filepath.Join(hawpRoot, "kit"),
 	}
 }
 
-// EnsureDataFolders creates .hawp/.data/ structure on first run.
-// Does NOT require git tracking — created automatically.
-// Returns true if folders were created, false if they already existed.
-func (p *HawpProject) EnsureDataFolders() (bool, error) {
-	// Check if .data folder already exists
-	if _, err := os.Stat(p.Data); err == nil {
-		return false, nil // Already exists
-	}
-
-	// Create directory structure
-	dirs := []string{p.Data, p.Config, p.DB}
+// EnsureRuntimeFolders creates the runtime directories used by search/config on
+// first use. Returns true if folders were created, false if they already existed.
+func (p *HawpProject) EnsureRuntimeFolders() (bool, error) {
+	dirs := []string{p.DB, p.Config}
+	created := false
 	for _, dir := range dirs {
+		if _, err := os.Stat(dir); err == nil {
+			continue
+		}
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			return false, fmt.Errorf("failed to create %s: %w", dir, err)
 		}
+		created = true
 	}
+	return created, nil
+}
 
-	return true, nil
+// EnsureDataFolders is kept as a compatibility wrapper for older callers that
+// still refer to the previous helper name.
+func (p *HawpProject) EnsureDataFolders() (bool, error) {
+	return p.EnsureRuntimeFolders()
 }
 
 // CheckSearchIndexExists checks if the search index has been built.

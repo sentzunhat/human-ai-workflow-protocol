@@ -53,11 +53,17 @@ func Query(repoRoot, query string, limit int) ([]domainsearch.Result, error) {
 			relevance = float32(getFloat(r, "_hybrid_score"))
 		}
 		results[i] = domainsearch.Result{
-			Source:    getStr(r, "path"),
-			Title:     getStr(r, "folder_role"),
-			Content:   getStr(r, "text"),
-			Relevance: relevance,
-			Embedding: []float32{},
+			ChunkID:       fmt.Sprintf("%d", getInt(r, "id")),
+			Content:       getStr(r, "text"),
+			Source:        getStr(r, "path"),
+			Title:         getStr(r, "folder_role"),
+			Relevance:     relevance,
+			LexicalRank:   float32(getFloat(r, "_lexical_rank")),
+			SemanticScore: float32(getFloat(r, "_semantic_score")),
+			Embedding:     []float32{},
+			LineStart:     int(getInt(r, "line_start")),
+			LineEnd:       int(getInt(r, "line_end")),
+			Priority:      i,
 		}
 	}
 	return results, nil

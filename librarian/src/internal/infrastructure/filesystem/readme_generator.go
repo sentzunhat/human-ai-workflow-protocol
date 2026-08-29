@@ -182,7 +182,7 @@ Create ~/.hawp/config/context.json with your defaults.
 
 Config priority (highest to lowest):
 1. CLI flags
-2. Project config (.hawp/.data/config/context.json)
+2. Project config (.hawp/config/context.json)
 3. Home config (~/.hawp/config/context.json)
 4. Built-in defaults: ONNX + BGE
 
@@ -205,7 +205,8 @@ Project-specific configuration, work tracking, and patterns.
 
 - work/ - Task tracking and planning (committed to git)
 - kit/ - Patterns and standards (committed to git)
-- .data/ - Auto-created runtime data (NOT in git)
+- db/ - Search index and embeddings cache (runtime data)
+- config/ - Project-specific context config (runtime data)
 
 ## First-Time Setup
 
@@ -213,19 +214,19 @@ After cloning or installing, build the search index once:
 
   hawp search index
 
-This creates .hawp/.data/db/index.sqlite containing:
+This creates .hawp/db/index.sqlite containing:
 - Lexical search index (FTS5)
 - Vector embeddings (semantic search)
 - Project-specific caches
 
 Takes ~2-3 seconds. Only needed once after clone/install.
 
-## .data/ Folder (Auto-Created)
+## Runtime Folders
 
 NOT committed to git. Contains:
-- .data/db/index.sqlite - Search index
-- .data/config/context.json - Project-specific config
-- .data/db/embeddings/ - Embedding cache (optional)
+- db/index.sqlite - Search index
+- config/context.json - Project-specific config
+- db/embeddings/ - Embedding cache (optional)
 
 Regenerated on demand if the codebase changes.
 

@@ -28,6 +28,8 @@ type FormattedResult struct {
 	Title     string  // Chunk title/heading
 	Content   string  // Actual text content
 	Tokens    int     // Approximate tokens in this result
+	LineStart int     // Line number where chunk starts in source
+	LineEnd   int     // Line number where chunk ends in source
 }
 
 // FormatAsMarkdown converts deduplicated results into LLM-ready markdown.
@@ -79,6 +81,8 @@ func FormatAsMarkdown(results []search.Result, query string, maxTokens int) Cont
 			Title:     result.Title,
 			Content:   result.Content,
 			Tokens:    resultTokens,
+			LineStart: result.LineStart,
+			LineEnd:   result.LineEnd,
 		})
 
 		usedTokens += resultTokens + separatorTokens
@@ -107,6 +111,8 @@ func deduplicateReferences(results []FormattedResult) []DocumentReference {
 			if result.Relevance > ref.Relevance {
 				ref.Relevance = result.Relevance
 				ref.Content = result.Content
+				ref.LineStart = result.LineStart
+				ref.LineEnd = result.LineEnd
 				refMap[result.Source] = ref
 			}
 		} else {
@@ -115,6 +121,8 @@ func deduplicateReferences(results []FormattedResult) []DocumentReference {
 				Title:     result.Title,
 				Content:   result.Content,
 				Relevance: result.Relevance,
+				LineStart: result.LineStart,
+				LineEnd:   result.LineEnd,
 			}
 		}
 	}
@@ -151,15 +159,26 @@ func (cb ContextBlock) String() string {
 func formatResultsInline(results []FormattedResult) string {
 	var sb strings.Builder
 	for _, result := range results {
-		title := result.Source
-		if result.Title != "" {
-			title = fmt.Sprintf("%s — %s", result.Source, result.Title)
-		}
+		title := formatReferenceTitle(result.Source, result.Title, result.LineStart, result.LineEnd)
 		sb.WriteString(fmt.Sprintf("**Reference:** %s (%d%% relevant)\n\n", title, int(result.Relevance*100)))
 		sb.WriteString(result.Content)
 		sb.WriteString("\n\n")
 	}
 	return sb.String()
+}
+
+func formatReferenceTitle(source, title string, lineStart, lineEnd int) string {
+	location := source
+	switch {
+	case lineStart > 0 && lineEnd > 0 && lineEnd >= lineStart:
+		location = fmt.Sprintf("%s:%d-%d", source, lineStart, lineEnd)
+	case lineStart > 0:
+		location = fmt.Sprintf("%s:%d", source, lineStart)
+	}
+	if title == "" {
+		return location
+	}
+	return fmt.Sprintf("%s — %s", location, title)
 }
 
 // estimateTokens estimates token count using ~4 chars per token heuristic.

@@ -55,6 +55,12 @@ func TestQueryLexicalOnly(t *testing.T) {
 	if results[0].Source != "/test/kubernetes.md" {
 		t.Errorf("Source = %q, want /test/kubernetes.md", results[0].Source)
 	}
+	if results[0].ChunkID == "" {
+		t.Error("ChunkID should not be empty")
+	}
+	if results[0].Priority != 0 {
+		t.Errorf("Priority = %d, want 0", results[0].Priority)
+	}
 }
 
 func TestQueryNoMatches(t *testing.T) {

@@ -14,12 +14,16 @@ func TestFormatAsMarkdown(t *testing.T) {
 			Source:    "README.md",
 			Title:     "Embeddings Intro",
 			Relevance: 0.95,
+			LineStart: 10,
+			LineEnd:   18,
 		},
 		{
 			Content:   "ONNX Runtime provides efficient inference",
 			Source:    "guide.md",
 			Title:     "ONNX Integration",
 			Relevance: 0.87,
+			LineStart: 30,
+			LineEnd:   35,
 		},
 	}
 
@@ -44,6 +48,9 @@ func TestFormatAsMarkdown(t *testing.T) {
 	// Check results are sorted by relevance (descending)
 	if block.Results[0].Relevance < block.Results[1].Relevance {
 		t.Error("Results not sorted by relevance descending")
+	}
+	if block.Results[0].LineStart == 0 || block.Results[0].LineEnd == 0 {
+		t.Error("Line ranges should be preserved in formatted results")
 	}
 }
 
@@ -144,6 +151,8 @@ func TestContextBlockString(t *testing.T) {
 				Title:     "Test Title",
 				Content:   "Test content",
 				Tokens:    5,
+				LineStart: 7,
+				LineEnd:   9,
 			},
 		},
 	}
@@ -165,6 +174,9 @@ func TestContextBlockString(t *testing.T) {
 	if !strings.Contains(str, "95%") {
 		t.Error("String output should contain relevance percentage")
 	}
+	if !strings.Contains(str, "test.md:7-9") {
+		t.Error("String output should contain line-ranged source path")
+	}
 }
 
 func TestContextBlockReferences(t *testing.T) {
@@ -175,18 +187,24 @@ func TestContextBlockReferences(t *testing.T) {
 			Source:    "deployment.md",
 			Title:     "Deployment Guide",
 			Relevance: 0.95,
+			LineStart: 4,
+			LineEnd:   12,
 		},
 		{
 			Content:   "Architecture overview",
 			Source:    "architecture.md",
 			Title:     "System Architecture",
 			Relevance: 0.82,
+			LineStart: 20,
+			LineEnd:   25,
 		},
 		{
 			Content:   "More deployment info",
 			Source:    "deployment.md",
 			Title:     "Deployment Setup",
 			Relevance: 0.78,
+			LineStart: 30,
+			LineEnd:   34,
 		},
 	}
 
@@ -226,6 +244,9 @@ func TestContextBlockReferences(t *testing.T) {
 		if ref.Source == "deployment.md" && ref.Relevance != 0.95 {
 			t.Errorf("deployment.md relevance should be 0.95 (highest), got %f", ref.Relevance)
 		}
+		if ref.Source == "deployment.md" && (ref.LineStart != 4 || ref.LineEnd != 12) {
+			t.Errorf("deployment.md line range = %d-%d, want 4-12", ref.LineStart, ref.LineEnd)
+		}
 	}
 }
 
@@ -245,6 +266,8 @@ func TestContextBlockStringInterleavesReferences(t *testing.T) {
 				Title:     "Deployment Guide",
 				Content:   "Deployment info",
 				Tokens:    50,
+				LineStart: 8,
+				LineEnd:   14,
 			},
 			{
 				Rank:      2,
@@ -253,24 +276,26 @@ func TestContextBlockStringInterleavesReferences(t *testing.T) {
 				Title:     "Architecture",
 				Content:   "Architecture info",
 				Tokens:    50,
+				LineStart: 21,
+				LineEnd:   24,
 			},
 		},
 	}
 
 	str := block.String()
 
-	if !strings.Contains(str, "**Reference:** deployment.md") {
+	if !strings.Contains(str, "**Reference:** deployment.md:8-14") {
 		t.Error("String output should contain an inline Reference line for deployment.md")
 	}
-	if !strings.Contains(str, "**Reference:** architecture.md") {
+	if !strings.Contains(str, "**Reference:** architecture.md:21-24") {
 		t.Error("String output should contain an inline Reference line for architecture.md")
 	}
 
 	// The deployment.md reference must precede its own content, and precede
 	// the architecture.md reference (interleaved order, not batched at end).
-	refDeployIdx := strings.Index(str, "**Reference:** deployment.md")
+	refDeployIdx := strings.Index(str, "**Reference:** deployment.md:8-14")
 	contentDeployIdx := strings.Index(str, "Deployment info")
-	refArchIdx := strings.Index(str, "**Reference:** architecture.md")
+	refArchIdx := strings.Index(str, "**Reference:** architecture.md:21-24")
 	contentArchIdx := strings.Index(str, "Architecture info")
 
 	if refDeployIdx < 0 || contentDeployIdx < 0 || refArchIdx < 0 || contentArchIdx < 0 {
