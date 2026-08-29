@@ -26,8 +26,9 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
   prerelease fallback path, avoiding brittle shell backreference parsing during
   downstream binary installs.
 - **`Auto-update integration test` workflow** — GitHub release discovery now
-  uses the Actions token for API reads and the same `awk`-based tag parsing so
-  macOS runners do not fail latest-release resolution with unauthenticated 403s.
+  uses the Actions token for API reads and JSON parsing via `python3` so
+  macOS runners do not fail latest-release resolution with unauthenticated 403s
+  or shell parsing drift.
 
 ## [0.0.20] - 2026-08-27
 
@@ -445,10 +446,10 @@ and kit reference docs updated for folder-per-UUID work item layout.
 ### CI
 
 - New workflow: `test-auto-update.yml` — runs on every `main` push across
-  Linux (ubuntu-latest), macOS (macos-latest), and Windows (windows-latest).
-  Downloads the `0.0.1` binary, runs `hawp update`, and asserts the binary
-  upgraded to the latest release. Skips gracefully when only one release
-  exists or baseline is already latest.
+  Linux (ubuntu-latest) and macOS (macos-latest). Downloads the `0.0.1`
+  binary, runs `hawp update`, and asserts the binary upgraded to the latest
+  release. Windows is excluded because in-place self-replace is unsupported
+  there; Windows users replace the binary manually while `hawp` is not running.
 
 ### Docs
 

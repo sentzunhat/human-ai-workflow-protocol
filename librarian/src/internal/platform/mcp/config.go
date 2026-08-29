@@ -17,7 +17,7 @@ func hawpBinaryPath(repoRoot string) string {
 // the project root for project-scoped configs, so both must be absolute.
 func codexTOMLBlock(repoRoot string) string {
 	bin := hawpBinaryPath(repoRoot)
-	return "\n[mcp_servers.hawp]\ncommand = \"" + bin + "\"\nargs = [\"mcp\"]\ncwd = \"" + repoRoot + "\"\n"
+	return "\n[mcp_servers.hawp]\ncommand = \"" + bin + "\"\nargs = [\"mcp\"]\ncwd = \"" + repoRoot + "\"\nenabled = true\nstartup_timeout_sec = 30\ntool_timeout_sec = 60\nenabled_tools = [\"hawp_search\", \"hawp_usage\", \"hawp_work_new\", \"hawp_work_validate\"]\n"
 }
 
 // claudeServerEntry returns the MCP server config block written for Claude

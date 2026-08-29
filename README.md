@@ -65,7 +65,7 @@ The `hawp` CLI ships with:
 - **`hawp search --context`** — packs results into a single LLM-ready block with token cap and dedup
 - **`hawp mcp`** — stdio MCP server; wire it into Claude Code, Cursor, or Continue in one command
 - **`hawp init --provider <name>`** — provisions `~/.hawp/` and writes the MCP config for your agent
-- **`hawp update`** — self-updates the binary and kit from the latest release (48h auto-update notifier built in)
+- **`hawp update`** — self-updates the binary and kit from the latest release (48h auto-update notifier built in; Windows uses manual binary replacement)
 - **`hawp work new`** — scaffolds a new work item with UUID, plan file, and BACKLOG row
 
 ---
@@ -98,12 +98,17 @@ hawp search embed --backend ollama   # or --backend onnx for offline
 
 # 3. Wire up MCP (one-time per provider)
 hawp init --provider claude   # writes .mcp.json
+#    or: hawp init --provider codex    # writes .codex/config.toml
 
 # 4. Shape your first task
 open .hawp/kit/start-here.md
 ```
 
 After that: use `hawp_search` from your agent instead of reading kit files directly. Ranked chunks at the token budget you set — no skimming.
+
+If you use Codex in this repository, run `scripts/setup-codex-mcp.sh` to write a
+local `.codex/config.toml` for this machine. That file stays gitignored because
+Codex requires machine-local absolute paths.
 
 ---
 

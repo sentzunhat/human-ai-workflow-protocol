@@ -110,6 +110,10 @@ show `hawp` after writing the config, trust the project in Codex settings and st
 fresh task or session. The desktop UI does not hot-reload MCP changes mid-session.
 Verify with the CLI: `codex mcp list` and `codex mcp get hawp`.
 
+Codex currently expects absolute `command` and `cwd` paths in project-scoped MCP
+config. Run `hawp init --provider codex` on each machine instead of copying
+another machine's `.codex/config.toml` verbatim.
+
 For Claude Code, the config is:
 
 ```json

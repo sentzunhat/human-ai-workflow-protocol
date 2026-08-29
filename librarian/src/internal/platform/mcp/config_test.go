@@ -30,6 +30,12 @@ func TestWriteCodexTOMLCreatesFile(t *testing.T) {
 	if !strings.Contains(content, `cwd = "`+repoRoot+`"`) {
 		t.Errorf(".codex/config.toml missing absolute cwd, got:\n%s", content)
 	}
+	if !strings.Contains(content, `enabled = true`) {
+		t.Errorf(".codex/config.toml missing enabled=true, got:\n%s", content)
+	}
+	if !strings.Contains(content, `enabled_tools = ["hawp_search", "hawp_usage", "hawp_work_new", "hawp_work_validate"]`) {
+		t.Errorf(".codex/config.toml missing enabled tool list, got:\n%s", content)
+	}
 }
 
 func TestWriteCodexTOMLIdempotent(t *testing.T) {
@@ -76,6 +82,9 @@ func TestWriteCodexTOMLUpgradesExistingRelativeBlock(t *testing.T) {
 	}
 	if !strings.Contains(content, `cwd = "`+repoRoot+`"`) {
 		t.Errorf("expected codex config to upgrade cwd, got:\n%s", content)
+	}
+	if !strings.Contains(content, `enabled_tools = ["hawp_search", "hawp_usage", "hawp_work_new", "hawp_work_validate"]`) {
+		t.Errorf("expected codex config to add enabled tool list, got:\n%s", content)
 	}
 	if strings.Contains(content, `command = ".hawp/bin/hawp"`) || strings.Contains(content, `cwd = "."`) {
 		t.Errorf("expected stale relative codex config to be removed, got:\n%s", content)
