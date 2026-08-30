@@ -3,6 +3,29 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.23] - 2026-08-30
+
+Search/context cleanup, safer work-folder migration previewing, and the first
+replicated `src/tests/` layout slice.
+
+### Added
+
+- **`librarian/src/tests/`** — new black-box test tree for exported behavior
+  that can live under the Go module root without breaking `internal/` imports.
+- **`hawp work normalize --migrate-folders` dry-run preview** — now reports the
+  exact file moves it would apply by running the real migration logic against a
+  temporary copy of `.hawp/work`.
+
+### Changed
+
+- **Search execution path** — CLI and application retrieval now share one
+  runtime-path-aware query service instead of reimplementing index opening and
+  ranking flow in parallel.
+- **Sparse context shaping** — under-budget small result sets now use a
+  passthrough render mode so formatting overhead stays near zero.
+- **Go toolchain hint** — `go.mod` now pins `toolchain go1.26.4`, matching the
+  latest local Go version used for this branch on 2026-08-30.
+
 ## [0.0.22] - 2026-08-27
 
 `hawp_usage` MCP reporting, synchronous usage logging, prerelease-safe install/update parsing, and authenticated auto-update release discovery.

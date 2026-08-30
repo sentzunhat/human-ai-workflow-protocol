@@ -1,4 +1,4 @@
-package work
+package work_test
 
 import (
 	"bytes"
@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work"
 )
 
 func TestNormalizeDryRunMigrateFoldersPreviewsChanges(t *testing.T) {
@@ -48,7 +50,7 @@ func TestNormalizeDryRunMigrateFoldersPreviewsChanges(t *testing.T) {
 
 	var out bytes.Buffer
 	var errOut bytes.Buffer
-	code := Normalize(&out, &errOut, NormalizeOptions{
+	code := appwork.Normalize(&out, &errOut, appwork.NormalizeOptions{
 		RepoRoot:       root,
 		MigrateFolders: true,
 	})

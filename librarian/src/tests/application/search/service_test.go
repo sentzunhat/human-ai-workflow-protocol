@@ -1,16 +1,16 @@
-package search
+package search_test
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
 
+	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
 )
 
 func TestQueryErrorsWithoutIndex(t *testing.T) {
-	// A fresh repo root with no .hawp/db/index.sqlite at all.
-	_, err := Query(t.TempDir(), "anything", 5)
+	_, err := appsearch.Query(t.TempDir(), "anything", 5)
 	if err == nil {
 		t.Error("Query should error when the index doesn't exist yet")
 	}
@@ -19,7 +19,7 @@ func TestQueryErrorsWithoutIndex(t *testing.T) {
 func TestQueryLexicalOnly(t *testing.T) {
 	repoRoot := t.TempDir()
 	dbPath := filepath.Join(repoRoot, ".hawp", "db", "index.sqlite")
-	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dbPath), 0o755); err != nil {
 		t.Fatal(err)
 	}
 
@@ -43,9 +43,7 @@ func TestQueryLexicalOnly(t *testing.T) {
 	}
 	db.Close()
 
-	// No vectors embedded — this should still return lexical results
-	// (no index_metadata row, so HybridRank falls back gracefully).
-	results, err := Query(repoRoot, "kubernetes", 5)
+	results, err := appsearch.Query(repoRoot, "kubernetes", 5)
 	if err != nil {
 		t.Fatalf("Query() error = %v", err)
 	}
@@ -66,7 +64,7 @@ func TestQueryLexicalOnly(t *testing.T) {
 func TestQueryNoMatches(t *testing.T) {
 	repoRoot := t.TempDir()
 	dbPath := filepath.Join(repoRoot, ".hawp", "db", "index.sqlite")
-	if err := os.MkdirAll(filepath.Dir(dbPath), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dbPath), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	db, err := sqlite.Open(dbPath)
@@ -78,7 +76,7 @@ func TestQueryNoMatches(t *testing.T) {
 	}
 	db.Close()
 
-	results, err := Query(repoRoot, "nonexistent query terms", 5)
+	results, err := appsearch.Query(repoRoot, "nonexistent query terms", 5)
 	if err != nil {
 		t.Fatalf("Query() error = %v", err)
 	}

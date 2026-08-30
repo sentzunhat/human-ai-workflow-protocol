@@ -1,10 +1,12 @@
-package work
+package work_test
 
 import (
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work"
 )
 
 const sampleBacklog = `# Backlog
@@ -23,10 +25,10 @@ nothing here
 func setupWorkDir(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(dir, "active"), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(dir, "active"), 0o755); err != nil {
 		t.Fatalf("mkdir active: %v", err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "BACKLOG.md"), []byte(sampleBacklog), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "BACKLOG.md"), []byte(sampleBacklog), 0o644); err != nil {
 		t.Fatalf("write BACKLOG.md: %v", err)
 	}
 	return dir
@@ -35,7 +37,7 @@ func setupWorkDir(t *testing.T) string {
 func TestNewItemCreatesPlanFileAndBacklogRow(t *testing.T) {
 	workDir := setupWorkDir(t)
 
-	result, err := NewItem(workDir, "bug", "Fix the reshape flag", "the --llm-reshape flag is broken")
+	result, err := appwork.NewItem(workDir, "bug", "Fix the reshape flag", "the --llm-reshape flag is broken")
 	if err != nil {
 		t.Fatalf("NewItem failed: %v", err)
 	}
@@ -83,7 +85,7 @@ func TestNewItemCreatesPlanFileAndBacklogRow(t *testing.T) {
 
 func TestNewItemRequiresTitle(t *testing.T) {
 	workDir := setupWorkDir(t)
-	_, err := NewItem(workDir, "task", "", "")
+	_, err := appwork.NewItem(workDir, "task", "", "")
 	if err == nil {
 		t.Error("NewItem should fail when title is empty")
 	}
@@ -91,7 +93,7 @@ func TestNewItemRequiresTitle(t *testing.T) {
 
 func TestNewItemDefaultsTypeToTask(t *testing.T) {
 	workDir := setupWorkDir(t)
-	result, err := NewItem(workDir, "", "Untyped item", "")
+	result, err := appwork.NewItem(workDir, "", "Untyped item", "")
 	if err != nil {
 		t.Fatalf("NewItem failed: %v", err)
 	}
@@ -102,7 +104,7 @@ func TestNewItemDefaultsTypeToTask(t *testing.T) {
 
 func TestNewItemRejectsUnknownType(t *testing.T) {
 	workDir := setupWorkDir(t)
-	_, err := NewItem(workDir, "not-a-real-type", "Some item", "")
+	_, err := appwork.NewItem(workDir, "not-a-real-type", "Some item", "")
 	if err == nil {
 		t.Error("NewItem should fail for an unrecognized Type value")
 	}
@@ -110,7 +112,7 @@ func TestNewItemRejectsUnknownType(t *testing.T) {
 
 func TestNewItemDefaultsInputToTitle(t *testing.T) {
 	workDir := setupWorkDir(t)
-	result, err := NewItem(workDir, "task", "Some title as input", "")
+	result, err := appwork.NewItem(workDir, "task", "Some title as input", "")
 	if err != nil {
 		t.Fatalf("NewItem failed: %v", err)
 	}
@@ -124,8 +126,8 @@ func TestNewItemDefaultsInputToTitle(t *testing.T) {
 }
 
 func TestNewItemFailsOnMissingBacklog(t *testing.T) {
-	dir := t.TempDir() // no BACKLOG.md written
-	_, err := NewItem(dir, "task", "Some item", "")
+	dir := t.TempDir()
+	_, err := appwork.NewItem(dir, "task", "Some item", "")
 	if err == nil {
 		t.Error("NewItem should fail when BACKLOG.md doesn't exist")
 	}
