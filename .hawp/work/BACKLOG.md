@@ -27,13 +27,12 @@ _v0.0.16 on `main` · next patch on `feature/v0.0.17`_
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
 | `release-benchmark-backfill` | planning | Benchmark evidence gate for `v0.0.11` through `v0.0.16` | `plan-ready` | — | [plan](active/release-benchmark-backfill/plan.md) | 2026-08-27 |
-| `v0014-token-speed-bench` | feature | Token-savings and speed benchmark gate | `plan-ready` | — | [plan](active/v0014-token-speed-bench/plan.md) | 2026-08-27 |
-| `387a37b7` | — | improvement | v0.0.23 refactor search pipeline and layout unification | in-progress | unassigned | [plan](active/387a37b7/plan.md) | 2026-08-29 |
-| `c804eec0` | — | test | v0.0.23 benchmark evidence and release artifact refresh | analyzing | unassigned | [plan](active/c804eec0/plan.md) | 2026-08-29 |
-| `5957aaf4` | — | task | v0.0.23 follow-up architecture audit and simplification queue | analyzing | unassigned | [plan](active/5957aaf4/plan.md) | 2026-08-29 |
-| `0bd32051` | — | refactor | v0.0.23 root tests layout and port adapter segregation | analyzing | unassigned | [plan](active/0bd32051/plan.md) | 2026-08-29 |
-| `89cf7a85` | — | improvement | v0.0.23 legacy work-item UUID canonicalization follow-up | inbox | unassigned | [plan](active/89cf7a85/plan.md) | 2026-08-30 |
-| `03299078` | — | improvement | v0.0.23 TypeScript script deprecation plan and Go parity audit | analyzing | unassigned | [plan](active/03299078/plan.md) | 2026-08-30 |
+| `387a37b7` | improvement | v0.0.23 refactor search pipeline and layout unification | `in-progress` | unassigned | [plan](active/387a37b7/plan.md) | 2026-08-30 |
+| `c804eec0` | test | v0.0.23 benchmark evidence and release artifact refresh | `analyzing` | unassigned | [plan](active/c804eec0/plan.md) | 2026-08-29 |
+| `5957aaf4` | task | v0.0.23 follow-up architecture audit and simplification queue | `analyzing` | unassigned | [plan](active/5957aaf4/plan.md) | 2026-08-29 |
+| `0bd32051` | refactor | v0.0.23 root tests layout and port adapter segregation | `in-progress` | unassigned | [plan](active/0bd32051/plan.md) | 2026-08-30 |
+| `89cf7a85` | improvement | v0.0.23 legacy work-item UUID canonicalization follow-up | `inbox` | unassigned | [plan](active/89cf7a85/plan.md) | 2026-08-30 |
+| `03299078` | improvement | v0.0.23 TypeScript script deprecation plan and Go parity audit | `analyzing` | unassigned | [plan](active/03299078/plan.md) | 2026-08-30 |
 
 ## Blocked / Parked
 
@@ -59,13 +58,13 @@ Limited to the last 10 items.
 | `v0014-ort-release-fix` | fix | Repair ORT release lanes — shipped v0.0.14–v0.0.16 | 2026-08-27 | [plan](closed/2026/08/27/v0014-ort-release-fix/plan.md) |
 | `onnx-llm-release-build` | feature | Ship ONNX LLM in release binary (ORT tarballs) — shipped v0.0.14 | 2026-08-27 | [plan](closed/2026/08/27/onnx-llm-release-build/plan.md) |
 | `usage-log` | feature | Local MCP call log with token counts (`hawp usage`) — shipped v0.0.12 | 2026-08-27 | [plan](closed/2026/08/27/usage-log/plan.md) |
+| `v0014-token-speed-bench` | feature | Token-savings and speed benchmark gate | 2026-08-30 | [plan](closed/2026/08/30/v0014-token-speed-bench/plan.md) |
 | `archive-uuid-structure-audit` | investigation | Review mixed `closed/` and `evidence/` archive structure vs UUID-folder guidance | 2026-08-25 | [plan](closed/2026/08/25/archive-uuid-structure-audit/plan.md) |
 | `releases-prerelease-fallback` | investigation | Verify/fix: `/releases/latest` 404 when all GitHub releases are prerelease | 2026-08-25 | [plan](closed/2026/08/25/releases-prerelease-fallback/plan.md) |
 | `manager-branch-kit-pattern` | improvement | Document optional manager-branch / worktree operating pattern in kit | 2026-08-25 | [plan](closed/2026/08/25/manager-branch-kit-pattern/plan.md) |
 | `agents-seed-if-missing` | fix | AGENTS.md must not be overwritten on `hawp init` update | 2026-08-25 | [plan](closed/2026/08/25/agents-seed-if-missing/plan.md) |
 | `install-docs-embed-optional` | docs | Clarify: `hawp search index` first; embed is optional and slow | 2026-08-25 | [plan](closed/2026/08/25/install-docs-embed-optional/plan.md) |
 | `cursor-docs-ui-path` | docs | Fix stale Cursor MCP UI path: Customize → MCPs (not Settings → Tools & MCP) | 2026-08-25 | [plan](closed/2026/08/25/cursor-docs-ui-path/plan.md) |
-| `cursor-mcp-type-wrapper` | fix | Cursor MCP: add `type: stdio` and `hawp-mcp` wrapper (relative command fails) | 2026-08-25 | [plan](closed/2026/08/25/cursor-mcp-type-wrapper/plan.md) |
 
 ---
 
@@ -82,6 +81,7 @@ Limited to the last 10 items.
 | -- | ---- | ----- | ------ | ------ |
 | `b7e2a4f9` | refactor | Rename `librarian/go/` → `src/` + retire TS validators | 2026-08-22 | [plan](closed/2026/08/22/b7e2a4f9/plan.md) |
 | `b8d3e1f0` | batch-close | All v0.0.1/0.0.2/0.0.3 planned work — shipped in 0.0.1 release (2026-08-21) | 2026-08-22 | [index](closed/2026/08/22/b8d3e1f0/plan.md) |
+| `cursor-mcp-type-wrapper` | fix | Cursor MCP: add `type: stdio` and `hawp-mcp` wrapper (relative command fails) | 2026-08-25 | [plan](closed/2026/08/25/cursor-mcp-type-wrapper/plan.md) |
 | `w4x6y8z0` | fix | `--llm-reshape` wired into the CLI | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
 | `n4o6p8q0` | fix | `ReshapingConfig` now honors configured Ollama URL | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |
 | `j2k4l6m8` | fix | `DefaultConfig()` no longer defaults to nonexistent ONNX LLM model | 2026-07-26 | [plan](closed/2026/07/26/v003-ship-audit/plan.md) |

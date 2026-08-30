@@ -26,6 +26,9 @@ change.
   without colliding with in-progress implementation
 - `librarian/src/go.mod` makes `librarian/src/` the Go module root today
 - Current tests are co-located under `librarian/src/internal/...`
+- As of 2026-08-30, exported black-box tests can be moved under
+  `librarian/src/tests/...`, but a sibling `librarian/tests/` tree beside `src/`
+  would fall outside the module root and break normal `internal/...` import use
 
 ## Initial Analysis
 
@@ -36,6 +39,23 @@ change.
 - That change touches folder topology and verification layout, so it should be
   handled as its own work item rather than piggybacked onto the current
   formatter pass
+- `librarian/src/` is the Go module root, so `librarian/src/tests/...` is the
+  safe replicated target for black-box tests that still need `internal/...`
+  imports
+- On 2026-08-30, the first replicated tests slice was implemented:
+  - moved exported-behavior tests from:
+    - `internal/application/search/service_test.go`
+    - `internal/application/work/intake_test.go`
+    - `internal/application/work/normalize_test.go`
+    - `internal/platform/cli/run_test.go`
+  - into:
+    - `tests/application/search/service_test.go`
+    - `tests/application/work/intake_test.go`
+    - `tests/application/work/normalize_test.go`
+    - `tests/platform/cli/run_test.go`
+- Verification passed on 2026-08-30:
+  - `go test ./tests/... ./internal/application/search ./internal/application/work ./internal/platform/cli ./internal/domain/work`
+  - `go test ./...`
 
 **Inferred (not yet proven):**
 
@@ -55,16 +75,18 @@ change.
 ## Risk + Review Gate
 
 **Risk:** medium
-**Gate:** plan/investigate first; do not merge
+**Gate:** implement incrementally; keep white-box tests co-located; do not merge
 
 ## Backlog + Plan Link
 
-**Status now:** analyzing
+**Status now:** in-progress
 **Plan file:** work/active/0bd32051/plan.md
 
 ## Next Step
 
 - [x] Work item created from the requested next compoundable slice
-- [ ] Inspect current Go package/test constraints for a replicated `tests/` tree
-- [ ] Propose the smallest safe migration plan and boundary cleanup set
-- [ ] Implement only after the migration path is explicit
+- [x] Inspect current Go package/test constraints for a replicated `tests/` tree
+- [x] Propose the smallest safe migration plan and boundary cleanup set
+- [x] Implement the first safe replicated `src/tests` slice for exported behavior
+- [ ] Continue moving exported black-box tests by capability where package internals are not required
+- [ ] Keep package-internal white-box tests beside code until a safer seam exists
