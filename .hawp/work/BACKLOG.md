@@ -31,6 +31,7 @@ _v0.0.16 on `main` · next patch on `feature/v0.0.17`_
 | `387a37b7` | — | improvement | v0.0.23 refactor search pipeline and layout unification | in-progress | unassigned | [plan](active/387a37b7-v0-0-23-refactor-search-pipeline-and-layout-unification.md) | 2026-08-29 |
 | `c804eec0` | — | test | v0.0.23 benchmark evidence and release artifact refresh | analyzing | unassigned | [plan](active/c804eec0-v0-0-23-benchmark-evidence-and-release-artifact-refresh.md) | 2026-08-29 |
 | `5957aaf4` | — | task | v0.0.23 follow-up architecture audit and simplification queue | analyzing | unassigned | [plan](active/5957aaf4-v0-0-23-follow-up-architecture-audit-and-simplification-queu.md) | 2026-08-29 |
+| `0bd32051` | — | refactor | v0.0.23 root tests layout and port adapter segregation | analyzing | unassigned | [plan](active/0bd32051-v0-0-23-root-tests-layout-and-port-adapter-segregation.md) | 2026-08-29 |
 
 ## Blocked / Parked
 

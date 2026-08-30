@@ -24,6 +24,9 @@ refactor without colliding with implementation work.
   typed provenance gaps
 - Main code edits belong to work item `387a37b7`; benchmark artifacts belong to
   work item `c804eec0`
+- The requested next compoundable layout slice now has its own item:
+  `0bd32051` for root-level replicated `tests/` layout and related
+  port/adapter segregation review
 
 ## Initial Analysis
 
@@ -58,3 +61,5 @@ refactor without colliding with implementation work.
 - [x] Investigation recorded above
 - [ ] Continue in parallel audit task
 - [ ] Return severity-ordered simplification queue to main lane
+- [ ] Fold `0bd32051` into the next ordered simplification pass and keep queue
+  priority explicit

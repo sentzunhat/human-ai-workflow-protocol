@@ -83,5 +83,29 @@ contract and preserve richer search provenance through the typed formatting path
 
 - [x] Investigation recorded above
 - [x] Plan direction captured in-place for this bounded patch lane
-- [ ] Implement scoped refactor + focused tests
-- [ ] Verify and summarize without merging
+- [x] Implement scoped refactor + focused tests
+- [x] Verify and summarize without merging
+- [ ] Continue sparse-result shaping cleanup until token benchmark negatives are removed or explicitly justified
+- [ ] Move to the next shared-search consolidation slice after the shaping pass
+
+## 2026-08-29 Compact Render Follow-Up
+
+**Directly verified:**
+
+- `librarian/src/internal/application/context/format.go` now keeps sparse
+  markdown output body-only (no title header at 5 results or fewer) and emits
+  compact inline provenance as `Ref: <source[:line[-line]]>`
+- richer title/relevance metadata is still preserved on typed
+  `FormattedResult` / `DocumentReference` shapes and JSON output
+- focused verification passed:
+  - `cd librarian/src && go test ./internal/application/context ./internal/application/search`
+- source-run token benchmark still shows three sparse negatives:
+  - intake ordering: `1707 -> 1753` (`-46`, `-3%`)
+  - provider distribution: `1796 -> 1870` (`-74`, `-4%`)
+  - core shape fields: `591 -> 613` (`-22`, `-4%`)
+
+**Inference:**
+
+- the cleanup improved the formatting boundary and kept the shaping change
+  minimal, but fully removing the remaining sparse negatives likely needs a
+  deliberate sparse passthrough policy rather than more wording compression

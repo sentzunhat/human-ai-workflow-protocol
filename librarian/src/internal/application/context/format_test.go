@@ -141,7 +141,7 @@ func TestTruncateToTokens(t *testing.T) {
 func TestContextBlockString(t *testing.T) {
 	block := ContextBlock{
 		Title:       "Test Results",
-		ResultCount: 1,
+		ResultCount: 6,
 		TokenCount:  100,
 		Results: []FormattedResult{
 			{
@@ -154,6 +154,11 @@ func TestContextBlockString(t *testing.T) {
 				LineStart: 7,
 				LineEnd:   9,
 			},
+			{Rank: 2, Relevance: 0.90, Source: "test-2.md", Content: "Extra content 2", Tokens: 4},
+			{Rank: 3, Relevance: 0.89, Source: "test-3.md", Content: "Extra content 3", Tokens: 4},
+			{Rank: 4, Relevance: 0.88, Source: "test-4.md", Content: "Extra content 4", Tokens: 4},
+			{Rank: 5, Relevance: 0.87, Source: "test-5.md", Content: "Extra content 5", Tokens: 4},
+			{Rank: 6, Relevance: 0.86, Source: "test-6.md", Content: "Extra content 6", Tokens: 4},
 		},
 	}
 
@@ -163,19 +168,17 @@ func TestContextBlockString(t *testing.T) {
 		t.Error("String output should contain title")
 	}
 
-	if !strings.Contains(str, "Test Title") {
-		t.Error("String output should contain result title")
-	}
-
 	if !strings.Contains(str, "Test content") {
 		t.Error("String output should contain result content")
 	}
-
-	if !strings.Contains(str, "95%") {
-		t.Error("String output should contain relevance percentage")
+	if block.Results[0].Title != "Test Title" {
+		t.Error("structured results should still retain the chunk title")
 	}
 	if !strings.Contains(str, "test.md:7-9") {
 		t.Error("String output should contain line-ranged source path")
+	}
+	if !strings.Contains(str, "Ref: test.md:7-9") {
+		t.Error("String output should contain compact reference label")
 	}
 }
 
@@ -251,7 +254,7 @@ func TestContextBlockReferences(t *testing.T) {
 }
 
 func TestContextBlockStringInterleavesReferences(t *testing.T) {
-	// Each result's **Reference:** line must appear immediately above its own
+	// Each result's `Ref:` line must appear immediately above its own
 	// content — not collected into one list at the end — so a reader sees
 	// which source a chunk came from right where it's used.
 	block := ContextBlock{
@@ -284,18 +287,18 @@ func TestContextBlockStringInterleavesReferences(t *testing.T) {
 
 	str := block.String()
 
-	if !strings.Contains(str, "**Reference:** deployment.md:8-14") {
+	if !strings.Contains(str, "Ref: deployment.md:8-14") {
 		t.Error("String output should contain an inline Reference line for deployment.md")
 	}
-	if !strings.Contains(str, "**Reference:** architecture.md:21-24") {
+	if !strings.Contains(str, "Ref: architecture.md:21-24") {
 		t.Error("String output should contain an inline Reference line for architecture.md")
 	}
 
 	// The deployment.md reference must precede its own content, and precede
 	// the architecture.md reference (interleaved order, not batched at end).
-	refDeployIdx := strings.Index(str, "**Reference:** deployment.md:8-14")
+	refDeployIdx := strings.Index(str, "Ref: deployment.md:8-14")
 	contentDeployIdx := strings.Index(str, "Deployment info")
-	refArchIdx := strings.Index(str, "**Reference:** architecture.md:21-24")
+	refArchIdx := strings.Index(str, "Ref: architecture.md:21-24")
 	contentArchIdx := strings.Index(str, "Architecture info")
 
 	if refDeployIdx < 0 || contentDeployIdx < 0 || refArchIdx < 0 || contentArchIdx < 0 {
@@ -304,5 +307,30 @@ func TestContextBlockStringInterleavesReferences(t *testing.T) {
 	if !(refDeployIdx < contentDeployIdx && contentDeployIdx < refArchIdx && refArchIdx < contentArchIdx) {
 		t.Errorf("expected order ref1 < content1 < ref2 < content2, got positions %d,%d,%d,%d",
 			refDeployIdx, contentDeployIdx, refArchIdx, contentArchIdx)
+	}
+}
+
+func TestContextBlockStringSparseSkipsHeader(t *testing.T) {
+	block := ContextBlock{
+		Title: "Sparse Results",
+		Results: []FormattedResult{
+			{
+				Rank:      1,
+				Relevance: 0.95,
+				Source:    "deployment.md",
+				Content:   "Deployment info",
+				LineStart: 8,
+				LineEnd:   14,
+			},
+		},
+	}
+
+	str := block.String()
+
+	if strings.Contains(str, "# Sparse Results") {
+		t.Error("sparse output should skip the markdown title header")
+	}
+	if !strings.Contains(str, "Ref: deployment.md:8-14") {
+		t.Error("sparse output should still preserve inline provenance")
 	}
 }

@@ -33,9 +33,13 @@ output, err := pipeline.Reshape(ctx, block, maxTokens)
 
 ## Design notes
 
-- **References render inline**, not batched — each result's `**Reference:**`
+- **References render inline**, not batched — each result's compact `Ref:`
   line sits immediately above its own content (`format.go`'s
   `formatResultsInline`), not collected into a footer list.
+- **Structured metadata stays typed**, while markdown stays lean — title,
+  relevance, and matched excerpt still live on `FormattedResult` /
+  `DocumentReference` and JSON output, but sparse markdown rendering keeps only
+  the source+line provenance needed at read time.
 - **The `"none"` backend is a deliberate mode**, not an error fallback —
   `ContextReshaper.Reshape` skips the embed/LLM stages entirely rather than
   routing a no-op call through them, so it's genuinely zero network.
