@@ -15,6 +15,7 @@ type ContextBlock struct {
 	ResultCount int                 // Number of results included
 	TokenCount  int                 // Approximate token usage
 	Budget      int                 // Token budget passed to FormatAsMarkdown
+	Passthrough bool                // Render raw content only for sparse under-budget result sets
 	Results     []FormattedResult   // Ordered, deduplicated results
 	References  []DocumentReference // Deduplicated source documents (by Source)
 	Metadata    map[string]string   // Query timestamp, filters, etc
@@ -53,6 +54,7 @@ func FormatAsMarkdown(results []search.Result, query string, maxTokens int) Cont
 	// Reserve space for the compact header, then add results until the budget is
 	// exhausted based on the rendered representation rather than a fixed surcharge.
 	usedTokens := estimateTokens(renderHeader(block.Title, len(sorted)))
+	rawTokens := 0
 
 	for rank, result := range sorted {
 		if usedTokens >= maxTokens {
@@ -89,16 +91,22 @@ func FormatAsMarkdown(results []search.Result, query string, maxTokens int) Cont
 
 		candidate.Tokens = resultTokens
 		block.Results = append(block.Results, candidate)
+		rawTokens += resultTokens
 
 		usedTokens += estimateTokens(renderFormattedResult(candidate))
 	}
 
 	block.References = deduplicateReferences(block.Results)
 	block.ResultCount = len(block.Results)
+	block.Passthrough = len(block.Results) > 0 && len(block.Results) <= 5 && rawTokens <= maxTokens
 	block.TokenCount = estimateTokens(block.String())
 	block.Metadata["result_count"] = fmt.Sprintf("%d", block.ResultCount)
 	block.Metadata["token_count"] = fmt.Sprintf("%d", block.TokenCount)
 	block.Metadata["budget"] = fmt.Sprintf("%d", maxTokens)
+	block.Metadata["render_mode"] = "inline"
+	if block.Passthrough {
+		block.Metadata["render_mode"] = "passthrough"
+	}
 
 	return block
 }
@@ -147,8 +155,12 @@ func deduplicateReferences(results []FormattedResult) []DocumentReference {
 // denser sets it prepends the compact title header before the same body.
 func (cb ContextBlock) String() string {
 	var sb strings.Builder
-	sb.WriteString(renderHeader(cb.Title, len(cb.Results)))
-	sb.WriteString(formatResultsInline(cb.Results))
+	if cb.Passthrough {
+		sb.WriteString(formatResultsPassthrough(cb.Results))
+	} else {
+		sb.WriteString(renderHeader(cb.Title, len(cb.Results)))
+		sb.WriteString(formatResultsInline(cb.Results))
+	}
 	return sb.String()
 }
 
@@ -164,6 +176,17 @@ func formatResultsInline(results []FormattedResult) string {
 	var sb strings.Builder
 	for _, result := range results {
 		sb.WriteString(renderFormattedResult(result))
+	}
+	return sb.String()
+}
+
+func formatResultsPassthrough(results []FormattedResult) string {
+	var sb strings.Builder
+	for i, result := range results {
+		if i > 0 {
+			sb.WriteString("\n\n")
+		}
+		sb.WriteString(result.Content)
 	}
 	return sb.String()
 }

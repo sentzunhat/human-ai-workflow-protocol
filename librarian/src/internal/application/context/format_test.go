@@ -88,6 +88,45 @@ func TestFormatAsMarkdownEmpty(t *testing.T) {
 	}
 }
 
+func TestFormatAsMarkdownSparsePassthrough(t *testing.T) {
+	results := []search.Result{
+		{
+			Content:   "Short content for sparse passthrough.",
+			Source:    "a.md",
+			Relevance: 0.9,
+			LineStart: 3,
+			LineEnd:   5,
+		},
+		{
+			Content:   "Another short result that should stay raw.",
+			Source:    "b.md",
+			Relevance: 0.8,
+			LineStart: 10,
+			LineEnd:   12,
+		},
+	}
+
+	block := FormatAsMarkdown(results, "sparse", 500)
+
+	if !block.Passthrough {
+		t.Fatal("expected sparse under-budget results to use passthrough rendering")
+	}
+	if got := block.Metadata["render_mode"]; got != "passthrough" {
+		t.Fatalf("render_mode = %q, want passthrough", got)
+	}
+
+	rendered := block.String()
+	if strings.Contains(rendered, "Ref: ") {
+		t.Errorf("passthrough render should skip inline Ref lines, got %q", rendered)
+	}
+	if !strings.Contains(rendered, results[0].Content) || !strings.Contains(rendered, results[1].Content) {
+		t.Errorf("passthrough render should contain the original content, got %q", rendered)
+	}
+	if len(block.References) != 2 {
+		t.Fatalf("References length = %d, want 2", len(block.References))
+	}
+}
+
 func TestEstimateTokens(t *testing.T) {
 	tests := []struct {
 		text string
@@ -312,7 +351,8 @@ func TestContextBlockStringInterleavesReferences(t *testing.T) {
 
 func TestContextBlockStringSparseSkipsHeader(t *testing.T) {
 	block := ContextBlock{
-		Title: "Sparse Results",
+		Title:       "Sparse Results",
+		Passthrough: true,
 		Results: []FormattedResult{
 			{
 				Rank:      1,
@@ -330,7 +370,10 @@ func TestContextBlockStringSparseSkipsHeader(t *testing.T) {
 	if strings.Contains(str, "# Sparse Results") {
 		t.Error("sparse output should skip the markdown title header")
 	}
-	if !strings.Contains(str, "Ref: deployment.md:8-14") {
-		t.Error("sparse output should still preserve inline provenance")
+	if strings.Contains(str, "Ref: deployment.md:8-14") {
+		t.Error("passthrough output should skip inline provenance wrappers")
+	}
+	if !strings.Contains(str, "Deployment info") {
+		t.Error("passthrough output should still contain the result content")
 	}
 }
