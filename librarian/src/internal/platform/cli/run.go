@@ -1071,39 +1071,30 @@ func runSearch(args []string) error {
 		return nil
 	}
 
-	dbPath := filepath.Join(root, ".hawp", "db", "index.sqlite")
-	db, err := sqlite.Open(dbPath)
+	execution, err := appsearch.DefaultService().Execute(root, appsearch.QueryOptions{
+		Query:       query,
+		Limit:       limit,
+		Semantic:    wantSemantic,
+		HybridRatio: float32(hybridRatio),
+	})
 	if err != nil {
-		fmt.Printf("Index not found at %s. Run `hawp search index` first.\n", dbPath)
+		var missingIndex appsearch.IndexNotFoundError
+		if errors.As(err, &missingIndex) {
+			fmt.Printf("Index not found at %s. Run `hawp search index` first.\n", missingIndex.Path)
+			return nil
+		}
+		return err
+	}
+
+	if wantSemantic && !execution.HasVectors {
+		fmt.Println("No vectors found. Run `hawp search embed` first to enable semantic search.")
 		return nil
 	}
-	defer db.Close()
 
-	hasVectors, _ := db.HasVectors()
-
-	var results []map[string]interface{}
-	if wantSemantic {
-		if !hasVectors {
-			fmt.Println("No vectors found. Run `hawp search embed` first to enable semantic search.")
-			return nil
-		}
-		results = appsearch.SemanticSearch(query, db, limit)
-		if results == nil {
-			fmt.Printf("Semantic search failed for %q — check that your embedding backend is running.\n", query)
-			return nil
-		}
-	} else {
-		// Lexical search (FTS5), with hybrid re-ranking when vectors exist.
-		var err error
-		results, err = db.QueryChunksLexical(query, limit*3)
-		if err != nil {
-			return fmt.Errorf("search failed: %w", err)
-		}
-		if hasVectors {
-			results = appsearch.HybridRank(results, query, db, limit, float32(hybridRatio))
-		} else if len(results) > limit {
-			results = results[:limit]
-		}
+	results := execution.Rows
+	if wantSemantic && results == nil {
+		fmt.Printf("Semantic search failed for %q — check that your embedding backend is running.\n", query)
+		return nil
 	}
 
 	if len(results) == 0 {
@@ -1132,16 +1123,7 @@ func runSearch(args []string) error {
 	}
 
 	// Convert to domain search results
-	searchResults := make([]domainsearch.Result, len(results))
-	for i, r := range results {
-		searchResults[i] = domainsearch.Result{
-			Source:    getStr(r, "path"),
-			Title:     getStr(r, "folder_role"),
-			Content:   getStr(r, "text"),
-			Relevance: float32(0.95), // Default high relevance
-			Embedding: []float32{},   // Not used in content-based dedup
-		}
-	}
+	searchResults := appsearch.RowsToResults(results, execution.HasVectors)
 
 	// Pre-pack content dedup: drop chunks with >70% word-set Jaccard overlap
 	// against a higher-ranked chunk. No embeddings needed — fast word-set
