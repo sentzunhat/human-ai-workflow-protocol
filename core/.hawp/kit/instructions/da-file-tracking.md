@@ -30,7 +30,7 @@ This instruction defines the file-tracking convention for digital agents coordin
 
 **File tracking lives inside each work item**, not in the backlog.
 
-Location: `.hawp/work/active/<TASK-ID>-files.md`
+Location: `.hawp/work/active/<TASK-ID>/files.md`
 
 This document is the authoritative source for:
 
@@ -48,7 +48,7 @@ This document is the authoritative source for:
 
 ✅ **Good:**
 
-- `.hawp/work/active/TASK-030.md`
+- `.hawp/work/active/TASK-030/plan.md`
 - `.hawp/kit/templates/work-item-files.md`
 - `README.md`
 - `librarian/scripts/backlog-upgrade/cli.ts`
@@ -138,11 +138,11 @@ These artifacts are coordination helpers only. They never replace plain-text pat
 
 When starting or coordinating a work item:
 
-1. **Check the work item plan** (`.hawp/work/active/TASK-XXX.md`).
+1. **Check the work item plan** (`.hawp/work/active/TASK-XXX/plan.md`).
    - Read the "Constraints" and "Scope" sections.
    - Check for file-tracking document references.
 
-2. **Read the file tracking document** (`.hawp/work/active/TASK-XXX-files.md`).
+2. **Read the file tracking document** (`.hawp/work/active/TASK-XXX/files.md`).
    - Before editing any file, verify it is in "Owned Files" section.
    - Before reading a file, verify it is in "Owned Files" or "Read-Only Context Files".
    - Before touching any file, check it is NOT in "Do-Not-Touch Files".
@@ -235,7 +235,7 @@ Template structure:
 
 ### 6. When to Create a File Tracking Document
 
-Create a separate file-tracking document (`.hawp/work/active/TASK-XXX-files.md`) when:
+Create a separate file-tracking document (`.hawp/work/active/TASK-XXX/files.md`) when:
 
 - The task touches multiple files or folders
 - The task risks overlapping with parallel work

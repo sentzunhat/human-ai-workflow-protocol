@@ -1,11 +1,21 @@
 # Active Work
 
-Flat folder for all open bugs and tasks.
+Folder-per-item workspace for all open bugs and tasks.
 
-Each item gets one plan file: `BUG-001.md`, `TASK-002.md`, etc.
+Each item gets one directory:
 
-Active work stays here until it is closed. On close, move the file to:
-
+```text
+active/
+  <work-id>/
+    plan.md
+    files.md   # optional file-tracking sidecar
 ```
-../closed/YYYY/MM/DD/<file>.md
+
+Active work stays here until it is closed. On close, move the plan to:
+
+```text
+../closed/YYYY/MM/DD/<work-id>/plan.md
 ```
+
+Historical flat files may still exist from older migration phases, but new and
+actively maintained UUID-native items should use the folder layout above.

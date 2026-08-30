@@ -5,12 +5,12 @@ In this source repository, live project work state is tracked at repo-root `.haw
 
 ## Layout
 
-```
+```text
 work/
   STATUS.md           — current state dashboard
   BACKLOG.md          — compact active index (not permanent history)
-  active/             — open bugs and tasks (flat, easy to find)
-  parked/             — deferred or icebox items (not active, not closed)
+  active/             — open bugs and tasks (`<id>/plan.md`, optional `files.md`)
+  parked/             — deferred or icebox items (`<id>/plan.md`)
   closed/YYYY/MM/DD/  — archived closed work, filed by date
   decisions/YYYY/MM/DD/ — ADRs and significant project decisions
   evidence/YYYY/MM/DD/  — verification artifacts (only when real)

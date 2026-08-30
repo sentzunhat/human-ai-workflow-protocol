@@ -1,6 +1,6 @@
 # Workflow Loop — Plan Section Snippet
 
-Copy this block into an active plan (`.hawp/work/active/<ID>.md`) when starting a multi-iteration loop.
+Copy this block into an active plan (`.hawp/work/active/<ID>/plan.md`) when starting a multi-iteration loop.
 Adjust fields per risk and scope. See [../usage/workflow-loop.md](../usage/workflow-loop.md).
 
 ---

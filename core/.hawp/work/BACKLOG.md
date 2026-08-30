@@ -48,8 +48,8 @@ _No recently closed items._
 ## Notes
 
 - Check this file before starting any new item.
-- Each item gets one plan file under `.hawp/work/active/` - no two agents on the same ID.
-- Deferred items can move to `.hawp/work/parked/` without being closed.
-- On close, move the plan file to `.hawp/work/closed/YYYY/MM/DD/`.
+- Each item gets one plan folder under `.hawp/work/active/<ID>/plan.md` - no two agents on the same ID.
+- Deferred items can move to `.hawp/work/parked/<ID>/plan.md` without being closed.
+- On close, move the plan file to `.hawp/work/closed/YYYY/MM/DD/<ID>/plan.md`.
 - Keep Recently Closed capped; do not append completed history forever.
 - Work started outside this loop should still get a row added for visibility.

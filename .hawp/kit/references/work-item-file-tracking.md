@@ -43,7 +43,7 @@ File tracking is a **manual convention** for now.
 
 **The backlog is a summary/report surface only.**
 
-- File tracking lives in `.hawp/work/active/<TASK-ID>-files.md`.
+- File tracking lives in `.hawp/work/active/<TASK-ID>/files.md`.
 - The backlog may link to a work item and summarize status.
 - The backlog must not rebuild file ownership from scratch.
 - The backlog must not list files per task.
@@ -126,10 +126,11 @@ Why this model:
 
 ### File Location
 
-```
+```text
 .hawp/work/active/
-  TASK-030.md                    # Work item plan
-  TASK-030-files.md              # File tracking (separate from plan)
+  TASK-030/
+    plan.md                      # Work item plan
+    files.md                     # File tracking (separate from plan)
 ```
 
 You may inline file tracking in the plan file for simple tasks with only a few files.
@@ -149,7 +150,7 @@ You may inline file tracking in the plan file for simple tasks with only a few f
 
 When starting work on a HAWP task:
 
-1. Read the work item plan (`.hawp/work/active/TASK-XXX.md`).
+1. Read the work item plan (`.hawp/work/active/TASK-XXX/plan.md`).
 2. Read the file-tracking document (if it exists).
 3. Before editing any file:
    - Verify it is in "Owned Files".
@@ -215,7 +216,7 @@ You may skip file tracking for:
 The backlog may reference work item file tracking:
 
 ```md
-| TASK-030 | task | Implement file-tracking v0.1 | in-progress | [plan](active/TASK-030.md) | Files: [tracking](active/TASK-030-files.md) |
+| TASK-030 | task | Implement file-tracking v0.1 | in-progress | [plan](active/TASK-030/plan.md) | Files: [tracking](active/TASK-030/files.md) |
 ```
 
 The backlog must NOT:
