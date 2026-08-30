@@ -1,12 +1,14 @@
-package filesystem
+package filesystem_test
 
 import (
 	"path/filepath"
 	"testing"
+
+	infrafs "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 func TestResolveHawpProjectUsesCurrentRuntimeLayout(t *testing.T) {
-	project := ResolveHawpProject("/repo")
+	project := infrafs.ResolveHawpProject("/repo")
 
 	if got, want := project.DB, filepath.Join("/repo", ".hawp", "db"); got != want {
 		t.Fatalf("DB = %q, want %q", got, want)
@@ -17,7 +19,7 @@ func TestResolveHawpProjectUsesCurrentRuntimeLayout(t *testing.T) {
 }
 
 func TestEnsureRuntimeFoldersCreatesDbAndConfig(t *testing.T) {
-	project := ResolveHawpProject(t.TempDir())
+	project := infrafs.ResolveHawpProject(t.TempDir())
 
 	created, err := project.EnsureRuntimeFolders()
 	if err != nil {

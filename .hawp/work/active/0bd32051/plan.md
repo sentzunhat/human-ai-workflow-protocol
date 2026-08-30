@@ -88,5 +88,42 @@ change.
 - [x] Inspect current Go package/test constraints for a replicated `tests/` tree
 - [x] Propose the smallest safe migration plan and boundary cleanup set
 - [x] Implement the first safe replicated `src/tests` slice for exported behavior
-- [ ] Continue moving exported black-box tests by capability where package internals are not required
-- [ ] Keep package-internal white-box tests beside code until a safer seam exists
+- [x] Continue moving exported black-box tests by capability where package internals are not required
+- [x] Keep package-internal white-box tests beside code until a safer seam exists
+
+## 2026-08-30 Migration Checkpoint
+
+**Directly verified:**
+
+- The replicated Go test tree now covers `14` black-box test files under
+  `librarian/src/tests/...`
+- The second migration pass added exported-behavior coverage for:
+  - `tests/application/db/init_service_test.go`
+  - `tests/application/links/check_test.go`
+  - `tests/application/links/clean_test.go`
+  - `tests/application/provision/provision_test.go`
+  - `tests/application/update/update_test.go`
+  - `tests/application/uuidgen/uuid_test.go`
+  - `tests/domain/search/similarity_test.go`
+  - `tests/domain/update/version_test.go`
+  - `tests/infrastructure/filesystem/hawp_project_test.go`
+  - `tests/infrastructure/githubrelease/githubrelease_test.go`
+- The remaining `42` `_test.go` files under `internal/...` are concentrated in
+  package-internal or integration-heavy areas such as:
+  - `internal/application/context`
+  - `internal/application/index`
+  - `internal/domain/context`
+  - `internal/domain/work`
+  - `internal/infrastructure/sqlite`
+  - `internal/platform/mcp`
+- Verification passed after the second migration pass:
+  - `go test ./tests/... ./internal/application/... ./internal/domain/... ./internal/infrastructure/... ./internal/platform/...`
+  - `go test ./...`
+  - `go run ./cmd/hawp work validate`
+
+**Decision:**
+
+- Treat `librarian/src/tests/...` as the home for exported black-box behavior
+  tests
+- Keep white-box and integration tests co-located until port seams or helper
+  extraction make a move simpler than the current layout

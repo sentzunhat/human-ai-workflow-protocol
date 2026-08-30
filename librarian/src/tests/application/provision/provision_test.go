@@ -1,6 +1,8 @@
-package provision
+package provision_test
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"crypto/sha256"
 	"encoding/hex"
 	"net/http"
@@ -9,9 +11,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"archive/tar"
-	"compress/gzip"
-
+	appprovision "github.com/sentzunhat/hawp/librarian/src/internal/application/provision"
 	domainprovision "github.com/sentzunhat/hawp/librarian/src/internal/domain/provision"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/download"
 )
@@ -21,8 +21,6 @@ func hashHex(b []byte) string {
 	return hex.EncodeToString(sum[:])
 }
 
-// fakeArchive builds a minimal .tgz containing one member and returns its
-// bytes plus sha256.
 func fakeArchive(t *testing.T, memberPath, memberContent string) ([]byte, string) {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "fake.tgz")
@@ -49,7 +47,6 @@ func fakeArchive(t *testing.T, memberPath, memberContent string) ([]byte, string
 	return data, hashHex(data)
 }
 
-// testServer serves a fixed map of path -> body and returns its base URL.
 func testServer(t *testing.T, routes map[string][]byte) string {
 	t.Helper()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +72,7 @@ func TestRunEndToEndFreshInstall(t *testing.T) {
 		"/tokenizer.json": tokenizerBytes,
 	})
 
-	registry := Registry{
+	registry := appprovision.Registry{
 		RuntimeAsset: domainprovision.Asset{
 			Name: "onnxruntime", URL: baseURL + "/runtime.tgz", SHA256: archiveHash,
 			Size: int64(len(archiveBytes)), ArchiveMember: "pkg/lib/libonnxruntime.so.1.27.1",
@@ -89,7 +86,7 @@ func TestRunEndToEndFreshInstall(t *testing.T) {
 	}
 
 	home := t.TempDir()
-	result := Run(download.NewHTTPFetcher(), home, registry)
+	result := appprovision.Run(download.NewHTTPFetcher(), home, registry)
 
 	if result.Failed() {
 		t.Fatalf("unexpected failure: %+v", result.Steps)
@@ -117,14 +114,7 @@ func TestRunEndToEndFreshInstall(t *testing.T) {
 		t.Fatalf("manifest not written: %v", err)
 	}
 
-	// Idempotent re-run: point the fetcher at a server that always 404s —
-	// re-provisioning must succeed from disk without hitting it.
-	deadServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusInternalServerError)
-	}))
-	defer deadServer.Close()
-
-	second := Run(download.NewHTTPFetcher(), home, registry)
+	second := appprovision.Run(download.NewHTTPFetcher(), home, registry)
 	if second.Failed() {
 		t.Fatalf("idempotent re-run failed: %+v", second.Steps)
 	}
@@ -139,7 +129,7 @@ func TestRunRuntimeUnsupportedPlatformStillProvisionsModels(t *testing.T) {
 	modelBytes := []byte("model bytes")
 	baseURL := testServer(t, map[string][]byte{"/model.onnx": modelBytes})
 
-	registry := Registry{
+	registry := appprovision.Registry{
 		RuntimeAssetErr: os.ErrInvalid,
 		ModelAssets: []domainprovision.Asset{
 			{Name: "model.onnx", URL: baseURL + "/model.onnx", SHA256: hashHex(modelBytes), Size: int64(len(modelBytes)), DestName: "model.onnx"},
@@ -147,12 +137,12 @@ func TestRunRuntimeUnsupportedPlatformStillProvisionsModels(t *testing.T) {
 	}
 
 	home := t.TempDir()
-	result := Run(download.NewHTTPFetcher(), home, registry)
+	result := appprovision.Run(download.NewHTTPFetcher(), home, registry)
 
 	if !result.Failed() {
 		t.Fatal("expected overall Failed() true due to runtime asset error")
 	}
-	var modelStep, runtimeStep *Step
+	var modelStep, runtimeStep *appprovision.Step
 	for i := range result.Steps {
 		switch result.Steps[i].Name {
 		case "model.onnx":
@@ -173,20 +163,20 @@ func TestRunChecksumMismatchReportsFailedStep(t *testing.T) {
 	modelBytes := []byte("model bytes")
 	baseURL := testServer(t, map[string][]byte{"/model.onnx": modelBytes})
 
-	registry := Registry{
+	registry := appprovision.Registry{
 		RuntimeAssetErr: os.ErrInvalid,
 		ModelAssets: []domainprovision.Asset{
 			{Name: "model.onnx", URL: baseURL + "/model.onnx", SHA256: "0000000000000000000000000000000000000000000000000000000000000000"[:64], Size: int64(len(modelBytes)), DestName: "model.onnx"},
 		},
 	}
-	result := Run(download.NewHTTPFetcher(), t.TempDir(), registry)
+	result := appprovision.Run(download.NewHTTPFetcher(), t.TempDir(), registry)
 	if !result.Failed() {
 		t.Fatal("expected failure on checksum mismatch")
 	}
 }
 
 func TestResultStringReportsFailuresAndSuccesses(t *testing.T) {
-	result := Result{Steps: []Step{
+	result := appprovision.Result{Steps: []appprovision.Step{
 		{Name: "a", Status: "downloaded", Path: "/x/a"},
 		{Name: "b", Status: "failed", Err: os.ErrInvalid},
 	}}

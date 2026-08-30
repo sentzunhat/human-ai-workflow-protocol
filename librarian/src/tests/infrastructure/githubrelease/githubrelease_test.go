@@ -1,25 +1,25 @@
-package githubrelease
+package githubrelease_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	infrarelease "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/githubrelease"
 )
 
-func serverReturning(t *testing.T, status int, body string) (Client, func()) {
+func serverReturning(t *testing.T, status int, body string) (infrarelease.Client, func()) {
 	t.Helper()
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/repos/owner/repo/releases" {
 			t.Errorf("unexpected path: %s (Latest must use the list endpoint, not /releases/latest, so prereleases are visible)", r.URL.Path)
 		}
 		w.WriteHeader(status)
-		w.Write([]byte(body))
+		_, _ = w.Write([]byte(body))
 	}))
-	return Client{BaseURL: server.URL, HTTP: server.Client()}, server.Close
+	return infrarelease.Client{BaseURL: server.URL, HTTP: server.Client()}, server.Close
 }
 
-// samplePayload mirrors the /releases list endpoint: an array, newest
-// first, which is how GitHub actually orders it.
 const samplePayload = `[{
   "tag_name": "v0.2.0",
   "assets": [
@@ -62,11 +62,6 @@ func TestAssetSHA256EmptyWhenDigestMissing(t *testing.T) {
 	}
 }
 
-// TestLatestIncludesPrereleases is a regression test for the real bug
-// found during 4c152ee3's live release test: GitHub's /releases/latest
-// excludes prereleases by definition, so a repo whose only releases are
-// all prerelease-tagged (as 0.0.x test releases intentionally are) would
-// otherwise be permanently invisible to `hawp update`.
 func TestLatestIncludesPrereleases(t *testing.T) {
 	client, closeServer := serverReturning(t, http.StatusOK, `[{
 		"tag_name": "v0.0.2",
@@ -89,7 +84,7 @@ func TestLatestNoReleasesYet(t *testing.T) {
 	defer closeServer()
 
 	_, err := client.Latest("owner/repo")
-	if err != ErrNoReleases {
+	if err != infrarelease.ErrNoReleases {
 		t.Errorf("err = %v, want ErrNoReleases for an empty releases list", err)
 	}
 }
@@ -99,7 +94,7 @@ func TestLatest404TreatedAsNoReleases(t *testing.T) {
 	defer closeServer()
 
 	_, err := client.Latest("owner/repo")
-	if err != ErrNoReleases {
+	if err != infrarelease.ErrNoReleases {
 		t.Errorf("err = %v, want ErrNoReleases", err)
 	}
 }

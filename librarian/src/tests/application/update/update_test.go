@@ -1,4 +1,4 @@
-package update
+package update_test
 
 import (
 	"crypto/sha256"
@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"testing"
 
+	appupdate "github.com/sentzunhat/hawp/librarian/src/internal/application/update"
 	domainupdate "github.com/sentzunhat/hawp/librarian/src/internal/domain/update"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/download"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/githubrelease"
@@ -21,9 +22,6 @@ func hashHex(b []byte) string {
 	return hex.EncodeToString(sum[:])
 }
 
-// releaseServer serves /repos/owner/repo/releases (the list endpoint —
-// Client.Latest deliberately avoids /releases/latest, which excludes
-// prereleases) and a binary download route.
 func releaseServer(t *testing.T, tag string, binary []byte, digest string) (githubrelease.Client, string) {
 	t.Helper()
 	assetName, err := domainupdate.AssetName()
@@ -50,7 +48,7 @@ func releaseServer(t *testing.T, tag string, binary []byte, digest string) (gith
 func TestCheckReportsUpdateAvailable(t *testing.T) {
 	client, _ := releaseServer(t, "v1.0.0", []byte("binary"), "sha256:"+hashHex([]byte("binary")))
 
-	status, err := Check(client, "owner/repo", "v0.9.0")
+	status, err := appupdate.Check(client, "owner/repo", "v0.9.0")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,7 +60,7 @@ func TestCheckReportsUpdateAvailable(t *testing.T) {
 func TestCheckReportsUpToDate(t *testing.T) {
 	client, _ := releaseServer(t, "v1.0.0", []byte("binary"), "sha256:"+hashHex([]byte("binary")))
 
-	status, err := Check(client, "owner/repo", "v1.0.0")
+	status, err := appupdate.Check(client, "owner/repo", "v1.0.0")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +76,7 @@ func TestCheckNoReleasesYet(t *testing.T) {
 	defer server.Close()
 	client := githubrelease.Client{BaseURL: server.URL, HTTP: server.Client()}
 
-	status, err := Check(client, "owner/repo", "dev")
+	status, err := appupdate.Check(client, "owner/repo", "dev")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -100,7 +98,7 @@ func TestApplyDownloadsVerifiesAndReplaces(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	applied, err := Apply(download.NewHTTPFetcher(), client, "owner/repo", execPath)
+	applied, err := appupdate.Apply(download.NewHTTPFetcher(), client, "owner/repo", execPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -130,12 +128,12 @@ func TestApplyChecksumMismatchLeavesOriginalBinaryIntact(t *testing.T) {
 
 	dir := t.TempDir()
 	execPath := filepath.Join(dir, "hawp")
-	original := []byte("old binary — must survive")
+	original := []byte("old binary - must survive")
 	if err := os.WriteFile(execPath, original, 0o755); err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := Apply(download.NewHTTPFetcher(), client, "owner/repo", execPath); err == nil {
+	if _, err := appupdate.Apply(download.NewHTTPFetcher(), client, "owner/repo", execPath); err == nil {
 		t.Fatal("expected checksum mismatch error")
 	}
 
@@ -157,9 +155,9 @@ func TestApplyMissingAssetForRelease(t *testing.T) {
 
 	dir := t.TempDir()
 	execPath := filepath.Join(dir, "hawp")
-	os.WriteFile(execPath, []byte("old"), 0o755)
+	_ = os.WriteFile(execPath, []byte("old"), 0o755)
 
-	if _, err := Apply(download.NewHTTPFetcher(), client, "owner/repo", execPath); err == nil {
+	if _, err := appupdate.Apply(download.NewHTTPFetcher(), client, "owner/repo", execPath); err == nil {
 		t.Fatal("expected error when release has no matching asset")
 	}
 }

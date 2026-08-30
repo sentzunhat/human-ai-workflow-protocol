@@ -1,9 +1,11 @@
-package links
+package links_test
 
 import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	applinks "github.com/sentzunhat/hawp/librarian/src/internal/application/links"
 )
 
 func buildRepo(t *testing.T, files map[string]string) string {
@@ -26,7 +28,7 @@ func TestCheckFindsBrokenLinks(t *testing.T) {
 		"README.md":               "[ok](.hawp/kit/start-here.md)\n[broken](missing.md)\n",
 		".hawp/kit/start-here.md": "# start\n",
 	})
-	result := Check(root)
+	result := applinks.Check(root)
 	if result.FilesChecked != 2 {
 		t.Errorf("files checked = %d, want 2", result.FilesChecked)
 	}
@@ -41,7 +43,7 @@ func TestCheckSkipsExternalAnchorsImagesFencesAndArchives(t *testing.T) {
 		".hawp/work/closed/2026/01/01/old.md": "[stale](../does-not-exist.md)\n",
 		".hawp/work/BACKLOG.md":               "# backlog\n",
 	})
-	result := Check(root)
+	result := applinks.Check(root)
 	if len(result.Failures) != 0 {
 		t.Fatalf("failures = %+v, want none (external/anchor/image/fence/archive all skipped)", result.Failures)
 	}
@@ -52,7 +54,7 @@ func TestCheckRootAbsolutePaths(t *testing.T) {
 		"README.md":     "[abs](/docs/guide.md)\n",
 		"docs/guide.md": "# guide\n",
 	})
-	if result := Check(root); len(result.Failures) != 0 {
+	if result := applinks.Check(root); len(result.Failures) != 0 {
 		t.Fatalf("root-absolute link should resolve from repo root: %+v", result.Failures)
 	}
 }

@@ -1,4 +1,4 @@
-package db
+package db_test
 
 import (
 	"path/filepath"
@@ -6,26 +6,26 @@ import (
 	"strings"
 	"testing"
 
+	appdb "github.com/sentzunhat/hawp/librarian/src/internal/application/db"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 func TestInitServicePlansHawpHomeLayout(t *testing.T) {
 	home := t.TempDir()
-	// os.UserHomeDir() uses HOME on Unix and USERPROFILE on Windows
 	if runtime.GOOS == "windows" {
 		t.Setenv("USERPROFILE", home)
 	} else {
 		t.Setenv("HOME", home)
 	}
 
-	service := NewInitService(filesystem.NewLayoutService())
+	service := appdb.NewInitService(filesystem.NewLayoutService())
 	result, err := service.Execute()
 	if err != nil {
 		t.Fatalf("Execute returned error: %v", err)
 	}
 
 	root := filepath.Join(home, ".hawp")
-	want := InitResult{
+	want := appdb.InitResult{
 		DBPath:        filepath.Join(root, "index", "librarian.db"),
 		ModelsPath:    filepath.Join(root, "models"),
 		DownloadsPath: filepath.Join(root, "cache", "downloads"),
@@ -36,7 +36,7 @@ func TestInitServicePlansHawpHomeLayout(t *testing.T) {
 }
 
 func TestInitResultStringListsAllPaths(t *testing.T) {
-	result := InitResult{
+	result := appdb.InitResult{
 		DBPath:        "/x/.hawp/index/librarian.db",
 		ModelsPath:    "/x/.hawp/models",
 		DownloadsPath: "/x/.hawp/cache/downloads",
