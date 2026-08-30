@@ -20,12 +20,11 @@ import (
 	appkit "github.com/sentzunhat/hawp/librarian/src/internal/application/kit"
 	appkitsync "github.com/sentzunhat/hawp/librarian/src/internal/application/kitsync"
 	applinks "github.com/sentzunhat/hawp/librarian/src/internal/application/links"
-	appmcp "github.com/sentzunhat/hawp/librarian/src/internal/platform/mcp"
 	appprovision "github.com/sentzunhat/hawp/librarian/src/internal/application/provision"
+	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
 	appupdate "github.com/sentzunhat/hawp/librarian/src/internal/application/update"
 	appuuid "github.com/sentzunhat/hawp/librarian/src/internal/application/uuidgen"
 	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work"
-	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
 	domainindex "github.com/sentzunhat/hawp/librarian/src/internal/domain/index"
 	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
 	domainupdate "github.com/sentzunhat/hawp/librarian/src/internal/domain/update"
@@ -35,6 +34,7 @@ import (
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/githubrelease"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
+	appmcp "github.com/sentzunhat/hawp/librarian/src/internal/platform/mcp"
 )
 
 // ExitError carries a non-zero exit code from a command that already
@@ -737,6 +737,8 @@ func runWorkNormalize(args []string) error {
 			opts.Apply = false
 		case args[i] == "--validate":
 			opts.Validate = true
+		case args[i] == "--migrate-folders":
+			opts.MigrateFolders = true
 		case args[i] == "--force-dirty":
 			opts.ForceDirty = true
 		case args[i] == "--verbose":
@@ -1313,7 +1315,7 @@ COMMANDS
   kit normalize [--apply]              normalize .hawp/kit/ names and links (dry-run default)
   work validate [--work-root <path>]   backlog/plan/evidence integrity checks
   work new "<title>" [--type ...]      scaffold intake: UUID, plan file, inbox backlog row
-  work normalize [--apply --validate]  normalize work record drift (dry-run default)
+  work normalize [--apply --migrate-folders --validate]  normalize work record drift (dry-run default)
   check                                combined kit + work + links validation
   init [--provider <name>|all]           provision ~/.hawp, sync kit, write MCP configs (claude|cursor|codex|continue|all)
   mcp                                   start stdio MCP server (JSON-RPC 2.0) for AI agent tool use

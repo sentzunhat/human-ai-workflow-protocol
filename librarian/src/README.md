@@ -44,7 +44,7 @@ wrapper surface stable.
 | `hawp kit validate` | npm `kit:validate` | **available** | ported 2026-07-20 (`39bc92b6`) |
 | `hawp work validate` | npm `work:validate` | **available** (count parity verified) | ported 2026-07-20 (`39bc92b6`) |
 | `hawp kit normalize [--apply]` | npm `kit:normalize` | **available** | ported 2026-07-20 (`eddd8339`) |
-| `hawp work normalize [--dry-run --apply --validate]` | npm `work:normalize` | **available** (full flag set, clean-tree guard) | ported 2026-07-20 (`eddd8339`) |
+| `hawp work normalize [--dry-run --apply --migrate-folders --validate]` | npm `work:normalize` | **available** (full flag set, clean-tree guard, explicit folder migration lane) | ported 2026-07-20 (`eddd8339`) |
 | `hawp backlog upgrade` | wrapper alias | **available** | alias for `work normalize` |
 | `hawp check` | npm `hawp:check` | **available** | composite kit + work + links; ported 2026-07-20 |
 | `hawp backlog validate` | wrapper alias | **available** | alias for `check` |

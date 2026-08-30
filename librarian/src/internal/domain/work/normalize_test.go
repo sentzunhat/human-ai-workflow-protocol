@@ -264,3 +264,147 @@ x
 		t.Errorf("duplicate research entries:\n%s", final)
 	}
 }
+
+func TestApplyWorkItemFolderMigrationMovesFlatPlanAndSidecar(t *testing.T) {
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/BACKLOG.md": cleanBacklogHeader +
+			"| `legacy-item` | task | legacy | inbox | [plan](active/legacy-item.md) | 2026-08-30 |\n" +
+			"| `v0.1.0-cloud-backends` | task | parked | parked | [plan](parked/v0.1.0-cloud-backends.md) | 2026-08-30 |\n" + backlogFooter,
+		".hawp/work/active/legacy-item.md": `# Legacy Item
+
+**Plan file:** work/active/legacy-item.md
+
+See [notes](../notes/context.md).
+`,
+		".hawp/work/active/legacy-item-files.md": `# Files
+
+**Work Item:** .hawp/work/active/legacy-item.md
+
+See [notes](../notes/context.md).
+`,
+		".hawp/work/parked/v0.1.0-cloud-backends.md": `# Parked
+
+**Plan file:** work/parked/v0.1.0-cloud-backends.md
+`,
+		".hawp/work/notes/context.md": "notes",
+		".hawp/work/closed/.keep":     "",
+	})
+
+	result, err := ApplyWorkItemFolderMigration(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.ChangedFiles) == 0 {
+		t.Fatal("expected migration changes")
+	}
+
+	planPath := filepath.Join(root, ".hawp/work/active/legacy-item/plan.md")
+	plan, err := os.ReadFile(planPath)
+	if err != nil {
+		t.Fatalf("migrated active plan missing: %v", err)
+	}
+	if strings.Contains(string(plan), "work/active/legacy-item.md") {
+		t.Errorf("plan file path not rewritten:\n%s", string(plan))
+	}
+	if !strings.Contains(string(plan), "work/active/legacy-item/plan.md") {
+		t.Errorf("plan file path missing new location:\n%s", string(plan))
+	}
+	if !strings.Contains(string(plan), "[notes](../../notes/context.md)") {
+		t.Errorf("relative link not rewritten for moved plan:\n%s", string(plan))
+	}
+
+	filesPath := filepath.Join(root, ".hawp/work/active/legacy-item/files.md")
+	filesContent, err := os.ReadFile(filesPath)
+	if err != nil {
+		t.Fatalf("migrated files sidecar missing: %v", err)
+	}
+	if !strings.Contains(string(filesContent), ".hawp/work/active/legacy-item/plan.md") {
+		t.Errorf("files.md work-item path not rewritten:\n%s", string(filesContent))
+	}
+	if !strings.Contains(string(filesContent), "[notes](../../notes/context.md)") {
+		t.Errorf("relative link not rewritten for moved files.md:\n%s", string(filesContent))
+	}
+
+	if _, err := os.Stat(filepath.Join(root, ".hawp/work/active/legacy-item.md")); !os.IsNotExist(err) {
+		t.Errorf("old flat plan should be removed, stat err = %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(root, ".hawp/work/active/legacy-item-files.md")); !os.IsNotExist(err) {
+		t.Errorf("old flat sidecar should be removed, stat err = %v", err)
+	}
+
+	parkedPlan, err := os.ReadFile(filepath.Join(root, ".hawp/work/parked/v0.1.0-cloud-backends/plan.md"))
+	if err != nil {
+		t.Fatalf("migrated parked plan missing: %v", err)
+	}
+	if !strings.Contains(string(parkedPlan), "work/parked/v0.1.0-cloud-backends/plan.md") {
+		t.Errorf("parked plan file path not rewritten:\n%s", string(parkedPlan))
+	}
+
+	backlog, err := os.ReadFile(filepath.Join(root, ".hawp/work/BACKLOG.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(backlog), "(active/legacy-item/plan.md)") {
+		t.Errorf("backlog active link not rewritten:\n%s", string(backlog))
+	}
+	if !strings.Contains(string(backlog), "(parked/v0.1.0-cloud-backends/plan.md)") {
+		t.Errorf("backlog parked link not rewritten:\n%s", string(backlog))
+	}
+
+	again, err := ApplyWorkItemFolderMigration(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(again.ChangedFiles) != 0 {
+		t.Errorf("second migration changed files: %v", again.ChangedFiles)
+	}
+}
+
+func TestApplyWorkItemFolderMigrationRenamesFolderToUUID(t *testing.T) {
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/BACKLOG.md": cleanBacklogHeader +
+			"| `12345678` | task | uuid item | inbox | [plan](active/legacy-slug/plan.md) | 2026-08-30 |\n" + backlogFooter,
+		".hawp/work/active/legacy-slug/plan.md": `# UUID Item
+
+**UUID:** ` + "`12345678-abcd-4abc-8def-1234567890ab`" + `
+**Plan file:** work/active/legacy-slug/plan.md
+`,
+		".hawp/work/active/legacy-slug/files.md": `# Files
+
+**Work Item:** .hawp/work/active/legacy-slug/plan.md
+`,
+		".hawp/work/parked/.keep": "",
+		".hawp/work/closed/.keep": "",
+	})
+
+	result, err := ApplyWorkItemFolderMigration(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.ChangedFiles) == 0 {
+		t.Fatal("expected rename changes")
+	}
+
+	if _, err := os.Stat(filepath.Join(root, ".hawp/work/active/12345678/plan.md")); err != nil {
+		t.Fatalf("uuid target folder missing: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(root, ".hawp/work/active/legacy-slug")); !os.IsNotExist(err) {
+		t.Errorf("legacy folder should be removed, stat err = %v", err)
+	}
+
+	plan, err := os.ReadFile(filepath.Join(root, ".hawp/work/active/12345678/plan.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(plan), "work/active/12345678/plan.md") {
+		t.Errorf("uuid plan path not rewritten:\n%s", string(plan))
+	}
+
+	filesContent, err := os.ReadFile(filepath.Join(root, ".hawp/work/active/12345678/files.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(filesContent), ".hawp/work/active/12345678/plan.md") {
+		t.Errorf("uuid files.md work-item path not rewritten:\n%s", string(filesContent))
+	}
+}

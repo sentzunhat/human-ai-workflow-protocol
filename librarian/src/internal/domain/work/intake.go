@@ -26,11 +26,20 @@ func (i NewItemInput) shortUUID() string {
 	return i.UUID
 }
 
-// PlanFileName returns the active/ plan file name for this item:
-// "<short-uuid>-<slug>.md", matching existing BACKLOG.md conventions (e.g.
-// "c9a7f2e1-github-actions-pipeline.md").
+// PlanDirName returns the canonical active/ item directory name for this item:
+// the stable 8-char UUID display form.
+func (i NewItemInput) PlanDirName() string {
+	return i.shortUUID()
+}
+
+// PlanFileName returns the plan file name inside the item directory.
 func (i NewItemInput) PlanFileName() string {
-	return fmt.Sprintf("%s-%s.md", i.shortUUID(), i.Slug)
+	return "plan.md"
+}
+
+// PlanRelativePath returns the canonical repo-relative plan path for this item.
+func (i NewItemInput) PlanRelativePath() string {
+	return fmt.Sprintf("active/%s/%s", i.PlanDirName(), i.PlanFileName())
 }
 
 // BacklogRow renders the Active Work table row for this item, status
@@ -38,7 +47,7 @@ func (i NewItemInput) PlanFileName() string {
 // | UUID | Legacy ID | Type | Title | Status | Owner | Plan File | Updated |
 func (i NewItemInput) BacklogRow(date string) string {
 	return fmt.Sprintf("| `%s` | — | %s | %s | inbox | unassigned | [plan](active/%s) | %s |",
-		i.shortUUID(), i.Type, i.Title, i.PlanFileName(), date)
+		i.shortUUID(), i.Type, i.Title, i.PlanDirName()+"/"+i.PlanFileName(), date)
 }
 
 // PlanFileContent renders the intake investigation template shape
@@ -69,7 +78,7 @@ func (i NewItemInput) PlanFileContent(inputText, date string) string {
 	sb.WriteString("**Gate:** _pending_ (auto-implement on low | review first on medium/high)\n\n")
 	sb.WriteString("## Backlog + Plan Link\n\n")
 	sb.WriteString("**Status now:** inbox\n")
-	fmt.Fprintf(&sb, "**Plan file:** work/active/%s\n\n", i.PlanFileName())
+	fmt.Fprintf(&sb, "**Plan file:** work/%s\n\n", i.PlanRelativePath())
 	sb.WriteString("## Next Step\n\n")
 	sb.WriteString("- [ ] Investigation recorded above (required before planning)\n")
 	sb.WriteString("- [ ] Write or update the plan file\n")

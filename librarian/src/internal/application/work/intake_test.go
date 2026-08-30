@@ -11,9 +11,9 @@ const sampleBacklog = `# Backlog
 
 ## Active Work
 
-| UUID | Legacy ID | Type | Title | Status | Owner | Plan File | Updated |
-| ---- | --------- | ---- | ----- | ------ | ----- | --------- | ------- |
-| ` + "`existing1`" + ` | — | task | Existing item | done | — | [plan](active/existing1.md) | 2026-07-20 |
+| UUID | Type | Title | Status | Owner | Plan File | Updated |
+| ---- | ---- | ----- | ------ | ----- | --------- | ------- |
+| ` + "`existing1`" + ` | task | Existing item | done | — | [plan](active/existing1/plan.md) | 2026-07-20 |
 
 ## Blocked / Parked
 
@@ -46,6 +46,9 @@ func TestNewItemCreatesPlanFileAndBacklogRow(t *testing.T) {
 	if result.Type != "bug" {
 		t.Errorf("result.Type = %q, want bug", result.Type)
 	}
+	if !strings.HasSuffix(result.PlanFilePath, filepath.Join("active", filepath.Base(filepath.Dir(result.PlanFilePath)), "plan.md")) {
+		t.Errorf("PlanFilePath should point to an active/<id>/plan.md file, got %q", result.PlanFilePath)
+	}
 
 	planBytes, err := os.ReadFile(result.PlanFilePath)
 	if err != nil {
@@ -72,6 +75,9 @@ func TestNewItemCreatesPlanFileAndBacklogRow(t *testing.T) {
 	}
 	if !strings.Contains(backlog, "inbox") {
 		t.Error("new row should have status inbox")
+	}
+	if !strings.Contains(backlog, "/plan.md") {
+		t.Error("new row should link to the folder-based plan path")
 	}
 }
 

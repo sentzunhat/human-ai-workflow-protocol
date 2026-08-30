@@ -43,9 +43,14 @@ func TestNewItemInputPlanFileName(t *testing.T) {
 		Title: "Fix the reshape flag",
 		Slug:  "fix-the-reshape-flag",
 	}
-	want := "abcd1234-fix-the-reshape-flag.md"
-	if got := item.PlanFileName(); got != want {
-		t.Errorf("PlanFileName() = %q, want %q", got, want)
+	if got := item.PlanDirName(); got != "abcd1234" {
+		t.Errorf("PlanDirName() = %q, want %q", got, "abcd1234")
+	}
+	if got := item.PlanFileName(); got != "plan.md" {
+		t.Errorf("PlanFileName() = %q, want %q", got, "plan.md")
+	}
+	if got := item.PlanRelativePath(); got != "active/abcd1234/plan.md" {
+		t.Errorf("PlanRelativePath() = %q, want %q", got, "active/abcd1234/plan.md")
 	}
 }
 
@@ -59,7 +64,7 @@ func TestNewItemInputBacklogRow(t *testing.T) {
 	row := item.BacklogRow("2026-07-26")
 
 	for _, want := range []string{"`abcd1234`", "bug", "Fix the reshape flag", "inbox", "unassigned",
-		"[plan](active/abcd1234-fix-the-reshape-flag.md)", "2026-07-26"} {
+		"[plan](active/abcd1234/plan.md)", "2026-07-26"} {
 		if !strings.Contains(row, want) {
 			t.Errorf("BacklogRow() = %q, missing %q", row, want)
 		}
@@ -91,7 +96,7 @@ func TestNewItemInputPlanFileContent(t *testing.T) {
 		"## Initial Analysis",
 		"## Risk + Review Gate",
 		"**Status now:** inbox",
-		"work/active/abcd1234-fix-the-reshape-flag.md",
+		"work/active/abcd1234/plan.md",
 	} {
 		if !strings.Contains(content, want) {
 			t.Errorf("PlanFileContent() missing %q\ngot:\n%s", want, content)
@@ -106,14 +111,14 @@ func TestInsertActiveRowAppendsBeforeNextHeading(t *testing.T) {
 
 | UUID | Legacy ID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | --------- | ---- | ----- | ------ | ----- | --------- | ------- |
-| ` + "`existing1`" + ` | — | task | Existing item | done | — | [plan](active/existing1.md) | 2026-07-20 |
+| ` + "`existing1`" + ` | — | task | Existing item | done | — | [plan](active/existing1/plan.md) | 2026-07-20 |
 
 ## Blocked / Parked
 
 nothing here
 `
 
-	newRow := "| `newitem1` | — | bug | New item | inbox | unassigned | [plan](active/newitem1-new-item.md) | 2026-07-26 |"
+	newRow := "| `newitem1` | — | bug | New item | inbox | unassigned | [plan](active/newitem1/plan.md) | 2026-07-26 |"
 
 	updated, err := InsertActiveRow(backlog, newRow)
 	if err != nil {
@@ -155,10 +160,10 @@ func TestInsertActiveRowNoTrailingSection(t *testing.T) {
 
 | UUID | Legacy ID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | --------- | ---- | ----- | ------ | ----- | --------- | ------- |
-| ` + "`existing1`" + ` | — | task | Existing item | done | — | [plan](active/existing1.md) | 2026-07-20 |
+| ` + "`existing1`" + ` | — | task | Existing item | done | — | [plan](active/existing1/plan.md) | 2026-07-20 |
 `
 
-	newRow := "| `newitem1` | — | bug | New item | inbox | unassigned | [plan](active/newitem1-new-item.md) | 2026-07-26 |"
+	newRow := "| `newitem1` | — | bug | New item | inbox | unassigned | [plan](active/newitem1/plan.md) | 2026-07-26 |"
 	updated, err := InsertActiveRow(backlog, newRow)
 	if err != nil {
 		t.Fatalf("InsertActiveRow failed: %v", err)

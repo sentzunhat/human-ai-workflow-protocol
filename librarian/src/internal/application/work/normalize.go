@@ -15,6 +15,7 @@ import (
 type NormalizeOptions struct {
 	RepoRoot            string
 	Apply               bool
+	MigrateFolders      bool
 	Validate            bool
 	FormatJSON          bool
 	Output              string
@@ -45,12 +46,24 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 			fmt.Fprintln(errOut, "Error: apply mode requires a clean working tree. Re-run with --force-dirty to override.")
 			return 2
 		}
-		result, err := domainwork.ApplyClosedRecordNormalization(opts.RepoRoot)
-		if err != nil {
-			fmt.Fprintf(errOut, "Script error: %v\n", err)
-			return 1
+		result := domainwork.ApplyResult{}
+		if opts.MigrateFolders {
+			migration, err := domainwork.ApplyWorkItemFolderMigration(opts.RepoRoot)
+			if err != nil {
+				fmt.Fprintf(errOut, "Script error: %v\n", err)
+				return 1
+			}
+			result.ChangedFiles = append(result.ChangedFiles, migration.ChangedFiles...)
+			notices = append(notices, fmt.Sprintf("Applied work-item folder migration to %d file(s).", len(migration.ChangedFiles)))
+		} else {
+			closed, err := domainwork.ApplyClosedRecordNormalization(opts.RepoRoot)
+			if err != nil {
+				fmt.Fprintf(errOut, "Script error: %v\n", err)
+				return 1
+			}
+			result = closed
+			notices = append(notices, fmt.Sprintf("Applied closed-record normalization to %d file(s).", len(result.ChangedFiles)))
 		}
-		notices = append(notices, fmt.Sprintf("Applied closed-record normalization to %d file(s).", len(result.ChangedFiles)))
 		if n := len(result.SkippedFiles); n > 0 {
 			notices = append(notices, fmt.Sprintf("Skipped %d ambiguous legacy file(s) without inferable Backlog ID.", n))
 		}
@@ -58,9 +71,9 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 			notices = append(notices, fmt.Sprintf("Added %d verification evidence follow-up item(s) inside Verification sections for agent-friendly research handoff.", n))
 		}
 
-		stdoutText := "No closed-record changes were necessary."
+		stdoutText := "No work-record changes were necessary."
 		if len(result.ChangedFiles) > 0 {
-			stdoutText = fmt.Sprintf("%d closed-record file(s) normalized.", len(result.ChangedFiles))
+			stdoutText = fmt.Sprintf("%d work-record file(s) normalized.", len(result.ChangedFiles))
 		}
 		if opts.Validate {
 			notices = append(notices, validationSummary(workRoot))
