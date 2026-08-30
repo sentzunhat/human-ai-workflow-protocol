@@ -408,3 +408,38 @@ func TestApplyWorkItemFolderMigrationRenamesFolderToUUID(t *testing.T) {
 		t.Errorf("uuid files.md work-item path not rewritten:\n%s", string(filesContent))
 	}
 }
+
+func TestPreviewWorkItemFolderMigrationMatchesApplyWithoutMutatingSource(t *testing.T) {
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/BACKLOG.md": cleanBacklogHeader +
+			"| `legacy-item` | task | legacy | inbox | [plan](active/legacy-item.md) | 2026-08-30 |\n" + backlogFooter,
+		".hawp/work/active/legacy-item.md": `# Legacy Item
+
+**Plan file:** work/active/legacy-item.md
+`,
+		".hawp/work/parked/.keep": "",
+		".hawp/work/closed/.keep": "",
+	})
+
+	preview, err := PreviewWorkItemFolderMigration(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(preview.ChangedFiles) == 0 {
+		t.Fatal("expected preview to report migration changes")
+	}
+	if _, err := os.Stat(filepath.Join(root, ".hawp/work/active/legacy-item.md")); err != nil {
+		t.Fatalf("preview should not mutate source repo, stat err = %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(root, ".hawp/work/active/legacy-item/plan.md")); !os.IsNotExist(err) {
+		t.Fatalf("preview should not create migrated folder in source repo, stat err = %v", err)
+	}
+
+	applied, err := ApplyWorkItemFolderMigration(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Join(preview.ChangedFiles, "\n") != strings.Join(applied.ChangedFiles, "\n") {
+		t.Fatalf("preview changes %v do not match apply changes %v", preview.ChangedFiles, applied.ChangedFiles)
+	}
+}

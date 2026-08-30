@@ -297,6 +297,55 @@ func rewriteBacklogPlanLinks(backlogPath string, movedPlans []movedPlan, touched
 	return nil
 }
 
+func copyTree(srcRoot, dstRoot string) error {
+	entries, err := os.ReadDir(srcRoot)
+	if err != nil {
+		return err
+	}
+	for _, entry := range entries {
+		srcPath := filepath.Join(srcRoot, entry.Name())
+		dstPath := filepath.Join(dstRoot, entry.Name())
+		if entry.IsDir() {
+			if err := os.MkdirAll(dstPath, 0o755); err != nil {
+				return err
+			}
+			if err := copyTree(srcPath, dstPath); err != nil {
+				return err
+			}
+			continue
+		}
+		data, err := os.ReadFile(srcPath)
+		if err != nil {
+			return err
+		}
+		if err := os.WriteFile(dstPath, data, 0o644); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// PreviewWorkItemFolderMigration runs the real migration against an isolated
+// temp copy of .hawp/work and returns the files that would change.
+func PreviewWorkItemFolderMigration(repoRoot string) (ApplyResult, error) {
+	tempRoot, err := os.MkdirTemp("", "hawp-work-migrate-preview-")
+	if err != nil {
+		return ApplyResult{}, err
+	}
+	defer os.RemoveAll(tempRoot)
+
+	srcWorkRoot := filepath.Join(repoRoot, ".hawp", "work")
+	dstWorkRoot := filepath.Join(tempRoot, ".hawp", "work")
+	if err := os.MkdirAll(dstWorkRoot, 0o755); err != nil {
+		return ApplyResult{}, err
+	}
+	if err := copyTree(srcWorkRoot, dstWorkRoot); err != nil {
+		return ApplyResult{}, err
+	}
+
+	return ApplyWorkItemFolderMigration(tempRoot)
+}
+
 // ApplyWorkItemFolderMigration migrates active/parked work-item plans and
 // sidecar artifacts into folder-per-item layout, preserving relative links.
 func ApplyWorkItemFolderMigration(repoRoot string) (ApplyResult, error) {
