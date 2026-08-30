@@ -51,7 +51,7 @@ benchmark artifacts, release-evidence notes, and benchmark-doc alignment only.
 ## Backlog + Plan Link
 
 **Status now:** analyzing
-**Plan file:** work/active/c804eec0-v0-0-23-benchmark-evidence-and-release-artifact-refresh.md
+**Plan file:** work/active/c804eec0/plan.md
 
 ## Next Step
 

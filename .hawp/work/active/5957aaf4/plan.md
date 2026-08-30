@@ -54,7 +54,7 @@ refactor without colliding with implementation work.
 ## Backlog + Plan Link
 
 **Status now:** analyzing
-**Plan file:** work/active/5957aaf4-v0-0-23-follow-up-architecture-audit-and-simplification-queu.md
+**Plan file:** work/active/5957aaf4/plan.md
 
 ## Next Step
 

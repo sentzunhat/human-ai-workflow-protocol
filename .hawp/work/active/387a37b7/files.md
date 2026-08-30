@@ -4,8 +4,8 @@
 
 ```txt
 .hawp/work/BACKLOG.md
-.hawp/work/active/387a37b7-v0-0-23-refactor-search-pipeline-and-layout-unification.md
-.hawp/work/active/387a37b7-files.md
+.hawp/work/active/387a37b7/plan.md
+.hawp/work/active/387a37b7/files.md
 librarian/src/internal/application/context/format.go
 librarian/src/internal/application/context/format_test.go
 librarian/src/internal/application/search/service.go
@@ -30,8 +30,8 @@ librarian/src/internal/platform/cli/run.go
 ## Do-Not-Touch Files
 
 ```txt
-.hawp/work/active/c804eec0-v0-0-23-benchmark-evidence-and-release-artifact-refresh.md
-.hawp/work/active/5957aaf4-v0-0-23-follow-up-architecture-audit-and-simplification-queu.md
+.hawp/work/active/c804eec0/plan.md
+.hawp/work/active/5957aaf4/plan.md
 ```
 
 ## Locked / Reserved Files
@@ -51,8 +51,8 @@ librarian/src/internal/infrastructure/filesystem/readme_generator.go
 
 ```txt
 .hawp/work/BACKLOG.md
-.hawp/work/active/387a37b7-v0-0-23-refactor-search-pipeline-and-layout-unification.md
-.hawp/work/active/387a37b7-files.md
+.hawp/work/active/387a37b7/plan.md
+.hawp/work/active/387a37b7/files.md
 librarian/src/internal/application/context/format.go
 librarian/src/internal/application/context/format_test.go
 librarian/src/internal/application/search/service.go

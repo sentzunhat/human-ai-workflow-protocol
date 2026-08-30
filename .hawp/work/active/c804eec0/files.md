@@ -4,8 +4,8 @@
 
 ```txt
 .hawp/work/BACKLOG.md
-.hawp/work/active/c804eec0-v0-0-23-benchmark-evidence-and-release-artifact-refresh.md
-.hawp/work/active/c804eec0-files.md
+.hawp/work/active/c804eec0/plan.md
+.hawp/work/active/c804eec0/files.md
 .hawp/work/evidence/
 librarian/docs/
 ```
@@ -15,7 +15,7 @@ librarian/docs/
 ```txt
 .hawp/work/active/v0014-token-speed-bench/plan.md
 .hawp/work/active/release-benchmark-backfill/plan.md
-.hawp/work/active/387a37b7-v0-0-23-refactor-search-pipeline-and-layout-unification.md
+.hawp/work/active/387a37b7/plan.md
 ```
 
 ## Do-Not-Touch Files
@@ -30,16 +30,16 @@ librarian/src/internal/infrastructure/sqlite/index.go
 ## Locked / Reserved Files
 
 ```txt
-.hawp/work/active/c804eec0-v0-0-23-benchmark-evidence-and-release-artifact-refresh.md
-.hawp/work/active/c804eec0-files.md
+.hawp/work/active/c804eec0/plan.md
+.hawp/work/active/c804eec0/files.md
 ```
 
 ## Changed Files
 
 ```txt
 .hawp/work/BACKLOG.md
-.hawp/work/active/c804eec0-v0-0-23-benchmark-evidence-and-release-artifact-refresh.md
-.hawp/work/active/c804eec0-files.md
+.hawp/work/active/c804eec0/plan.md
+.hawp/work/active/c804eec0/files.md
 ```
 
 ## Verification Notes

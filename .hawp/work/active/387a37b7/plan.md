@@ -32,8 +32,8 @@ contract and preserve richer search provenance through the typed formatting path
   - typed search results define line/provenance fields that are not preserved
     through `FormatAsMarkdown` and reference deduplication
 - Parallel lanes opened:
-  - benchmark/evidence lane: `.hawp/work/active/c804eec0-v0-0-23-benchmark-evidence-and-release-artifact-refresh.md`
-  - follow-up audit lane: `.hawp/work/active/5957aaf4-v0-0-23-follow-up-architecture-audit-and-simplification-queu.md`
+  - benchmark/evidence lane: `.hawp/work/active/c804eec0/plan.md`
+  - follow-up audit lane: `.hawp/work/active/5957aaf4/plan.md`
 
 ## Initial Analysis
 
@@ -77,7 +77,7 @@ contract and preserve richer search provenance through the typed formatting path
 ## Backlog + Plan Link
 
 **Status now:** in-progress
-**Plan file:** work/active/387a37b7-v0-0-23-refactor-search-pipeline-and-layout-unification.md
+**Plan file:** work/active/387a37b7/plan.md
 
 ## Next Step
 

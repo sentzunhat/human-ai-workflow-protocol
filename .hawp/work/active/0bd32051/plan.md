@@ -60,7 +60,7 @@ change.
 ## Backlog + Plan Link
 
 **Status now:** analyzing
-**Plan file:** work/active/0bd32051-v0-0-23-root-tests-layout-and-port-adapter-segregation.md
+**Plan file:** work/active/0bd32051/plan.md
 
 ## Next Step
 
