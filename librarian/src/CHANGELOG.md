@@ -25,6 +25,14 @@ replicated `src/tests/` layout slice.
   passthrough render mode so formatting overhead stays near zero.
 - **Go toolchain hint** — `go.mod` now pins `toolchain go1.26.4`, matching the
   latest local Go version used for this branch on 2026-08-30.
+- **Legacy work-repo compatibility** — `hawp work validate` /
+  `hawp work normalize` now honor explicit `--hawp-root` / `--work-root`
+  targeting, accept older numeric IDs and `#` backlog columns, and tolerate
+  plain `Plan File` paths plus nested Active Work subsections during older-repo
+  proof runs.
+- **Maintainer command docs** — README guidance now distinguishes validation
+  compatibility from stricter normalization cleanup, and documents the Go-only
+  pre-PR workflow for providers, distribution, kit, and work maintenance.
 
 ## [0.0.22] - 2026-08-27
 

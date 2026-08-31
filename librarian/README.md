@@ -9,11 +9,22 @@ maintenance tasks.
 ```bash
 cd librarian/src
 go test ./...
+go run ./cmd/hawp commands
 go run ./cmd/hawp providers sync
 go run ./cmd/hawp distribution sync
 go run ./cmd/hawp kit validate
 go run ./cmd/hawp work validate
+go run ./cmd/hawp work normalize --dry-run --validate
 go run ./cmd/hawp check
+```
+
+For another HAWP checkout, keep using the same Go CLI here and point the work
+commands at the target repo:
+
+```bash
+cd librarian/src
+go run ./cmd/hawp work validate --hawp-root /path/to/other-repo/.hawp
+go run ./cmd/hawp work normalize --dry-run --hawp-root /path/to/other-repo/.hawp
 ```
 
 ## Provider and distribution maintenance
@@ -28,6 +39,29 @@ Provider registration now lives in Go:
 
 - Distribution variants: `librarian/src/internal/domain/distribution/distribution.go`
 - Provider materialization targets: `librarian/src/internal/domain/providersync/materialize.go`
+
+## Pre-PR and release prep
+
+Before opening a PR, use the local Go CLI as the single validation surface:
+
+```bash
+cd librarian/src
+go test ./...
+go run ./cmd/hawp providers sync
+go run ./cmd/hawp distribution sync
+go run ./cmd/hawp check
+```
+
+Add `go run ./cmd/hawp work normalize --dry-run --validate` when the branch
+touches work-record layout, UUID migration, or backlog cleanup. A dry-run can
+legitimately report manual-review items on older historical rows even when
+`work validate` passes; treat that as cleanup guidance, not automatic release
+failure.
+
+Release automation is handled by
+`.github/workflows/release-librarian-go.yml`. Keep Docker or per-OS packaging
+changes scoped to actual release-distribution needs; the current default release
+path is `make dist` plus the GitHub Actions matrix already wired in this repo.
 
 ## Binary
 
