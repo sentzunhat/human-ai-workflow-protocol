@@ -4,18 +4,32 @@ How `librarian/scripts/` is organized and how to add new scripts. Follows the re
 
 ## Domain map
 
-Scripts are grouped by owner: `hawp/` holds HAWP-workflow tooling, `librarian/` holds librarian build pipelines. Each domain folder has a single purpose. No script imports another domain's internals — shared code lives in `lib/` (flat, used by both groups).
+Scripts are grouped by owner: `hawp/` now holds deprecated legacy workflow
+implementations, while `librarian/` holds the active Node-based build
+pipelines that still power distribution/provider maintenance. The canonical
+user-facing workflow path is the Go CLI under `librarian/src`; npm wrappers
+call that binary directly. No script imports another domain's internals —
+shared code lives in `lib/` (flat, used by both groups).
 
 | Folder | Purpose | Entry point | npm script / CLI |
 |---|---|---|---|
-| `hawp/kit-validate/` | Validate `.hawp/kit/` structure (naming, required files, links) | `index.ts` | `kit:validate` · `kit validate` |
-| `hawp/kit-normalize/` | Detect and normalize `.hawp/kit/` drift | `index.ts` | `kit:normalize` · `kit normalize` |
-| `hawp/work-validate/` | Backlog/plan/evidence integrity checks | `index.ts` | `work:validate` · `work validate` |
-| `hawp/work-normalize/` | Detect and normalize work record drift | `index.ts` | `work:normalize` · `work normalize` · `backlog upgrade` |
-| `hawp/hawp-check/` | Combined distribution + work:validate in one command | `index.ts` | `hawp:check` · `backlog validate` |
+| `hawp/kit-validate/` | Deprecated legacy implementation of `.hawp/kit/` validation | `index.ts` | superseded by `hawp kit validate` |
+| `hawp/kit-normalize/` | Deprecated legacy implementation of `.hawp/kit/` normalization | `index.ts` | superseded by `hawp kit normalize` |
+| `hawp/work-validate/` | Deprecated legacy implementation of work-record validation | `index.ts` | superseded by `hawp work validate` |
+| `hawp/work-normalize/` | Deprecated legacy implementation of work-record normalization | `index.ts` | superseded by `hawp work normalize` |
+| `hawp/hawp-check/` | Deprecated legacy implementation of the composite workflow check | `index.ts` | superseded by `hawp check` |
 | `librarian/distribution/` | Build/validate generated install/update guides | `build/index.ts`, `validate/index.ts` | `distribution:build`, `distribution:validate`, `distribution:sync` |
 | `librarian/providers/materialize/` | Materialize shared behaviors into provider packs | `build/index.ts`, `validate/index.ts` | `providers:materialize`, `providers:validate`, `providers:sync` |
 | `lib/` | Shared utilities (node builtins only) | — (library) | — |
+
+## Current ownership
+
+- Use the Go CLI for all user-facing HAWP workflow commands (`uuid`, `links
+  check`, `kit/work validate`, `kit/work normalize`, `check`).
+- Keep `librarian/scripts/hawp/` only as transitional source for import
+  compatibility and deletion planning; do not add new workflow features there.
+- Keep `librarian/scripts/librarian/` and `lib/` for Node-based maintainer
+  pipelines that are still active release tooling.
 
 ## Boundary pattern (CLI-shaped domains)
 
@@ -49,9 +63,13 @@ Build/validate pipelines (`librarian/distribution/`, `librarian/providers/materi
 1. Create a new domain folder (kebab-case, single purpose) under `hawp/` (workflow tooling) or `librarian/` (build pipelines) — don't grow an existing one past its responsibility.
 2. Use the boundary pattern above; start with `index.ts` + `script.ts`, add `cli.ts` when flags appear.
 3. Add an npm script in `librarian/package.json` (`tsx scripts/<group>/<domain>/index.ts`).
-4. If it's a user-facing command, wire it as a subcommand in `.hawp/bin/hawp`.
+4. If it's a user-facing workflow command, add it to the Go CLI instead of
+   creating a new `hawp/` TypeScript surface. Only add a TypeScript entry point
+   when the command is intentionally Node-only maintainer tooling.
 5. Add `__tests__/<name>.test.ts` — `npm test` picks up `scripts/**/*.test.ts` automatically.
-6. Validate: `npm run typecheck && npm test`.
+6. Validate with the runtime that owns the surface:
+   - Go workflow commands: `go test ./...` and the relevant `hawp` command
+   - Node maintainer pipelines: `npm run typecheck && npm test`
 
 ## Conventions
 

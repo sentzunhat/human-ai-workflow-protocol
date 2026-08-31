@@ -1,7 +1,7 @@
 # release-benchmark-backfill — Benchmark evidence gate for v0.0.11 through v0.0.13
 
 **Type:** planning
-**Status:** plan-ready
+**Status:** parked
 **Branch:** `feature/v0.0.13`
 **Opened:** 2026-08-26
 
@@ -62,3 +62,9 @@ Produce benchmark evidence for each patch version before merge/release:
 - If a direct pre-change baseline no longer exists, use clearly labeled
   absolute measurements plus scope notes rather than inventing a comparison.
 - Evidence must separate directly measured results from inference.
+
+## Parking Note
+
+Parked 2026-08-31 to keep the `v0.0.23` release backlog scoped to the current
+patch. This evidence backfill still belongs to the older `v0.0.11` through
+`v0.0.13` train and is not a blocker for `v0.0.23`.

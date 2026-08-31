@@ -22,22 +22,18 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 ## Active Work
 
-_v0.0.16 on `main` · next patch on `feature/v0.0.17`_
+_No active work items. `v0.0.23` release lanes are closed or intentionally
+parked._
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
-| `release-benchmark-backfill` | planning | Benchmark evidence gate for `v0.0.11` through `v0.0.16` | `plan-ready` | — | [plan](active/release-benchmark-backfill/plan.md) | 2026-08-27 |
-| `387a37b7` | improvement | v0.0.23 refactor search pipeline and layout unification | `in-progress` | unassigned | [plan](active/387a37b7/plan.md) | 2026-08-30 |
-| `c804eec0` | test | v0.0.23 benchmark evidence and release artifact refresh | `analyzing` | unassigned | [plan](active/c804eec0/plan.md) | 2026-08-29 |
-| `5957aaf4` | task | v0.0.23 follow-up architecture audit and simplification queue | `analyzing` | unassigned | [plan](active/5957aaf4/plan.md) | 2026-08-29 |
-| `0bd32051` | refactor | v0.0.23 root tests layout and port adapter segregation | `in-progress` | unassigned | [plan](active/0bd32051/plan.md) | 2026-08-30 |
-| `89cf7a85` | improvement | v0.0.23 legacy work-item UUID canonicalization follow-up | `inbox` | unassigned | [plan](active/89cf7a85/plan.md) | 2026-08-30 |
-| `03299078` | improvement | v0.0.23 TypeScript script deprecation plan and Go parity audit | `analyzing` | unassigned | [plan](active/03299078/plan.md) | 2026-08-30 |
 
 ## Blocked / Parked
 
 | ID  | Type | Title | Reason | Detail | Updated |
 | --- | ---- | ----- | ------ | ------ | ------- |
+| `89cf7a85` | improvement | v0.0.23 legacy work-item UUID canonicalization follow-up | Older-repo safety and archive-policy follow-up; not a live `v0.0.23` blocker | [plan](parked/89cf7a85/plan.md) | 2026-08-31 |
+| `release-benchmark-backfill` | planning | Benchmark evidence gate for `v0.0.11` through `v0.0.13` | Older patch-train backfill, intentionally kept out of the `v0.0.23` release lane | [plan](parked/release-benchmark-backfill/plan.md) | 2026-08-31 |
 | `usage-tracking` | feature | `hawp usage` CLI + `hawp_usage` MCP tool for token/wall-clock metering | Scope too large for v0.0.11; belongs at v0.1.0 token-reduction gate | [plan](parked/usage-tracking/plan.md) | 2026-08-25 |
 | `bee15107` | improvement | Defer CLI participant adapters for Codex, Claude, and GitHub | Not needed yet; provider packs are enough | [plan](parked/bee15107/plan.md) | 2026-07-06 |
 | `v010-3-3a` | feature | ONNX LLM Text2Text models (FLAN-T5-small) | Plan ready (FLAN-T5-small feasible via ONNX); deferred per incremental-only patch strategy | [detail](parked/v010-3-3a/plan.md) | 2026-08-24 |
@@ -55,6 +51,11 @@ Limited to the last 10 items.
 
 | ID | Type | Title | Closed | Detail |
 | -- | ---- | ----- | ------ | ------ |
+| `03299078` | improvement | v0.0.23 TypeScript script deprecation plan and Go parity audit | 2026-08-31 | [plan](closed/2026/08/31/03299078/plan.md) |
+| `5957aaf4` | task | v0.0.23 follow-up architecture audit and simplification queue | 2026-08-31 | [plan](closed/2026/08/31/5957aaf4/plan.md) |
+| `c804eec0` | test | v0.0.23 benchmark evidence and release artifact refresh | 2026-08-31 | [plan](closed/2026/08/31/c804eec0/plan.md) |
+| `0bd32051` | refactor | v0.0.23 root tests layout and port adapter segregation | 2026-08-31 | [plan](closed/2026/08/31/0bd32051/plan.md) |
+| `387a37b7` | improvement | v0.0.23 refactor search pipeline and layout unification | 2026-08-31 | [plan](closed/2026/08/31/387a37b7/plan.md) |
 | `v0014-ort-release-fix` | fix | Repair ORT release lanes — shipped v0.0.14–v0.0.16 | 2026-08-27 | [plan](closed/2026/08/27/v0014-ort-release-fix/plan.md) |
 | `onnx-llm-release-build` | feature | Ship ONNX LLM in release binary (ORT tarballs) — shipped v0.0.14 | 2026-08-27 | [plan](closed/2026/08/27/onnx-llm-release-build/plan.md) |
 | `usage-log` | feature | Local MCP call log with token counts (`hawp usage`) — shipped v0.0.12 | 2026-08-27 | [plan](closed/2026/08/27/usage-log/plan.md) |

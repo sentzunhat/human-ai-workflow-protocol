@@ -86,15 +86,68 @@ script tree.
 
 ## Backlog + Plan Link
 
-**Status now:** analyzing
-**Plan file:** work/active/03299078/plan.md
+**Status now:** done
+**Plan file:** work/closed/2026/08/31/03299078/plan.md
 
 ## Next Step
 
 - [x] Investigation recorded above (required before planning)
-- [ ] Build the TS-to-Go parity matrix and classify each remaining script as
+- [x] Build the TS-to-Go parity matrix and classify each remaining script as
       remove, retain, or migrate later
-- [ ] Decide whether to track TS deprecation as one item or split by workflow
+- [x] Decide whether to track TS deprecation as one item or split by workflow
       surface vs maintainer pipelines
-- [ ] Move backlog status to plan-ready once the removal order and proof gates
+- [x] Move backlog status to plan-ready once the removal order and proof gates
       are explicit
+
+## 2026-08-31 Parity Matrix
+
+| Surface | Go replacement | Current invocation path | Decision |
+| ------- | -------------- | ----------------------- | -------- |
+| `hawp/kit-validate` | `hawp kit validate` | npm wrapper calls Go CLI | deprecated now; delete in a later cleanup patch |
+| `hawp/kit-normalize` | `hawp kit normalize` | npm wrapper calls Go CLI | deprecated now; delete in a later cleanup patch |
+| `hawp/work-validate` | `hawp work validate` | npm wrapper calls Go CLI | deprecated now; keep only as transitional source |
+| `hawp/work-normalize` | `hawp work normalize` | npm wrapper calls Go CLI | deprecated now; keep only as transitional source |
+| `hawp/hawp-check` | `hawp check` | npm wrapper calls Go CLI | deprecated now; delete in a later cleanup patch |
+| `librarian/distribution/*` | none | npm TypeScript pipeline | retain; release-generation tooling still lives here |
+| `librarian/providers/materialize/*` | none | npm TypeScript pipeline | retain; provider/distribution tooling still lives here |
+| `lib/*` | none | shared by retained Node tooling | retain until Node maintainer pipelines are retired |
+
+## Decision
+
+- Treat TypeScript workflow deprecation as complete for `v0.0.23` at the
+  documentation and ownership layer: the Go CLI is authoritative, npm wrappers
+  already route through it, and `librarian/scripts/README.md` now describes the
+  `hawp/` tree as deprecated legacy source instead of the primary runtime path.
+- Keep actual TypeScript source deletion out of this release because
+  distribution/provider pipelines still keep Node tooling live in the same
+  workspace and there is no release need to mix deletion risk into this patch.
+
+## Outcome
+
+Closed 2026-08-31.
+
+The TypeScript workflow deprecation lane is complete as a release-readiness
+audit. The remaining TypeScript workflow command surfaces are now explicitly
+mapped to their Go replacements, the retained Node-only pipelines are separated
+from deprecated workflow code, and the live scripts documentation no longer
+implies that `librarian/scripts/hawp/` is the primary path.
+
+## Verification
+
+- [x] `librarian/src/README.md` already marks the workflow command set as ported
+      to Go. Evidence: [README.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/librarian/src/README.md)
+      command matrix shows `uuid`, `links check`, `kit/work validate`,
+      `kit/work normalize`, and `check` as available via Go
+- [x] `librarian/scripts/README.md` now labels `librarian/scripts/hawp/` as a
+      deprecated legacy implementation surface. Evidence:
+      [README.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/librarian/scripts/README.md)
+      documents Go ownership for user-facing workflow commands
+- [x] `librarian/src/CHANGELOG.md` records the v0.0.23 TypeScript deprecation
+      checkpoint. Evidence: [CHANGELOG.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/librarian/src/CHANGELOG.md)
+      includes the TS script deprecation note under `0.0.23`
+
+## Close Checklist
+
+- [x] Parity matrix recorded
+- [x] Retained Node-only boundaries made explicit
+- [x] Live docs reflect the release-ready ownership model

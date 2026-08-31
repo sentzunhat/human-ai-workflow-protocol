@@ -79,8 +79,8 @@ change.
 
 ## Backlog + Plan Link
 
-**Status now:** in-progress
-**Plan file:** work/active/0bd32051/plan.md
+**Status now:** done
+**Plan file:** work/closed/2026/08/31/0bd32051/plan.md
 
 ## Next Step
 
@@ -127,3 +127,31 @@ change.
   tests
 - Keep white-box and integration tests co-located until port seams or helper
   extraction make a move simpler than the current layout
+
+## Outcome
+
+Closed 2026-08-31.
+
+The replicated test-topology lane is complete for `v0.0.23`. The repo now has
+an explicit, verified boundary: exported black-box tests live under
+`librarian/src/tests/...`, while package-internal or integration-heavy tests
+stay beside the code until there is a cleaner seam.
+
+## Verification
+
+- [x] The replicated test tree now covers `14` black-box test files under
+      `librarian/src/tests/...`. Evidence: [plan.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/08/31/0bd32051/plan.md)
+      migration checkpoint lists the moved files
+- [x] The remaining `42` tests intentionally stay co-located under
+      `internal/...`. Evidence: [plan.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/08/31/0bd32051/plan.md)
+      checkpoint records the retained package-internal and integration-heavy
+      areas
+- [x] The mixed topology passed verification after the migration pass. Evidence:
+      [plan.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/08/31/0bd32051/plan.md)
+      records `go test ./...` and `go run ./cmd/hawp work validate`
+
+## Close Checklist
+
+- [x] Black-box boundary exported into `src/tests`
+- [x] White-box boundary explicitly retained in `internal/...`
+- [x] Verification recorded

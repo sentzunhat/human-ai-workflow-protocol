@@ -76,8 +76,8 @@ contract and preserve richer search provenance through the typed formatting path
 
 ## Backlog + Plan Link
 
-**Status now:** in-progress
-**Plan file:** work/active/387a37b7/plan.md
+**Status now:** done
+**Plan file:** work/closed/2026/08/31/387a37b7/plan.md
 
 ## Next Step
 
@@ -109,3 +109,41 @@ contract and preserve richer search provenance through the typed formatting path
 - the cleanup improved the formatting boundary and kept the shaping change
   minimal, but fully removing the remaining sparse negatives likely needs a
   deliberate sparse passthrough policy rather than more wording compression
+
+## 2026-08-31 Release Checkpoint
+
+**Directly verified:**
+
+- the source-backed rerun of `hawp search benchmark --token` now reports
+  aggregate savings of `4838` tokens (`21%`)
+- prior sparse-query negatives were reduced to `0` in two cases and a single
+  negligible `-1` token case in the third
+- `go run ./cmd/hawp check` passes on the live source path after the
+  verification-clarity cleanup
+
+## Outcome
+
+Closed 2026-08-31.
+
+The search/layout unification lane is complete for `v0.0.23`. Runtime layout
+drift was resolved, sparse shaping is now effectively passthrough for small
+contexts, typed provenance stays intact, and the benchmark rerun no longer
+shows materially negative sparse-query behavior.
+
+## Verification
+
+- [x] Shared search/runtime cleanup shipped in the `0.0.23` changelog. Evidence:
+      [CHANGELOG.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/librarian/src/CHANGELOG.md)
+      `shared search execution path` and `sparse context shaping to passthrough`
+- [x] Branch-local benchmark proof is recorded. Evidence:
+      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
+      shows `21%` aggregate savings and only a `-1` sparse outlier
+- [x] Source-backed validation is green. Evidence:
+      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
+      records `hawp check` and `work validate` pass results
+
+## Close Checklist
+
+- [x] Layout/runtime drift resolved
+- [x] Sparse shaping checkpoint justified by rerun evidence
+- [x] Follow-up implementation moved out of the release lane
