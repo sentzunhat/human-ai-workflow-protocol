@@ -37,6 +37,7 @@ type BlockedInfo struct {
 var (
 	isoDateRe        = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 	canonicalIDRe    = regexp.MustCompile(`^(TASK|BUG)-\d+$`)
+	numericRowIDRe   = regexp.MustCompile(`^\d+$`)
 	verifySectionRe  = regexp.MustCompile(`(?ms)^##\s+Verification\b(.*?)(?:^##\s+|\z)`)
 	checklistLineRe  = regexp.MustCompile(`- \[[x ]\]`)
 	unprovenMarkerRe = regexp.MustCompile(`(?i)(NOT YET VERIFIED|\bunproven\b)`)
@@ -55,7 +56,7 @@ func isISODateOrEmpty(value string) bool {
 }
 
 func isCanonicalID(value string) bool {
-	return canonicalIDRe.MatchString(value) || fullUUIDRe.MatchString(value) || ExtractShortUUID(value) != ""
+	return canonicalIDRe.MatchString(value) || numericRowIDRe.MatchString(value) || fullUUIDRe.MatchString(value) || ExtractShortUUID(value) != ""
 }
 
 func inferTypeFromID(id string) string {

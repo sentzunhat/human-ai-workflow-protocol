@@ -43,7 +43,7 @@ func extractMarkdownLinkTarget(value string) string {
 	if m := mdLinkTargetRe.FindStringSubmatch(value); m != nil {
 		return strings.TrimSpace(m[1])
 	}
-	return ""
+	return strings.TrimSpace(stripCodeSpan(value))
 }
 
 func normalizeSectionHeader(line string) NormalizeSection {
@@ -105,7 +105,7 @@ func ParseNormalizeBacklog(backlogPath string) (*NormalizeBacklog, error) {
 		}
 
 		var candidates []string
-		for _, alias := range []string{"legacy id", "id", "uuid"} {
+		for _, alias := range []string{"legacy id", "id", "uuid", "#"} {
 			value := stripCodeSpan(mappedCell(cells, headerMap, alias))
 			if value != "" && value != "—" && value != "-" {
 				candidates = append(candidates, value)
@@ -130,7 +130,7 @@ func ParseNormalizeBacklog(backlogPath string) (*NormalizeBacklog, error) {
 			rawID = candidates[0]
 		}
 		lowered := strings.ToLower(strings.TrimSpace(rawID))
-		if rawID == "" || lowered == "id" || lowered == "legacy id" {
+		if rawID == "" || lowered == "id" || lowered == "legacy id" || lowered == "#" {
 			continue
 		}
 		id := ExtractIDFromFilename(rawID)

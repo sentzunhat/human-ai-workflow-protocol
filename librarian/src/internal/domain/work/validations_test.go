@@ -149,6 +149,79 @@ Done.
 	}
 }
 
+func TestBacklogConsistencyAcceptsHashColumnAndNumericIDs(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"active/049.md":            "# plan",
+		"closed/2026/07/27/042.md": closedPlanComplete,
+		"parked/040.md":            "# parked",
+	})
+	backlog, err := ParseBacklog(filepath.Join(workDir, "BACKLOG.md"))
+	if err == nil || backlog != nil {
+		t.Fatal("expected missing backlog fixture to fail before explicit parse fixture setup")
+	}
+
+	workDir = buildWorkDir(t, map[string]string{
+		"BACKLOG.md": `# Backlog
+
+## Active Work
+
+| # | Status | Title | Plan File | Next action |
+| --- | --- | --- | --- | --- |
+| 049 | in-progress | thing | active/049.md | next |
+
+## Blocked / Parked
+
+| # | Status | Title | Detail | Next action |
+| --- | --- | --- | --- | --- |
+| 040 | parked | parked thing | [plan](parked/040.md) | later |
+
+## Recently Closed
+
+| # | Title | Closed | Plan File |
+| --- | --- | --- | --- |
+| 042 | closed thing | 2026-07-27 | closed/2026/07/27/042.md |
+`,
+		"active/049.md":            "# plan",
+		"closed/2026/07/27/042.md": closedPlanComplete,
+		"parked/040.md":            "# parked",
+	})
+
+	backlog, err = ParseBacklog(filepath.Join(workDir, "BACKLOG.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(backlog.Active) != 1 || backlog.Active[0].ID != "049" {
+		t.Fatalf("active rows = %+v, want numeric 049 row", backlog.Active)
+	}
+	if len(backlog.Closed) != 1 || backlog.Closed[0].ID != "042" {
+		t.Fatalf("closed rows = %+v, want numeric 042 row", backlog.Closed)
+	}
+	if len(backlog.Parked) != 1 || backlog.Parked[0].ID != "040" {
+		t.Fatalf("parked rows = %+v, want numeric 040 row", backlog.Parked)
+	}
+
+	result := CheckBacklogConsistency(workDir, backlog)
+	if result.Status != StatusPass {
+		t.Fatalf("status = %s, want PASS: %+v", result.Status, result)
+	}
+}
+
+func TestClosedTaskCompletenessAcceptsNumericClosedIDs(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"closed/2026/07/27/042.md": closedPlanComplete,
+	})
+	result := CheckClosedTaskCompleteness(workDir)
+	if result.Total != 1 {
+		t.Fatalf("total plans = %d, want 1", result.Total)
+	}
+	if len(result.UntypedCurrent) != 0 {
+		t.Fatalf("untyped current = %+v, want none", result.UntypedCurrent)
+	}
+	if result.Status != StatusPass {
+		t.Fatalf("status = %s, want PASS", result.Status)
+	}
+}
+
 func TestEvidenceIntegrity(t *testing.T) {
 	workDir := buildWorkDir(t, map[string]string{
 		"closed/2026/07/03/TASK-086.md":       "## Verification\n\n- [x] ok Evidence: ../evidence/2026/07/03/TASK-086-run.md\n- [x] bad Evidence: ../evidence/2026/07/03/missing.md\n",

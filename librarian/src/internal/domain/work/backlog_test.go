@@ -10,12 +10,14 @@ const sampleBacklog = `# Backlog
 
 ## Active Work
 
+### Primary Lane
+
 | UUID | Legacy ID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | --------- | ---- | ----- | ------ | ----- | --------- | ------- |
 | ` + "`39bc92b6`" + ` | — | feature | port phase 1 | in-progress | agent | [plan](active/39bc92b6.md) | 2026-07-20 |
-| ` + "`eddd8339`" + ` | — | feature | port phase 2 | approved | agent | [plan](active/eddd8339.md) | 2026-07-20 |
+| ` + "`eddd8339`" + ` | — | feature | port phase 2 | approved | agent | active/eddd8339.md | 2026-07-20 |
 
-### Nested Subsection
+### Nested Notes
 
 | Not | A | Backlog | Row |
 | --- | --- | --- | --- |
@@ -57,6 +59,9 @@ func TestParseBacklogSections(t *testing.T) {
 	}
 	if backlog.Active[0].Status != "in-progress" {
 		t.Errorf("active[0].Status = %q", backlog.Active[0].Status)
+	}
+	if backlog.Active[1].Detail != "active/eddd8339.md" {
+		t.Errorf("active[1].Detail = %q, want plain plan path", backlog.Active[1].Detail)
 	}
 	if len(backlog.Parked) != 1 || backlog.Parked[0].Detail != "[plan](parked/bee15107.md)" {
 		t.Errorf("parked rows = %+v", backlog.Parked)

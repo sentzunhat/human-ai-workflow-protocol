@@ -84,6 +84,45 @@ func TestRulesCleanRepo(t *testing.T) {
 	}
 }
 
+func TestRulesAcceptLegacySubsectionsAndPlainPlanPaths(t *testing.T) {
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/BACKLOG.md": `# Backlog
+
+## Active Work
+
+### Release Readiness
+
+| # | Status | Title | Plan File | Next action |
+| --- | --- | --- | --- | --- |
+| 049 | in-progress | legacy item | active/049.md | next |
+
+## Blocked / Parked
+
+| # | Status | Title | Detail | Next action |
+| --- | --- | --- | --- | --- |
+| 040 | parked | parked legacy item | parked/040.md | later |
+
+## Recently Closed
+
+| # | Title | Closed | Plan File |
+| --- | --- | --- | --- |
+| 042 | closed legacy item | 2026-07-27 | closed/2026/07/27/042.md |
+`,
+		".hawp/work/active/049.md":            "# active plan\n",
+		".hawp/work/parked/040.md":            "# parked plan\n",
+		".hawp/work/closed/2026/07/27/042.md": closedPlanComplete,
+	})
+	ops := detect(t, root)
+	if len(ops) != 3 {
+		t.Fatalf("legacy repo produced %d operations, want 3 type warnings: %v", len(ops), rulesOf(ops))
+	}
+	for _, op := range ops {
+		if op.RuleID != "B1" {
+			t.Fatalf("legacy repo produced non-type operation: %+v", op)
+		}
+	}
+}
+
 func TestRowRules(t *testing.T) {
 	root := buildRepoFixture(t, map[string]string{
 		".hawp/work/BACKLOG.md": cleanBacklogHeader +

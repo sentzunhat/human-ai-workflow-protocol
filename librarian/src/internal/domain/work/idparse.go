@@ -10,6 +10,7 @@ var (
 	shortUUIDRe   = regexp.MustCompile(`(?i)^[0-9a-f]{8}$`)
 	fullUUIDRe    = regexp.MustCompile(`(?i)^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`)
 	legacyIDRe    = regexp.MustCompile(`^([A-Z]+)-(\d+)`)
+	numericIDRe   = regexp.MustCompile(`^\d+$`)
 	datePrefixRe  = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}-([A-Za-z]+-\d+)`)
 	shortIDSlugRe = regexp.MustCompile(`(?i)^([0-9a-z]{8})-[a-z]`)
 	bareShortIDRe = regexp.MustCompile(`(?i)^([0-9a-z]{8})$`)
@@ -51,6 +52,9 @@ func ExtractIDFromFilename(filename string) string {
 	}
 	if m := legacyIDRe.FindString(filename); m != "" {
 		return m
+	}
+	if numericIDRe.MatchString(filename) {
+		return filename
 	}
 	if m := datePrefixRe.FindStringSubmatch(filename); m != nil {
 		return strings.ToUpper(m[1])

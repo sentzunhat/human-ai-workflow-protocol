@@ -32,10 +32,14 @@ func ParseBacklog(backlogPath string) (*Backlog, error) {
 			section, headerMap = "parked", nil
 			continue
 		}
-		// Any ##+ header ends the current section so nested subsections are
-		// not parsed as table rows.
-		if section != "" && regexp.MustCompile(`^#{2,}\s`).MatchString(line) {
+		// A new level-2 section switches context; deeper subsection headings keep
+		// the current top-level section but reset table headers.
+		if strings.HasPrefix(line, "## ") {
 			section, headerMap = "", nil
+			continue
+		}
+		if section != "" && regexp.MustCompile(`^#{3,}\s`).MatchString(line) {
+			headerMap = nil
 			continue
 		}
 
@@ -103,11 +107,11 @@ func stripCodeSpan(value string) string {
 	return strings.Trim(value, "`")
 }
 
-// buildRow resolves the row ID from the Legacy ID / ID / UUID cells,
+// buildRow resolves the row ID from the Legacy ID / ID / UUID / # cells,
 // preferring the first cell that parses as a known ID format.
 func buildRow(cells []string, headerMap map[string]int) (BacklogRow, bool) {
 	var candidates []string
-	for _, alias := range []string{"legacy id", "id", "uuid"} {
+	for _, alias := range []string{"legacy id", "id", "uuid", "#"} {
 		value := stripCodeSpan(mappedCell(cells, headerMap, alias))
 		if value != "" && value != "—" && value != "-" {
 			candidates = append(candidates, value)
@@ -136,7 +140,7 @@ func buildRow(cells []string, headerMap map[string]int) (BacklogRow, bool) {
 		return BacklogRow{}, false
 	}
 	normalized := strings.ToLower(strings.TrimSpace(rawID))
-	if normalized == "id" || normalized == "legacy id" {
+	if normalized == "id" || normalized == "legacy id" || normalized == "#" {
 		return BacklogRow{}, false
 	}
 

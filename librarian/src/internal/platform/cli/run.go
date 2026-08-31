@@ -883,6 +883,7 @@ func runKitNormalize(args []string) error {
 
 func runWorkNormalize(args []string) error {
 	opts := appwork.NormalizeOptions{}
+	explicitRepoRoot := ""
 	for i := 0; i < len(args); i++ {
 		switch {
 		case args[i] == "--apply":
@@ -909,13 +910,23 @@ func runWorkNormalize(args []string) error {
 		case args[i] == "--export-research-queue" && i+1 < len(args):
 			opts.ExportResearchQueue = args[i+1]
 			i++
+		case args[i] == "--hawp-root" && i+1 < len(args):
+			explicitRepoRoot = filepath.Dir(filepath.Clean(args[i+1]))
+			i++
+		case args[i] == "--work-root" && i+1 < len(args):
+			explicitRepoRoot = filepath.Dir(filepath.Dir(filepath.Clean(args[i+1])))
+			i++
 		}
 	}
-	root, err := repo.FindBacklogRepoRoot(mustGetwd())
-	if err != nil {
-		return err
+	if explicitRepoRoot != "" {
+		opts.RepoRoot = explicitRepoRoot
+	} else {
+		root, err := repo.FindBacklogRepoRoot(mustGetwd())
+		if err != nil {
+			return err
+		}
+		opts.RepoRoot = root
 	}
-	opts.RepoRoot = root
 	if code := appwork.Normalize(os.Stdout, os.Stderr, opts); code != 0 {
 		return ExitError{Code: code}
 	}

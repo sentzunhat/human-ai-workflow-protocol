@@ -2,7 +2,9 @@ package cli_test
 
 import (
 	"errors"
+	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -147,5 +149,86 @@ func TestRunSearchWithContext(t *testing.T) {
 	}
 	for _, args := range cases {
 		_ = platformcli.Run(args)
+	}
+}
+
+func TestRunWorkNormalizeSupportsHawpRootOverride(t *testing.T) {
+	currentDir := t.TempDir()
+	targetRepo := t.TempDir()
+
+	targetFiles := map[string]string{
+		".hawp/work/BACKLOG.md": `# Backlog
+
+## Active Work
+
+| # | Status | Title | Plan File | Next action |
+| --- | --- | --- | --- | --- |
+| 049 | in-progress | legacy | active/049.md | next |
+
+## Blocked / Parked
+
+| # | Status | Title | Plan File | Next action |
+| --- | --- | --- | --- | --- |
+
+## Recently Closed
+
+| # | Title | Closed | Plan File |
+| --- | --- | --- | --- |
+`,
+		".hawp/work/active/049.md": "# legacy plan\n",
+	}
+	for rel, content := range targetFiles {
+		full := filepath.Join(targetRepo, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(full, []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	oldWd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Chdir(currentDir); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		_ = os.Chdir(oldWd)
+	})
+
+	oldStdout := os.Stdout
+	oldStderr := os.Stderr
+	rOut, wOut, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	rErr, wErr, err := os.Pipe()
+	if err != nil {
+		t.Fatal(err)
+	}
+	os.Stdout = wOut
+	os.Stderr = wErr
+	t.Cleanup(func() {
+		os.Stdout = oldStdout
+		os.Stderr = oldStderr
+	})
+
+	runErr := platformcli.Run([]string{
+		"work", "normalize", "--dry-run", "--migrate-folders",
+		"--hawp-root", filepath.Join(targetRepo, ".hawp"),
+	})
+
+	_ = wOut.Close()
+	_ = wErr.Close()
+	stdoutBytes, _ := io.ReadAll(rOut)
+	_, _ = io.ReadAll(rErr)
+
+	if runErr != nil {
+		t.Fatalf("Run returned error: %v", runErr)
+	}
+	if !strings.Contains(string(stdoutBytes), ".hawp/work/active/049/plan.md") {
+		t.Fatalf("expected target repo migration preview, got %q", string(stdoutBytes))
 	}
 }

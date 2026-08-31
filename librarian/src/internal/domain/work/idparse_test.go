@@ -11,8 +11,10 @@ func TestExtractIDFromFilename(t *testing.T) {
 		{"361FB08E-6457-4ED5-80BD-76337B6F0E89-title", "361fb08e-6457-4ed5-80bd-76337b6f0e89"},
 		{"TASK-012", "TASK-012"},
 		{"BUG-063-some-title", "BUG-063"},
+		{"042", "042"},
 		{"2026-04-29-BUG-001-title", "BUG-001"},
 		{"2026-04-29-bug-001-title", "BUG-001"},
+		{"025-analysis", ""},
 		{"random-name", ""},
 		{"", ""},
 	}
