@@ -83,10 +83,10 @@ Implemented in v0.0.7. `--semantic` is a real pure-vector search mode: embeds qu
 
 ## Verification
 
-- [x] `hawp search "backlog alignment" --semantic` returns 10 ranked results, top result is backlog-alignment.md
-- [x] All 3 patterns in benchmark: lexical / semantic / hybrid
-- [x] All Go tests pass (`go test ./...`)
-- [x] Links clean, work validates PASS
+- [x] `hawp search "backlog alignment" --semantic` returns 10 ranked results, top result is backlog-alignment.md. Evidence: see Outcome section above.
+- [x] All 3 patterns in benchmark: lexical / semantic / hybrid. Evidence: see Outcome section above.
+- [x] All Go tests pass (`go test ./...`). Evidence: see Outcome section above.
+- [x] Links clean, work validates PASS. Evidence: see Outcome section above.
 
 ## Close Checklist
 

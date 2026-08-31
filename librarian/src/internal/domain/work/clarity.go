@@ -2,20 +2,26 @@ package work
 
 import (
 	"os"
-	"path/filepath"
 	"regexp"
 	"strings"
 )
 
 var (
 	verificationSectionRe = regexp.MustCompile(`^##\s+Verification\b`)
+	verificationItemRe    = regexp.MustCompile(`^\s*-\s+\[(?:x| )\]`)
 	claimPrefixRe         = regexp.MustCompile(`^[\s\-\[\]x ]+`)
 	unprovenRe            = regexp.MustCompile(`(?i)\b(?:explicitly )?unproven\b`)
 )
 
+type checklistItem struct {
+	StartLine int
+	Lines     []string
+}
+
 // CheckVerificationClarity scans Verification sections in closed plans for
 // checklist claims, classifying each as proven (Evidence:), explicitly
-// unproven, or ambiguous.
+// unproven, or ambiguous. Explicitly unproven claims are tracked for context
+// but do not warn on their own because the uncertainty is already labeled.
 func CheckVerificationClarity(closedFiles []string) VerificationCheck {
 	result := VerificationCheck{Status: StatusPass}
 
@@ -25,17 +31,15 @@ func CheckVerificationClarity(closedFiles []string) VerificationCheck {
 			warnf("skipping unreadable closed plan %s: %v", filePath, err)
 			continue
 		}
-		fileName := strings.TrimSuffix(filepath.Base(filePath), ".md")
+		fileName := closedPlanID(filePath)
 
 		section := extractVerificationSection(string(content))
 		if section == "" {
 			continue
 		}
 
-		for index, line := range strings.Split(section, "\n") {
-			if !strings.Contains(line, "- [x]") && !strings.Contains(line, "- [ ]") {
-				continue
-			}
+		for _, item := range extractChecklistItems(section) {
+			line := item.Lines[0]
 			claim := claimPrefixRe.ReplaceAllString(line, "")
 			if len(claim) > 100 {
 				claim = claim[:100]
@@ -46,12 +50,13 @@ func CheckVerificationClarity(closedFiles []string) VerificationCheck {
 			}
 
 			result.Total++
-			entry := Claim{ID: fileName, Claim: claim, FilePath: filePath, LineNumber: index + 1}
+			entry := Claim{ID: fileName, Claim: claim, FilePath: filePath, LineNumber: item.StartLine}
+			body := strings.Join(item.Lines, "\n")
 
 			switch {
-			case strings.Contains(line, "Evidence:"):
+			case strings.Contains(body, "Evidence:"):
 				result.Proven++
-			case strings.Contains(line, "NOT YET VERIFIED") || unprovenRe.MatchString(line):
+			case strings.Contains(body, "NOT YET VERIFIED") || unprovenRe.MatchString(body):
 				result.Unproven = append(result.Unproven, entry)
 			default:
 				result.Ambiguous = append(result.Ambiguous, entry)
@@ -59,7 +64,7 @@ func CheckVerificationClarity(closedFiles []string) VerificationCheck {
 		}
 	}
 
-	if len(result.Unproven) > 0 || len(result.Ambiguous) > 0 {
+	if len(result.Ambiguous) > 0 {
 		result.Status = StatusWarn
 	}
 	return result
@@ -83,4 +88,28 @@ func extractVerificationSection(content string) string {
 		}
 	}
 	return strings.Join(section, "\n")
+}
+
+func extractChecklistItems(section string) []checklistItem {
+	var items []checklistItem
+	var current *checklistItem
+
+	for index, line := range strings.Split(section, "\n") {
+		if verificationItemRe.MatchString(line) {
+			if current != nil {
+				items = append(items, *current)
+			}
+			current = &checklistItem{StartLine: index + 1, Lines: []string{line}}
+			continue
+		}
+		if current != nil {
+			current.Lines = append(current.Lines, line)
+		}
+	}
+
+	if current != nil {
+		items = append(items, *current)
+	}
+
+	return items
 }

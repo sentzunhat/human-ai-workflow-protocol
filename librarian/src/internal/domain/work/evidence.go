@@ -9,8 +9,9 @@ import (
 
 var evidenceLinkRe = regexp.MustCompile(`Evidence:\s*(?:link to )?\.\./evidence/([\w/.-]+\.md)`)
 
-// CollectClosedPlanFiles gathers all .md files in the strict
-// closed/YYYY/MM/DD/ layout (including README.md, matching the TS walker).
+// CollectClosedPlanFiles gathers closed-plan markdown files from both the
+// legacy flat layout (`closed/YYYY/MM/DD/<id>.md`) and the current
+// folder-per-item layout (`closed/YYYY/MM/DD/<id>/plan.md`).
 func CollectClosedPlanFiles(closedDir string) []string {
 	var files []string
 	years, err := os.ReadDir(closedDir)
@@ -44,12 +45,28 @@ func CollectClosedPlanFiles(closedDir string) []string {
 				for _, entry := range entries {
 					if strings.HasSuffix(entry.Name(), ".md") {
 						files = append(files, filepath.Join(closedDir, year.Name(), month.Name(), day.Name(), entry.Name()))
+						continue
+					}
+					if !entry.IsDir() {
+						continue
+					}
+					planPath := filepath.Join(closedDir, year.Name(), month.Name(), day.Name(), entry.Name(), "plan.md")
+					if _, err := os.Stat(planPath); err == nil {
+						files = append(files, planPath)
 					}
 				}
 			}
 		}
 	}
 	return files
+}
+
+func closedPlanID(filePath string) string {
+	base := filepath.Base(filePath)
+	if base == "plan.md" {
+		return filepath.Base(filepath.Dir(filePath))
+	}
+	return strings.TrimSuffix(base, ".md")
 }
 
 // CheckEvidenceIntegrity verifies that `Evidence: ../evidence/...` links in
@@ -64,7 +81,7 @@ func CheckEvidenceIntegrity(workDir string, closedFiles []string) EvidenceCheck 
 			warnf("skipping unreadable closed plan %s: %v", filePath, err)
 			continue
 		}
-		fileName := strings.TrimSuffix(filepath.Base(filePath), ".md")
+		fileName := closedPlanID(filePath)
 
 		for _, line := range strings.Split(string(content), "\n") {
 			m := evidenceLinkRe.FindStringSubmatch(line)

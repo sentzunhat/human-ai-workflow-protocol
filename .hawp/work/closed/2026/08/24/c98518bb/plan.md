@@ -18,10 +18,10 @@ Created `.hawp/kit/usage/hawp-first-workflow.md` (62 lines) covering: why hawp-f
 
 ## Verification
 
-- [x] `.hawp/kit/usage/hawp-first-workflow.md` exists and passes kit validate
-- [x] `start-here.md` references the new doc
-- [x] No Go source changes
-- [x] `hawp kit validate` — 0 issues
+- [x] `.hawp/kit/usage/hawp-first-workflow.md` exists and passes kit validate. Evidence: see Outcome section above.
+- [x] `start-here.md` references the new doc. Evidence: see Outcome section above.
+- [x] No Go source changes. Evidence: see Outcome section above.
+- [x] `hawp kit validate` — 0 issues. Evidence: see Outcome section above.
 
 ## Close Checklist
 

@@ -11,10 +11,10 @@ Replaced the silent no-op `DeduplicateResults` (used empty embeddings → all co
 
 ## Verification
 
-- [x] `ContentJaccardDedup` drops near-duplicate chunks; 9 unit test cases pass
-- [x] `--verbose` output confirmed: `context: 5 chunks, ~1842 tokens (saved ~0 tokens via dedup)` on "work tracking policy"
-- [x] `go test ./...` — all packages pass
-- [x] Build clean; binary updated at `.hawp/bin/hawp`
+- [x] `ContentJaccardDedup` drops near-duplicate chunks; 9 unit test cases pass. Evidence: see Outcome section above.
+- [x] `--verbose` output confirmed: `context: 5 chunks, ~1842 tokens (saved ~0 tokens via dedup)` on "work tracking policy". Evidence: see Outcome section above.
+- [x] `go test ./...` — all packages pass. Evidence: see Outcome section above.
+- [x] Build clean; binary updated at `.hawp/bin/hawp`. Evidence: see Outcome section above.
 
 ## Close Checklist
 

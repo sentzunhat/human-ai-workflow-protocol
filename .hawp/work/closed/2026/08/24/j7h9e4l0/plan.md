@@ -354,16 +354,15 @@ Linux and Windows platforms covered by the `test-auto-update.yml` CI workflow ad
 ## Verification
 
 - Evidence: `.hawp/work/evidence/2026/08/24/j7h9e4l0-auto-update-darwin-arm64.md`
-- [x] `hawp version` → `0.0.1` from downloaded release binary ✅
-- [x] `hawp update` detected `0.0.2` and self-replaced ✅
-- [x] SHA256 verified via `checksums.txt` ✅
-- [x] Kit refreshed: 106 file(s) ✅
-- [x] `hawp version` → `0.0.2` post-update ✅
-- [x] `hawp update --check` → "Already up to date" ✅
+- [x] `hawp version` → `0.0.1` from downloaded release binary ✅. Evidence: `.hawp/work/evidence/2026/08/24/j7h9e4l0-auto-update-darwin-arm64.md`
+- [x] `hawp update` detected `0.0.2` and self-replaced ✅. Evidence: `.hawp/work/evidence/2026/08/24/j7h9e4l0-auto-update-darwin-arm64.md`
+- [x] SHA256 verified via `checksums.txt` ✅. Evidence: `.hawp/work/evidence/2026/08/24/j7h9e4l0-auto-update-darwin-arm64.md`
+- [x] Kit refreshed: 106 file(s) ✅. Evidence: `.hawp/work/evidence/2026/08/24/j7h9e4l0-auto-update-darwin-arm64.md`
+- [x] `hawp version` → `0.0.2` post-update ✅. Evidence: `.hawp/work/evidence/2026/08/24/j7h9e4l0-auto-update-darwin-arm64.md`
+- [x] `hawp update --check` → "Already up to date" ✅. Evidence: `.hawp/work/evidence/2026/08/24/j7h9e4l0-auto-update-darwin-arm64.md`
 
 ## Close Checklist
 
 - [x] Outcome documented
 - [x] Verification evidence linked
 - [x] Work item moved to `closed/2026/08/24/j7h9e4l0/`
-

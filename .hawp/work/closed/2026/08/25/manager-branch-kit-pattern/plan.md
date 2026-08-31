@@ -28,12 +28,12 @@ when they need a broader coordination pattern around parallel worktrees.
 
 ## Verification
 
-- [x] Added `.hawp/kit/usage/manager-branch.md`
-- [x] Linked the new guide from `.hawp/kit/start-here.md`
-- [x] Added cross-reference from `.hawp/kit/usage/hawp-first-workflow.md`
-- [x] `mise exec node@26.5.0 -- npm run distribution:sync`
-- [ ] `mise exec node@26.5.0 -- npm run kit:validate` — attempted, but `../.hawp/bin/hawp kit validate` exited 137 in this checkout
-- [ ] `mise exec node@26.5.0 -- npm run check:markdown-links` — attempted, but `../.hawp/bin/hawp links check` exited 137 in this checkout
+- [x] Added `.hawp/kit/usage/manager-branch.md`. Evidence: see Outcome section above.
+- [x] Linked the new guide from `.hawp/kit/start-here.md`. Evidence: see Outcome section above.
+- [x] Added cross-reference from `.hawp/kit/usage/hawp-first-workflow.md`. Evidence: see Outcome section above.
+- [x] `mise exec node@26.5.0 -- npm run distribution:sync`. Evidence: see Outcome section above.
+- [ ] explicitly unproven in that checkout: `mise exec node@26.5.0 -- npm run kit:validate` — attempted, but `../.hawp/bin/hawp kit validate` exited 137 in this checkout
+- [ ] explicitly unproven in that checkout: `mise exec node@26.5.0 -- npm run check:markdown-links` — attempted, but `../.hawp/bin/hawp links check` exited 137 in this checkout
 
 ## What was done
 

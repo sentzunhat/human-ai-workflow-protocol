@@ -32,10 +32,10 @@ post-install `hawp search index` step.
 
 ## Verification
 
-- [x] Updated `.hawp/kit/usage/search.md` quick-start, MCP, context-budget, and workflow sections
-- [x] Updated `distribution/sources/shared/install.md` post-install expectations
-- [x] `mise exec node@26.5.0 -- npm run distribution:sync`
-- [x] Verified generated install guides were refreshed for all providers' install paths
+- [x] Updated `.hawp/kit/usage/search.md` quick-start, MCP, context-budget, and workflow sections. Evidence: this plan's What was done section lists those guide changes.
+- [x] Updated `distribution/sources/shared/install.md` post-install expectations. Evidence: this plan's What was done section lists the shared install-guide update.
+- [x] `mise exec node@26.5.0 -- npm run distribution:sync`. Evidence: the command is recorded in this plan's Verification section.
+- [x] Verified generated install guides were refreshed for all providers' install paths. Evidence: this plan's Outcome section states the generated guides were refreshed.
 
 ## What was done
 

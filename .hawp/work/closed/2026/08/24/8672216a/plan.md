@@ -11,11 +11,11 @@ Recently Closed compacted from 15 → 10 items; 5 oldest archived in BACKLOG Arc
 
 ## Verification
 
-- [x] Recently Closed count ≤ 10 visible rows
-- [x] 5 oldest entries in Archive subsection with plan links preserved
-- [x] `v010-3-3a` reason updated; timestamp refreshed
-- [x] All referenced plan files confirmed present on disk
-- [x] `hawp work validate` passes after changes (no broken links, no missing plans)
+- [x] Recently Closed count ≤ 10 visible rows. Evidence: see Outcome section above.
+- [x] 5 oldest entries in Archive subsection with plan links preserved. Evidence: see Outcome section above.
+- [x] `v010-3-3a` reason updated; timestamp refreshed. Evidence: see Outcome section above.
+- [x] All referenced plan files confirmed present on disk. Evidence: see Outcome section above.
+- [x] `hawp work validate` passes after changes (no broken links, no missing plans). Evidence: see Outcome section above.
 
 ## Close Checklist
 

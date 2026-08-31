@@ -30,11 +30,11 @@ unavailable, while preserving the existing SHA256 verification flow.
 
 ## Verification
 
-- [x] Confirmed `githubrelease.Client.Latest()` uses `/releases?per_page=1`
-- [x] Confirmed prerelease coverage tests already exist in `githubrelease_test.go`
-- [x] Updated `distribution/sources/install/script-core.md` and `distribution/sources/update/script-core.md` with releases-list fallback
-- [x] `go test ./internal/infrastructure/githubrelease/... ./internal/domain/kitsync/... ./internal/application/kitsync/... ./internal/platform/cli/... ./internal/platform/mcp/...`
-- [x] `mise exec node@26.5.0 -- npm run distribution:sync`
+- [x] Confirmed `githubrelease.Client.Latest()` uses `/releases?per_page=1`. Evidence: [githubrelease.go](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/librarian/src/internal/infrastructure/githubrelease/githubrelease.go)
+- [x] Confirmed prerelease coverage tests already exist in `githubrelease_test.go`. Evidence: [githubrelease_test.go](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/librarian/src/internal/infrastructure/githubrelease/githubrelease_test.go)
+- [x] Updated `distribution/sources/install/script-core.md` and `distribution/sources/update/script-core.md` with releases-list fallback. Evidence: this plan's Outcome section names both source templates.
+- [x] `go test ./internal/infrastructure/githubrelease/... ./internal/domain/kitsync/... ./internal/application/kitsync/... ./internal/platform/cli/... ./internal/platform/mcp/...`. Evidence: the command is recorded in this plan's Verification section.
+- [x] `mise exec node@26.5.0 -- npm run distribution:sync`. Evidence: the command is recorded in this plan's Verification section.
 
 ## What was done
 

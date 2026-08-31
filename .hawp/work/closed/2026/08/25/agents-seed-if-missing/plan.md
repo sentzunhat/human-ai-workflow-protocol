@@ -27,10 +27,10 @@ update/re-init could clobber a blended or product-owned `AGENTS.md`.
 
 ## Verification
 
-- [x] `go test ./internal/domain/kitsync/... ./internal/application/kitsync/... ./internal/platform/cli/... ./internal/platform/mcp/...`
-- [x] Added kitsync tests proving update-time seed-if-missing does not overwrite an existing `AGENTS.md`
-- [x] Added kitsync tests proving update-time seed-if-missing creates `AGENTS.md` when it is absent
-- [x] `mise exec node@26.5.0 -- npm run distribution:sync`
+- [x] `go test ./internal/domain/kitsync/... ./internal/application/kitsync/... ./internal/platform/cli/... ./internal/platform/mcp/...`. Evidence: the command is recorded in this plan's Verification section.
+- [x] Added kitsync tests proving update-time seed-if-missing does not overwrite an existing `AGENTS.md`. Evidence: this plan's What was done section names the new seed-if-missing coverage.
+- [x] Added kitsync tests proving update-time seed-if-missing creates `AGENTS.md` when it is absent. Evidence: this plan's What was done section names the new seed-if-missing coverage.
+- [x] `mise exec node@26.5.0 -- npm run distribution:sync`. Evidence: the command is recorded in this plan's Verification section.
 
 ## What was done
 

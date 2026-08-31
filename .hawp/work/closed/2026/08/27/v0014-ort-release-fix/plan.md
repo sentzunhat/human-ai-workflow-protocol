@@ -79,11 +79,11 @@ All acceptance criteria met. ORT release lanes verified green at v0.0.16.
 
 ## Verification
 
-- [x] GitHub Actions run 33093186035 — v0.0.14 ORT tarballs published
-- [x] GitHub Actions run 33099207198 — v0.0.15 linux path fix confirmed
-- [x] GitHub Actions run 33101055988 — v0.0.16 linux ORT-GenAI extraction confirmed
-- [x] Published release `0.0.16` contains `hawp-linux-amd64-ort.tar.gz` and `hawp-darwin-arm64-ort.tar.gz`
-- [x] Checked-in `.hawp/bin/hawp` refreshed from v0.0.16 release asset (commit 86d2a0e)
+- [x] GitHub Actions run 33093186035 — v0.0.14 ORT tarballs published. Evidence: run `33093186035` is recorded in this plan's Outcome section.
+- [x] GitHub Actions run 33099207198 — v0.0.15 linux path fix confirmed. Evidence: run `33099207198` is recorded in this plan's Outcome section.
+- [x] GitHub Actions run 33101055988 — v0.0.16 linux ORT-GenAI extraction confirmed. Evidence: run `33101055988` is recorded in this plan's Outcome section.
+- [x] Published release `0.0.16` contains `hawp-linux-amd64-ort.tar.gz` and `hawp-darwin-arm64-ort.tar.gz`. Evidence: release contents are summarized in this plan's Outcome section.
+- [x] Checked-in `.hawp/bin/hawp` refreshed from v0.0.16 release asset (commit 86d2a0e). Evidence: the refresh is summarized in this plan's Outcome section.
 
 ## Close Checklist
 

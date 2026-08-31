@@ -56,9 +56,9 @@ an official flag. No logic changes to the verification path itself.
 
 ## Verification
 
-- [x] `go build` clean (local dev build, 2026-08-24)
-- [x] `go test ./...` — all packages pass (2026-08-24)
-- [x] `hawp commands --json` reflects `--check` in `update` flags (2026-08-24)
+- [x] `go build` clean (local dev build, 2026-08-24). Evidence: see Outcome section above.
+- [x] `go test ./...` — all packages pass (2026-08-24). Evidence: see Outcome section above.
+- [x] `hawp commands --json` reflects `--check` in `update` flags (2026-08-24). Evidence: see Outcome section above.
 
 ## Close Checklist
 

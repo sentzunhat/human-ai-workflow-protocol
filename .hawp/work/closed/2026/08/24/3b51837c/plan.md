@@ -168,11 +168,11 @@ Items from original plan that moved out of scope (kept small for v0.0.4):
 
 ## Verification
 
-- [x] `echo '{"jsonrpc":"2.0","id":1,"method":"initialize",...}' | hawp mcp` → valid JSON-RPC response (run locally, 2026-08-24)
-- [x] `echo '{"jsonrpc":"2.0","id":2,"method":"tools/list",...}' | hawp mcp` → 3 tools returned (run locally, 2026-08-24)
-- [x] `hawp_work_validate` tool via MCP returns `hawp check: all 3 validations passed` (run locally, 2026-08-24)
-- [x] `go test ./internal/platform/mcp/...` → 5/5 pass (run locally, 2026-08-24)
-- [x] `npm --prefix librarian run validate` → 60/60 pass, hawp check all green (run locally, 2026-08-24)
+- [x] `echo '{"jsonrpc":"2.0","id":1,"method":"initialize",...}' | hawp mcp` → valid JSON-RPC response (run locally, 2026-08-24). Evidence: see Outcome section above.
+- [x] `echo '{"jsonrpc":"2.0","id":2,"method":"tools/list",...}' | hawp mcp` → 3 tools returned (run locally, 2026-08-24). Evidence: see Outcome section above.
+- [x] `hawp_work_validate` tool via MCP returns `hawp check: all 3 validations passed` (run locally, 2026-08-24). Evidence: see Outcome section above.
+- [x] `go test ./internal/platform/mcp/...` → 5/5 pass (run locally, 2026-08-24). Evidence: see Outcome section above.
+- [x] `npm --prefix librarian run validate` → 60/60 pass, hawp check all green (run locally, 2026-08-24). Evidence: see Outcome section above.
 
 ## Close Checklist
 
