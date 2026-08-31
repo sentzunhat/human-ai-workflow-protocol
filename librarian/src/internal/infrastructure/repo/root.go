@@ -1,6 +1,6 @@
 // Package repo locates the HAWP repository root and converts paths for
-// display. Mirrors librarian/scripts/lib (findUpward, findBacklogRepoRoot,
-// toRepoRelative).
+// display. It centralizes upward repo discovery and repo-relative path
+// rendering for the Go CLI.
 package repo
 
 import (

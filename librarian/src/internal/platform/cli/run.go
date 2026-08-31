@@ -15,17 +15,20 @@ import (
 	appcheck "github.com/sentzunhat/hawp/librarian/src/internal/application/check"
 	appcontext "github.com/sentzunhat/hawp/librarian/src/internal/application/context"
 	appdb "github.com/sentzunhat/hawp/librarian/src/internal/application/db"
+	appdistribution "github.com/sentzunhat/hawp/librarian/src/internal/application/distribution"
 	appembed "github.com/sentzunhat/hawp/librarian/src/internal/application/embed"
 	appindex "github.com/sentzunhat/hawp/librarian/src/internal/application/index"
 	appkit "github.com/sentzunhat/hawp/librarian/src/internal/application/kit"
 	appkitsync "github.com/sentzunhat/hawp/librarian/src/internal/application/kitsync"
 	applinks "github.com/sentzunhat/hawp/librarian/src/internal/application/links"
+	appprovidersync "github.com/sentzunhat/hawp/librarian/src/internal/application/providersync"
 	appprovision "github.com/sentzunhat/hawp/librarian/src/internal/application/provision"
 	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
 	appupdate "github.com/sentzunhat/hawp/librarian/src/internal/application/update"
 	appuuid "github.com/sentzunhat/hawp/librarian/src/internal/application/uuidgen"
 	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work"
 	domainindex "github.com/sentzunhat/hawp/librarian/src/internal/domain/index"
+	domainprovidersync "github.com/sentzunhat/hawp/librarian/src/internal/domain/providersync"
 	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
 	domainupdate "github.com/sentzunhat/hawp/librarian/src/internal/domain/update"
 	domainusage "github.com/sentzunhat/hawp/librarian/src/internal/domain/usage"
@@ -86,6 +89,24 @@ func Run(args []string) error {
 
 	case command == "work" && sub == "new":
 		return runWorkNew(args[2:])
+
+	case command == "providers" && sub == "materialize":
+		return runProvidersMaterialize()
+
+	case command == "providers" && sub == "validate":
+		return runProvidersValidate()
+
+	case command == "providers" && sub == "sync":
+		return runProvidersSync()
+
+	case command == "distribution" && sub == "build":
+		return runDistributionBuild()
+
+	case command == "distribution" && sub == "validate":
+		return runDistributionValidate()
+
+	case command == "distribution" && sub == "sync":
+		return runDistributionSync()
 
 	case command == "check":
 		return runCheck()
@@ -389,6 +410,139 @@ func runInit(args []string) error {
 		return ExitError{Code: 1}
 	}
 	return nil
+}
+
+func runProvidersMaterialize() error {
+	root, err := repo.FindBacklogRepoRoot(mustGetwd())
+	if err != nil {
+		return err
+	}
+
+	result, err := appprovidersync.Materialize(root)
+	if err != nil {
+		return err
+	}
+	for _, file := range result.Updated {
+		fmt.Printf("updated %s\n", file)
+	}
+	for _, file := range result.Unchanged {
+		fmt.Printf("unchanged %s\n", file)
+	}
+	fmt.Printf("\nprovider materialize complete: %d/%d file(s) updated\n", len(result.Updated), len(result.Updated)+len(result.Unchanged))
+	return nil
+}
+
+func runProvidersValidate() error {
+	root, err := repo.FindBacklogRepoRoot(mustGetwd())
+	if err != nil {
+		return err
+	}
+
+	result, err := appprovidersync.Validate(root)
+	if err != nil {
+		return err
+	}
+	if !result.OK() {
+		fmt.Fprintln(os.Stderr, "provider materialization validation failed")
+		if len(result.Missing) > 0 {
+			fmt.Fprintln(os.Stderr, "\nmissing materialized outputs:")
+			for _, file := range result.Missing {
+				fmt.Fprintf(os.Stderr, "- %s\n", file)
+			}
+		}
+		if len(result.Stale) > 0 {
+			fmt.Fprintln(os.Stderr, "\nstale materialized outputs:")
+			for _, file := range result.Stale {
+				fmt.Fprintf(os.Stderr, "- %s\n", file)
+			}
+		}
+		fmt.Fprintln(os.Stderr, "\nrun `hawp providers materialize`")
+		return ExitError{Code: 1}
+	}
+
+	fmt.Printf("provider validation passed: %d materialized file(s) are current\n", len(domainprovidersync.MaterializationTargets))
+	return nil
+}
+
+func runProvidersSync() error {
+	if err := runProvidersMaterialize(); err != nil {
+		return err
+	}
+	return runProvidersValidate()
+}
+
+func runDistributionBuild() error {
+	root, err := repo.FindBacklogRepoRoot(mustGetwd())
+	if err != nil {
+		return err
+	}
+
+	result, err := appdistribution.Build(root)
+	if err != nil {
+		return err
+	}
+	for _, file := range result.Updated {
+		fmt.Printf("updated %s\n", file)
+	}
+	for _, file := range result.Unchanged {
+		fmt.Printf("unchanged %s\n", file)
+	}
+	fmt.Printf("\ndistribution build complete: %d/%d file(s) updated\n", len(result.Updated), len(result.Updated)+len(result.Unchanged))
+	return nil
+}
+
+func runDistributionValidate() error {
+	root, err := repo.FindBacklogRepoRoot(mustGetwd())
+	if err != nil {
+		return err
+	}
+
+	result, err := appdistribution.Validate(root)
+	if err != nil {
+		return err
+	}
+	if !result.OK() {
+		fmt.Fprintln(os.Stderr, "distribution validation failed")
+		if len(result.LegacyPresent) > 0 {
+			fmt.Fprintln(os.Stderr, "\nlegacy root-level guides must be removed:")
+			for _, file := range result.LegacyPresent {
+				fmt.Fprintf(os.Stderr, "- %s\n", file)
+			}
+		}
+		if len(result.Missing) > 0 {
+			fmt.Fprintln(os.Stderr, "\nmissing generated outputs:")
+			for _, file := range result.Missing {
+				fmt.Fprintf(os.Stderr, "- %s\n", file)
+			}
+		}
+		if len(result.Stale) > 0 {
+			fmt.Fprintln(os.Stderr, "\nstale generated outputs:")
+			for _, file := range result.Stale {
+				fmt.Fprintf(os.Stderr, "- %s\n", file)
+			}
+		}
+		if len(result.PathLeaks) > 0 {
+			fmt.Fprintln(os.Stderr, "\ninvalid downstream path leaks (core/.hawp/) in source kit files:")
+			for _, leak := range result.PathLeaks {
+				fmt.Fprintf(os.Stderr, "- %s:%d %s\n", leak.File, leak.Line, leak.Text)
+			}
+		}
+		fmt.Fprintln(os.Stderr, "\nrun `hawp distribution build`")
+		return ExitError{Code: 1}
+	}
+
+	fmt.Println("distribution validation passed: generated outputs are current")
+	return nil
+}
+
+func runDistributionSync() error {
+	if err := runProvidersSync(); err != nil {
+		return err
+	}
+	if err := runDistributionBuild(); err != nil {
+		return err
+	}
+	return runDistributionValidate()
 }
 
 func runMCP() error {
@@ -1298,6 +1452,12 @@ COMMANDS
   work validate [--work-root <path>]   backlog/plan/evidence integrity checks
   work new "<title>" [--type ...]      scaffold intake: UUID, plan file, inbox backlog row
   work normalize [--apply --migrate-folders --validate]  normalize work record drift (dry-run default)
+  providers materialize                materialize shared provider behaviors into provider packs
+  providers validate                   validate generated provider-pack files
+  providers sync                       materialize + validate provider-pack files
+  distribution build                   build generated install/update guides
+  distribution validate                validate generated install/update guides
+  distribution sync                    providers sync + build + validate generated guides
   check                                combined kit + work + links validation
   init [--provider <name>|all]           provision ~/.hawp, sync kit, write MCP configs (claude|cursor|codex|continue|all)
   mcp                                   start stdio MCP server (JSON-RPC 2.0) for AI agent tool use

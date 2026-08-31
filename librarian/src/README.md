@@ -1,7 +1,6 @@
 # hawp (librarian/src/)
 
-Go source for the `hawp` CLI — the HAWP intelligence tool. Distribution
-tooling (provider materialization, generated guides) remains in `librarian/`.
+Go source for the `hawp` CLI - the HAWP intelligence tool and maintainer command surface.
 
 Roadmap:
 
@@ -58,9 +57,10 @@ wrapper surface stable.
 | `hawp embed <text>...` | — | **available** | local embeddings via hugot's pure-Go backend; added 2026-07-21 (`748609a8`) |
 | `hawp generate <prompt>` | — | planned | text generation; needs hugot's ORT/cgo backend, deferred pending a build-matrix decision (`748609a8`) |
 
-Stays npm-only (maintainer tooling, not part of the installable CLI):
-`providers:materialize|validate|sync`, `distribution:build|validate|sync`,
-`typecheck`, `test`, `validate`. The Node CLI PoC was retired 2026-07-20.
+Maintainer commands now live in the Go CLI as well:
+`hawp providers materialize|validate|sync` and
+`hawp distribution build|validate|sync`. The Node CLI PoC was retired
+2026-07-20, and the Node maintainer workspace was retired on 2026-08-31.
 
 ## Build
 
