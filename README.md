@@ -68,6 +68,10 @@ The `hawp` CLI ships with:
 - **`hawp update`** — self-updates the binary and kit from the latest release (48h auto-update notifier built in; Windows uses manual binary replacement)
 - **`hawp work new`** — scaffolds a new work item with UUID, plan file, and BACKLOG row
 
+Maintainer and workflow-repair commands run from [`librarian/src`](./librarian/src/README.md),
+including `work validate`, `work normalize`, `kit validate`, `distribution sync`,
+and `providers sync`.
+
 ---
 
 ## Install — pick your agent
@@ -133,7 +137,7 @@ Active development in [`.hawp/work/BACKLOG.md`](.hawp/work/BACKLOG.md). Next foc
 Shared agent behaviors: `core/providers/shared/behaviors/` → materialize into provider packs with:
 
 ```bash
-npm --prefix librarian run distribution:sync
+cd librarian/src && go run ./cmd/hawp distribution sync
 ```
 
 See [librarian/README.md](librarian/README.md) for tooling details and validation commands.

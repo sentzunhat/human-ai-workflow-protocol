@@ -133,10 +133,10 @@ corrected ORT release-lane path issues; all lanes verified green at v0.0.16.
 
 ## Verification
 
-- [x] v0.0.14 Release workflow published ORT tarballs (run 33093186035 via CI)
-- [x] v0.0.15 fixed linux ORT native-lib path (run 33099207198)
-- [x] v0.0.16 fixed linux ORT-GenAI extraction strip-components (run 33101055988)
-- [x] `go test ./...` — green on all versions
+- [x] v0.0.14 Release workflow published ORT tarballs (run 33093186035 via CI). Evidence: run `33093186035` is recorded in this plan's Outcome section.
+- [x] v0.0.15 fixed linux ORT native-lib path (run 33099207198). Evidence: run `33099207198` is recorded in this plan's Outcome section.
+- [x] v0.0.16 fixed linux ORT-GenAI extraction strip-components (run 33101055988). Evidence: run `33101055988` is recorded in this plan's Outcome section.
+- [x] `go test ./...` — green on all versions. Evidence: [v0014-ort-release-fix/plan.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/08/27/v0014-ort-release-fix/plan.md) records the post-fix green verification chain.
 
 ## Close Checklist
 

@@ -3,7 +3,7 @@
 Do not edit directly. Regenerate:
 
 ```bash
-npm --prefix librarian run distribution:sync
+cd librarian/src && go run ./cmd/hawp distribution sync
 ```
 
 Edits to provider overlay rules: change `core/providers/shared/behaviors/` (materialized into provider packs automatically).

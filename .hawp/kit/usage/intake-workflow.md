@@ -44,12 +44,12 @@ Work items are identified by a UUID; the type (`task`, `bug`, `improvement`, `de
 lives in the separate Type column, not in the ID. UUIDs make parallel item creation
 collision-free — two agents can open items simultaneously without coordinating a sequence.
 
-- **New items:** generate a UUID (`./.hawp/bin/hawp uuid`, or `npm --prefix librarian run uuid`
-  in this source repo), name the
-  plan file `active/<uuid>.md`, and put the full UUID in the row's UUID cell (a code span
+- **New items:** generate a UUID (`./.hawp/bin/hawp uuid`, or `cd librarian/src && go run ./cmd/hawp uuid`
+  in this source repo), create the
+  plan file `active/<work-id>/plan.md`, and put the full UUID in the row's UUID cell (a code span
   is fine). Leave Legacy ID as `—`.
 - **Existing items:** keep their sequential ID (`TASK-013`) as Legacy ID until they close;
-  the plan file stays `active/<LEGACY-ID>.md`. Do not retroactively rename closed records.
+  the plan file stays `active/<LEGACY-ID>/plan.md`. Do not retroactively rename closed records.
 - **Validation:** `work:validate` accepts both formats. A row's ID resolves from the
   Legacy ID cell first, then the UUID cell. The UUID cell may hold either the full UUID
   or the short display form (first 8 hex chars, e.g. `361fb08e`) — the validator matches
@@ -78,10 +78,10 @@ The investigation covers:
 Planning is not optional: every item gets a plan built from the investigation
 findings before any implementation starts.
 
-I write a plan file to `work/active/<ID>.md`.
+I write a plan file to `work/active/<ID>/plan.md`.
 The backlog row moves to `plan-ready` and links to the plan file.
 
-On close, the file moves to `work/closed/YYYY/MM/DD/<ID>.md`.
+On close, the file moves to `work/closed/YYYY/MM/DD/<ID>/plan.md`.
 
 The plan includes:
 
@@ -190,8 +190,8 @@ Reference evidence files by name in the Verification section so a reader can fin
 
 ## Parked / Deferred
 
-To defer an item without closing it, move the plan file to `work/parked/<ID>.md` and mark the backlog row `parked`.
-When it becomes active again, move it back to `work/active/<ID>.md` and update the backlog row.
+To defer an item without closing it, move the plan file to `work/parked/<ID>/plan.md` and mark the backlog row `parked`.
+When it becomes active again, move it back to `work/active/<ID>/plan.md` and update the backlog row.
 
 ---
 
@@ -201,14 +201,14 @@ When it becomes active again, move it back to `work/active/<ID>.md` and update t
 
 Close is a structured handoff:
 
-1. **Update the plan file** (`work/active/<ID>.md`):
+1. **Update the plan file** (`work/active/<ID>/plan.md`):
    - Fill Outcome section (what was actually implemented)
    - Complete Verification section (all checks with direct evidence or "unproven" notes)
    - Check the Close Checklist
    - Mark all boxes ✓
 
 2. **Move the plan file:**
-   - From `work/active/<ID>.md` to `work/closed/YYYY/MM/DD/<ID>.md`
+   - From `work/active/<ID>/plan.md` to `work/closed/YYYY/MM/DD/<ID>/plan.md`
    - Use the close date for the folder
 
 3. **Link evidence** (if exists):

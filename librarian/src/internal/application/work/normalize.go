@@ -5,16 +5,29 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 	"time"
 
 	domainwork "github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 )
 
+type migrationPreviewReport struct {
+	Mode              string   `json:"mode"`
+	GeneratedAt       string   `json:"generatedAt"`
+	Assessment        string   `json:"assessment"`
+	EstimatedChanges  int      `json:"estimatedChanges"`
+	ChangedFiles      []string `json:"changedFiles"`
+	Recommendation    string   `json:"recommendation"`
+	ValidationSummary string   `json:"validationSummary,omitempty"`
+}
+
 // NormalizeOptions configures a work normalize run.
 type NormalizeOptions struct {
 	RepoRoot            string
 	Apply               bool
+	MigrateFolders      bool
 	Validate            bool
 	FormatJSON          bool
 	Output              string
@@ -45,12 +58,24 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 			fmt.Fprintln(errOut, "Error: apply mode requires a clean working tree. Re-run with --force-dirty to override.")
 			return 2
 		}
-		result, err := domainwork.ApplyClosedRecordNormalization(opts.RepoRoot)
-		if err != nil {
-			fmt.Fprintf(errOut, "Script error: %v\n", err)
-			return 1
+		result := domainwork.ApplyResult{}
+		if opts.MigrateFolders {
+			migration, err := domainwork.ApplyWorkItemFolderMigration(opts.RepoRoot)
+			if err != nil {
+				fmt.Fprintf(errOut, "Script error: %v\n", err)
+				return 1
+			}
+			result.ChangedFiles = append(result.ChangedFiles, migration.ChangedFiles...)
+			notices = append(notices, fmt.Sprintf("Applied work-item folder migration to %d file(s).", len(migration.ChangedFiles)))
+		} else {
+			closed, err := domainwork.ApplyClosedRecordNormalization(opts.RepoRoot)
+			if err != nil {
+				fmt.Fprintf(errOut, "Script error: %v\n", err)
+				return 1
+			}
+			result = closed
+			notices = append(notices, fmt.Sprintf("Applied closed-record normalization to %d file(s).", len(result.ChangedFiles)))
 		}
-		notices = append(notices, fmt.Sprintf("Applied closed-record normalization to %d file(s).", len(result.ChangedFiles)))
 		if n := len(result.SkippedFiles); n > 0 {
 			notices = append(notices, fmt.Sprintf("Skipped %d ambiguous legacy file(s) without inferable Backlog ID.", n))
 		}
@@ -58,9 +83,9 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 			notices = append(notices, fmt.Sprintf("Added %d verification evidence follow-up item(s) inside Verification sections for agent-friendly research handoff.", n))
 		}
 
-		stdoutText := "No closed-record changes were necessary."
+		stdoutText := "No work-record changes were necessary."
 		if len(result.ChangedFiles) > 0 {
-			stdoutText = fmt.Sprintf("%d closed-record file(s) normalized.", len(result.ChangedFiles))
+			stdoutText = fmt.Sprintf("%d work-record file(s) normalized.", len(result.ChangedFiles))
 		}
 		if opts.Validate {
 			notices = append(notices, validationSummary(workRoot))
@@ -89,6 +114,70 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 
 	if opts.ForceDirty {
 		notices = append(notices, "--force-dirty has no effect in dry-run mode.")
+	}
+	if opts.MigrateFolders {
+		preview, err := domainwork.PreviewWorkItemFolderMigration(opts.RepoRoot)
+		if err != nil {
+			fmt.Fprintf(errOut, "Script error: %v\n", err)
+			return 1
+		}
+		sort.Strings(preview.ChangedFiles)
+
+		report := migrationPreviewReport{
+			Mode:             "work-item-folder-migration-dry-run",
+			GeneratedAt:      time.Now().UTC().Format(time.RFC3339),
+			Assessment:       "clean",
+			EstimatedChanges: len(preview.ChangedFiles),
+			ChangedFiles:     preview.ChangedFiles,
+			Recommendation:   "No work-item folder changes are needed.",
+		}
+		if len(preview.ChangedFiles) > 0 {
+			report.Assessment = "migration-ready"
+			report.Recommendation = "Review the planned file moves, then run `hawp work normalize --apply --migrate-folders --validate` in a clean worktree."
+		}
+
+		var rendered string
+		if opts.FormatJSON {
+			rendered, err = domainwork.RenderJSONValue(report)
+			if err != nil {
+				fmt.Fprintf(errOut, "Script error: %v\n", err)
+				return 1
+			}
+		} else {
+			rendered = renderMigrationPreviewText(report)
+		}
+		if opts.Validate {
+			summary := validationSummary(workRoot)
+			report.ValidationSummary = summary
+			notices = append(notices, summary)
+			if opts.FormatJSON {
+				rendered, err = domainwork.RenderJSONValue(report)
+				if err != nil {
+					fmt.Fprintf(errOut, "Script error: %v\n", err)
+					return 1
+				}
+			}
+		}
+		if opts.Output != "" {
+			if err := writeOptionalFile(opts.Output, rendered); err != nil {
+				fmt.Fprintf(errOut, "Script error: %v\n", err)
+				return 1
+			}
+			notices = append(notices, "Report written: "+opts.Output)
+			rendered = ""
+		}
+		if opts.ExportPlan != "" {
+			if err := exportJSON(opts.ExportPlan, report); err != nil {
+				fmt.Fprintf(errOut, "Script error: %v\n", err)
+				return 1
+			}
+			notices = append(notices, "Plan exported: "+opts.ExportPlan)
+		}
+		if rendered != "" {
+			fmt.Fprint(out, rendered)
+		}
+		printNotices(out, notices)
+		return 0
 	}
 
 	backlog, err := domainwork.ParseNormalizeBacklog(backlogPath)
@@ -151,6 +240,26 @@ func printNotices(out io.Writer, notices []string) {
 	for _, notice := range notices {
 		fmt.Fprintln(out, notice)
 	}
+}
+
+func renderMigrationPreviewText(report migrationPreviewReport) string {
+	var b strings.Builder
+	b.WriteString("HAWP Work Folder Migration Dry-Run\n")
+	b.WriteString("=================================\n")
+	b.WriteString("Generated: " + report.GeneratedAt + "\n")
+	b.WriteString("Assessment: " + report.Assessment + "\n")
+	b.WriteString(fmt.Sprintf("Estimated changes: %d\n", report.EstimatedChanges))
+	b.WriteString("Recommendation: " + report.Recommendation + "\n\n")
+	b.WriteString("Planned file changes\n")
+	b.WriteString("--------------------\n")
+	if len(report.ChangedFiles) == 0 {
+		b.WriteString("No work-item folder changes are needed.\n")
+		return b.String()
+	}
+	for _, path := range report.ChangedFiles {
+		b.WriteString("- " + path + "\n")
+	}
+	return b.String()
 }
 
 func validationSummary(workRoot string) string {

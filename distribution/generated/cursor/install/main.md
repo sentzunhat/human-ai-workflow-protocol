@@ -625,7 +625,7 @@ echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .haw
 This file is generated. Do not edit it directly.
 
 - Workflow gate: pushes and pull requests on `main` or `dev` fail when generated guides drift from source.
-- Local sync: run `npm --prefix librarian run distribution:sync` after editing `distribution/sources/` or the distribution composition code.
+- Local sync: run `hawp distribution sync` after editing `distribution/sources/` or the distribution composition code.
 
 Generated output file:
 
@@ -633,7 +633,7 @@ Generated output file:
 
 Provider: `cursor` · Operation: `install` · Branch: `main`
 
-Install mapping: `core/providers/.cursor/` → downstream paths in this guide.
+Install mapping: `core/providers/.cursor/` -> downstream paths in this guide.
 
 This generated guide is built from:
 

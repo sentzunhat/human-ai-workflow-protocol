@@ -1,7 +1,6 @@
 # hawp (librarian/src/)
 
-Go source for the `hawp` CLI — the HAWP intelligence tool. Distribution
-tooling (provider materialization, generated guides) remains in `librarian/`.
+Go source for the `hawp` CLI - the HAWP intelligence tool and maintainer command surface.
 
 Roadmap:
 
@@ -39,14 +38,14 @@ wrapper surface stable.
 | --- | --- | --- | --- |
 | `hawp db init` | Go scaffold | available (scaffold, layout-planning only) | superseded by `hawp init` for real provisioning |
 | `hawp index build [--scope] [--export]` | Go, real | **available** — enriches kit/work docs with folder role + backlog metadata, exports JSON | fbf12a93 Slice 1; ported 2026-07-21 (`f93bee55`) |
-| `hawp uuid [--short]` | npm `uuid` | **available** | ported 2026-07-20 (`39bc92b6`) |
-| `hawp links check` | npm `check:markdown-links` | **available** (fixes dead TS link regex) | ported 2026-07-20 (`39bc92b6`) |
-| `hawp kit validate` | npm `kit:validate` | **available** | ported 2026-07-20 (`39bc92b6`) |
-| `hawp work validate` | npm `work:validate` | **available** (count parity verified) | ported 2026-07-20 (`39bc92b6`) |
-| `hawp kit normalize [--apply]` | npm `kit:normalize` | **available** | ported 2026-07-20 (`eddd8339`) |
-| `hawp work normalize [--dry-run --apply --validate]` | npm `work:normalize` | **available** (full flag set, clean-tree guard) | ported 2026-07-20 (`eddd8339`) |
+| `hawp uuid [--short]` | Go CLI | **available** | ported 2026-07-20 (`39bc92b6`) |
+| `hawp links check` | Go CLI | **available** (fixes dead TS link regex) | ported 2026-07-20 (`39bc92b6`) |
+| `hawp kit validate` | Go CLI | **available** | ported 2026-07-20 (`39bc92b6`) |
+| `hawp work validate` | Go CLI | **available** (count parity verified) | ported 2026-07-20 (`39bc92b6`) |
+| `hawp kit normalize [--apply]` | Go CLI | **available** | ported 2026-07-20 (`eddd8339`) |
+| `hawp work normalize [--dry-run --apply --migrate-folders --validate]` | Go CLI | **available** (full flag set, clean-tree guard, explicit folder migration lane) | ported 2026-07-20 (`eddd8339`) |
 | `hawp backlog upgrade` | wrapper alias | **available** | alias for `work normalize` |
-| `hawp check` | npm `hawp:check` | **available** | composite kit + work + links; ported 2026-07-20 |
+| `hawp check` | Go CLI | **available** | composite kit + work + links; ported 2026-07-20 |
 | `hawp backlog validate` | wrapper alias | **available** | alias for `check` |
 | `hawp init` | — | **available** | provision `~/.hawp` (ONNX Runtime + embedding model); ported 2026-07-20 (`e98de8c4`); supersedes `db init` for the intelligence lane |
 | `hawp search <query>` | — | planned | lexical then vector search (`fbf12a93`) |
@@ -58,9 +57,48 @@ wrapper surface stable.
 | `hawp embed <text>...` | — | **available** | local embeddings via hugot's pure-Go backend; added 2026-07-21 (`748609a8`) |
 | `hawp generate <prompt>` | — | planned | text generation; needs hugot's ORT/cgo backend, deferred pending a build-matrix decision (`748609a8`) |
 
-Stays npm-only (maintainer tooling, not part of the installable CLI):
-`providers:materialize|validate|sync`, `distribution:build|validate|sync`,
-`typecheck`, `test`, `validate`. The Node CLI PoC was retired 2026-07-20.
+Maintainer commands now live in the Go CLI as well:
+`hawp providers materialize|validate|sync` and
+`hawp distribution build|validate|sync`. The Node CLI PoC was retired
+2026-07-20, and the Node maintainer workspace was retired on 2026-08-31.
+
+## Workflow compatibility and legacy repos
+
+The Go CLI is now the only maintained command surface for workflow upkeep.
+Run it from `librarian/src` in this repo:
+
+```bash
+cd librarian/src
+go run ./cmd/hawp work validate
+go run ./cmd/hawp work normalize --dry-run --validate
+go run ./cmd/hawp kit validate
+go run ./cmd/hawp check
+```
+
+For another HAWP repo or an older checkout, point the command at that repo's
+`.hawp/` or `.hawp/work/` tree explicitly:
+
+```bash
+cd librarian/src
+go run ./cmd/hawp work validate --hawp-root /path/to/repo/.hawp
+go run ./cmd/hawp work normalize --dry-run --hawp-root /path/to/repo/.hawp
+go run ./cmd/hawp work normalize --dry-run --work-root /path/to/repo/.hawp/work
+```
+
+Compatibility currently covers the older layouts we still need to support in
+the field:
+
+- UUID rows, legacy `TASK-123` / `BUG-123` rows, and older numeric IDs like `042`
+- `#` backlog ID columns in addition to `ID`, `Legacy ID`, and `UUID`
+- plain `Plan File` paths such as `active/049.md`, not only Markdown links
+- nested `###` subsections inside `## Active Work`
+- flat files and folder-per-item plan layouts
+
+`hawp work validate` is the compatibility gate: it answers whether the repo can
+be read and checked safely. `hawp work normalize` is stricter on purpose: it can
+still report manual-review drift for historical non-canonical rows even when
+`work validate` passes. That is expected for some older repos and does not by
+itself mean the parser or UUID migration is broken.
 
 ## Build
 
@@ -207,3 +245,32 @@ Shared exit-code convention across every validating/mutating command
 
 For scripted/agent use, prefer `--format json` where a command offers it
 (`work normalize`) and `hawp check`'s exit code over parsing stdout text.
+
+## Maintainer automation
+
+The repo's maintainer automation now runs through the same Go CLI instead of a
+parallel Node workspace:
+
+- `hawp providers sync` regenerates provider overlays and validates them
+- `hawp distribution sync` rebuilds generated install/update guides and validates them
+- `hawp check` is the local pre-PR sanity pass for kit + work + links
+
+Recommended pre-PR pass from `librarian/src`:
+
+```bash
+go test ./...
+go run ./cmd/hawp providers sync
+go run ./cmd/hawp distribution sync
+go run ./cmd/hawp kit validate
+go run ./cmd/hawp work validate
+go run ./cmd/hawp check
+```
+
+If a release prep branch includes workflow-record cleanup, add:
+
+```bash
+go run ./cmd/hawp work normalize --dry-run --validate
+```
+
+Only use `--apply` after reviewing the dry-run output and confirming the
+worktree is in the right lane for those edits.

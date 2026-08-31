@@ -3,23 +3,23 @@ package search
 // Result represents a single search result with all metadata needed for context packing.
 type Result struct {
 	// Content
-	ChunkID   string  // Unique identifier for this chunk
-	Content   string  // The actual text content
-	Source    string  // Document source/path (e.g., "README.md", "guide/setup.md")
-	Title     string  // Human-readable title or heading
+	ChunkID string // Unique identifier for this chunk
+	Content string // The actual text content
+	Source  string // Document source/path (e.g., "README.md", "guide/setup.md")
+	Title   string // Human-readable title or heading
 
 	// Relevance
-	Relevance  float32 // Confidence score (0.0 - 1.0)
-	LexicalRank float32 // FTS5 rank (typically negative)
+	Relevance     float32 // Confidence score (0.0 - 1.0)
+	LexicalRank   float32 // Relative lexical rank used for hybrid scoring
 	SemanticScore float32 // Cosine similarity from embedding search
 
 	// Embedding (for deduplication)
 	Embedding []float32 // Vector embedding for similarity comparison
 
 	// Metadata
-	LineStart int    // Line number where chunk starts in source
-	LineEnd   int    // Line number where chunk ends
-	Priority  int    // Ordering hint (lower = higher priority)
+	LineStart int // Line number where chunk starts in source
+	LineEnd   int // Line number where chunk ends
+	Priority  int // Ordering hint (lower = higher priority)
 }
 
 // Score calculates the hybrid relevance score.

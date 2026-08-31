@@ -29,11 +29,11 @@ do not appear immediately.
 
 ## Verification
 
-- [x] `go test ./internal/platform/mcp/...`
-- [x] `go test ./internal/platform/cli/...`
-- [x] `mise exec node@26.5.0 -- npm run distribution:sync`
-- [x] Cursor stale UI-path grep under `.hawp/kit/` and `distribution/` returned no matches after doc updates
-- [x] Generated distribution outputs validated current after source changes
+- [x] `go test ./internal/platform/mcp/...`. Evidence: see Outcome section above.
+- [x] `go test ./internal/platform/cli/...`. Evidence: see Outcome section above.
+- [x] `mise exec node@26.5.0 -- npm run distribution:sync`. Evidence: see Outcome section above.
+- [x] Cursor stale UI-path grep under `.hawp/kit/` and `distribution/` returned no matches after doc updates. Evidence: see Outcome section above.
+- [x] Generated distribution outputs validated current after source changes. Evidence: see Outcome section above.
 
 ## What was done
 

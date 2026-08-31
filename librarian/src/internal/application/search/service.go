@@ -9,13 +9,130 @@ package search
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 	"sort"
 
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/embeddings"
 	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
 )
+
+type searchIndex interface {
+	Close() error
+	QueryChunksLexical(query string, limit int) ([]map[string]interface{}, error)
+	HasVectors() (bool, error)
+	GetEmbeddingMetadata() (sqlite.EmbeddingMetadata, bool, error)
+	GetAllChunkVectors() (map[int64][]float32, error)
+	QueryChunksByIDs(ids []int64) ([]map[string]interface{}, error)
+	GetChunkVectors(chunkIDs []int64) (map[int64][]float32, error)
+}
+
+type projectResolver interface {
+	ResolveSearchIndexPath(repoRoot string) (string, error)
+}
+
+type defaultProjectResolver struct{}
+
+func (defaultProjectResolver) ResolveSearchIndexPath(repoRoot string) (string, error) {
+	project := filesystem.ResolveHawpProject(repoRoot)
+	return project.GetSearchIndexPath(), nil
+}
+
+type Service struct {
+	resolver projectResolver
+	open     func(path string) (searchIndex, error)
+}
+
+type QueryOptions struct {
+	Query       string
+	Limit       int
+	Semantic    bool
+	HybridRatio float32
+}
+
+type QueryExecution struct {
+	Rows       []map[string]interface{}
+	HasVectors bool
+}
+
+type IndexNotFoundError struct {
+	Path string
+	Err  error
+}
+
+func (e IndexNotFoundError) Error() string {
+	return fmt.Sprintf("index not found at %s; run `hawp search index` first: %v", e.Path, e.Err)
+}
+
+func (e IndexNotFoundError) Unwrap() error {
+	return e.Err
+}
+
+func NewService(resolver projectResolver, open func(path string) (searchIndex, error)) Service {
+	if resolver == nil {
+		resolver = defaultProjectResolver{}
+	}
+	if open == nil {
+		open = func(path string) (searchIndex, error) {
+			return sqlite.Open(path)
+		}
+	}
+	return Service{
+		resolver: resolver,
+		open:     open,
+	}
+}
+
+func DefaultService() Service {
+	return NewService(nil, nil)
+}
+
+func (s Service) Execute(repoRoot string, opts QueryOptions) (QueryExecution, error) {
+	if opts.Limit <= 0 {
+		opts.Limit = 10
+	}
+	dbPath, err := s.resolver.ResolveSearchIndexPath(repoRoot)
+	if err != nil {
+		return QueryExecution{}, fmt.Errorf("resolve search index path: %w", err)
+	}
+	db, err := s.open(dbPath)
+	if err != nil {
+		return QueryExecution{}, IndexNotFoundError{Path: dbPath, Err: err}
+	}
+	defer db.Close()
+
+	hasVectors, _ := db.HasVectors()
+	if opts.Semantic {
+		if !hasVectors {
+			return QueryExecution{HasVectors: false}, nil
+		}
+		rows := SemanticSearch(opts.Query, db, opts.Limit)
+		return QueryExecution{
+			Rows:       rows,
+			HasVectors: hasVectors,
+		}, nil
+	}
+
+	rows, err := db.QueryChunksLexical(opts.Query, opts.Limit*3)
+	if err != nil {
+		return QueryExecution{}, fmt.Errorf("lexical search: %w", err)
+	}
+	if len(rows) == 0 {
+		return QueryExecution{
+			Rows:       nil,
+			HasVectors: hasVectors,
+		}, nil
+	}
+	if hasVectors {
+		rows = HybridRank(rows, opts.Query, db, opts.Limit, opts.HybridRatio)
+	} else if len(rows) > opts.Limit {
+		rows = rows[:opts.Limit]
+	}
+	return QueryExecution{
+		Rows:       rows,
+		HasVectors: hasVectors,
+	}, nil
+}
 
 // Query runs query against the index at repoRoot/.hawp/db/index.sqlite:
 // lexical search first, then hybrid re-ranking (using whichever
@@ -23,44 +140,38 @@ import (
 // sqlite.IndexDB.GetEmbeddingMetadata) when vectors exist. Returns at most
 // limit results, already ranked.
 func Query(repoRoot, query string, limit int) ([]domainsearch.Result, error) {
-	dbPath := filepath.Join(repoRoot, ".hawp", "db", "index.sqlite")
-	db, err := sqlite.Open(dbPath)
+	execution, err := DefaultService().Execute(repoRoot, QueryOptions{
+		Query: query,
+		Limit: limit,
+	})
 	if err != nil {
-		return nil, fmt.Errorf("index not found at %s; run `hawp search index` first: %w", dbPath, err)
+		return nil, err
 	}
-	defer db.Close()
+	return RowsToResults(execution.Rows, execution.HasVectors), nil
+}
 
-	// Over-fetch for re-ranking headroom, same as the CLI always has.
-	rows, err := db.QueryChunksLexical(query, limit*3)
-	if err != nil {
-		return nil, fmt.Errorf("lexical search: %w", err)
-	}
-	if len(rows) == 0 {
-		return nil, nil
-	}
-
-	hasVectors, _ := db.HasVectors()
-	if hasVectors {
-		rows = HybridRank(rows, query, db, limit, 0)
-	} else if len(rows) > limit {
-		rows = rows[:limit]
-	}
-
+func RowsToResults(rows []map[string]interface{}, hasVectors bool) []domainsearch.Result {
 	results := make([]domainsearch.Result, len(rows))
 	for i, r := range rows {
-		relevance := float32(0.95) // no hybrid score available (lexical-only fallback)
+		relevance := float32(0.95) // lexical-only fallback
 		if hasVectors {
 			relevance = float32(getFloat(r, "_hybrid_score"))
 		}
 		results[i] = domainsearch.Result{
-			Source:    getStr(r, "path"),
-			Title:     getStr(r, "folder_role"),
-			Content:   getStr(r, "text"),
-			Relevance: relevance,
-			Embedding: []float32{},
+			ChunkID:       fmt.Sprintf("%d", getInt(r, "id")),
+			Content:       getStr(r, "text"),
+			Source:        getStr(r, "path"),
+			Title:         getStr(r, "folder_role"),
+			Relevance:     relevance,
+			LexicalRank:   float32(getFloat(r, "_lexical_rank")),
+			SemanticScore: float32(getFloat(r, "_semantic_score")),
+			Embedding:     []float32{},
+			LineStart:     int(getInt(r, "line_start")),
+			LineEnd:       int(getInt(r, "line_end")),
+			Priority:      i,
 		}
 	}
-	return results, nil
+	return results
 }
 
 // SemanticSearch performs a pure-vector search: embeds the query using the same
@@ -68,7 +179,7 @@ func Query(repoRoot, query string, limit int) ([]domainsearch.Result, error) {
 // cosine similarity and returns the top-limit rows.  No FTS5 is involved.
 // Returns nil (not an error) when vectors are absent, the embedder can't be
 // constructed, or the query fails — the caller decides how to handle that.
-func SemanticSearch(query string, db *sqlite.IndexDB, limit int) []map[string]interface{} {
+func SemanticSearch(query string, db searchIndex, limit int) []map[string]interface{} {
 	meta, ok, err := db.GetEmbeddingMetadata()
 	if err != nil || !ok {
 		return nil
@@ -141,7 +252,7 @@ func SemanticSearch(query string, db *sqlite.IndexDB, limit int) []map[string]in
 // used. Falls back to lexical order alone if no embedding metadata is
 // recorded yet, the embedder can't be constructed, or query embedding fails,
 // so hybrid ranking degrades gracefully rather than erroring the whole search.
-func HybridRank(lexicalResults []map[string]interface{}, query string, db *sqlite.IndexDB, limit int, lexicalWeight float32) []map[string]interface{} {
+func HybridRank(lexicalResults []map[string]interface{}, query string, db searchIndex, limit int, lexicalWeight float32) []map[string]interface{} {
 	if len(lexicalResults) == 0 {
 		return lexicalResults
 	}

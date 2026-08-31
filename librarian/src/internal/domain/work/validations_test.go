@@ -149,6 +149,79 @@ Done.
 	}
 }
 
+func TestBacklogConsistencyAcceptsHashColumnAndNumericIDs(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"active/049.md":            "# plan",
+		"closed/2026/07/27/042.md": closedPlanComplete,
+		"parked/040.md":            "# parked",
+	})
+	backlog, err := ParseBacklog(filepath.Join(workDir, "BACKLOG.md"))
+	if err == nil || backlog != nil {
+		t.Fatal("expected missing backlog fixture to fail before explicit parse fixture setup")
+	}
+
+	workDir = buildWorkDir(t, map[string]string{
+		"BACKLOG.md": `# Backlog
+
+## Active Work
+
+| # | Status | Title | Plan File | Next action |
+| --- | --- | --- | --- | --- |
+| 049 | in-progress | thing | active/049.md | next |
+
+## Blocked / Parked
+
+| # | Status | Title | Detail | Next action |
+| --- | --- | --- | --- | --- |
+| 040 | parked | parked thing | [plan](parked/040.md) | later |
+
+## Recently Closed
+
+| # | Title | Closed | Plan File |
+| --- | --- | --- | --- |
+| 042 | closed thing | 2026-07-27 | closed/2026/07/27/042.md |
+`,
+		"active/049.md":            "# plan",
+		"closed/2026/07/27/042.md": closedPlanComplete,
+		"parked/040.md":            "# parked",
+	})
+
+	backlog, err = ParseBacklog(filepath.Join(workDir, "BACKLOG.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(backlog.Active) != 1 || backlog.Active[0].ID != "049" {
+		t.Fatalf("active rows = %+v, want numeric 049 row", backlog.Active)
+	}
+	if len(backlog.Closed) != 1 || backlog.Closed[0].ID != "042" {
+		t.Fatalf("closed rows = %+v, want numeric 042 row", backlog.Closed)
+	}
+	if len(backlog.Parked) != 1 || backlog.Parked[0].ID != "040" {
+		t.Fatalf("parked rows = %+v, want numeric 040 row", backlog.Parked)
+	}
+
+	result := CheckBacklogConsistency(workDir, backlog)
+	if result.Status != StatusPass {
+		t.Fatalf("status = %s, want PASS: %+v", result.Status, result)
+	}
+}
+
+func TestClosedTaskCompletenessAcceptsNumericClosedIDs(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"closed/2026/07/27/042.md": closedPlanComplete,
+	})
+	result := CheckClosedTaskCompleteness(workDir)
+	if result.Total != 1 {
+		t.Fatalf("total plans = %d, want 1", result.Total)
+	}
+	if len(result.UntypedCurrent) != 0 {
+		t.Fatalf("untyped current = %+v, want none", result.UntypedCurrent)
+	}
+	if result.Status != StatusPass {
+		t.Fatalf("status = %s, want PASS", result.Status)
+	}
+}
+
 func TestEvidenceIntegrity(t *testing.T) {
 	workDir := buildWorkDir(t, map[string]string{
 		"closed/2026/07/03/TASK-086.md":       "## Verification\n\n- [x] ok Evidence: ../evidence/2026/07/03/TASK-086-run.md\n- [x] bad Evidence: ../evidence/2026/07/03/missing.md\n",
@@ -176,6 +249,17 @@ func TestEvidenceIntegrity(t *testing.T) {
 	}
 }
 
+func TestCollectClosedPlanFilesIncludesFolderPlans(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"closed/2026/08/25/flat.md":             closedPlanComplete,
+		"closed/2026/08/25/folder-item/plan.md": closedPlanComplete,
+	})
+	files := CollectClosedPlanFiles(filepath.Join(workDir, "closed"))
+	if len(files) != 2 {
+		t.Fatalf("closed plan files = %d, want 2", len(files))
+	}
+}
+
 func TestVerificationClarity(t *testing.T) {
 	workDir := buildWorkDir(t, map[string]string{
 		"closed/2026/07/03/TASK-086.md": `## Verification (filled at close)
@@ -199,6 +283,60 @@ func TestVerificationClarity(t *testing.T) {
 	}
 	if result.Status != StatusWarn {
 		t.Errorf("status = %s, want WARN", result.Status)
+	}
+}
+
+func TestVerificationClarityCountsMultilineEvidenceAsProven(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"closed/2026/08/25/folder-item/plan.md": `## Verification
+
+- [x] benchmark evidence recorded
+      Evidence: ../evidence/2026/08/25/folder-item-proof.md
+- [x] explicit unproven follow-up
+      explicitly unproven pending CI
+
+## Close Checklist
+`,
+		"evidence/2026/08/25/folder-item-proof.md": "# proof",
+	})
+	files := CollectClosedPlanFiles(filepath.Join(workDir, "closed"))
+	result := CheckVerificationClarity(files)
+	if result.Total != 2 {
+		t.Fatalf("total claims = %d, want 2", result.Total)
+	}
+	if result.Proven != 1 || len(result.Unproven) != 1 || len(result.Ambiguous) != 0 {
+		t.Fatalf("clarity = proven %d / ambiguous %d / unproven %d, want 1/0/1",
+			result.Proven, len(result.Ambiguous), len(result.Unproven))
+	}
+	if result.Status != StatusPass {
+		t.Errorf("status = %s, want PASS", result.Status)
+	}
+}
+
+func TestVerificationClarityUnprovenOnlyPasses(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"closed/2026/08/25/folder-item/plan.md": `## Verification
+
+- [x] proven claim (Evidence: test output)
+- [ ] explicitly unproven claim
+
+## Close Checklist
+`,
+	})
+	files := CollectClosedPlanFiles(filepath.Join(workDir, "closed"))
+	result := CheckVerificationClarity(files)
+	if result.Total != 2 {
+		t.Fatalf("total claims = %d, want 2", result.Total)
+	}
+	if result.Proven != 1 || len(result.Unproven) != 1 || len(result.Ambiguous) != 0 {
+		t.Fatalf("clarity = proven %d / ambiguous %d / unproven %d, want 1/0/1",
+			result.Proven, len(result.Ambiguous), len(result.Unproven))
+	}
+	if result.Status != StatusPass {
+		t.Errorf("status = %s, want PASS", result.Status)
+	}
+	if result.Unproven[0].ID != "folder-item" {
+		t.Fatalf("unproven id = %q, want folder-item", result.Unproven[0].ID)
 	}
 }
 

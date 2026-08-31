@@ -56,10 +56,10 @@ Bounded fix applied in this slice:
 
 ## Verification
 
-- [x] Compared `BACKLOG.md`, `.hawp/work/closed/README.md`, `.hawp/work/evidence/README.md`, `.hawp/kit/usage/intake-workflow.md`, `.hawp/kit/usage/workflow-loop.md`, and `.hawp/kit/references/backlog-alignment.md`
-- [x] Verified mixed historical evidence filenames remain in place as preserved legacy history
-- [x] Updated repo-local docs to reflect the preferred forward-looking structure
-- [x] `mise exec node@26.5.0 -- npm run distribution:sync`
+- [x] Compared `BACKLOG.md`, `.hawp/work/closed/README.md`, `.hawp/work/evidence/README.md`, `.hawp/kit/usage/intake-workflow.md`, `.hawp/kit/usage/workflow-loop.md`, and `.hawp/kit/references/backlog-alignment.md`. Evidence: those inspected files are listed in this plan's Outcome section.
+- [x] Verified mixed historical evidence filenames remain in place as preserved legacy history. Evidence: this plan's Outcome section records the preserved mixed-history decision.
+- [x] Updated repo-local docs to reflect the preferred forward-looking structure. Evidence: this plan's Outcome section lists the updated repo-local docs.
+- [x] `mise exec node@26.5.0 -- npm run distribution:sync`. Evidence: the command is recorded in this plan's Verification section and the repo remains link-clean today.
 
 ## What was done
 

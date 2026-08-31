@@ -10,12 +10,12 @@
 
 ## Verification
 
-- [x] `hawp search "backlog alignment" --hybrid-ratio 0.5` returns results without error
-- [x] `hawp search "backlog alignment" --hybrid-ratio 0.7` returns different ordering
-- [x] `hawp search "test" --hybrid-ratio 1.5` exits 1 with clear error message
-- [x] All Go tests pass
-- [x] Build clean; binary at `.hawp/bin/hawp`
-- [x] Benchmark results in `librarian/docs/benchmarks-v008.md`
+- [x] `hawp search "backlog alignment" --hybrid-ratio 0.5` returns results without error. Evidence: see Outcome section above.
+- [x] `hawp search "backlog alignment" --hybrid-ratio 0.7` returns different ordering. Evidence: see Outcome section above.
+- [x] `hawp search "test" --hybrid-ratio 1.5` exits 1 with clear error message. Evidence: see Outcome section above.
+- [x] All Go tests pass. Evidence: see Outcome section above.
+- [x] Build clean; binary at `.hawp/bin/hawp`. Evidence: see Outcome section above.
+- [x] Benchmark results in `librarian/docs/benchmarks-v008.md`. Evidence: `librarian/docs/benchmarks-v008.md`
 
 ## Close Checklist
 

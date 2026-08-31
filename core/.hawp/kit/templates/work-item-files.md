@@ -2,7 +2,7 @@
 
 Use this template to track files for a work item.
 
-**Save as:** `.hawp/work/active/<TASK-ID>-files.md`
+**Save as:** `.hawp/work/active/<TASK-ID>/files.md`
 
 ---
 
@@ -10,7 +10,7 @@ Use this template to track files for a work item.
 
 **Purpose:** Track files related to this work item using exact repo-relative paths. Source of truth for file ownership, read-only context, and lock status.
 
-**Work Item:** `.hawp/work/active/TASK-XXX.md`
+**Work Item:** `.hawp/work/active/TASK-XXX/plan.md`
 
 **Last Updated:** YYYY-MM-DD
 
@@ -20,7 +20,7 @@ Use this template to track files for a work item.
 
 Files this task is allowed to create or edit.
 
-- `.hawp/work/active/TASK-XXX.md` — this work item plan
+- `.hawp/work/active/TASK-XXX/plan.md` — this work item plan
 - `path/to/file.md` — file 1
 - `path/to/another-file.ts` — file 2
 
@@ -62,7 +62,7 @@ Files actually changed during this task. Populate as work progresses.
 - `.hawp/kit/templates/work-item-files.md` (new)
 - `.hawp/kit/instructions/da-file-tracking.md` (new)
 - `.hawp/kit/references/work-item-file-tracking.md` (new)
-- `.hawp/work/active/TASK-030.md` (this work item)
+- `.hawp/work/active/TASK-030/plan.md` (this work item)
 - `.hawp/work/BACKLOG.md` (updated with TASK-030 row)
 
 ---

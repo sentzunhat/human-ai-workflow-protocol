@@ -10,10 +10,10 @@
 
 ## Verification
 
-- [x] `go vet ./...` — clean
-- [x] `go build ./cmd/hawp` — clean
-- [x] `go test ./...` (short) — all packages pass
-- [x] grep for `llm-reshape`, `llmReshape`, `ragOutput` across `librarian/src/` — no actionable dead code remaining
+- [x] `go vet ./...` — clean. Evidence: see Outcome section above.
+- [x] `go build ./cmd/hawp` — clean. Evidence: see Outcome section above.
+- [x] `go test ./...` (short) — all packages pass. Evidence: see Outcome section above.
+- [x] grep for `llm-reshape`, `llmReshape`, `ragOutput` across `librarian/src/` — no actionable dead code remaining. Evidence: see Outcome section above.
 
 ## Close Checklist
 

@@ -15,18 +15,20 @@ import (
 	appcheck "github.com/sentzunhat/hawp/librarian/src/internal/application/check"
 	appcontext "github.com/sentzunhat/hawp/librarian/src/internal/application/context"
 	appdb "github.com/sentzunhat/hawp/librarian/src/internal/application/db"
+	appdistribution "github.com/sentzunhat/hawp/librarian/src/internal/application/distribution"
 	appembed "github.com/sentzunhat/hawp/librarian/src/internal/application/embed"
 	appindex "github.com/sentzunhat/hawp/librarian/src/internal/application/index"
 	appkit "github.com/sentzunhat/hawp/librarian/src/internal/application/kit"
 	appkitsync "github.com/sentzunhat/hawp/librarian/src/internal/application/kitsync"
 	applinks "github.com/sentzunhat/hawp/librarian/src/internal/application/links"
-	appmcp "github.com/sentzunhat/hawp/librarian/src/internal/platform/mcp"
+	appprovidersync "github.com/sentzunhat/hawp/librarian/src/internal/application/providersync"
 	appprovision "github.com/sentzunhat/hawp/librarian/src/internal/application/provision"
+	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
 	appupdate "github.com/sentzunhat/hawp/librarian/src/internal/application/update"
 	appuuid "github.com/sentzunhat/hawp/librarian/src/internal/application/uuidgen"
 	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work"
-	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
 	domainindex "github.com/sentzunhat/hawp/librarian/src/internal/domain/index"
+	domainprovidersync "github.com/sentzunhat/hawp/librarian/src/internal/domain/providersync"
 	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
 	domainupdate "github.com/sentzunhat/hawp/librarian/src/internal/domain/update"
 	domainusage "github.com/sentzunhat/hawp/librarian/src/internal/domain/usage"
@@ -35,6 +37,7 @@ import (
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/githubrelease"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
+	appmcp "github.com/sentzunhat/hawp/librarian/src/internal/platform/mcp"
 )
 
 // ExitError carries a non-zero exit code from a command that already
@@ -86,6 +89,24 @@ func Run(args []string) error {
 
 	case command == "work" && sub == "new":
 		return runWorkNew(args[2:])
+
+	case command == "providers" && sub == "materialize":
+		return runProvidersMaterialize()
+
+	case command == "providers" && sub == "validate":
+		return runProvidersValidate()
+
+	case command == "providers" && sub == "sync":
+		return runProvidersSync()
+
+	case command == "distribution" && sub == "build":
+		return runDistributionBuild()
+
+	case command == "distribution" && sub == "validate":
+		return runDistributionValidate()
+
+	case command == "distribution" && sub == "sync":
+		return runDistributionSync()
 
 	case command == "check":
 		return runCheck()
@@ -389,6 +410,139 @@ func runInit(args []string) error {
 		return ExitError{Code: 1}
 	}
 	return nil
+}
+
+func runProvidersMaterialize() error {
+	root, err := repo.FindBacklogRepoRoot(mustGetwd())
+	if err != nil {
+		return err
+	}
+
+	result, err := appprovidersync.Materialize(root)
+	if err != nil {
+		return err
+	}
+	for _, file := range result.Updated {
+		fmt.Printf("updated %s\n", file)
+	}
+	for _, file := range result.Unchanged {
+		fmt.Printf("unchanged %s\n", file)
+	}
+	fmt.Printf("\nprovider materialize complete: %d/%d file(s) updated\n", len(result.Updated), len(result.Updated)+len(result.Unchanged))
+	return nil
+}
+
+func runProvidersValidate() error {
+	root, err := repo.FindBacklogRepoRoot(mustGetwd())
+	if err != nil {
+		return err
+	}
+
+	result, err := appprovidersync.Validate(root)
+	if err != nil {
+		return err
+	}
+	if !result.OK() {
+		fmt.Fprintln(os.Stderr, "provider materialization validation failed")
+		if len(result.Missing) > 0 {
+			fmt.Fprintln(os.Stderr, "\nmissing materialized outputs:")
+			for _, file := range result.Missing {
+				fmt.Fprintf(os.Stderr, "- %s\n", file)
+			}
+		}
+		if len(result.Stale) > 0 {
+			fmt.Fprintln(os.Stderr, "\nstale materialized outputs:")
+			for _, file := range result.Stale {
+				fmt.Fprintf(os.Stderr, "- %s\n", file)
+			}
+		}
+		fmt.Fprintln(os.Stderr, "\nrun `hawp providers materialize`")
+		return ExitError{Code: 1}
+	}
+
+	fmt.Printf("provider validation passed: %d materialized file(s) are current\n", len(domainprovidersync.MaterializationTargets))
+	return nil
+}
+
+func runProvidersSync() error {
+	if err := runProvidersMaterialize(); err != nil {
+		return err
+	}
+	return runProvidersValidate()
+}
+
+func runDistributionBuild() error {
+	root, err := repo.FindBacklogRepoRoot(mustGetwd())
+	if err != nil {
+		return err
+	}
+
+	result, err := appdistribution.Build(root)
+	if err != nil {
+		return err
+	}
+	for _, file := range result.Updated {
+		fmt.Printf("updated %s\n", file)
+	}
+	for _, file := range result.Unchanged {
+		fmt.Printf("unchanged %s\n", file)
+	}
+	fmt.Printf("\ndistribution build complete: %d/%d file(s) updated\n", len(result.Updated), len(result.Updated)+len(result.Unchanged))
+	return nil
+}
+
+func runDistributionValidate() error {
+	root, err := repo.FindBacklogRepoRoot(mustGetwd())
+	if err != nil {
+		return err
+	}
+
+	result, err := appdistribution.Validate(root)
+	if err != nil {
+		return err
+	}
+	if !result.OK() {
+		fmt.Fprintln(os.Stderr, "distribution validation failed")
+		if len(result.LegacyPresent) > 0 {
+			fmt.Fprintln(os.Stderr, "\nlegacy root-level guides must be removed:")
+			for _, file := range result.LegacyPresent {
+				fmt.Fprintf(os.Stderr, "- %s\n", file)
+			}
+		}
+		if len(result.Missing) > 0 {
+			fmt.Fprintln(os.Stderr, "\nmissing generated outputs:")
+			for _, file := range result.Missing {
+				fmt.Fprintf(os.Stderr, "- %s\n", file)
+			}
+		}
+		if len(result.Stale) > 0 {
+			fmt.Fprintln(os.Stderr, "\nstale generated outputs:")
+			for _, file := range result.Stale {
+				fmt.Fprintf(os.Stderr, "- %s\n", file)
+			}
+		}
+		if len(result.PathLeaks) > 0 {
+			fmt.Fprintln(os.Stderr, "\ninvalid downstream path leaks (core/.hawp/) in source kit files:")
+			for _, leak := range result.PathLeaks {
+				fmt.Fprintf(os.Stderr, "- %s:%d %s\n", leak.File, leak.Line, leak.Text)
+			}
+		}
+		fmt.Fprintln(os.Stderr, "\nrun `hawp distribution build`")
+		return ExitError{Code: 1}
+	}
+
+	fmt.Println("distribution validation passed: generated outputs are current")
+	return nil
+}
+
+func runDistributionSync() error {
+	if err := runProvidersSync(); err != nil {
+		return err
+	}
+	if err := runDistributionBuild(); err != nil {
+		return err
+	}
+	return runDistributionValidate()
 }
 
 func runMCP() error {
@@ -729,6 +883,7 @@ func runKitNormalize(args []string) error {
 
 func runWorkNormalize(args []string) error {
 	opts := appwork.NormalizeOptions{}
+	explicitRepoRoot := ""
 	for i := 0; i < len(args); i++ {
 		switch {
 		case args[i] == "--apply":
@@ -737,6 +892,8 @@ func runWorkNormalize(args []string) error {
 			opts.Apply = false
 		case args[i] == "--validate":
 			opts.Validate = true
+		case args[i] == "--migrate-folders":
+			opts.MigrateFolders = true
 		case args[i] == "--force-dirty":
 			opts.ForceDirty = true
 		case args[i] == "--verbose":
@@ -753,13 +910,23 @@ func runWorkNormalize(args []string) error {
 		case args[i] == "--export-research-queue" && i+1 < len(args):
 			opts.ExportResearchQueue = args[i+1]
 			i++
+		case args[i] == "--hawp-root" && i+1 < len(args):
+			explicitRepoRoot = filepath.Dir(filepath.Clean(args[i+1]))
+			i++
+		case args[i] == "--work-root" && i+1 < len(args):
+			explicitRepoRoot = filepath.Dir(filepath.Dir(filepath.Clean(args[i+1])))
+			i++
 		}
 	}
-	root, err := repo.FindBacklogRepoRoot(mustGetwd())
-	if err != nil {
-		return err
+	if explicitRepoRoot != "" {
+		opts.RepoRoot = explicitRepoRoot
+	} else {
+		root, err := repo.FindBacklogRepoRoot(mustGetwd())
+		if err != nil {
+			return err
+		}
+		opts.RepoRoot = root
 	}
-	opts.RepoRoot = root
 	if code := appwork.Normalize(os.Stdout, os.Stderr, opts); code != 0 {
 		return ExitError{Code: code}
 	}
@@ -1069,39 +1236,30 @@ func runSearch(args []string) error {
 		return nil
 	}
 
-	dbPath := filepath.Join(root, ".hawp", "db", "index.sqlite")
-	db, err := sqlite.Open(dbPath)
+	execution, err := appsearch.DefaultService().Execute(root, appsearch.QueryOptions{
+		Query:       query,
+		Limit:       limit,
+		Semantic:    wantSemantic,
+		HybridRatio: float32(hybridRatio),
+	})
 	if err != nil {
-		fmt.Printf("Index not found at %s. Run `hawp search index` first.\n", dbPath)
+		var missingIndex appsearch.IndexNotFoundError
+		if errors.As(err, &missingIndex) {
+			fmt.Printf("Index not found at %s. Run `hawp search index` first.\n", missingIndex.Path)
+			return nil
+		}
+		return err
+	}
+
+	if wantSemantic && !execution.HasVectors {
+		fmt.Println("No vectors found. Run `hawp search embed` first to enable semantic search.")
 		return nil
 	}
-	defer db.Close()
 
-	hasVectors, _ := db.HasVectors()
-
-	var results []map[string]interface{}
-	if wantSemantic {
-		if !hasVectors {
-			fmt.Println("No vectors found. Run `hawp search embed` first to enable semantic search.")
-			return nil
-		}
-		results = appsearch.SemanticSearch(query, db, limit)
-		if results == nil {
-			fmt.Printf("Semantic search failed for %q — check that your embedding backend is running.\n", query)
-			return nil
-		}
-	} else {
-		// Lexical search (FTS5), with hybrid re-ranking when vectors exist.
-		var err error
-		results, err = db.QueryChunksLexical(query, limit*3)
-		if err != nil {
-			return fmt.Errorf("search failed: %w", err)
-		}
-		if hasVectors {
-			results = appsearch.HybridRank(results, query, db, limit, float32(hybridRatio))
-		} else if len(results) > limit {
-			results = results[:limit]
-		}
+	results := execution.Rows
+	if wantSemantic && results == nil {
+		fmt.Printf("Semantic search failed for %q — check that your embedding backend is running.\n", query)
+		return nil
 	}
 
 	if len(results) == 0 {
@@ -1130,16 +1288,7 @@ func runSearch(args []string) error {
 	}
 
 	// Convert to domain search results
-	searchResults := make([]domainsearch.Result, len(results))
-	for i, r := range results {
-		searchResults[i] = domainsearch.Result{
-			Source:    getStr(r, "path"),
-			Title:     getStr(r, "folder_role"),
-			Content:   getStr(r, "text"),
-			Relevance: float32(0.95), // Default high relevance
-			Embedding: []float32{},   // Not used in content-based dedup
-		}
-	}
+	searchResults := appsearch.RowsToResults(results, execution.HasVectors)
 
 	// Pre-pack content dedup: drop chunks with >70% word-set Jaccard overlap
 	// against a higher-ranked chunk. No embeddings needed — fast word-set
@@ -1313,7 +1462,13 @@ COMMANDS
   kit normalize [--apply]              normalize .hawp/kit/ names and links (dry-run default)
   work validate [--work-root <path>]   backlog/plan/evidence integrity checks
   work new "<title>" [--type ...]      scaffold intake: UUID, plan file, inbox backlog row
-  work normalize [--apply --validate]  normalize work record drift (dry-run default)
+  work normalize [--apply --migrate-folders --validate]  normalize work record drift (dry-run default)
+  providers materialize                materialize shared provider behaviors into provider packs
+  providers validate                   validate generated provider-pack files
+  providers sync                       materialize + validate provider-pack files
+  distribution build                   build generated install/update guides
+  distribution validate                validate generated install/update guides
+  distribution sync                    providers sync + build + validate generated guides
   check                                combined kit + work + links validation
   init [--provider <name>|all]           provision ~/.hawp, sync kit, write MCP configs (claude|cursor|codex|continue|all)
   mcp                                   start stdio MCP server (JSON-RPC 2.0) for AI agent tool use

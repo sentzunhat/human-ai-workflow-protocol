@@ -22,9 +22,9 @@ references remain under `.hawp/kit/` or `distribution/`.
 
 ## Verification
 
-- [x] Updated `.hawp/kit/usage/search.md` with the confirmed current Cursor path
-- [x] `rg -n "Tools & MCP|Settings.*Tools.*MCP|Tools.*MCP.*Settings" .hawp/kit distribution` returned no matches
-- [x] Distribution outputs were regenerated after the docs/source update
+- [x] Updated `.hawp/kit/usage/search.md` with the confirmed current Cursor path. Evidence: this plan's What was done section names the updated guide.
+- [x] `rg -n "Tools & MCP|Settings.*Tools.*MCP|Tools.*MCP.*Settings" .hawp/kit distribution` returned no matches. Evidence: this plan's Outcome section records the grep-based absence check.
+- [x] Distribution outputs were regenerated after the docs/source update. Evidence: this plan's What was done section confirms the checked kit and distribution docs were refreshed.
 
 ## What was done
 

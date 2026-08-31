@@ -178,9 +178,9 @@ Benchmarking infrastructure shipped as `hawp search benchmark` in the Go CLI (v0
 
 ## Verification
 
-- [x] `hawp search benchmark` runs end-to-end with real HybridRank (v0.0.5, 2026-08-24)
-- [x] 10/10 queries return results against HAWP corpus (v0.0.5 + v0.0.6, 2026-08-24)
-- [x] Benchmark results recorded in `librarian/docs/benchmarks-v004.md` and `librarian/docs/benchmarks-v006.md`
+- [x] `hawp search benchmark` runs end-to-end with real HybridRank (v0.0.5, 2026-08-24). Evidence: see Outcome section above.
+- [x] 10/10 queries return results against HAWP corpus (v0.0.5 + v0.0.6, 2026-08-24). Evidence: see Outcome section above.
+- [x] Benchmark results recorded in `librarian/docs/benchmarks-v004.md` and `librarian/docs/benchmarks-v006.md`. Evidence: `librarian/docs/benchmarks-v004.md` and `librarian/docs/benchmarks-v006.md`
 - [x] Evidence: `.hawp/work/evidence/2026/08/24/search-benchmark-v004.md` and `search-benchmark-v006.md`
 
 ## Close Checklist

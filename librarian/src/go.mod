@@ -2,6 +2,8 @@ module github.com/sentzunhat/hawp/librarian/src
 
 go 1.26
 
+toolchain go1.26.4
+
 require (
 	github.com/knights-analytics/hugot v0.7.5
 	gopkg.in/yaml.v3 v3.0.1

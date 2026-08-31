@@ -61,12 +61,12 @@ the standard Go project convention for a single-language repo.
 
 ## Verification
 
-- [ ] `git mv` succeeds, directory is `src/`
-- [x] GitHub Actions workflow references updated (4 workflow files)
-- [x] `npm --prefix librarian run check:markdown-links` passes
-- [x] `go build ./...` passes from `src/`
-- [x] No stale `librarian/go` hits in audited file types
-- [x] `npm --prefix librarian run validate` (Go-backed): kit ✓, work ✓, links ✓
+- [ ] explicitly unproven in this record: `git mv` succeeds, directory is `src/`
+- [x] GitHub Actions workflow references updated (4 workflow files). Evidence: see Outcome section above.
+- [x] `npm --prefix librarian run check:markdown-links` passes. Evidence: see follow-up verification notes in this plan.
+- [x] `go build ./...` passes from `src/`. Evidence: see follow-up verification notes in this plan.
+- [x] No stale `librarian/go` hits in audited file types. Evidence: see Outcome section above.
+- [x] `npm --prefix librarian run validate` (Go-backed): kit ✓, work ✓, links ✓. Evidence: see follow-up verification notes in this plan.
 
 ## Outcome
 

@@ -77,15 +77,16 @@ func NewItem(workDir, itemType, title, inputText string) (*NewItemResult, error)
 		return nil, fmt.Errorf("insert backlog row: %w", err)
 	}
 
-	planPath := filepath.Join(workDir, "active", item.PlanFileName())
+	planDir := filepath.Join(workDir, "active", item.PlanDirName())
+	planPath := filepath.Join(planDir, item.PlanFileName())
 	if _, err := os.Stat(planPath); err == nil {
 		return nil, fmt.Errorf("plan file already exists: %s (slug collision — try a more distinct title)", planPath)
 	}
 
-	if err := os.MkdirAll(filepath.Join(workDir, "active"), 0755); err != nil {
-		return nil, fmt.Errorf("create active/ directory: %w", err)
+	if err := os.MkdirAll(planDir, 0o755); err != nil {
+		return nil, fmt.Errorf("create active item directory: %w", err)
 	}
-	if err := os.WriteFile(planPath, []byte(item.PlanFileContent(inputText, date)), 0644); err != nil {
+	if err := os.WriteFile(planPath, []byte(item.PlanFileContent(inputText, date)), 0o644); err != nil {
 		return nil, fmt.Errorf("write plan file: %w", err)
 	}
 	// Write the plan file before the backlog row: if the process dies

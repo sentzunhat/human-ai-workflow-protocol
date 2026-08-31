@@ -15,6 +15,7 @@ type ContextBlock struct {
 	ResultCount int                 // Number of results included
 	TokenCount  int                 // Approximate token usage
 	Budget      int                 // Token budget passed to FormatAsMarkdown
+	Passthrough bool                // Render raw content only for sparse under-budget result sets
 	Results     []FormattedResult   // Ordered, deduplicated results
 	References  []DocumentReference // Deduplicated source documents (by Source)
 	Metadata    map[string]string   // Query timestamp, filters, etc
@@ -28,6 +29,8 @@ type FormattedResult struct {
 	Title     string  // Chunk title/heading
 	Content   string  // Actual text content
 	Tokens    int     // Approximate tokens in this result
+	LineStart int     // Line number where chunk starts in source
+	LineEnd   int     // Line number where chunk ends in source
 }
 
 // FormatAsMarkdown converts deduplicated results into LLM-ready markdown.
@@ -48,48 +51,62 @@ func FormatAsMarkdown(results []search.Result, query string, maxTokens int) Cont
 		return sorted[i].Relevance > sorted[j].Relevance
 	})
 
-	// Add results until token budget exceeded
-	usedTokens := estimateTokens(block.Title) + 50 // Title + metadata overhead
+	// Reserve space for the compact header, then add results until the budget is
+	// exhausted based on the rendered representation rather than a fixed surcharge.
+	usedTokens := estimateTokens(renderHeader(block.Title, len(sorted)))
+	rawTokens := 0
 
 	for rank, result := range sorted {
 		if usedTokens >= maxTokens {
 			break // Stop adding if we exceed budget
 		}
 
-		// Reserve ~25 tokens for separators and formatting per result
-		separatorTokens := 25
-		if usedTokens+separatorTokens >= maxTokens {
-			break // No room for even a minimal result
-		}
-
-		resultTokens := estimateTokens(result.Content)
-		availableTokens := maxTokens - usedTokens - separatorTokens
-
-		if resultTokens > availableTokens {
-			// Truncate this result to fit available space
-			truncated := truncateToTokens(result.Content, availableTokens-5) // -5 for truncation markers
-			resultTokens = estimateTokens(truncated)
-			result.Content = truncated
-		}
-
-		block.Results = append(block.Results, FormattedResult{
+		candidate := FormattedResult{
 			Rank:      rank + 1,
 			Relevance: result.Relevance,
 			Source:    result.Source,
 			Title:     result.Title,
 			Content:   result.Content,
-			Tokens:    resultTokens,
-		})
+			LineStart: result.LineStart,
+			LineEnd:   result.LineEnd,
+		}
+		referenceTokens := estimateTokens(renderReferenceLine(candidate)) + 1
+		if usedTokens+referenceTokens >= maxTokens {
+			break // No room for even a minimal result
+		}
 
-		usedTokens += resultTokens + separatorTokens
+		resultTokens := estimateTokens(result.Content)
+		availableTokens := maxTokens - usedTokens - referenceTokens
+
+		if resultTokens > availableTokens {
+			if availableTokens <= 5 {
+				break
+			}
+			// Truncate this result to fit available space
+			truncated := truncateToTokens(result.Content, availableTokens-5) // -5 for truncation markers
+			resultTokens = estimateTokens(truncated)
+			result.Content = truncated
+			candidate.Content = truncated
+		}
+
+		candidate.Tokens = resultTokens
+		block.Results = append(block.Results, candidate)
+		rawTokens += resultTokens
+
+		usedTokens += estimateTokens(renderFormattedResult(candidate))
 	}
 
 	block.References = deduplicateReferences(block.Results)
 	block.ResultCount = len(block.Results)
-	block.TokenCount = usedTokens
+	block.Passthrough = len(block.Results) > 0 && len(block.Results) <= 5 && rawTokens <= maxTokens
+	block.TokenCount = estimateTokens(block.String())
 	block.Metadata["result_count"] = fmt.Sprintf("%d", block.ResultCount)
 	block.Metadata["token_count"] = fmt.Sprintf("%d", block.TokenCount)
 	block.Metadata["budget"] = fmt.Sprintf("%d", maxTokens)
+	block.Metadata["render_mode"] = "inline"
+	if block.Passthrough {
+		block.Metadata["render_mode"] = "passthrough"
+	}
 
 	return block
 }
@@ -107,6 +124,8 @@ func deduplicateReferences(results []FormattedResult) []DocumentReference {
 			if result.Relevance > ref.Relevance {
 				ref.Relevance = result.Relevance
 				ref.Content = result.Content
+				ref.LineStart = result.LineStart
+				ref.LineEnd = result.LineEnd
 				refMap[result.Source] = ref
 			}
 		} else {
@@ -115,6 +134,8 @@ func deduplicateReferences(results []FormattedResult) []DocumentReference {
 				Title:     result.Title,
 				Content:   result.Content,
 				Relevance: result.Relevance,
+				LineStart: result.LineStart,
+				LineEnd:   result.LineEnd,
 			}
 		}
 	}
@@ -129,18 +150,21 @@ func deduplicateReferences(results []FormattedResult) []DocumentReference {
 	return refs
 }
 
-// String renders the context block as formatted markdown: a title/summary
-// header, followed by the interleaved reference+content body (see
-// formatResultsInline).
+// String renders the context block as formatted markdown: for small/sparse
+// result sets it emits only the interleaved provenance+content body; for
+// denser sets it prepends the compact title header before the same body.
 func (cb ContextBlock) String() string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("# %s\n\n", cb.Title))
-	sb.WriteString(fmt.Sprintf("**Results:** %d | **Tokens:** %d/%d\n\n", cb.ResultCount, cb.TokenCount, cb.Budget))
-	sb.WriteString(formatResultsInline(cb.Results))
+	if cb.Passthrough {
+		sb.WriteString(formatResultsPassthrough(cb.Results))
+	} else {
+		sb.WriteString(renderHeader(cb.Title, len(cb.Results)))
+		sb.WriteString(formatResultsInline(cb.Results))
+	}
 	return sb.String()
 }
 
-// formatResultsInline renders just the body — each result's **Reference:**
+// formatResultsInline renders just the body — each result's `Ref:`
 // line interleaved immediately above its own content, rather than collected
 // into one list at the end — so a reader (human or LLM) sees which source a
 // chunk came from right where it's used, without having to cross-reference
@@ -151,15 +175,46 @@ func (cb ContextBlock) String() string {
 func formatResultsInline(results []FormattedResult) string {
 	var sb strings.Builder
 	for _, result := range results {
-		title := result.Source
-		if result.Title != "" {
-			title = fmt.Sprintf("%s — %s", result.Source, result.Title)
-		}
-		sb.WriteString(fmt.Sprintf("**Reference:** %s (%d%% relevant)\n\n", title, int(result.Relevance*100)))
-		sb.WriteString(result.Content)
-		sb.WriteString("\n\n")
+		sb.WriteString(renderFormattedResult(result))
 	}
 	return sb.String()
+}
+
+func formatResultsPassthrough(results []FormattedResult) string {
+	var sb strings.Builder
+	for i, result := range results {
+		if i > 0 {
+			sb.WriteString("\n\n")
+		}
+		sb.WriteString(result.Content)
+	}
+	return sb.String()
+}
+
+func renderHeader(title string, resultCount int) string {
+	if title == "" || resultCount <= 5 {
+		return ""
+	}
+	return fmt.Sprintf("# %s\n\n", title)
+}
+
+func renderReferenceLine(result FormattedResult) string {
+	return fmt.Sprintf("Ref: %s\n", formatReferenceLocation(result.Source, result.LineStart, result.LineEnd))
+}
+
+func renderFormattedResult(result FormattedResult) string {
+	return renderReferenceLine(result) + result.Content + "\n\n"
+}
+
+func formatReferenceLocation(source string, lineStart, lineEnd int) string {
+	location := source
+	switch {
+	case lineStart > 0 && lineEnd > 0 && lineEnd >= lineStart:
+		location = fmt.Sprintf("%s:%d-%d", source, lineStart, lineEnd)
+	case lineStart > 0:
+		location = fmt.Sprintf("%s:%d", source, lineStart)
+	}
+	return location
 }
 
 // estimateTokens estimates token count using ~4 chars per token heuristic.

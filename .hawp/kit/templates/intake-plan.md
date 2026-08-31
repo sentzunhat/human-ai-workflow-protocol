@@ -1,6 +1,6 @@
 # Work Intake — Plan Template
 
-Use this template for plan files saved to `work/active/<ID>.md`.
+Use this template for plan files saved to `work/active/<ID>/plan.md`.
 Fill it after the investigation task record (`work-intake.md`) exists —
 the Analysis section below carries the investigation findings forward.
 
@@ -147,7 +147,7 @@ Format:
 - [ ] Outcome section filled (what was actually implemented)
 - [ ] Verification section filled (all checks listed, each with direct evidence or "unproven" tag)
 - [ ] All evidence files referenced exist in `../evidence/YYYY/MM/DD/` or are noted as inline
-- [ ] Plan file will be moved to `../closed/YYYY/MM/DD/<ID>.md`
+- [ ] Plan file will be moved to `../closed/YYYY/MM/DD/<ID>/plan.md`
 - [ ] BACKLOG.md row moved from Active to Recently Closed (or marked done)
 - [ ] Status report written (optional: only if non-trivial OR if something remains unproven OR if a decision/pattern emerged)
 - [ ] Decision file created if applicable (only if this task resolves a design question)

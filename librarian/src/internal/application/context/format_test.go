@@ -14,12 +14,16 @@ func TestFormatAsMarkdown(t *testing.T) {
 			Source:    "README.md",
 			Title:     "Embeddings Intro",
 			Relevance: 0.95,
+			LineStart: 10,
+			LineEnd:   18,
 		},
 		{
 			Content:   "ONNX Runtime provides efficient inference",
 			Source:    "guide.md",
 			Title:     "ONNX Integration",
 			Relevance: 0.87,
+			LineStart: 30,
+			LineEnd:   35,
 		},
 	}
 
@@ -44,6 +48,9 @@ func TestFormatAsMarkdown(t *testing.T) {
 	// Check results are sorted by relevance (descending)
 	if block.Results[0].Relevance < block.Results[1].Relevance {
 		t.Error("Results not sorted by relevance descending")
+	}
+	if block.Results[0].LineStart == 0 || block.Results[0].LineEnd == 0 {
+		t.Error("Line ranges should be preserved in formatted results")
 	}
 }
 
@@ -78,6 +85,45 @@ func TestFormatAsMarkdownEmpty(t *testing.T) {
 
 	if len(block.Results) != 0 {
 		t.Errorf("Empty results should have length 0, got %d", len(block.Results))
+	}
+}
+
+func TestFormatAsMarkdownSparsePassthrough(t *testing.T) {
+	results := []search.Result{
+		{
+			Content:   "Short content for sparse passthrough.",
+			Source:    "a.md",
+			Relevance: 0.9,
+			LineStart: 3,
+			LineEnd:   5,
+		},
+		{
+			Content:   "Another short result that should stay raw.",
+			Source:    "b.md",
+			Relevance: 0.8,
+			LineStart: 10,
+			LineEnd:   12,
+		},
+	}
+
+	block := FormatAsMarkdown(results, "sparse", 500)
+
+	if !block.Passthrough {
+		t.Fatal("expected sparse under-budget results to use passthrough rendering")
+	}
+	if got := block.Metadata["render_mode"]; got != "passthrough" {
+		t.Fatalf("render_mode = %q, want passthrough", got)
+	}
+
+	rendered := block.String()
+	if strings.Contains(rendered, "Ref: ") {
+		t.Errorf("passthrough render should skip inline Ref lines, got %q", rendered)
+	}
+	if !strings.Contains(rendered, results[0].Content) || !strings.Contains(rendered, results[1].Content) {
+		t.Errorf("passthrough render should contain the original content, got %q", rendered)
+	}
+	if len(block.References) != 2 {
+		t.Fatalf("References length = %d, want 2", len(block.References))
 	}
 }
 
@@ -134,7 +180,7 @@ func TestTruncateToTokens(t *testing.T) {
 func TestContextBlockString(t *testing.T) {
 	block := ContextBlock{
 		Title:       "Test Results",
-		ResultCount: 1,
+		ResultCount: 6,
 		TokenCount:  100,
 		Results: []FormattedResult{
 			{
@@ -144,7 +190,14 @@ func TestContextBlockString(t *testing.T) {
 				Title:     "Test Title",
 				Content:   "Test content",
 				Tokens:    5,
+				LineStart: 7,
+				LineEnd:   9,
 			},
+			{Rank: 2, Relevance: 0.90, Source: "test-2.md", Content: "Extra content 2", Tokens: 4},
+			{Rank: 3, Relevance: 0.89, Source: "test-3.md", Content: "Extra content 3", Tokens: 4},
+			{Rank: 4, Relevance: 0.88, Source: "test-4.md", Content: "Extra content 4", Tokens: 4},
+			{Rank: 5, Relevance: 0.87, Source: "test-5.md", Content: "Extra content 5", Tokens: 4},
+			{Rank: 6, Relevance: 0.86, Source: "test-6.md", Content: "Extra content 6", Tokens: 4},
 		},
 	}
 
@@ -154,16 +207,17 @@ func TestContextBlockString(t *testing.T) {
 		t.Error("String output should contain title")
 	}
 
-	if !strings.Contains(str, "Test Title") {
-		t.Error("String output should contain result title")
-	}
-
 	if !strings.Contains(str, "Test content") {
 		t.Error("String output should contain result content")
 	}
-
-	if !strings.Contains(str, "95%") {
-		t.Error("String output should contain relevance percentage")
+	if block.Results[0].Title != "Test Title" {
+		t.Error("structured results should still retain the chunk title")
+	}
+	if !strings.Contains(str, "test.md:7-9") {
+		t.Error("String output should contain line-ranged source path")
+	}
+	if !strings.Contains(str, "Ref: test.md:7-9") {
+		t.Error("String output should contain compact reference label")
 	}
 }
 
@@ -175,18 +229,24 @@ func TestContextBlockReferences(t *testing.T) {
 			Source:    "deployment.md",
 			Title:     "Deployment Guide",
 			Relevance: 0.95,
+			LineStart: 4,
+			LineEnd:   12,
 		},
 		{
 			Content:   "Architecture overview",
 			Source:    "architecture.md",
 			Title:     "System Architecture",
 			Relevance: 0.82,
+			LineStart: 20,
+			LineEnd:   25,
 		},
 		{
 			Content:   "More deployment info",
 			Source:    "deployment.md",
 			Title:     "Deployment Setup",
 			Relevance: 0.78,
+			LineStart: 30,
+			LineEnd:   34,
 		},
 	}
 
@@ -226,11 +286,14 @@ func TestContextBlockReferences(t *testing.T) {
 		if ref.Source == "deployment.md" && ref.Relevance != 0.95 {
 			t.Errorf("deployment.md relevance should be 0.95 (highest), got %f", ref.Relevance)
 		}
+		if ref.Source == "deployment.md" && (ref.LineStart != 4 || ref.LineEnd != 12) {
+			t.Errorf("deployment.md line range = %d-%d, want 4-12", ref.LineStart, ref.LineEnd)
+		}
 	}
 }
 
 func TestContextBlockStringInterleavesReferences(t *testing.T) {
-	// Each result's **Reference:** line must appear immediately above its own
+	// Each result's `Ref:` line must appear immediately above its own
 	// content — not collected into one list at the end — so a reader sees
 	// which source a chunk came from right where it's used.
 	block := ContextBlock{
@@ -245,6 +308,8 @@ func TestContextBlockStringInterleavesReferences(t *testing.T) {
 				Title:     "Deployment Guide",
 				Content:   "Deployment info",
 				Tokens:    50,
+				LineStart: 8,
+				LineEnd:   14,
 			},
 			{
 				Rank:      2,
@@ -253,24 +318,26 @@ func TestContextBlockStringInterleavesReferences(t *testing.T) {
 				Title:     "Architecture",
 				Content:   "Architecture info",
 				Tokens:    50,
+				LineStart: 21,
+				LineEnd:   24,
 			},
 		},
 	}
 
 	str := block.String()
 
-	if !strings.Contains(str, "**Reference:** deployment.md") {
+	if !strings.Contains(str, "Ref: deployment.md:8-14") {
 		t.Error("String output should contain an inline Reference line for deployment.md")
 	}
-	if !strings.Contains(str, "**Reference:** architecture.md") {
+	if !strings.Contains(str, "Ref: architecture.md:21-24") {
 		t.Error("String output should contain an inline Reference line for architecture.md")
 	}
 
 	// The deployment.md reference must precede its own content, and precede
 	// the architecture.md reference (interleaved order, not batched at end).
-	refDeployIdx := strings.Index(str, "**Reference:** deployment.md")
+	refDeployIdx := strings.Index(str, "Ref: deployment.md:8-14")
 	contentDeployIdx := strings.Index(str, "Deployment info")
-	refArchIdx := strings.Index(str, "**Reference:** architecture.md")
+	refArchIdx := strings.Index(str, "Ref: architecture.md:21-24")
 	contentArchIdx := strings.Index(str, "Architecture info")
 
 	if refDeployIdx < 0 || contentDeployIdx < 0 || refArchIdx < 0 || contentArchIdx < 0 {
@@ -279,5 +346,34 @@ func TestContextBlockStringInterleavesReferences(t *testing.T) {
 	if !(refDeployIdx < contentDeployIdx && contentDeployIdx < refArchIdx && refArchIdx < contentArchIdx) {
 		t.Errorf("expected order ref1 < content1 < ref2 < content2, got positions %d,%d,%d,%d",
 			refDeployIdx, contentDeployIdx, refArchIdx, contentArchIdx)
+	}
+}
+
+func TestContextBlockStringSparseSkipsHeader(t *testing.T) {
+	block := ContextBlock{
+		Title:       "Sparse Results",
+		Passthrough: true,
+		Results: []FormattedResult{
+			{
+				Rank:      1,
+				Relevance: 0.95,
+				Source:    "deployment.md",
+				Content:   "Deployment info",
+				LineStart: 8,
+				LineEnd:   14,
+			},
+		},
+	}
+
+	str := block.String()
+
+	if strings.Contains(str, "# Sparse Results") {
+		t.Error("sparse output should skip the markdown title header")
+	}
+	if strings.Contains(str, "Ref: deployment.md:8-14") {
+		t.Error("passthrough output should skip inline provenance wrappers")
+	}
+	if !strings.Contains(str, "Deployment info") {
+		t.Error("passthrough output should still contain the result content")
 	}
 }

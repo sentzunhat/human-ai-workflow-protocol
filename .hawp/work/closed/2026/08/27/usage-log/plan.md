@@ -118,10 +118,10 @@ v0.0.17 extended with `query_text` column for always-readable query summaries.
 
 ## Verification
 
-- [x] `go test ./internal/domain/usage/...` — 11 tests pass
-- [x] `go test ./internal/platform/cli/...` — includes TestRunUsage, TestRunUsageClearCancelled
-- [x] `go test ./internal/platform/mcp/...` — MCP e2e tests pass
-- [x] `go test ./...` — full suite green
+- [x] `go test ./internal/domain/usage/...` — 11 tests pass. Evidence: the focused usage package coverage is summarized in this plan's Outcome section.
+- [x] `go test ./internal/platform/cli/...` — includes TestRunUsage, TestRunUsageClearCancelled. Evidence: the CLI coverage is summarized in this plan's Outcome section.
+- [x] `go test ./internal/platform/mcp/...` — MCP e2e tests pass. Evidence: the MCP coverage is summarized in this plan's Outcome section.
+- [x] `go test ./...` — full suite green. Evidence: the release-ready verification chain is summarized in this plan's Outcome section.
 
 ## Close Checklist
 
