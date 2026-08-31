@@ -4,12 +4,12 @@ HAWP maintenance and documentation generation tooling.
 
 ## Purpose
 
-The `librarian` folder is the single librarian home. It holds two lanes:
+The `librarian` folder now holds two clear lanes:
 
-- **npm/TypeScript tooling** (this level) — the current working implementation of packaging, validation, and workflow integrity checks.
-- **Go implementation** ([go/](go/README.md)) — the future installable `hawp` CLI. The TypeScript commands are being ported there phase by phase (see `.hawp/work/notes/2026/07/20/librarian-ts-to-go-port-plan.md`); `make build` in `go/` produces the distributable `go/bin/hawp` binary. The full command taxonomy lives in [go/README.md](go/README.md).
+- **Go CLI** ([src/](src/README.md)) — the canonical `hawp` runtime for user-facing workflow commands.
+- **npm/TypeScript maintainer tooling** (this level) — retained only for distribution guide generation, provider materialization, and their supporting tests.
 
-The npm scripts remain canonical until their Go equivalent lands with matching unit tests.
+The former TypeScript workflow command tree under `scripts/hawp/` was retired on 2026-08-31 after the Go CLI reached parity for `uuid`, `links check`, `kit/work validate`, `kit/work normalize`, and `check`.
 
 ## Runtime
 
@@ -55,25 +55,11 @@ Materializes shared behaviors into provider pack files.
 
 Run `npm run providers:sync` before `distribution:sync` (wired automatically).
 
-### Workflow Validation Tools
+### Workflow Commands
 
-Scripts for HAWP backlog and work item integrity verification.
-
-**Location:** `scripts/hawp/work-validate/`
-
-- **`index.ts`** — CLI entry point and orchestration
-- **`cli.ts`** — Command-line argument parsing
-- **`reporter.ts`** — Structured output formatting (plain text)
-- **`orchestrate.ts`** — Validation pipeline coordination
-- **`types.ts`** — Shared type definitions
-
-**Validations** (`validations/`):
-
-- `backlog-consistency.ts` — Ensures BACKLOG.md rows match actual plan files
-- `id-parser.ts` — Extracts and validates work item IDs (extensible for UUID support)
-- `closed-task-completeness.ts` — Checks closed plans include required sections (with legacy tolerance)
-- `evidence-integrity.ts` — Validates evidence file references and completeness
-- `verification-clarity.ts` — Ensures verification sections avoid ambiguous or unproven claims
+HAWP workflow validation and normalization now live in the Go CLI under
+`librarian/src`. Use [src/README.md](src/README.md) for the command taxonomy
+and verification contract.
 
 ## Common Tasks
 
@@ -121,7 +107,7 @@ npm --prefix librarian run kit:validate
 
 ### Normalize workflow records
 
-Dry-run the raw normalize CLI:
+Dry-run the Go normalize path:
 
 ```bash
 npm --prefix librarian run work:normalize:cli -- --dry-run --validate
@@ -169,29 +155,26 @@ npm run validate
 
 ## CLI
 
-`./.hawp/bin/hawp` is a thin bash wrapper. It prefers the compiled Go binary
-(`librarian/src/bin/hawp`, build with `cd librarian/src && make build`) and
-falls back to these npm scripts when the binary is absent:
+Inside this source repository, the npm wrappers call `go run ./cmd/hawp` from
+`librarian/src` so maintainer checks always exercise the current Go source
+instead of depending on a separately installed binary. The external
+`./.hawp/bin/hawp` entrypoint remains the user-facing wrapper.
 
 ```bash
-./.hawp/bin/hawp kit validate [options]      # Go; fallback scripts/hawp/kit-validate/
-./.hawp/bin/hawp kit normalize [options]     # Go; fallback scripts/hawp/kit-normalize/
-./.hawp/bin/hawp work validate [options]     # Go; fallback scripts/hawp/work-validate/
-./.hawp/bin/hawp work normalize [options]    # Go; fallback scripts/hawp/work-normalize/ raw CLI
+./.hawp/bin/hawp kit validate [options]
+./.hawp/bin/hawp kit normalize [options]
+./.hawp/bin/hawp work validate [options]
+./.hawp/bin/hawp work normalize [options]
 ./.hawp/bin/hawp check                       # Go composite: kit + work + links
 ./.hawp/bin/hawp links check                 # Go markdown link check
 ./.hawp/bin/hawp backlog upgrade [options]   # alias for work normalize
-./.hawp/bin/hawp backlog validate [options]  # alias for check (npm fallback: work:validate)
+./.hawp/bin/hawp backlog validate [options]  # alias for check
 ./.hawp/bin/hawp uuid [--short]              # generate a work item UUID
 ```
 
-`npm --prefix librarian run work:normalize` is the apply-and-validate shortcut.
-Use `./.hawp/bin/hawp work normalize ...` or
-`npm --prefix librarian run work:normalize:cli -- ...` when you need the raw
-CLI modes such as `--dry-run`, `--format json`, `--export-plan`, or
-`--export-research-queue`.
-
-See `scripts/hawp/work-normalize/CLI.md` for the full work-normalize command contract. The wrapper resolves paths relative to this repository, so it only works in the HAWP source repo (not in downstream installs).
+Use either `./.hawp/bin/hawp work normalize ...` or
+`npm --prefix librarian run work:normalize:cli -- ...` for modes such as
+`--dry-run`, `--format json`, `--export-plan`, or `--export-research-queue`.
 
 ## Future Extensions
 
@@ -203,8 +186,9 @@ The librarian architecture supports:
 
 ## Go binary
 
-The installable CLI is the Go implementation in [go/](go/README.md).
-`make build` produces `go/bin/hawp`; `make dist` cross-compiles all release
+The installable CLI is the Go implementation in [src/](src/README.md).
+`make build` in `librarian/src` produces `src/bin/hawp`; `make dist`
+cross-compiles all release
 platforms. The former Node/oclif/SEA PoC (`scripts/hawp-cli-poc/`) and its
 CI workflow were retired 2026-07-20 after the Go port reached mutation
 parity (see `.hawp/work/closed/2026/07/20/`).

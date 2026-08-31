@@ -55,7 +55,7 @@
 
     "skipLibCheck": true
   },
-  "include": ["scripts/**/*.ts"],
+  "include": ["scripts/librarian/**/*.ts", "scripts/lib/**/*.ts"],
   "exclude": [
     "node_modules",
     "build-*-esm",

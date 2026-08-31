@@ -39,14 +39,14 @@ wrapper surface stable.
 | --- | --- | --- | --- |
 | `hawp db init` | Go scaffold | available (scaffold, layout-planning only) | superseded by `hawp init` for real provisioning |
 | `hawp index build [--scope] [--export]` | Go, real | **available** — enriches kit/work docs with folder role + backlog metadata, exports JSON | fbf12a93 Slice 1; ported 2026-07-21 (`f93bee55`) |
-| `hawp uuid [--short]` | npm `uuid` | **available** | ported 2026-07-20 (`39bc92b6`) |
-| `hawp links check` | npm `check:markdown-links` | **available** (fixes dead TS link regex) | ported 2026-07-20 (`39bc92b6`) |
-| `hawp kit validate` | npm `kit:validate` | **available** | ported 2026-07-20 (`39bc92b6`) |
-| `hawp work validate` | npm `work:validate` | **available** (count parity verified) | ported 2026-07-20 (`39bc92b6`) |
-| `hawp kit normalize [--apply]` | npm `kit:normalize` | **available** | ported 2026-07-20 (`eddd8339`) |
-| `hawp work normalize [--dry-run --apply --migrate-folders --validate]` | npm `work:normalize` | **available** (full flag set, clean-tree guard, explicit folder migration lane) | ported 2026-07-20 (`eddd8339`) |
+| `hawp uuid [--short]` | Go CLI | **available** | ported 2026-07-20 (`39bc92b6`) |
+| `hawp links check` | Go CLI | **available** (fixes dead TS link regex) | ported 2026-07-20 (`39bc92b6`) |
+| `hawp kit validate` | Go CLI | **available** | ported 2026-07-20 (`39bc92b6`) |
+| `hawp work validate` | Go CLI | **available** (count parity verified) | ported 2026-07-20 (`39bc92b6`) |
+| `hawp kit normalize [--apply]` | Go CLI | **available** | ported 2026-07-20 (`eddd8339`) |
+| `hawp work normalize [--dry-run --apply --migrate-folders --validate]` | Go CLI | **available** (full flag set, clean-tree guard, explicit folder migration lane) | ported 2026-07-20 (`eddd8339`) |
 | `hawp backlog upgrade` | wrapper alias | **available** | alias for `work normalize` |
-| `hawp check` | npm `hawp:check` | **available** | composite kit + work + links; ported 2026-07-20 |
+| `hawp check` | Go CLI | **available** | composite kit + work + links; ported 2026-07-20 |
 | `hawp backlog validate` | wrapper alias | **available** | alias for `check` |
 | `hawp init` | — | **available** | provision `~/.hawp` (ONNX Runtime + embedding model); ported 2026-07-20 (`e98de8c4`); supersedes `db init` for the intelligence lane |
 | `hawp search <query>` | — | planned | lexical then vector search (`fbf12a93`) |
