@@ -23,7 +23,7 @@ import { findRepoRoot } from "../lib.js";
 ## npm scripts
 
 - Use `domain:action` naming (e.g. `workflow:validate`, `distribution:sync`)
-- Prefer repo-root invocation patterns when a project still uses npm scripts; do not rely on subshell `cd` wrappers unless the repository explicitly documents them.
+- Run from repo root using `npm --prefix librarian run <script>` — never `cd librarian && npm run <script>`
 
 ## Script boundaries
 

@@ -44,7 +44,7 @@ Work items are identified by a UUID; the type (`task`, `bug`, `improvement`, `de
 lives in the separate Type column, not in the ID. UUIDs make parallel item creation
 collision-free — two agents can open items simultaneously without coordinating a sequence.
 
-- **New items:** generate a UUID (`./.hawp/bin/hawp uuid`, or `cd librarian/src && go run ./cmd/hawp uuid`
+- **New items:** generate a UUID (`./.hawp/bin/hawp uuid`, or `npm --prefix librarian run uuid`
   in this source repo), create the
   plan file `active/<work-id>/plan.md`, and put the full UUID in the row's UUID cell (a code span
   is fine). Leave Legacy ID as `—`.

@@ -294,8 +294,8 @@ git diff --name-status
 git diff --check
 
 # Run repo validation
-cd librarian/src && go test ./...
-cd librarian/src && go run ./cmd/hawp check
+npm run typecheck
+npm run validate:workflow
 ```
 
 Confirm that:
@@ -337,7 +337,7 @@ These are deferred and not part of v0.1:
 
 ### Read-Only Context Files
 
-- `librarian/src/go.mod`
+- `librarian/package.json`
 - `README.md`
 
 ### Do-Not-Touch Files
