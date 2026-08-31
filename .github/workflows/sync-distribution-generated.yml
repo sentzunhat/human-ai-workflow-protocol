@@ -9,11 +9,11 @@ on:
             - distribution/sources/**
             - distribution/generated/**
             - core/providers/shared/**
-            - librarian/scripts/librarian/distribution/**
-            - librarian/scripts/librarian/providers/**
-            - librarian/scripts/lib/**
-            - librarian/package.json
-            - .nvmrc
+            - librarian/src/internal/application/distribution/**
+            - librarian/src/internal/application/providersync/**
+            - librarian/src/internal/domain/distribution/**
+            - librarian/src/internal/domain/providersync/**
+            - librarian/src/internal/platform/cli/**
             - README.md
             - .github/workflows/sync-distribution-generated.yml
     pull_request:
@@ -24,11 +24,11 @@ on:
             - distribution/sources/**
             - distribution/generated/**
             - core/providers/shared/**
-            - librarian/scripts/librarian/distribution/**
-            - librarian/scripts/librarian/providers/**
-            - librarian/scripts/lib/**
-            - librarian/package.json
-            - .nvmrc
+            - librarian/src/internal/application/distribution/**
+            - librarian/src/internal/application/providersync/**
+            - librarian/src/internal/domain/distribution/**
+            - librarian/src/internal/domain/providersync/**
+            - librarian/src/internal/platform/cli/**
             - README.md
             - .github/workflows/sync-distribution-generated.yml
 
@@ -42,23 +42,15 @@ jobs:
               with:
                   fetch-depth: 0
 
-            - name: Set up Node.js
-              uses: actions/setup-node@v4
+            - name: Set up Go
+              uses: actions/setup-go@v5
               with:
-                  node-version-file: .nvmrc
-                  cache: npm
-                  cache-dependency-path: librarian/package-lock.json
-
-            - name: Show Node and npm versions
-              run: node -v && npm -v
-
-            - name: Install librarian dependencies
-              run: npm ci
-              working-directory: librarian
+                  go-version-file: librarian/src/go.mod
+                  cache-dependency-path: librarian/src/go.sum
 
             - name: Sync generated distribution guides
-              run: npm run distribution:sync
-              working-directory: librarian
+              run: go run ./cmd/hawp distribution sync
+              working-directory: librarian/src
 
             - name: Fail on generated drift
               run: |
@@ -67,6 +59,6 @@ jobs:
                     exit 0
                   fi
 
-                  echo "Generated outputs are stale. Run 'npm --prefix librarian run distribution:sync' and commit the updates."
+                  echo "Generated outputs are stale. Run 'cd librarian/src && go run ./cmd/hawp distribution sync' and commit the updates."
                   git --no-pager diff -- distribution/generated core/providers/.github/instructions core/providers/.cursor/rules core/providers/.continue/rules
                   exit 1

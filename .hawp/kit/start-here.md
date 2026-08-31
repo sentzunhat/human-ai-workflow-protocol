@@ -37,7 +37,7 @@ output: |
 - **constraints** — state what must not happen as clearly as what must.
 - **output** — describe the artifact form, not just "an answer."
 - **checkpoint** — omit unless you need a handoff or pause anchor.
-- For this repository, use Node 26 when running librarian or workflow-maintenance commands; follow the repo's declared runtime contract before treating a failure as a protocol issue.
+- For this repository, run maintainer and workflow commands through `librarian/src` (`go run ./cmd/hawp ...` or `make build`); follow the repo's declared Go toolchain before treating a failure as a protocol issue.
 - For path-sensitive work, reference files using exact repo-relative paths from repository root.
 - Basename-only file mentions are unsafe for path-sensitive work unless the file is truly at repository root and explicitly marked as such.
 - Capture repo-root proof (`pwd`, `git rev-parse --show-toplevel`, `git rev-parse --show-prefix`, `git status --short`) before path-sensitive edits.

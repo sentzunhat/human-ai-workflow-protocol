@@ -133,7 +133,7 @@ Active development in [`.hawp/work/BACKLOG.md`](.hawp/work/BACKLOG.md). Next foc
 Shared agent behaviors: `core/providers/shared/behaviors/` → materialize into provider packs with:
 
 ```bash
-npm --prefix librarian run distribution:sync
+cd librarian/src && go run ./cmd/hawp distribution sync
 ```
 
 See [librarian/README.md](librarian/README.md) for tooling details and validation commands.

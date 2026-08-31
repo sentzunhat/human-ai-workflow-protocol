@@ -29,4 +29,4 @@ sources/
     └── script-update.md
 ```
 
-Generated bash = core + provider script + footer (see `librarian/scripts/librarian/distribution/shared/composition.ts`).
+Generated bash = core + provider script + footer (see `librarian/src/internal/domain/distribution/distribution.go`).
