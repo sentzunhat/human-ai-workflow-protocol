@@ -257,7 +257,7 @@ else
   trap cleanup_tmp_dir EXIT
   curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
     | tar -xz -C "$TMP_DIR"
-  SRC="$(find "$TMP_DIR" -maxdepth 2 -type d -path "*/core" | head -n 1)"
+  SRC="$(find "$TMP_DIR" -maxdepth 2 -type d -path "*/core" -print -quit)"
   if [ -z "$SRC" ]; then
     echo "Error: downloaded archive did not contain core/"
     exit 1

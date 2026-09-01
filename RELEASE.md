@@ -21,7 +21,7 @@ go run ./cmd/hawp distribution sync
 go run ./cmd/hawp kit validate
 go run ./cmd/hawp work validate
 go run ./cmd/hawp check
-make dist VERSION=0.0.23
+make dist VERSION=<version>
 ```
 
 Commit the version, changelog, generated distribution files, materialized
@@ -66,11 +66,11 @@ Optional ORT tarballs may also be present for supported platforms.
 Check one downloaded binary:
 
 ```bash
-curl -L -o hawp https://github.com/sentzunhat/human-ai-workflow-protocol/releases/download/0.0.23/hawp-darwin-arm64
+curl -L -o hawp-darwin-arm64 https://github.com/sentzunhat/human-ai-workflow-protocol/releases/download/0.0.23/hawp-darwin-arm64
 curl -L -o checksums.txt https://github.com/sentzunhat/human-ai-workflow-protocol/releases/download/0.0.23/checksums.txt
 grep ' hawp-darwin-arm64$' checksums.txt | shasum -a 256 -c -
-chmod +x hawp
-./hawp version
+chmod +x hawp-darwin-arm64
+./hawp-darwin-arm64 version
 ```
 
 Expected version output for this example: `0.0.23`.

@@ -2,8 +2,8 @@
   "name": "docs-alignment-workitem.v1",
   "description": "WorkItem schema to run the Documentation Alignment Auditor against the repository.",
   "inputs": {
-    "scanPaths": ["src", "docs"],
-    "includeFiles": ["README.md", "CHANGELOG.md", "go.mod"],
+    "scanPaths": ["librarian/src", ".hawp/kit", "core/.hawp/kit", "distribution/sources"],
+    "includeFiles": ["README.md", "RELEASE.md", "librarian/src/go.mod"],
     "excludePatterns": ["node_modules", "build", "dist", "publish", "build-cjs"]
   },
   "phases": [

@@ -63,9 +63,9 @@ Detect documentation drift between implementation and docs without changing code
 
 ## Source Of Truth
 
-- Treat `src/` and runtime-facing repository configuration as the primary source of truth.
+- Treat `librarian/src/`, `.hawp/kit/`, `core/.hawp/kit/`, `distribution/sources/`, provider sources, and runtime-facing repository configuration as the primary source of truth.
 - Include `docs/`, `README.md`, changelog files, manifest files, and relevant examples when they are part of the audited scope.
-- Follow the repository documentation standards in `docs/guidelines/documentation.md`.
+- Follow the repository documentation standards in `.hawp/kit/standards/guidelines/documentation.md`.
 
 ## Constraints
 

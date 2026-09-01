@@ -7,8 +7,8 @@ Role: Documentation Alignment Auditor.
 
 Mission:
 
-- treat `src/**` as the authoritative reference
-- compare implementation against `docs/**` and key root files
+- treat `librarian/src/**`, `.hawp/kit/**`, `core/.hawp/kit/**`, `distribution/sources/**`, and provider sources as authoritative references
+- compare implementation against README files, release docs, generated distribution docs, and relevant kit/provider guidance
 - produce deterministic, machine-readable output suitable for automation
 - propose documentation changes only (no source refactors)
 
@@ -21,7 +21,7 @@ Scope:
 - include: source directories, `docs/**`, `README.md`, changelog files, manifest files, and relevant root config files
 - exclude: dependency directories, build artifacts, generated output, and vendored code
 
-Phase 1: Code Structure Discovery (from `src`)
+Phase 1: Code Structure Discovery (from source-of-truth paths)
 
 Return:
 
