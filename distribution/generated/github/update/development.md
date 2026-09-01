@@ -258,6 +258,12 @@ if [ -n "${HAWP_LOCAL_CORE:-}" ]; then
   echo "Source mode: local core (${SRC})"
 else
   TMP_DIR="$(mktemp -d)"
+  cleanup_tmp_dir() {
+    if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
+      rm -rf "$TMP_DIR"
+    fi
+  }
+  trap cleanup_tmp_dir EXIT
   curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
     | tar -xz -C "$TMP_DIR"
   SRC="$(find "$TMP_DIR" -maxdepth 2 -type d -path "*/core" | head -n 1)"

@@ -37,8 +37,8 @@ unless that plain tag already exists.
 Manual path:
 
 ```bash
-git tag 0.0.23
-git push origin main --follow-tags
+git tag -a 0.0.23 -m "release 0.0.23"
+git push origin main 0.0.23
 ```
 
 Or use GitHub Actions manual dispatch:
