@@ -37,15 +37,16 @@ unless that plain tag already exists.
 Manual path:
 
 ```bash
-git tag -a 0.0.23 -m "release 0.0.23"
-git push origin main 0.0.23
+VERSION=<version>
+git tag -a "$VERSION" -m "release $VERSION"
+git push origin main "$VERSION"
 ```
 
 Or use GitHub Actions manual dispatch:
 
 1. Open **Actions**.
 2. Run **Release**.
-3. Enter `0.0.23` as the version.
+3. Enter the release version being published.
 4. Leave `draft` off for immediate publication, or enable it for manual review.
 
 ## Verify
@@ -66,14 +67,15 @@ Optional ORT tarballs may also be present for supported platforms.
 Check one downloaded binary:
 
 ```bash
-curl -L -o hawp-darwin-arm64 https://github.com/sentzunhat/human-ai-workflow-protocol/releases/download/0.0.23/hawp-darwin-arm64
-curl -L -o checksums.txt https://github.com/sentzunhat/human-ai-workflow-protocol/releases/download/0.0.23/checksums.txt
+VERSION=<version>
+curl -L -o hawp-darwin-arm64 "https://github.com/sentzunhat/human-ai-workflow-protocol/releases/download/${VERSION}/hawp-darwin-arm64"
+curl -L -o checksums.txt "https://github.com/sentzunhat/human-ai-workflow-protocol/releases/download/${VERSION}/checksums.txt"
 grep ' hawp-darwin-arm64$' checksums.txt | shasum -a 256 -c -
 chmod +x hawp-darwin-arm64
 ./hawp-darwin-arm64 version
 ```
 
-Expected version output for this example: `0.0.23`.
+Expected version output: the value of `VERSION`.
 
 ## Downstream Provider Updates
 
