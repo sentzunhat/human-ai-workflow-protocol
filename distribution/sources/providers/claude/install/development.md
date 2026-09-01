@@ -1,6 +1,6 @@
-# Install HAWP — Claude Code Provider (Dev Branch)
+# Install HAWP — Claude Code Provider (Development Branch)
 
-Install HAWP kit plus Claude Code overlays from the `dev` branch.
+Install HAWP kit plus Claude Code overlays from the `development` branch.
 
 Same source → target mapping as main: `core/providers/.claude/` → `.claude/rules/` + `CLAUDE.md` (seed).
 
@@ -12,7 +12,7 @@ Same source → target mapping as main: `core/providers/.claude/` → `.claude/r
 ## Steps
 
 1. Repository root in terminal.
-2. Run install command block (`REF="dev"`, `PROVIDER="claude"`).
+2. Run install command block (`REF="development"`, `PROVIDER="claude"`).
 3. Verify `.hawp/kit/`, `.claude/rules/`, and `CLAUDE.md`.
 
 ## Reverting to Main

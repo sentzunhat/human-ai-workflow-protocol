@@ -78,9 +78,9 @@ func writeDistributionFixture(t *testing.T, root string) {
 		files["distribution/sources/providers/"+provider+"/install-contract.md"] = "# install contract\n"
 		files["distribution/sources/providers/"+provider+"/update-contract.md"] = "# update contract\n"
 		files["distribution/sources/providers/"+provider+"/install/main.md"] = "# install main\n"
-		files["distribution/sources/providers/"+provider+"/install/dev.md"] = "# install dev\n"
+		files["distribution/sources/providers/"+provider+"/install/development.md"] = "# install development\n"
 		files["distribution/sources/providers/"+provider+"/update/main.md"] = "# update main\n"
-		files["distribution/sources/providers/"+provider+"/update/dev.md"] = "# update dev\n"
+		files["distribution/sources/providers/"+provider+"/update/development.md"] = "# update development\n"
 		files["distribution/sources/providers/"+provider+"/script-install.md"] = "```bash\nprovider install\n```\n"
 		files["distribution/sources/providers/"+provider+"/script-update.md"] = "```bash\nprovider update\n```\n"
 	}

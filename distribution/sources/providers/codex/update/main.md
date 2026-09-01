@@ -26,7 +26,7 @@ Stable update of HAWP kit plus Codex `AGENTS.md` instructions.
 
 ## Other guides
 
-- Dev branch: `distribution/generated/codex/update/dev.md`
+- Development branch: `distribution/generated/codex/update/development.md`
 - GitHub/Copilot: `distribution/generated/github/update/main.md`
 - Cursor: `distribution/generated/cursor/update/main.md`
 - Continue: `distribution/generated/continue/update/main.md`

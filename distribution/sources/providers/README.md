@@ -1,6 +1,6 @@
 # Provider distribution sources
 
-Per-agent install and update guide fragments. Composed into `distribution/generated/<provider>/<install|update>/<main|dev>.md`.
+Per-agent install and update guide fragments. Composed into `distribution/generated/<provider>/<install|update>/<main|development>.md`.
 
 | Provider | Status | Sources |
 | -------- | ------ | ------- |

@@ -58,6 +58,6 @@ Stable install of HAWP kit plus GitHub Copilot overlays.
 
 ## Other guides
 
-- Dev branch: `distribution/generated/github/install/dev.md`
+- Development branch: `distribution/generated/github/install/development.md`
 - Cursor: `distribution/generated/cursor/install/main.md`
 - Continue: `distribution/generated/continue/install/main.md`

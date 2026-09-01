@@ -1,4 +1,4 @@
-> **Agent instruction:** Update the local HAWP **Claude Code provider** installation in this repository. Run the bash command block in the **Update Command (Copy/Paste)** section in a terminal from the repository root. Do not report "already present" based on content inspection alone — execute the script and report terminal output with `Source:`, `Provider:`, and `Source mode:` lines as proof.
+> **Agent instruction:** Update HAWP with the **Codex provider** in this repository. Run the bash command block in the **Update Command (Copy/Paste)** section in a terminal from the repository root. Do not report "already current" based on content inspection alone — execute the script and report terminal output with `Source:`, `Provider:`, and `Source mode:` lines as proof.
 
 # Safety: Install and Update Principles
 
@@ -50,14 +50,14 @@ If your repository has an older HAWP layout, migration runs automatically:
 - Avoid storing host-local prefixes such as `<user-home>/...`, `<linux-home>/...`, or `<windows-user-home>\\...` in repository artifacts.
 - If command output includes absolute host paths, redact only the machine-local prefix with a placeholder (for example `<repo-root-abs>`) while preserving command identity and repo-relative path evidence.
 
-# Claude Code Overlay Safety
+# Codex Provider Safety
 
-This guide installs the Claude Code provider pack only.
+Codex uses `AGENTS.md` for repo-local instructions. This guide only manages the HAWP Codex seed file and the shared `.hawp/` kit.
 
-- Refreshes `.claude/rules/hawp-*.md` from `core/providers/.claude/rules/` on every install and update.
-- Seeds `CLAUDE.md` from `CLAUDE.md.seed` on first install only when missing; never overwrites on update.
-- Does not modify `.github/`, `.cursor/`, or `.continue/`.
-- Non-HAWP files already in `.claude/rules/` are left unchanged.
+Do not create `.codex/` folders or runtime adapter files from this provider guide.
+
+`AGENTS.md` is seeded only when missing, on both install and update. Existing
+repo-local Codex instructions must be preserved.
 
 # Kit and Work Boundaries (All Providers)
 
@@ -82,34 +82,32 @@ Every provider install/update guide refreshes the agent-neutral kit and preserve
 
 Provider-specific overlay boundaries are documented in the next section for this guide.
 
-# Claude Code Provider Boundaries
+# Codex Provider Boundaries
 
-This guide sets `PROVIDER=claude`. Only the Claude Code overlay is installed — not GitHub, Cursor, or Continue paths.
+This guide sets `PROVIDER=codex`. Only the Codex overlay is installed — not GitHub, Cursor, Continue, or Claude paths.
 
 ## Source pack
 
-`core/providers/.claude/`
+`core/providers/.codex/`
 
 ## Install mapping
 
 | Source | Installs to | Install | Update |
 |--------|-------------|---------|--------|
-| `rules/hawp-*.md` | `.claude/rules/` | refresh | refresh |
-| `CLAUDE.md.seed` | `CLAUDE.md` (repo root) | seed if missing | skip |
+| `AGENTS.md.seed` | `AGENTS.md` (repo root) | seed if missing | seed if missing |
 
 ## Not touched by this guide
 
 - `.github/**`
 - `.cursor/**`
 - `.continue/**`
-- Non-HAWP files in `.claude/rules/` (only files copied from the provider pack are refreshed)
-- `CLAUDE.md` on update (user-editable; never overwritten after first install)
+- `.claude/**`
+- Runtime CLI participant adapters
 
 ## Boundary model
 
-```
-core/providers/.claude/  →  .claude/rules/hawp-*.md
-                         →  CLAUDE.md  (seed only)
+```text
+core/providers/.codex/  ->  AGENTS.md
 ```
 
 # Update HAWP: Shared Concepts
@@ -170,48 +168,59 @@ Safe to run multiple times.
 
 Composed from `distribution/sources/update/script-core.md` + `providers/<provider>/script-update.md` + `script-footer.md`.
 
-# Claude Code Update Contract
+# Codex Update Contract
 
 ## Work item goal
 
-Refresh HAWP kit plus **Claude Code overlays** from the selected branch. This refreshes `core/providers/.claude/rules/hawp-*.md` into `.claude/rules/`. `CLAUDE.md` is never overwritten on update.
+Refresh HAWP kit plus the **Codex overlay** from the selected branch. This seeds `core/providers/.codex/AGENTS.md.seed` into `AGENTS.md` only when the target repo does not already have one.
 
 ## Agent execution
 
 - Requires existing `.hawp/`.
-- Report proof: `Source:`, `Provider: claude`, `Source mode:`.
-- File proof: `git status --short .hawp/kit .claude/rules`
+- Report proof: `Source:`, `Provider: codex`, `Source mode:`.
+- File proof: `git status --short .hawp/kit AGENTS.md`
 
 ## Provider-specific rules
 
-- Refreshes all provider-pack `hawp-*.md` rules on every update.
-- Never overwrites `CLAUDE.md` (user-editable).
-- Does not modify `.github/`, `.cursor/`, or `.continue/`.
+- Seeds `AGENTS.md` only when it is missing; existing custom `AGENTS.md` content is preserved.
+- If you want new HAWP instruction wording in an already-customized `AGENTS.md`, blend it manually instead of expecting update to overwrite the file.
+- Does not modify `.github/`, `.cursor/`, `.continue/`, or `.claude/`.
+- Does not create runtime CLI participant adapters.
 
 ## Auto-dispatch
 
-Use the install-contract **Guide fetch (review-first)** block with `PROVIDER="claude"`; it selects update when `.hawp/` exists.
+Use the install-contract **Guide fetch (review-first)** block with `PROVIDER="codex"`; it selects update when `.hawp/` exists.
 
-# Update HAWP — Claude Code Provider (Dev Branch)
+# Update HAWP — Codex Provider (Development Branch)
 
-Refresh HAWP kit and Claude Code provider rules from the `dev` branch. `CLAUDE.md` is preserved.
+Development update of HAWP kit plus Codex `AGENTS.md` instructions.
 
-Same target paths as main update: `.claude/rules/hawp-*.md`.
+## Update Steps
 
-## When to Use
+1. Open your target repository root in a terminal.
+2. Run the **Update Command (Copy/Paste)** block below (`REF="development"`, `PROVIDER="codex"`).
+3. Confirm `.hawp/kit/` and `AGENTS.md` reflect the selected branch.
 
-- Testing unreleased HAWP Claude Code provider changes.
-- Contributing to HAWP development.
+## What Was Updated
 
-## Steps
+- `.hawp/kit/**` — refreshed from HAWP core.
+- `AGENTS.md` — refreshed from `core/providers/.codex/AGENTS.md.seed`.
 
-1. Repository root in terminal.
-2. Run update command block (`REF="dev"`, `PROVIDER="claude"`).
-3. Verify `.hawp/work/` intact and Claude Code rules updated.
+## What Was NOT Changed
 
-## Reverting to Main
+- `.github/**`
+- `.cursor/**`
+- `.continue/**`
+- `.claude/**`
+- Runtime CLI participant adapters.
+- `.hawp/work/**` project records.
 
-Use `distribution/generated/claude/update/main.md`.
+## Other guides
+
+- Main branch: `distribution/generated/codex/update/main.md`
+- GitHub/Copilot: `distribution/generated/github/update/development.md`
+- Cursor: `distribution/generated/cursor/update/development.md`
+- Continue: `distribution/generated/continue/update/development.md`
 
 ## Update Command (Copy/Paste)
 
@@ -222,8 +231,8 @@ set -euo pipefail
 
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
-REF="dev"
-PROVIDER="claude"
+REF="development"
+PROVIDER="codex"
 
 echo "Source: ${OWNER}/${REPO}@${REF}"
 echo "Provider: ${PROVIDER}"
@@ -241,13 +250,17 @@ else
   TMP_DIR="$(mktemp -d)"
   curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
     | tar -xz -C "$TMP_DIR"
-  SRC="$TMP_DIR/${REPO}-${REF}/core"
+  SRC="$(find "$TMP_DIR" -maxdepth 2 -type d -path "*/core" | head -n 1)"
+  if [ -z "$SRC" ]; then
+    echo "Error: downloaded archive did not contain core/"
+    exit 1
+  fi
   echo "Source mode: remote archive"
 fi
 
 if [ ! -d ".hawp" ]; then
   echo "Preflight: .hawp/ not found in this repository."
-  echo "Run distribution/generated/${PROVIDER}/install/${REF}.md first, then run ${PROVIDER}/update/${REF}.md."
+  echo "Run the matching install guide first, then rerun this update guide."
   if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
     rm -rf "$TMP_DIR"
   fi
@@ -524,25 +537,22 @@ copy_file_no_clobber "$SRC/.hawp/work/evidence/README.md"      ".hawp/work/evide
 copy_file_no_clobber "$SRC/.hawp/work/status/README.md"        ".hawp/work/status/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/notes/README.md"         ".hawp/work/notes/README.md"
 
-# --- Provider overlay: Claude Code (refresh rules only; CLAUDE.md preserved) ---
+# --- Provider overlay: Codex (refresh AGENTS.md) ---
 resolve_provider_pack() {
-  if [ -d "$SRC/providers/.claude" ]; then
-    echo "$SRC/providers/.claude"
+  if [ -d "$SRC/providers/.codex" ]; then
+    echo "$SRC/providers/.codex"
     return 0
   fi
-  echo "Error: Claude Code provider pack not found at core/providers/.claude/" >&2
+  echo "Error: Codex provider pack not found at core/providers/.codex/" >&2
   return 1
 }
 update_provider_overlay() {
   pack="$(resolve_provider_pack)" || return 1
-  mkdir -p .claude/rules
-  if [ -d "$pack/rules" ]; then
-    cp "$pack/rules/"hawp-*.md .claude/rules/ 2>/dev/null || true
-  fi
-  echo "  refreshed: core/providers/.claude/ -> .claude/rules/ (CLAUDE.md preserved)"
+  copy_file_no_clobber "$pack/AGENTS.md.seed" AGENTS.md
+  echo "  seeded if missing: core/providers/.codex/ -> AGENTS.md"
 }
 update_provider_overlay || exit 1
-echo "Provider overlay: .claude/rules/* (CLAUDE.md not touched)"
+echo "Provider overlay: AGENTS.md (seed if missing)"
 
 if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
   rm -rf "$TMP_DIR"
@@ -558,30 +568,30 @@ echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .haw
 
 This file is generated. Do not edit it directly.
 
-- Workflow gate: pushes and pull requests on `main` or `dev` fail when generated guides drift from source.
+- Workflow gate: pushes and pull requests on `main` or `development` fail when generated guides drift from source.
 - Local sync: run `hawp distribution sync` after editing `distribution/sources/` or the distribution composition code.
 
 Generated output file:
 
-- `distribution/generated/claude/update/dev.md`
+- `distribution/generated/codex/update/development.md`
 
-Provider: `claude` · Operation: `update` · Branch: `dev`
+Provider: `codex` · Operation: `update` · Branch: `development`
 
-Install mapping: `core/providers/.claude/` -> downstream paths in this guide.
+Install mapping: `core/providers/.codex/` -> downstream paths in this guide.
 
 This generated guide is built from:
 
-- `distribution/sources/providers/claude/preamble-update.md`
+- `distribution/sources/providers/codex/preamble-update.md`
 - `distribution/sources/shared/safety.md`
-- `distribution/sources/providers/claude/safety.md`
+- `distribution/sources/providers/codex/safety.md`
 - `distribution/sources/shared/repo-boundaries-kit.md`
-- `distribution/sources/providers/claude/boundaries.md`
+- `distribution/sources/providers/codex/boundaries.md`
 - `distribution/sources/shared/update.md`
-- `distribution/sources/providers/claude/update-contract.md`
-- `distribution/sources/providers/claude/update/dev.md`
+- `distribution/sources/providers/codex/update-contract.md`
+- `distribution/sources/providers/codex/update/development.md`
 
 Composed shell script (core + provider overlay + footer):
 
 - `distribution/sources/update/script-core.md`
-- `distribution/sources/providers/claude/script-update.md`
+- `distribution/sources/providers/codex/script-update.md`
 - `distribution/sources/update/script-footer.md`

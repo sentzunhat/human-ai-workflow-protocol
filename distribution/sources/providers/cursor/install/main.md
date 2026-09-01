@@ -40,6 +40,6 @@ HAWP guidance you want from the provider seed instead of overwriting your file.
 
 ## Other guides
 
-- Dev branch: `distribution/generated/cursor/install/dev.md`
+- Development branch: `distribution/generated/cursor/install/development.md`
 - GitHub/Copilot: `distribution/generated/github/install/main.md`
 - Continue: `distribution/generated/continue/install/main.md`

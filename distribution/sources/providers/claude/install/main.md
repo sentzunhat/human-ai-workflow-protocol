@@ -23,6 +23,8 @@ Stable install of HAWP kit plus Claude Code overlays: `.claude/rules/hawp-*.md` 
 
 Optional: `export HAWP_LOCAL_CORE="/absolute/path/to/human-ai-workflow-protocol/core"` for local testing.
 
+For a temporary slash-named provider branch, use the visible command block below and set `REF` to that branch name after review.
+
 ## What Was Added
 
 - `.hawp/kit/**` — agent-neutral HAWP kit (always installed).
@@ -42,7 +44,7 @@ After install, add project-specific content to `CLAUDE.md`: build commands, test
 
 ## Other guides
 
-- Dev branch: `distribution/generated/claude/install/dev.md`
+- Development branch: `distribution/generated/claude/install/development.md`
 - GitHub/Copilot: `distribution/generated/github/install/main.md`
 - Cursor: `distribution/generated/cursor/install/main.md`
 - Continue: `distribution/generated/continue/install/main.md`

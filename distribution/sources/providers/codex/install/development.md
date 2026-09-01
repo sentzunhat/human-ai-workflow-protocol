@@ -1,4 +1,4 @@
-# Install HAWP — Codex Provider (Dev Branch)
+# Install HAWP — Codex Provider (Development Branch)
 
 Development install of HAWP kit plus Codex `AGENTS.md` instructions.
 
@@ -16,7 +16,7 @@ Development install of HAWP kit plus Codex `AGENTS.md` instructions.
 ## Installation Steps
 
 1. Open your target repository root in a terminal.
-2. Run the **Install Command (Copy/Paste)** block below (`REF="dev"`, `PROVIDER="codex"`).
+2. Run the **Install Command (Copy/Paste)** block below (`REF="development"`, `PROVIDER="codex"`).
 3. Confirm `.hawp/kit/` and `AGENTS.md` exist.
 
 Optional: `export HAWP_LOCAL_CORE="/absolute/path/to/human-ai-workflow-protocol/core"` for local testing.
@@ -39,7 +39,7 @@ Optional: `export HAWP_LOCAL_CORE="/absolute/path/to/human-ai-workflow-protocol/
 ## Other guides
 
 - Main branch: `distribution/generated/codex/install/main.md`
-- GitHub/Copilot: `distribution/generated/github/install/dev.md`
-- Cursor: `distribution/generated/cursor/install/dev.md`
-- Continue: `distribution/generated/continue/install/dev.md`
+- GitHub/Copilot: `distribution/generated/github/install/development.md`
+- Cursor: `distribution/generated/cursor/install/development.md`
+- Continue: `distribution/generated/continue/install/development.md`
 

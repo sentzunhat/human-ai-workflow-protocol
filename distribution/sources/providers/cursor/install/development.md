@@ -1,6 +1,6 @@
-# Install HAWP — Cursor Provider (Dev Branch)
+# Install HAWP — Cursor Provider (Development Branch)
 
-Install HAWP kit plus Cursor overlays from the `dev` branch.
+Install HAWP kit plus Cursor overlays from the `development` branch.
 
 Same source → target mapping as main: `core/providers/.cursor/` → `.cursor/rules/` + `AGENTS.md`.
 
@@ -12,7 +12,7 @@ Same source → target mapping as main: `core/providers/.cursor/` → `.cursor/r
 ## Steps
 
 1. Repository root in terminal.
-2. Run install command block (`REF="dev"`, `PROVIDER="cursor"`).
+2. Run install command block (`REF="development"`, `PROVIDER="cursor"`).
 3. Verify `.hawp/kit/`, `.cursor/rules/`, and `AGENTS.md`.
 
 ## Reverting to Main

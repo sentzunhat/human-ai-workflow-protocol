@@ -1,8 +1,8 @@
-# Install HAWP — Continue Provider (Dev Branch)
+# Install HAWP — Continue Provider (Development Branch)
 
-Dev-branch install of HAWP kit plus Continue overlays: `.continue/rules/hawp-*.md`.
+Development-branch install of HAWP kit plus Continue overlays: `.continue/rules/hawp-*.md`.
 
-Use this when testing unreleased HAWP changes on the `dev` branch.
+Use this when testing unreleased HAWP changes on the `development` branch.
 
 **Source → target mapping:**
 
@@ -18,7 +18,7 @@ Use this when testing unreleased HAWP changes on the `dev` branch.
 ## Installation Steps
 
 1. Open your target repository root in a terminal.
-2. Run the **Install Command (Copy/Paste)** block below (`REF="dev"`, `PROVIDER="continue"`).
+2. Run the **Install Command (Copy/Paste)** block below (`REF="development"`, `PROVIDER="continue"`).
 3. Confirm `.hawp/kit/` and `.continue/rules/hawp-*.md` exist.
 
 Optional: `export HAWP_LOCAL_CORE="/absolute/path/to/human-ai-workflow-protocol/core"` for local testing.

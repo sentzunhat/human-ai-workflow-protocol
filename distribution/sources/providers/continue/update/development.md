@@ -1,13 +1,13 @@
-# Update HAWP — Continue Provider (Dev Branch)
+# Update HAWP — Continue Provider (Development Branch)
 
-Dev-branch update of HAWP kit plus Continue overlays.
+Development-branch update of HAWP kit plus Continue overlays.
 
 Requires an existing `.hawp/` install in the target repository.
 
 ## Update Steps
 
 1. Open your target repository root in a terminal.
-2. Run the **Update Command (Copy/Paste)** block below (`REF="dev"`, `PROVIDER="continue"`).
+2. Run the **Update Command (Copy/Paste)** block below (`REF="development"`, `PROVIDER="continue"`).
 3. Confirm `.hawp/kit/` and `.continue/rules/hawp-*.md` were refreshed.
 
 ## What Was Refreshed

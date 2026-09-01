@@ -22,14 +22,18 @@ else
   TMP_DIR="$(mktemp -d)"
   curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
     | tar -xz -C "$TMP_DIR"
-  SRC="$TMP_DIR/${REPO}-${REF}/core"
+  SRC="$(find "$TMP_DIR" -maxdepth 2 -type d -path "*/core" | head -n 1)"
+  if [ -z "$SRC" ]; then
+    echo "Error: downloaded archive did not contain core/"
+    exit 1
+  fi
   echo "Source mode: remote archive"
 fi
 
 if [ -d ".hawp" ]; then
   echo "Preflight: detected existing .hawp/."
   echo "Switching to update-compatible refresh mode for this run."
-  echo "Tip: use distribution/generated/${PROVIDER}/update/${REF}.md next time when .hawp/ already exists."
+  echo "Tip: use the matching update guide next time when .hawp/ already exists."
 fi
 
 # --- Helpers (no-clobber copy; never overwrite repo-owned files) ---

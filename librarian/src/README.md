@@ -15,7 +15,7 @@ published releases (see work item `cdcf9f78`).
 
 Current status:
 
-- All read/mutate/composite workflow commands ported from TypeScript
+- All read/mutate/composite workflow commands live in Go
   (uuid, links check, kit/work validate + normalize, check)
 - `hawp init` provisions ONNX Runtime + an embedding model into `~/.hawp/`
 - `hawp model pull` / `hawp embed` run real Hugging Face ONNX models
@@ -57,10 +57,9 @@ wrapper surface stable.
 | `hawp embed <text>...` | — | **available** | local embeddings via hugot's pure-Go backend; added 2026-07-21 (`748609a8`) |
 | `hawp generate <prompt>` | — | planned | text generation; needs hugot's ORT/cgo backend, deferred pending a build-matrix decision (`748609a8`) |
 
-Maintainer commands now live in the Go CLI as well:
+Maintainer commands live in the Go CLI:
 `hawp providers materialize|validate|sync` and
-`hawp distribution build|validate|sync`. The Node CLI PoC was retired
-2026-07-20, and the Node maintainer workspace was retired on 2026-08-31.
+`hawp distribution build|validate|sync`.
 
 ## Workflow compatibility and legacy repos
 
@@ -248,8 +247,7 @@ For scripted/agent use, prefer `--format json` where a command offers it
 
 ## Maintainer automation
 
-The repo's maintainer automation now runs through the same Go CLI instead of a
-parallel Node workspace:
+The repo's maintainer automation runs through the same Go CLI:
 
 - `hawp providers sync` regenerates provider overlays and validates them
 - `hawp distribution sync` rebuilds generated install/update guides and validates them

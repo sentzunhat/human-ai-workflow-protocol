@@ -1,4 +1,4 @@
-> **Agent instruction:** Update the local HAWP **Cursor provider** installation in this repository. Run the bash command block in the **Update Command (Copy/Paste)** section in a terminal from the repository root. Do not report "already present" based on content inspection alone — execute the script and report terminal output with `Source:`, `Provider:`, and `Source mode:` lines as proof.
+> **Agent instruction:** Install HAWP with the **Cursor provider** in this repository. Run the bash command block in the **Install Command (Copy/Paste)** section in a terminal from the repository root. Do not report "already present" based on content inspection alone — execute the script and report terminal output with `Source:`, `Provider:`, and `Source mode:` lines as proof.
 
 # Safety: Install and Update Principles
 
@@ -110,102 +110,153 @@ core/providers/.cursor/  →  .cursor/rules/hawp-*.mdc
                        →  AGENTS.md
 ```
 
-# Update HAWP: Shared Concepts
+# Install HAWP: Shared Concepts
 
 ## Execution Preflight (Run First)
 
+Treat this run as a new execution work item for the current repository.
+
 - Open a terminal at the target repository root.
-- Confirm `.hawp/` exists; if not, run install for this provider first.
-- Use the matching provider update guide (same provider as install).
+- Use the **provider-specific** guide for your agent (this file's provider section and boundaries apply).
+- If `.hawp/` already exists, run **update** for the same provider and branch instead of install.
+- Run the generated command block exactly as written.
 - Verify output includes `Source:`, `Provider:`, and `Source mode:`.
 
-## Update Work Item Contract (shared)
+## Install Work Item Contract (shared)
 
-- Refresh `.hawp/LICENSE`, `.hawp/kit/**`, and **this provider's overlay folder only**.
-- The provider folder refresh depends on the guide:
-  - Claude Code: `.claude/rules/` (`CLAUDE.md` is preserved on update)
-  - Codex: `AGENTS.md`
-  - GitHub: `.github/instructions/`, `.github/prompts/`, `.github/copilot-instructions.md`
-  - Cursor: `.cursor/rules/`, `AGENTS.md`
-  - Continue: `.continue/rules/`
-- Preserve `.hawp/work/**`.
-- Reconcile closed work from backlog when eligible.
+- Install always refreshes `.hawp/LICENSE`, `.hawp/kit/**`, and seeds missing `.hawp/work/` scaffold files.
+- Install also runs **one provider overlay** for this guide's provider. That means the matching provider folder is refreshed alongside the kit:
+  - Claude Code: `core/providers/.claude/` → `.claude/rules/`, `CLAUDE.md`
+  - Codex: `core/providers/.codex/` → `AGENTS.md`
+  - GitHub: `core/providers/.github/` → `.github/instructions/`, `.github/prompts/`, `.github/copilot-instructions.md`
+  - Cursor: `core/providers/.cursor/` → `.cursor/rules/`, `AGENTS.md`
+  - Continue: `core/providers/.continue/` → `.continue/rules/`
+- Preserve `.hawp/work/**` project records.
 
-Provider-specific proof is in the **Update Contract** section in this guide.
+Provider-specific execution proof and optional guide-fetch helpers are in the **Install Contract** section above the branch steps.
 
-## Explicit dispatch
+## When to Install
 
-See the provider **Install Contract** **Guide fetch (review-first)** block — it selects update when `.hawp/` exists and writes a script to `/tmp` for review before execution.
+Install when you want HAWP kit plus agent overlays in a repository that does not have `.hawp/` yet (or you are re-running install intentionally).
 
-## When to Update
+## What Install Does (all providers)
 
-When HAWP is installed and you want the latest kit and provider overlay for your agent.
+1. Downloads HAWP `core/` from the selected branch (or uses `HAWP_LOCAL_CORE`).
+2. Runs legacy layout migrations when detected.
+3. Refreshes `.hawp/kit/**` and seeds `.hawp/work/` scaffold when missing.
+4. Installs **only this guide's provider overlay folder** (see provider boundaries + contract).
 
-## What Update Does (all providers)
-
-1. Refreshes kit from source branch.
-2. Refreshes the provider overlay folder documented in this guide's boundaries.
-3. Seeds missing work scaffold only.
-4. Runs migrations and backlog reconciliation when eligible.
-
-## What Update Does NOT Do
+## What Install Does NOT Do
 
 - Does not overwrite `.hawp/work/**`.
-- Does not refresh other providers' folders.
+- Does not install other providers' overlays (e.g. a Cursor guide does not write `.github/`).
+- Does not build the search index for you. If you plan to use `hawp search` or
+  `hawp_search` right away, run `hawp search index` after install. `hawp search embed`
+  is optional and only needed for semantic or hybrid search.
 
-## Update Is Safe to Re-Run
+## Install Is Safe to Re-Run
 
-Safe to run multiple times.
+Idempotent for project-owned files. Kit and provider-managed paths refresh each run.
+
+## Copy/Paste Behavior
+
+- `REF` and `PROVIDER` are pre-set in the command block for this guide.
+- For local testing: `export HAWP_LOCAL_CORE="/path/to/human-ai-workflow-protocol/core"`.
+- Run in a terminal from repo root — not doc inspection alone.
 
 ## Agent Execution Contract (shared minimum)
 
-- Required: run **Update Command (Copy/Paste)** in a terminal after reviewing the script block.
-- Required: `Source:`, `Provider:`, `Source mode:` in output.
-- Required: provider file proof from Update Contract.
+- Required: run **Install Command (Copy/Paste)** in a terminal after reviewing the script block.
+- Required: report `Source:`, `Provider:`, `Source mode:` from output.
+- Required: provider-specific file proof from the Install Contract section.
 - Optional: **Guide fetch (review-first)** writes a script to `/tmp` for inspection — run it explicitly; never pipe remote content directly to `bash`.
+- Not allowed: "already present" without execution proof.
 
 ## Implementation Reference
 
-Composed from `distribution/sources/update/script-core.md` + `providers/<provider>/script-update.md` + `script-footer.md`.
+Composed from `distribution/sources/install/script-core.md` + `providers/<provider>/script-install.md` + `script-footer.md`.
 
-# Cursor Update Contract
+# Cursor Install Contract
 
 ## Work item goal
 
-Refresh HAWP kit plus **Cursor overlays** from the selected branch. This refreshes `core/providers/.cursor/rules/` into `.cursor/rules/` and seeds `AGENTS.md` only when it is missing.
+Install HAWP kit plus **Cursor overlays only**. This refreshes `core/providers/.cursor/` into `.cursor/rules/` and `AGENTS.md`.
 
 ## Agent execution
 
-- Requires existing `.hawp/`.
-- Report proof: `Source:`, `Provider: cursor`, `Source mode:`.
-- File proof: `git status --short .hawp/kit .cursor/rules AGENTS.md`
+- Run the **Install Command** bash block in a terminal from repo root.
+- Report proof lines: `Source:`, `Provider: cursor`, `Source mode:`.
+- File proof:
+  - `git status --short .hawp/LICENSE .hawp/kit .cursor/rules AGENTS.md`
+  - `find .cursor/rules -maxdepth 1 -name 'hawp-*.mdc' 2>/dev/null | sort`
 
 ## Provider-specific rules
 
-- Refreshes all provider-pack `.mdc` rules on every update.
-- Seeds `AGENTS.md` only when it is missing; existing custom `AGENTS.md` content is preserved.
-- If you want new HAWP instruction wording in an already-customized `AGENTS.md`, blend it manually instead of expecting update to overwrite the file.
-- Does not modify `.github/`.
+- Refresh all `hawp-*.mdc` rules from the provider pack on install.
+- Seed `AGENTS.md` only when missing. If your repo already has `AGENTS.md`, keep it and manually blend in any HAWP guidance you want from the provider seed.
+- Do **not** expect `.github/` changes from this guide.
 
-## Auto-dispatch
+## Guide fetch (review-first)
 
-Use the install-contract **Guide fetch (review-first)** block with `PROVIDER="cursor"`; it selects update when `.hawp/` exists.
+**Recommended:** use **Install Command (Copy/Paste)** below — the full script is visible in this guide for review before you run it.
 
-# Update HAWP — Cursor Provider (Dev Branch)
+**Optional convenience:** downloads the remote guide and writes the extracted command block to a local script file. **Does not execute automatically** — review the file, then run it explicitly.
 
-Refresh kit and Cursor overlays from `dev`.
+> Security: do not pipe remote content directly to `bash`. This helper writes to `/tmp` so you can inspect the script first.
+
+````bash
+OWNER="sentzunhat"
+REPO="human-ai-workflow-protocol"
+PROVIDER="cursor"
+REF="development"   # set to "main" for stable
+
+case "$REF" in
+  main|development) ;;
+  *) echo "Error: REF must be 'main' or 'development'"; exit 1 ;;
+esac
+
+if [ -d ".hawp" ]; then MODE="update"; else MODE="install"; fi
+
+GUIDE_URL="https://raw.githubusercontent.com/${OWNER}/${REPO}/${REF}/distribution/generated/${PROVIDER}/${MODE}/${REF}.md"
+SCRIPT="$(mktemp "/tmp/hawp-${PROVIDER}-${MODE}.XXXXXX.sh")"
+
+echo "Execution work item: ${MODE} HAWP (${PROVIDER}) from ${OWNER}/${REPO}@${REF}"
+echo "Guide: ${GUIDE_URL}"
+
+curl -fsSL "$GUIDE_URL" | awk '
+  /^```bash$/ { in_block = 1; next }
+  /^```$/ && in_block { exit }
+  in_block { print }
+' > "$SCRIPT"
+
+chmod 700 "$SCRIPT"
+echo "Script written: $SCRIPT"
+echo "Review it, then run:"
+echo "  bash \"$SCRIPT\""
+````
+
+# Install HAWP — Cursor Provider (Development Branch)
+
+Install HAWP kit plus Cursor overlays from the `development` branch.
+
+Same source → target mapping as main: `core/providers/.cursor/` → `.cursor/rules/` + `AGENTS.md`.
+
+## When to Use
+
+- Testing unreleased HAWP Cursor provider changes.
+- Contributing to HAWP development.
 
 ## Steps
 
-1. Repository root.
-2. Run update command block (`REF="dev"`, `PROVIDER="cursor"`).
-3. Test in Cursor Agent; report issues on the HAWP repo if needed.
+1. Repository root in terminal.
+2. Run install command block (`REF="development"`, `PROVIDER="cursor"`).
+3. Verify `.hawp/kit/`, `.cursor/rules/`, and `AGENTS.md`.
 
-## Reverting
+## Reverting to Main
 
-Use `distribution/generated/cursor/update/main.md`.
+Use `distribution/generated/cursor/install/main.md`.
 
-## Update Command (Copy/Paste)
+## Install Command (Copy/Paste)
 
 Run this from the root of your target repository. No edits are required; branch and provider are already configured in the command. Each run fetches the latest commit from that branch.
 
@@ -214,7 +265,7 @@ set -euo pipefail
 
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
-REF="dev"
+REF="development"
 PROVIDER="cursor"
 
 echo "Source: ${OWNER}/${REPO}@${REF}"
@@ -233,17 +284,18 @@ else
   TMP_DIR="$(mktemp -d)"
   curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
     | tar -xz -C "$TMP_DIR"
-  SRC="$TMP_DIR/${REPO}-${REF}/core"
+  SRC="$(find "$TMP_DIR" -maxdepth 2 -type d -path "*/core" | head -n 1)"
+  if [ -z "$SRC" ]; then
+    echo "Error: downloaded archive did not contain core/"
+    exit 1
+  fi
   echo "Source mode: remote archive"
 fi
 
-if [ ! -d ".hawp" ]; then
-  echo "Preflight: .hawp/ not found in this repository."
-  echo "Run distribution/generated/${PROVIDER}/install/${REF}.md first, then run ${PROVIDER}/update/${REF}.md."
-  if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
-    rm -rf "$TMP_DIR"
-  fi
-  exit 1
+if [ -d ".hawp" ]; then
+  echo "Preflight: detected existing .hawp/."
+  echo "Switching to update-compatible refresh mode for this run."
+  echo "Tip: use the matching update guide next time when .hawp/ already exists."
 fi
 
 # --- Helpers (no-clobber copy; never overwrite repo-owned files) ---
@@ -406,10 +458,8 @@ cp -R "$SRC/.hawp/kit/usage"      .hawp/kit/
 cp -R "$SRC/.hawp/kit/references" .hawp/kit/
 cp -R "$SRC/.hawp/kit/standards"  .hawp/kit/
 
-# --- 4b. Update hawp CLI binary (platform-detected from GitHub release) ---
-# Downloads the latest Go binary to .hawp/bin/hawp-bin (beside the shell
-# wrapper at .hawp/bin/hawp). Never copies the shell wrapper over the binary.
-update_hawp_binary() {
+# --- 4b. Install hawp CLI binary (platform-detected from GitHub release) ---
+install_hawp_binary() {
   local _os _arch _asset _ext _dest _url _checksum_url _expected _actual
   local _tag
 
@@ -422,7 +472,7 @@ update_hawp_binary() {
     darwin) _os="darwin" ;;
     mingw*|msys*|cygwin*|windows_nt*) _os="windows"; _ext=".exe" ;;
     *)
-      echo "hawp update: unsupported OS '$_os' — skipping binary update."
+      echo "hawp install: unsupported OS '$_os' — skipping binary install."
       return 0
       ;;
   esac
@@ -431,7 +481,7 @@ update_hawp_binary() {
     x86_64|amd64)  _arch="amd64" ;;
     aarch64|arm64) _arch="arm64" ;;
     *)
-      echo "hawp update: unsupported arch '$_arch' — skipping binary update."
+      echo "hawp install: unsupported arch '$_arch' — skipping binary install."
       return 0
       ;;
   esac
@@ -439,16 +489,17 @@ update_hawp_binary() {
   _asset="hawp-${_os}-${_arch}${_ext}"
   _dest=".hawp/bin/hawp-bin${_ext}"
 
+  # Resolve latest release tag from GitHub API.
   _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" 2>/dev/null \
     | awk -F'"' '/"tag_name"/ { print $4; exit }' || true)"
   if [ -z "$_tag" ]; then
     _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases?per_page=1" 2>/dev/null \
       | awk -F'"' '/"tag_name"/ { print $4; exit }' || true)"
-    [ -n "$_tag" ] && echo "hawp update: /releases/latest unavailable; using releases list fallback."
+    [ -n "$_tag" ] && echo "hawp install: /releases/latest unavailable; using releases list fallback."
   fi
 
   if [ -z "$_tag" ]; then
-    echo "hawp update: could not resolve latest release tag — skipping binary update."
+    echo "hawp install: could not resolve latest release tag — skipping binary install."
     return 0
   fi
 
@@ -458,10 +509,11 @@ update_hawp_binary() {
   echo "hawp binary: ${_asset} (release ${_tag})"
   mkdir -p .hawp/bin
   curl -fsSL -o "${_dest}.tmp" "$_url" || {
-    echo "hawp update: download failed — skipping binary update."
+    echo "hawp install: download failed — skipping binary install."
     return 0
   }
 
+  # Verify SHA256 when checksums.txt is available
   if curl -fsSL -o /tmp/hawp-checksums.txt "$_checksum_url" 2>/dev/null; then
     _expected="$(grep " ${_asset}$" /tmp/hawp-checksums.txt | awk '{print $1}')"
     if [ -n "$_expected" ]; then
@@ -473,7 +525,7 @@ update_hawp_binary() {
         _actual=""
       fi
       if [ -n "$_actual" ] && [ "$_actual" != "$_expected" ]; then
-        echo "hawp update: SHA256 mismatch — aborting binary update."
+        echo "hawp install: SHA256 mismatch — aborting binary install."
         rm -f "${_dest}.tmp"
         return 1
       fi
@@ -485,7 +537,7 @@ update_hawp_binary() {
   mv "${_dest}.tmp" "$_dest"
   chmod +x "$_dest"
 
-  # Install the shell wrapper alongside the binary (idempotent).
+  # Install the shell wrapper at .hawp/bin/hawp so it delegates to hawp-bin.
   if [ -f "$SRC/.hawp/bin/hawp" ]; then
     cp "$SRC/.hawp/bin/hawp" .hawp/bin/hawp
     chmod +x .hawp/bin/hawp
@@ -495,9 +547,9 @@ update_hawp_binary() {
     chmod +x .hawp/bin/hawp-mcp
   fi
 
-  echo "hawp binary: updated to ${_tag} at ${_dest}"
+  echo "hawp binary: installed to ${_dest}"
 }
-update_hawp_binary
+install_hawp_binary
 
 rm -rf .hawp/templates .hawp/patterns .hawp/reviews .hawp/examples .hawp/types .hawp/usage
 rm -f .hawp/README.md .hawp/spec.md .hawp/start-here.md .hawp/authoring-patterns.md
@@ -516,7 +568,7 @@ copy_file_no_clobber "$SRC/.hawp/work/evidence/README.md"      ".hawp/work/evide
 copy_file_no_clobber "$SRC/.hawp/work/status/README.md"        ".hawp/work/status/README.md"
 copy_file_no_clobber "$SRC/.hawp/work/notes/README.md"         ".hawp/work/notes/README.md"
 
-# --- Provider overlay: Cursor (refresh) ---
+# --- Provider overlay: Cursor (core/providers/.cursor/ -> .cursor/, AGENTS.md) ---
 resolve_provider_pack() {
   if [ -d "$SRC/providers/.cursor" ]; then
     echo "$SRC/providers/.cursor"
@@ -525,25 +577,24 @@ resolve_provider_pack() {
   echo "Error: Cursor provider pack not found at core/providers/.cursor/" >&2
   return 1
 }
-update_provider_overlay() {
+install_provider_overlay() {
   pack="$(resolve_provider_pack)" || return 1
   mkdir -p .cursor/rules
   if [ -d "$pack/rules" ]; then
     cp "$pack/rules/"*.mdc .cursor/rules/ 2>/dev/null || true
   fi
   copy_file_no_clobber "$pack/AGENTS.md.seed" AGENTS.md
-  echo "  refreshed: core/providers/.cursor/ -> .cursor/rules/"
-  echo "  seeded if missing: core/providers/.cursor/ -> AGENTS.md"
+  echo "  installed: core/providers/.cursor/ -> .cursor/rules/, AGENTS.md (seed if missing)"
 }
-update_provider_overlay || exit 1
+install_provider_overlay || exit 1
 echo "Provider overlay: .cursor/rules/*, AGENTS.md (seed if missing)"
 
 if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
   rm -rf "$TMP_DIR"
 fi
 
-echo "HAWP update complete (provider: ${PROVIDER})."
-echo "Refreshed: .hawp/LICENSE, .hawp/kit/**"
+echo "HAWP install complete (provider: ${PROVIDER})."
+echo "Refreshed: .hawp/LICENSE, .hawp/kit/**, .hawp/bin/hawp (platform binary)"
 echo "Preserved: .hawp/work/** (no-overwrite)"
 echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .hawp/work/active/ when eligible (see 'reconciled (link):' and 'reconciled (id-fallback):' lines above)"
 ```
@@ -552,30 +603,30 @@ echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .haw
 
 This file is generated. Do not edit it directly.
 
-- Workflow gate: pushes and pull requests on `main` or `dev` fail when generated guides drift from source.
+- Workflow gate: pushes and pull requests on `main` or `development` fail when generated guides drift from source.
 - Local sync: run `hawp distribution sync` after editing `distribution/sources/` or the distribution composition code.
 
 Generated output file:
 
-- `distribution/generated/cursor/update/dev.md`
+- `distribution/generated/cursor/install/development.md`
 
-Provider: `cursor` · Operation: `update` · Branch: `dev`
+Provider: `cursor` · Operation: `install` · Branch: `development`
 
 Install mapping: `core/providers/.cursor/` -> downstream paths in this guide.
 
 This generated guide is built from:
 
-- `distribution/sources/providers/cursor/preamble-update.md`
+- `distribution/sources/providers/cursor/preamble-install.md`
 - `distribution/sources/shared/safety.md`
 - `distribution/sources/providers/cursor/safety.md`
 - `distribution/sources/shared/repo-boundaries-kit.md`
 - `distribution/sources/providers/cursor/boundaries.md`
-- `distribution/sources/shared/update.md`
-- `distribution/sources/providers/cursor/update-contract.md`
-- `distribution/sources/providers/cursor/update/dev.md`
+- `distribution/sources/shared/install.md`
+- `distribution/sources/providers/cursor/install-contract.md`
+- `distribution/sources/providers/cursor/install/development.md`
 
 Composed shell script (core + provider overlay + footer):
 
-- `distribution/sources/update/script-core.md`
-- `distribution/sources/providers/cursor/script-update.md`
-- `distribution/sources/update/script-footer.md`
+- `distribution/sources/install/script-core.md`
+- `distribution/sources/providers/cursor/script-install.md`
+- `distribution/sources/install/script-footer.md`

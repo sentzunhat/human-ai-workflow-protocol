@@ -30,11 +30,11 @@ Install HAWP kit plus **Claude Code overlays only**. This copies `core/providers
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
 PROVIDER="claude"
-REF="dev"   # set to "main" for stable
+REF="development"   # set to "main" for stable
 
 case "$REF" in
-  main|dev) ;;
-  *) echo "Error: REF must be 'main' or 'dev'"; exit 1 ;;
+  main|development) ;;
+  *) echo "Error: REF must be 'main' or 'development'"; exit 1 ;;
 esac
 
 if [ -d ".hawp" ]; then MODE="update"; else MODE="install"; fi

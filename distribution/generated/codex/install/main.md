@@ -209,11 +209,11 @@ Install HAWP kit plus the **Codex overlay only**. This seeds `core/providers/.co
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
 PROVIDER="codex"
-REF="dev"   # set to "main" for stable
+REF="development"   # set to "main" for stable
 
 case "$REF" in
-  main|dev) ;;
-  *) echo "Error: REF must be 'main' or 'dev'"; exit 1 ;;
+  main|development) ;;
+  *) echo "Error: REF must be 'main' or 'development'"; exit 1 ;;
 esac
 
 if [ -d ".hawp" ]; then MODE="update"; else MODE="install"; fi
@@ -279,7 +279,7 @@ HAWP guidance you want from the provider seed instead of overwriting your file.
 
 ## Other guides
 
-- Dev branch: `distribution/generated/codex/install/dev.md`
+- Development branch: `distribution/generated/codex/install/development.md`
 - GitHub/Copilot: `distribution/generated/github/install/main.md`
 - Cursor: `distribution/generated/cursor/install/main.md`
 - Continue: `distribution/generated/continue/install/main.md`
@@ -312,14 +312,18 @@ else
   TMP_DIR="$(mktemp -d)"
   curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
     | tar -xz -C "$TMP_DIR"
-  SRC="$TMP_DIR/${REPO}-${REF}/core"
+  SRC="$(find "$TMP_DIR" -maxdepth 2 -type d -path "*/core" | head -n 1)"
+  if [ -z "$SRC" ]; then
+    echo "Error: downloaded archive did not contain core/"
+    exit 1
+  fi
   echo "Source mode: remote archive"
 fi
 
 if [ -d ".hawp" ]; then
   echo "Preflight: detected existing .hawp/."
   echo "Switching to update-compatible refresh mode for this run."
-  echo "Tip: use distribution/generated/${PROVIDER}/update/${REF}.md next time when .hawp/ already exists."
+  echo "Tip: use the matching update guide next time when .hawp/ already exists."
 fi
 
 # --- Helpers (no-clobber copy; never overwrite repo-owned files) ---
@@ -623,7 +627,7 @@ echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .haw
 
 This file is generated. Do not edit it directly.
 
-- Workflow gate: pushes and pull requests on `main` or `dev` fail when generated guides drift from source.
+- Workflow gate: pushes and pull requests on `main` or `development` fail when generated guides drift from source.
 - Local sync: run `hawp distribution sync` after editing `distribution/sources/` or the distribution composition code.
 
 Generated output file:
