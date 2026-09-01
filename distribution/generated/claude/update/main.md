@@ -268,9 +268,6 @@ fi
 if [ ! -d ".hawp" ]; then
   echo "Preflight: .hawp/ not found in this repository."
   echo "Run the matching install guide first, then rerun this update guide."
-  if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
-    rm -rf "$TMP_DIR"
-  fi
   exit 1
 fi
 

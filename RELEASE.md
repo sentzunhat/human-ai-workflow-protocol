@@ -38,8 +38,10 @@ Manual path:
 
 ```bash
 VERSION=<version>
+git checkout main
+git pull --ff-only
 git tag -a "$VERSION" -m "release $VERSION"
-git push origin main "$VERSION"
+git push origin "$VERSION"
 ```
 
 Or use GitHub Actions manual dispatch:
