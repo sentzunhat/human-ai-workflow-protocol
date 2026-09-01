@@ -7,6 +7,25 @@ import (
 	"testing"
 )
 
+func TestLegacyRootGuidesIncludesDevAndDevelopmentVariants(t *testing.T) {
+	want := map[string]bool{
+		"install-main.md":        true,
+		"install-dev.md":         true,
+		"install-development.md": true,
+		"update-main.md":         true,
+		"update-dev.md":          true,
+		"update-development.md":  true,
+	}
+
+	for _, guide := range LegacyRootGuides {
+		delete(want, guide)
+	}
+
+	if len(want) != 0 {
+		t.Fatalf("LegacyRootGuides missing entries: %v", want)
+	}
+}
+
 func TestComputeExpectedOutputsProducesAllVariants(t *testing.T) {
 	root := t.TempDir()
 	writeDistributionFixture(t, root)

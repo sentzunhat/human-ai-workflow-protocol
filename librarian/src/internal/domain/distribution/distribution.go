@@ -32,8 +32,10 @@ var ActiveProviders = []string{"claude", "codex", "github", "cursor", "continue"
 
 var LegacyRootGuides = []string{
 	"install-main.md",
+	"install-dev.md",
 	"install-development.md",
 	"update-main.md",
+	"update-dev.md",
 	"update-development.md",
 }
 
