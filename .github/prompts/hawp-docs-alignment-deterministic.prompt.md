@@ -18,8 +18,8 @@ Canonical reference:
 
 Scope:
 
-- include: source directories, `docs/**`, `README.md`, changelog files, manifest files, and relevant root config files
-- exclude: dependency directories, build artifacts, generated output, and vendored code
+- include: source directories, `docs/**`, `README.md`, changelog files, manifest files, relevant root config files, and `distribution/generated/**` (as a comparison target, not a source of truth)
+- exclude: dependency directories, build artifacts, and vendored code — `distribution/generated/**` is excluded as a source of truth but included as a comparison target (see Mission)
 
 Phase 1: Code Structure Discovery (from source-of-truth paths)
 

@@ -31,7 +31,7 @@ Install HAWP kit plus the **Codex overlay only**. This seeds `core/providers/.co
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
 PROVIDER="codex"
-REF="development"   # set to "main" for stable
+REF="main"   # set to "development" to install from the dev branch
 
 case "$REF" in
   main|development) ;;

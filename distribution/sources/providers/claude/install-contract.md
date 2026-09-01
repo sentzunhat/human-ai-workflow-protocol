@@ -30,7 +30,7 @@ Install HAWP kit plus **Claude Code overlays only**. This copies `core/providers
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
 PROVIDER="claude"
-REF="development"   # set to "main" for stable
+REF="main"   # set to "development" to install from the dev branch
 
 case "$REF" in
   main|development) ;;
