@@ -115,6 +115,15 @@ Structured response schema:
 - `lines.source` — line containing the best match for the query term
 - `context.window` — suggested read window (±40 lines around `lines.source`, clamped to file bounds)
 
+Pass `context: true` to receive a single deduplicated, token-capped markdown block instead of raw results — suitable for direct LLM injection:
+
+```json
+{ "query": "backlog alignment", "limit": 5, "context": true, "max_tokens": 2000 }
+```
+
+- `context` — when `true`, returns a pre-shaped markdown block (Jaccard dedup + greedy token cap applied); default `false`
+- `max_tokens` — token budget for the context block when `context: true`; default `2000`
+
 Other MCP tools: `hawp_work_new` (create work item), `hawp_work_validate` (validate kit + work integrity).
 
 ## Typical agent workflow
