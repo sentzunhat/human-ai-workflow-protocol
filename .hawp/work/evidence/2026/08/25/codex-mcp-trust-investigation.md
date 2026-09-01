@@ -1,7 +1,7 @@
 # Evidence: Codex MCP project-trust gate
 
 **Date:** 2026-08-25  
-**Repo under test:** `/Users/beltrd/Desktop/projects/beltrd/local-print-farm`  
+**Repo under test:** `local-print-farm`  
 **Codex binary:** `/Applications/ChatGPT.app/Contents/Resources/codex`
 
 ---
@@ -17,7 +17,7 @@
 
 ### Negative case (untrusted throwaway repo)
 
-- `/Users/beltrd/tmp/codex-mcp-probe/.codex/config.toml` had same shape, pointed at OpenAI Docs MCP server
+- `codex-mcp-probe/.codex/config.toml` had same shape, pointed at OpenAI Docs MCP server
 - `codex mcp list` omitted it; `codex mcp get openaiDeveloperDocs` returned "No MCP server named ... found."
 - Same config, different project trust status → server not loaded
 

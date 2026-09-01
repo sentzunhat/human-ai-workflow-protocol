@@ -2,7 +2,7 @@
 
 Prompt given to the agent (verbatim, no framing added):
 
-> Repository: /home/beltrd/Desktop/projects/human-ai-workflow-protocol
+> Repository: human-ai-workflow-protocol
 >
 > Is HAWP ready for a v1.0 release? What do we still need to do?
 >
