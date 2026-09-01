@@ -38,10 +38,7 @@ Manual path:
 
 ```bash
 VERSION=<version>
-git checkout main
-git pull --ff-only
-git tag -a "$VERSION" -m "release $VERSION"
-git push origin "$VERSION"
+gh workflow run release.yml --field version="$VERSION" --field draft=false
 ```
 
 Or use GitHub Actions manual dispatch:

@@ -10,7 +10,7 @@ Upgrade to the latest unreleased HAWP kit and GitHub Copilot overlays from the `
 ## Prerequisites
 
 - HAWP already installed.
-- Willingness to use potentially unstable Development branch content.
+- Willingness to use potentially unstable `development` branch content.
 
 ## Before You Update
 
@@ -26,7 +26,7 @@ Upgrade to the latest unreleased HAWP kit and GitHub Copilot overlays from the `
 
 ## What Gets Updated
 
-- `.hawp/LICENSE`, `.hawp/kit/**` (Development branch)
+- `.hawp/LICENSE`, `.hawp/kit/**` (`development` branch)
 - `.github/instructions/`, `.github/prompts/`, `.github/copilot-instructions.md`
 
 ## What Is Preserved
