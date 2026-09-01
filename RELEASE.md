@@ -81,13 +81,7 @@ Expected version output: the value of `VERSION`.
 Downstream repositories should get a normal branch and PR. For a stable update,
 use the provider update guide from `main`.
 
-For Claude/Codex provider and binary staging, the current branch observed in
-this repository is:
-
-```text
-claude/claude-codex-binary-update-n00dve
-```
-
-When testing a slash-named branch, use the visible install/update command block
-from a generated guide and set `REF` to that branch name after review. The
-script archive extraction supports slash-named refs.
+For Claude/Codex provider and binary staging, use a temporary branch when you
+need to test a slash-named ref. Run the visible install/update command block
+from a generated guide, review it first, then set `REF` to the branch name you
+are testing. The script archive extraction supports slash-named refs.

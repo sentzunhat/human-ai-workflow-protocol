@@ -29,7 +29,7 @@ Update HAWP kit and refresh **Continue overlays only**. This refreshes `core/pro
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
 PROVIDER="continue"
-REF="main"   # set to "development" to install from the development branch
+REF="main"   # set to "development" to update from the development branch
 
 case "$REF" in
   main|development) ;;

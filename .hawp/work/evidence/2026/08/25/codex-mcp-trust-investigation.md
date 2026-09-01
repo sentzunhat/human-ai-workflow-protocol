@@ -2,7 +2,7 @@
 
 **Date:** 2026-08-25  
 **Repo under test:** `local-print-farm`  
-**Codex binary:** `/Applications/ChatGPT.app/Contents/Resources/codex`
+**Codex binary:** `codex` on PATH
 
 ---
 
