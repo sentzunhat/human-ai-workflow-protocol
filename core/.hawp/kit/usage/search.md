@@ -61,6 +61,7 @@ hawp search <query>
   --max-tokens <n>        token budget for context block (default: 2000)
   --semantic              force semantic-only search
   --hybrid-ratio <f>      lexical fraction for hybrid blend, 0.0 to 1.0 (default: 0.3)
+  --verbose | -v          print token accounting summary to stderr (chunks, ~tokens, saved via dedup)
 
 hawp search index         ingest configured paths into SQLite (reads .hawp/config/search.json)
 hawp search embed         generate and store embedding vectors
