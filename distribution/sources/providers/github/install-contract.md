@@ -30,7 +30,7 @@ Install HAWP kit plus **GitHub Copilot overlays only**. This refreshes `core/pro
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
 PROVIDER="github"
-REF="main"   # set to "development" to install from the dev branch
+REF="main"   # set to "development" to install from the development branch
 
 case "$REF" in
   main|development) ;;

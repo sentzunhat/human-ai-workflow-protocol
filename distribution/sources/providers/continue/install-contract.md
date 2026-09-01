@@ -29,7 +29,7 @@ Install HAWP kit plus **Continue overlays only**. This refreshes `core/providers
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
 PROVIDER="continue"
-REF="main"   # set to "development" to install from the dev branch
+REF="main"   # set to "development" to install from the development branch
 
 case "$REF" in
   main|development) ;;
