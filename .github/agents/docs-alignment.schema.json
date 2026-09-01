@@ -3,7 +3,7 @@
   "description": "WorkItem schema to run the Documentation Alignment Auditor against the repository.",
   "inputs": {
     "scanPaths": ["src", "docs"],
-    "includeFiles": ["package.json", "README.md", "docs/changelog.md"],
+    "includeFiles": ["README.md", "CHANGELOG.md", "go.mod"],
     "excludePatterns": ["node_modules", "build", "dist", "publish", "build-cjs"]
   },
   "phases": [

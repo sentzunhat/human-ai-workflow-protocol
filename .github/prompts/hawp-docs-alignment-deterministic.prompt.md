@@ -18,8 +18,8 @@ Canonical reference:
 
 Scope:
 
-- include: `src/**`, `docs/**`, `package.json`, `README.md`, `CHANGELOG.md` (if present), root config files (`tsconfig*`, `eslint*`, `vitest*`, etc.)
-- exclude: `node_modules/**`, `dist/**`, build artifacts
+- include: source directories, `docs/**`, `README.md`, changelog files, manifest files, and relevant root config files
+- exclude: dependency directories, build artifacts, generated output, and vendored code
 
 Phase 1: Code Structure Discovery (from `src`)
 

@@ -196,12 +196,6 @@ For v0.2 file-tracking enforcement lanes, execute this sequence:
 
 Use one of the commands below to deterministically generate a path-key from an exact repo-relative path.
 
-Node.js (macOS/Linux/Windows):
-
-```bash
-node -e 'const p=process.argv[1];const b=Buffer.from(p,"utf8").toString("base64").replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"" );console.log(`pk-${b}.txt`);' ".hawp/kit/templates/work-item-files.md"
-```
-
 Python 3 (macOS/Linux/Windows):
 
 ```bash
@@ -294,8 +288,7 @@ git diff --name-status
 git diff --check
 
 # Run repo validation
-npm run typecheck
-npm run validate:workflow
+cd librarian/src && go run ./cmd/hawp work validate
 ```
 
 Confirm that:
@@ -337,7 +330,7 @@ These are deferred and not part of v0.1:
 
 ### Read-Only Context Files
 
-- `librarian/package.json`
+- `librarian/src/go.mod`
 - `README.md`
 
 ### Do-Not-Touch Files

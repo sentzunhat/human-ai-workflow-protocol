@@ -64,7 +64,7 @@ Detect documentation drift between implementation and docs without changing code
 ## Source Of Truth
 
 - Treat `src/` and runtime-facing repository configuration as the primary source of truth.
-- Include `docs/`, `README.md`, `package.json`, `docs/changelog.md`, and relevant examples when they are part of the audited scope.
+- Include `docs/`, `README.md`, changelog files, manifest files, and relevant examples when they are part of the audited scope.
 - Follow the repository documentation standards in `docs/guidelines/documentation.md`.
 
 ## Constraints
