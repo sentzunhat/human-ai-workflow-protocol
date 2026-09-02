@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestLegacyRootGuidesIncludesDevAndDevelopmentVariants(t *testing.T) {
+func TestLegacyRootGuidesIncludesMainDevAndDevelopmentVariants(t *testing.T) {
 	want := map[string]bool{
 		"install-main.md":        true,
 		"install-dev.md":         true,
