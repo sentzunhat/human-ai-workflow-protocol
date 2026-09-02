@@ -288,7 +288,7 @@ git diff --name-status
 git diff --check
 
 # Run repo validation
-cd librarian/src && go run ./cmd/hawp work validate
+.hawp/bin/hawp work validate
 ```
 
 Confirm that:

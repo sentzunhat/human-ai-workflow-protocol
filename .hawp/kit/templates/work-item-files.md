@@ -112,7 +112,7 @@ git diff --name-status
 git diff --check
 
 # Verify HAWP workflow structure
-cd librarian/src && go run ./cmd/hawp work validate
+.hawp/bin/hawp work validate
 
 # Final commit validation
 git log -1 --oneline
