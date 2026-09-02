@@ -13,57 +13,57 @@ Edits to provider overlay rules: change `core/providers/shared/behaviors/` (mate
 ```text
 generated/
 └── <provider>/
-    ├── install/main.md | install/dev.md
-    └── update/main.md  | update/dev.md
+    ├── install/main.md | install/development.md
+    └── update/main.md  | update/development.md
 ```
 
-Each guide embeds `PROVIDER=<name>` and `REF=main|dev` in the bash block. Scripts install `.hawp/kit/**` plus **only that provider's overlay** from `core/providers/.<provider>/`.
+Each guide embeds `PROVIDER=<name>` and `REF=main|development` in the bash block. Scripts install `.hawp/kit/**` plus **only that provider's overlay** from `core/providers/.<provider>/`.
 
 ## Claude Code
 
-| | Stable (`main`) | Dev (`dev`) |
+| | Stable (`main`) | Development (`development`) |
 |--|-----------------|-------------|
-| **Install** | [install/main.md](claude/install/main.md) | [install/dev.md](claude/install/dev.md) |
-| **Update** | [update/main.md](claude/update/main.md) | [update/dev.md](claude/update/dev.md) |
+| **Install** | [install/main.md](claude/install/main.md) | [install/development.md](claude/install/development.md) |
+| **Update** | [update/main.md](claude/update/main.md) | [update/development.md](claude/update/development.md) |
 
 Installs: `core/providers/.claude/` → `.claude/rules/hawp-*.md`, `CLAUDE.md`
 
 ## Codex
 
-| | Stable (`main`) | Dev (`dev`) |
+| | Stable (`main`) | Development (`development`) |
 |--|-----------------|-------------|
-| **Install** | [install/main.md](codex/install/main.md) | [install/dev.md](codex/install/dev.md) |
-| **Update** | [update/main.md](codex/update/main.md) | [update/dev.md](codex/update/dev.md) |
+| **Install** | [install/main.md](codex/install/main.md) | [install/development.md](codex/install/development.md) |
+| **Update** | [update/main.md](codex/update/main.md) | [update/development.md](codex/update/development.md) |
 
 Installs: `core/providers/.codex/` → `AGENTS.md`
 
 ## GitHub / Copilot
 
-| | Stable (`main`) | Dev (`dev`) |
+| | Stable (`main`) | Development (`development`) |
 |--|-----------------|-------------|
-| **Install** | [install/main.md](github/install/main.md) | [install/dev.md](github/install/dev.md) |
-| **Update** | [update/main.md](github/update/main.md) | [update/dev.md](github/update/dev.md) |
+| **Install** | [install/main.md](github/install/main.md) | [install/development.md](github/install/development.md) |
+| **Update** | [update/main.md](github/update/main.md) | [update/development.md](github/update/development.md) |
 
 Installs: `core/providers/.github/` → `.github/`
 
 ## Cursor
 
-| | Stable (`main`) | Dev (`dev`) |
+| | Stable (`main`) | Development (`development`) |
 |--|-----------------|-------------|
-| **Install** | [install/main.md](cursor/install/main.md) | [install/dev.md](cursor/install/dev.md) |
-| **Update** | [update/main.md](cursor/update/main.md) | [update/dev.md](cursor/update/dev.md) |
+| **Install** | [install/main.md](cursor/install/main.md) | [install/development.md](cursor/install/development.md) |
+| **Update** | [update/main.md](cursor/update/main.md) | [update/development.md](cursor/update/development.md) |
 
 Installs: `core/providers/.cursor/` → `.cursor/rules/`, `AGENTS.md`
 
 ## Continue
 
-| | Stable (`main`) | Dev (`dev`) |
+| | Stable (`main`) | Development (`development`) |
 |--|-----------------|-------------|
-| **Install** | [install/main.md](continue/install/main.md) | [install/dev.md](continue/install/dev.md) |
-| **Update** | [update/main.md](continue/update/main.md) | [update/dev.md](continue/update/dev.md) |
+| **Install** | [install/main.md](continue/install/main.md) | [install/development.md](continue/install/development.md) |
+| **Update** | [update/main.md](continue/update/main.md) | [update/development.md](continue/update/development.md) |
 
 Installs: `core/providers/.continue/` → `.continue/rules/hawp-*.md`
 
 ## Legacy
 
-Root-level `install-main.md` / `update-dev.md` were removed. Use provider folders above.
+Root-level `install-main.md` / `update-development.md` were removed. Use provider folders above.

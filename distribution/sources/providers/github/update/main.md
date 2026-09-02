@@ -44,4 +44,4 @@ Upgrade an existing HAWP installation to the latest stable kit and GitHub Copilo
 
 ## Other branches
 
-- Dev update: `distribution/generated/github/update/dev.md`
+- Development update: `distribution/generated/github/update/development.md`

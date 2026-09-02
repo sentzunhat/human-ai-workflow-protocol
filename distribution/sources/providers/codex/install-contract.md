@@ -31,11 +31,11 @@ Install HAWP kit plus the **Codex overlay only**. This seeds `core/providers/.co
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
 PROVIDER="codex"
-REF="dev"   # set to "main" for stable
+REF="main"   # set to "development" to install from the development branch
 
 case "$REF" in
-  main|dev) ;;
-  *) echo "Error: REF must be 'main' or 'dev'"; exit 1 ;;
+  main|development) ;;
+  *) echo "Error: REF must be 'main' or 'development'"; exit 1 ;;
 esac
 
 if [ -d ".hawp" ]; then MODE="update"; else MODE="install"; fi

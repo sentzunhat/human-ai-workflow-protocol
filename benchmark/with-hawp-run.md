@@ -17,7 +17,7 @@ const shape: Shape = {
 
 #### 1. Complexity & Cognitive Load
 - **Observation**: The `distribution/sources/providers/` directory contains highly repetitive structures for `continue`, `cursor`, and `github` (e.g., `boundaries.md`, `install-contract.md`, `preamble-install.md`).
-- **Evidence**: `/Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/distribution/sources/providers/continue/` vs `/Users/beltrd/Desktop/projects/r-and-d/personal-projects/human-ai-workflow-protocol/distribution/sources/providers/cursor/`.
+- **Evidence**: `distribution/sources/providers/continue/` vs `distribution/sources/providers/cursor/`.
 - **Risk**: High risk of "configuration drift" where updates to the HAWP standard are applied to one provider but missed in others, leading to inconsistent developer experiences across different AI agents.
 
 #### 2. Documentation Fragmentation

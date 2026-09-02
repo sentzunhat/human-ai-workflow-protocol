@@ -20,16 +20,36 @@ if [ -n "${HAWP_LOCAL_CORE:-}" ]; then
   echo "Source mode: local core (${SRC})"
 else
   TMP_DIR="$(mktemp -d)"
+  cleanup_tmp_dir() {
+    if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
+      rm -rf "$TMP_DIR"
+    fi
+  }
+  trap cleanup_tmp_dir EXIT
   curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
     | tar -xz -C "$TMP_DIR"
-  SRC="$TMP_DIR/${REPO}-${REF}/core"
+  SRC=""
+  if [ -d "$TMP_DIR/${REPO}-${REF}/core/.hawp/kit" ]; then
+    SRC="$TMP_DIR/${REPO}-${REF}/core"
+  else
+    for candidate in "$TMP_DIR"/*/core; do
+      if [ -d "$candidate/.hawp/kit" ]; then
+        SRC="$candidate"
+        break
+      fi
+    done
+  fi
+  if [ -z "$SRC" ]; then
+    echo "Error: downloaded archive did not contain core/"
+    exit 1
+  fi
   echo "Source mode: remote archive"
 fi
 
 if [ -d ".hawp" ]; then
   echo "Preflight: detected existing .hawp/."
   echo "Switching to update-compatible refresh mode for this run."
-  echo "Tip: use distribution/generated/${PROVIDER}/update/${REF}.md next time when .hawp/ already exists."
+  echo "Tip: use the matching update guide next time when .hawp/ already exists."
 fi
 
 # --- Helpers (no-clobber copy; never overwrite repo-owned files) ---
@@ -105,7 +125,8 @@ reconcile_closed_plans_from_backlog() {
       *) closed_dir="" ;;
     esac
 
-    find .hawp/work/active -maxdepth 1 -type f -name "*-${id}-*.md" | while IFS= read -r src; do
+    for src in .hawp/work/active/*-"$id"-*.md; do
+      [ -f "$src" ] || continue
       [ -n "$src" ] || continue
       local_dir="$closed_dir"
       if [ -z "$local_dir" ]; then

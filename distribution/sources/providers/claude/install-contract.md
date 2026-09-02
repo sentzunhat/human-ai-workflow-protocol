@@ -10,7 +10,7 @@ Install HAWP kit plus **Claude Code overlays only**. This copies `core/providers
 - Report proof lines: `Source:`, `Provider: claude`, `Source mode:`.
 - File proof:
   - `git status --short .hawp/LICENSE .hawp/kit .claude/rules CLAUDE.md`
-  - `find .claude/rules -maxdepth 1 -name 'hawp-*.md' 2>/dev/null | sort`
+  - `for rule in .claude/rules/hawp-*.md; do [ -f "$rule" ] && printf '%s\n' "$rule"; done | sort`
 
 ## Provider-specific rules
 
@@ -30,11 +30,11 @@ Install HAWP kit plus **Claude Code overlays only**. This copies `core/providers
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
 PROVIDER="claude"
-REF="dev"   # set to "main" for stable
+REF="main"   # set to "development" to install from the development branch
 
 case "$REF" in
-  main|dev) ;;
-  *) echo "Error: REF must be 'main' or 'dev'"; exit 1 ;;
+  main|development) ;;
+  *) echo "Error: REF must be 'main' or 'development'"; exit 1 ;;
 esac
 
 if [ -d ".hawp" ]; then MODE="update"; else MODE="install"; fi

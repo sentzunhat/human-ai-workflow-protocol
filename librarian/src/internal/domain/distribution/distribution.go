@@ -33,8 +33,10 @@ var ActiveProviders = []string{"claude", "codex", "github", "cursor", "continue"
 var LegacyRootGuides = []string{
 	"install-main.md",
 	"install-dev.md",
+	"install-development.md",
 	"update-main.md",
 	"update-dev.md",
+	"update-development.md",
 }
 
 var DownstreamTargetFiles = []string{
@@ -114,7 +116,7 @@ func distributionPlan() []Variant {
 	var variants []Variant
 	for _, provider := range ActiveProviders {
 		for _, operation := range []string{"install", "update"} {
-			for _, ref := range []string{"main", "dev"} {
+			for _, ref := range []string{"main", "development"} {
 				variants = append(variants, providerVariant(provider, operation, ref))
 			}
 		}
@@ -211,7 +213,7 @@ func generateSourceReferenceSection(variant Variant) string {
 
 	return "## Source Reference\n\n" +
 		"This file is generated. Do not edit it directly.\n\n" +
-		"- Workflow gate: pushes and pull requests on `main` or `dev` fail when generated guides drift from source.\n" +
+		"- Workflow gate: pushes and pull requests on `main` or `development` fail when generated guides drift from source.\n" +
 		"- Local sync: run `hawp distribution sync` after editing `distribution/sources/` or the distribution composition code.\n\n" +
 		"Generated output file:\n\n" +
 		"- `distribution/generated/" + variant.OutputFile + "`\n\n" +

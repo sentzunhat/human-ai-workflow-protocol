@@ -14,7 +14,7 @@ hawp search embed --backend onnx     # offline fallback, no Ollama needed
 
 # 3. Search
 hawp search "how do I write a status report"
-hawp search "backlog alignment rules" --hybrid
+hawp search "backlog alignment rules" --hybrid-ratio 0.3
 ```
 
 ## Embedding backends
@@ -37,7 +37,7 @@ hawp search embed --backend onnx   --model all-MiniLM-L6-v2
 | Mode | Flag | Speed | Notes |
 |------|------|-------|-------|
 | Lexical (FTS5) | default | <1ms | No vectors needed |
-| Hybrid (lexical + semantic) | `--hybrid` | ~15–50ms | Requires embed step |
+| Hybrid (lexical + semantic) | default when vectors exist | ~15–50ms | Requires embed step; tune with `--hybrid-ratio` |
 | Semantic only | `--semantic` | ~100ms | Requires embed step |
 
 Hybrid is recommended once vectors are built.
@@ -55,14 +55,15 @@ Output includes source file, chunk, and relevance score per result.
 
 ```
 hawp search <query>
-  --limit <n>             max results (default: 5)
+  --limit <n>             max results (default: 10)
   --context               pack results into LLM-ready context block
   --format markdown|json  output format (default: markdown)
-  --max-tokens <n>        token budget for context block (default: 8000)
+  --max-tokens <n>        token budget for context block (default: 2000)
   --semantic              force semantic-only search
-  --hybrid                force hybrid search (lexical + semantic blend)
+  --hybrid-ratio <f>      lexical fraction for hybrid blend, 0.0 to 1.0 (default: 0.3)
+  --verbose | -v          print token accounting summary to stderr (chunks, ~tokens, saved via dedup)
 
-hawp search index         ingest documents into SQLite (no vectors)
+hawp search index         ingest configured paths into SQLite (reads .hawp/config/search.json)
 hawp search embed         generate and store embedding vectors
   --backend onnx|ollama   required: embedding backend to use
   --model <name>          override default model for the backend
@@ -114,6 +115,15 @@ Structured response schema:
 - `lines.source` — line containing the best match for the query term
 - `context.window` — suggested read window (±40 lines around `lines.source`, clamped to file bounds)
 
+Pass `context: true` to receive a single deduplicated, token-capped markdown block instead of raw results — suitable for direct LLM injection:
+
+```json
+{ "query": "backlog alignment", "limit": 5, "context": true, "max_tokens": 2000 }
+```
+
+- `context` — when `true`, returns a pre-shaped markdown block (Jaccard dedup + greedy token cap applied); default `false`
+- `max_tokens` — token budget for the context block when `context: true`; default `2000`
+
 Other MCP tools: `hawp_work_new` (create work item), `hawp_work_validate` (validate kit + work integrity).
 
 ## Typical agent workflow
@@ -123,7 +133,7 @@ Other MCP tools: `hawp_work_new` (create work item), `hawp_work_validate` (valid
 hawp search index && hawp search embed --backend ollama
 
 # During work
-hawp search "backlog alignment rules" --hybrid --context --max-tokens 6000
+hawp search "backlog alignment rules" --context --max-tokens 2000
 ```
 
 The index is idempotent — re-running after content changes upserts new chunks. Vectors persist across sessions.

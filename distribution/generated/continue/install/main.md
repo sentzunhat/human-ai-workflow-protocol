@@ -187,7 +187,7 @@ Install HAWP kit plus **Continue overlays only**. This refreshes `core/providers
 - Report proof lines: `Source:`, `Provider: continue`, `Source mode:`.
 - File proof:
   - `git status --short .hawp/LICENSE .hawp/kit .continue/rules`
-  - `find .continue/rules -maxdepth 1 -name 'hawp-*.md' 2>/dev/null | sort`
+  - `for rule in .continue/rules/hawp-*.md; do [ -f "$rule" ] && printf '%s\n' "$rule"; done | sort`
 
 ## Provider-specific rules
 
@@ -206,11 +206,11 @@ Install HAWP kit plus **Continue overlays only**. This refreshes `core/providers
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
 PROVIDER="continue"
-REF="dev"   # set to "main" for stable
+REF="main"   # set to "development" to install from the development branch
 
 case "$REF" in
-  main|dev) ;;
-  *) echo "Error: REF must be 'main' or 'dev'"; exit 1 ;;
+  main|development) ;;
+  *) echo "Error: REF must be 'main' or 'development'"; exit 1 ;;
 esac
 
 if [ -d ".hawp" ]; then MODE="update"; else MODE="install"; fi
@@ -270,7 +270,7 @@ Optional: `export HAWP_LOCAL_CORE="/absolute/path/to/human-ai-workflow-protocol/
 
 ## Other guides
 
-- Dev branch: `distribution/generated/continue/install/dev.md`
+- Development branch: `distribution/generated/continue/install/development.md`
 - GitHub/Copilot: `distribution/generated/github/install/main.md`
 - Cursor: `distribution/generated/cursor/install/main.md`
 
@@ -300,16 +300,36 @@ if [ -n "${HAWP_LOCAL_CORE:-}" ]; then
   echo "Source mode: local core (${SRC})"
 else
   TMP_DIR="$(mktemp -d)"
+  cleanup_tmp_dir() {
+    if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
+      rm -rf "$TMP_DIR"
+    fi
+  }
+  trap cleanup_tmp_dir EXIT
   curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
     | tar -xz -C "$TMP_DIR"
-  SRC="$TMP_DIR/${REPO}-${REF}/core"
+  SRC=""
+  if [ -d "$TMP_DIR/${REPO}-${REF}/core/.hawp/kit" ]; then
+    SRC="$TMP_DIR/${REPO}-${REF}/core"
+  else
+    for candidate in "$TMP_DIR"/*/core; do
+      if [ -d "$candidate/.hawp/kit" ]; then
+        SRC="$candidate"
+        break
+      fi
+    done
+  fi
+  if [ -z "$SRC" ]; then
+    echo "Error: downloaded archive did not contain core/"
+    exit 1
+  fi
   echo "Source mode: remote archive"
 fi
 
 if [ -d ".hawp" ]; then
   echo "Preflight: detected existing .hawp/."
   echo "Switching to update-compatible refresh mode for this run."
-  echo "Tip: use distribution/generated/${PROVIDER}/update/${REF}.md next time when .hawp/ already exists."
+  echo "Tip: use the matching update guide next time when .hawp/ already exists."
 fi
 
 # --- Helpers (no-clobber copy; never overwrite repo-owned files) ---
@@ -385,7 +405,8 @@ reconcile_closed_plans_from_backlog() {
       *) closed_dir="" ;;
     esac
 
-    find .hawp/work/active -maxdepth 1 -type f -name "*-${id}-*.md" | while IFS= read -r src; do
+    for src in .hawp/work/active/*-"$id"-*.md; do
+      [ -f "$src" ] || continue
       [ -n "$src" ] || continue
       local_dir="$closed_dir"
       if [ -z "$local_dir" ]; then
@@ -616,7 +637,7 @@ echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .haw
 
 This file is generated. Do not edit it directly.
 
-- Workflow gate: pushes and pull requests on `main` or `dev` fail when generated guides drift from source.
+- Workflow gate: pushes and pull requests on `main` or `development` fail when generated guides drift from source.
 - Local sync: run `hawp distribution sync` after editing `distribution/sources/` or the distribution composition code.
 
 Generated output file:

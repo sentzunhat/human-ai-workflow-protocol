@@ -18,6 +18,8 @@ Refresh HAWP kit and Claude Code provider rules from `main`. `CLAUDE.md` is pres
 2. Run **Update Command (Copy/Paste)** (`REF="main"`, `PROVIDER="claude"`).
 3. Verify `.hawp/work/` intact and Claude Code rules updated.
 
+For a temporary slash-named provider branch, use the visible command block below and set `REF` to that branch name after review.
+
 ## Preserved
 
 - `.hawp/work/**` — never overwritten.
@@ -25,4 +27,4 @@ Refresh HAWP kit and Claude Code provider rules from `main`. `CLAUDE.md` is pres
 
 ## Other guides
 
-- Dev update: `distribution/generated/claude/update/dev.md`
+- Development update: `distribution/generated/claude/update/development.md`

@@ -30,7 +30,7 @@ providers/
 ## Distribution guides
 
 ```text
-distribution/generated/<provider>/install|update/{main|dev}.md
+distribution/generated/<provider>/install|update/{main|development}.md
 ```
 
 See [distribution/generated/README.md](../../distribution/generated/README.md) for links.

@@ -10,7 +10,7 @@ Install HAWP kit plus **Cursor overlays only**. This refreshes `core/providers/.
 - Report proof lines: `Source:`, `Provider: cursor`, `Source mode:`.
 - File proof:
   - `git status --short .hawp/LICENSE .hawp/kit .cursor/rules AGENTS.md`
-  - `find .cursor/rules -maxdepth 1 -name 'hawp-*.mdc' 2>/dev/null | sort`
+  - `for rule in .cursor/rules/hawp-*.mdc; do [ -f "$rule" ] && printf '%s\n' "$rule"; done | sort`
 
 ## Provider-specific rules
 
@@ -30,11 +30,11 @@ Install HAWP kit plus **Cursor overlays only**. This refreshes `core/providers/.
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
 PROVIDER="cursor"
-REF="dev"   # set to "main" for stable
+REF="main"   # set to "development" to install from the development branch
 
 case "$REF" in
-  main|dev) ;;
-  *) echo "Error: REF must be 'main' or 'dev'"; exit 1 ;;
+  main|development) ;;
+  *) echo "Error: REF must be 'main' or 'development'"; exit 1 ;;
 esac
 
 if [ -d ".hawp" ]; then MODE="update"; else MODE="install"; fi

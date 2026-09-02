@@ -86,7 +86,7 @@ Each guide is a single copy-paste block. Safe to re-run. Never overwrites `.hawp
 | Codex | [codex/install/main.md](distribution/generated/codex/install/main.md) | [codex/update/main.md](distribution/generated/codex/update/main.md) |
 | Continue | [continue/install/main.md](distribution/generated/continue/install/main.md) | [continue/update/main.md](distribution/generated/continue/update/main.md) |
 
-Dev channel guides: [distribution/generated/README.md](distribution/generated/README.md)
+Development channel guides: [distribution/generated/README.md](distribution/generated/README.md)
 
 ---
 

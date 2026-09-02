@@ -27,4 +27,4 @@ Refresh HAWP kit and Cursor provider overlays from `main`.
 
 ## Other guides
 
-- Dev update: `distribution/generated/cursor/update/dev.md`
+- Development update: `distribution/generated/cursor/update/development.md`

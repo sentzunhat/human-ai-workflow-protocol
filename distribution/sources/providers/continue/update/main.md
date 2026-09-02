@@ -23,4 +23,4 @@ Optional: `export HAWP_LOCAL_CORE="/absolute/path/to/human-ai-workflow-protocol/
 
 ## Other guides
 
-- Dev branch: `distribution/generated/continue/update/dev.md`
+- Development branch: `distribution/generated/continue/update/development.md`

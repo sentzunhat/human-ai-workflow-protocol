@@ -1,6 +1,6 @@
 name: Tag and release on merge to main
 
-# When dev is merged into main, read the version from version.go and
+# When a release-prep change lands on main, read the version from version.go and
 # trigger the release workflow via workflow_dispatch. The release workflow
 # creates the tag itself, builds the 6 binaries, and publishes the release.
 #

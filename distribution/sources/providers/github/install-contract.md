@@ -10,7 +10,7 @@ Install HAWP kit plus **GitHub Copilot overlays only**. This refreshes `core/pro
 - Report proof lines: `Source:`, `Provider: github`, `Source mode:`.
 - File proof:
   - `git status --short .hawp/LICENSE .hawp/kit .github/instructions .github/prompts`
-  - `find .hawp/kit -maxdepth 2 -type f | head -n 20`
+  - `find .hawp/kit -type f | sort | head -n 20`
 
 ## Provider-specific rules
 
@@ -30,11 +30,11 @@ Install HAWP kit plus **GitHub Copilot overlays only**. This refreshes `core/pro
 OWNER="sentzunhat"
 REPO="human-ai-workflow-protocol"
 PROVIDER="github"
-REF="dev"   # set to "main" for stable
+REF="main"   # set to "development" to install from the development branch
 
 case "$REF" in
-  main|dev) ;;
-  *) echo "Error: REF must be 'main' or 'dev'"; exit 1 ;;
+  main|development) ;;
+  *) echo "Error: REF must be 'main' or 'development'"; exit 1 ;;
 esac
 
 if [ -d ".hawp" ]; then MODE="update"; else MODE="install"; fi
