@@ -10,7 +10,7 @@ Install HAWP kit plus **Cursor overlays only**. This refreshes `core/providers/.
 - Report proof lines: `Source:`, `Provider: cursor`, `Source mode:`.
 - File proof:
   - `git status --short .hawp/LICENSE .hawp/kit .cursor/rules AGENTS.md`
-  - `find .cursor/rules -maxdepth 1 -name 'hawp-*.mdc' 2>/dev/null | sort`
+  - `for rule in .cursor/rules/hawp-*.mdc; do [ -f "$rule" ] && printf '%s\n' "$rule"; done | sort`
 
 ## Provider-specific rules
 

@@ -10,7 +10,7 @@ Install HAWP kit plus **GitHub Copilot overlays only**. This refreshes `core/pro
 - Report proof lines: `Source:`, `Provider: github`, `Source mode:`.
 - File proof:
   - `git status --short .hawp/LICENSE .hawp/kit .github/instructions .github/prompts`
-  - `find .hawp/kit -maxdepth 2 -type f | head -n 20`
+  - `find .hawp/kit -type f | sort | head -n 20`
 
 ## Provider-specific rules
 

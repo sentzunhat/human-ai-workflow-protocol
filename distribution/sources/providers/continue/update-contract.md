@@ -10,7 +10,7 @@ Update HAWP kit and refresh **Continue overlays only**. This refreshes `core/pro
 - Report proof lines: `Source:`, `Provider: continue`, `Source mode:`.
 - File proof:
   - `git status --short .hawp/LICENSE .hawp/kit .continue/rules`
-  - `find .continue/rules -maxdepth 1 -name 'hawp-*.md' 2>/dev/null | sort`
+  - `for rule in .continue/rules/hawp-*.md; do [ -f "$rule" ] && printf '%s\n' "$rule"; done | sort`
 
 ## Provider-specific rules
 

@@ -257,7 +257,17 @@ else
   trap cleanup_tmp_dir EXIT
   curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
     | tar -xz -C "$TMP_DIR"
-  SRC="$(find "$TMP_DIR" -maxdepth 2 -type d -path "*/core" -print -quit)"
+  SRC=""
+  if [ -d "$TMP_DIR/${REPO}-${REF}/core/.hawp/kit" ]; then
+    SRC="$TMP_DIR/${REPO}-${REF}/core"
+  else
+    for candidate in "$TMP_DIR"/*/core; do
+      if [ -d "$candidate/.hawp/kit" ]; then
+        SRC="$candidate"
+        break
+      fi
+    done
+  fi
   if [ -z "$SRC" ]; then
     echo "Error: downloaded archive did not contain core/"
     exit 1
@@ -344,7 +354,8 @@ reconcile_closed_plans_from_backlog() {
       *) closed_dir="" ;;
     esac
 
-    find .hawp/work/active -maxdepth 1 -type f -name "*-${id}-*.md" | while IFS= read -r src; do
+    for src in .hawp/work/active/*-"$id"-*.md; do
+      [ -f "$src" ] || continue
       [ -n "$src" ] || continue
       local_dir="$closed_dir"
       if [ -z "$local_dir" ]; then

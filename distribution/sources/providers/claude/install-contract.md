@@ -10,7 +10,7 @@ Install HAWP kit plus **Claude Code overlays only**. This copies `core/providers
 - Report proof lines: `Source:`, `Provider: claude`, `Source mode:`.
 - File proof:
   - `git status --short .hawp/LICENSE .hawp/kit .claude/rules CLAUDE.md`
-  - `find .claude/rules -maxdepth 1 -name 'hawp-*.md' 2>/dev/null | sort`
+  - `for rule in .claude/rules/hawp-*.md; do [ -f "$rule" ] && printf '%s\n' "$rule"; done | sort`
 
 ## Provider-specific rules
 
