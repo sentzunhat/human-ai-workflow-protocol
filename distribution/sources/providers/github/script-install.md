@@ -15,10 +15,12 @@ install_provider_overlay() {
   cp "$pack/prompts/"*.prompt.md            .github/prompts/
   for existing in .github/instructions/human-ai-workflow-protocol-*.instructions.md; do
     [ -e "$existing" ] || continue
+    [ -f "$existing" ] || continue
     rm -f "$existing"
   done
   for existing in .github/prompts/human-ai-workflow-protocol-*.prompt.md; do
     [ -e "$existing" ] || continue
+    [ -f "$existing" ] || continue
     rm -f "$existing"
   done
   copy_file_no_clobber "$pack/copilot-instructions.md" .github/copilot-instructions.md
