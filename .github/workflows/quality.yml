@@ -32,15 +32,13 @@ jobs:
                   go-version-file: librarian/src/go.mod
                   cache-dependency-path: librarian/src/go.sum
 
-            - name: Build hawp binary
-              run: make build
+            - name: Build and install hawp binary
+              run: make install
               working-directory: librarian/src
 
-            - name: Install hawp binary to .hawp/bin
-              run: |
-                  mkdir -p .hawp/bin
-                  cp librarian/src/bin/hawp .hawp/bin/hawp
-                  chmod +x .hawp/bin/hawp
+            - name: Go vet
+              run: go vet ./...
+              working-directory: librarian/src
 
             - name: Go tests
               run: go test ./...

@@ -25,6 +25,9 @@ func CheckBacklogConsistency(workDir string, backlog *Backlog) BacklogCheck {
 
 	result.ActiveWork.Total = len(backlog.Active)
 	for _, row := range backlog.Active {
+		if isNonCanonicalActiveID(row.ID) {
+			result.NonCanonicalActiveItems = append(result.NonCanonicalActiveItems, row.ID)
+		}
 		if findActiveFile(workDir, row.ID) {
 			result.ActiveWork.Found++
 		} else {
@@ -75,10 +78,20 @@ func CheckBacklogConsistency(workDir string, backlog *Backlog) BacklogCheck {
 
 	if len(result.ActiveWork.Missing) > 0 || len(result.RecentlyClosed.Missing) > 0 ||
 		len(result.ParkedWork.Missing) > 0 || len(result.OrphanedFiles) > 0 ||
-		len(result.OrphanedParked) > 0 {
+		len(result.OrphanedParked) > 0 || len(result.NonCanonicalActiveItems) > 0 {
 		result.Status = StatusFail
 	}
 	return result
+}
+
+func isNonCanonicalActiveID(id string) bool {
+	if ExtractShortUUID(id) != "" || fullUUIDRe.MatchString(id) {
+		return false
+	}
+	if canonicalIDRe.MatchString(id) || numericIDRe.MatchString(id) {
+		return false
+	}
+	return true
 }
 
 func idSet(rows []BacklogRow) map[string]struct{} {

@@ -11,21 +11,13 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/sentzunhat/hawp/librarian/src/internal/domain/embeddings"
+	embeddings "github.com/sentzunhat/hawp/librarian/src/internal/domain/providers/embeddings"
 	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
+	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
 )
 
-type searchIndex interface {
-	Close() error
-	QueryChunksLexical(query string, limit int) ([]map[string]interface{}, error)
-	HasVectors() (bool, error)
-	GetEmbeddingMetadata() (sqlite.EmbeddingMetadata, bool, error)
-	GetAllChunkVectors() (map[int64][]float32, error)
-	QueryChunksByIDs(ids []int64) ([]map[string]interface{}, error)
-	GetChunkVectors(chunkIDs []int64) (map[int64][]float32, error)
-}
+type EmbedderFactory func(backend, model string) (embeddings.Embedder, error)
 
 type projectResolver interface {
 	ResolveSearchIndexPath(repoRoot string) (string, error)
@@ -40,7 +32,8 @@ func (defaultProjectResolver) ResolveSearchIndexPath(repoRoot string) (string, e
 
 type Service struct {
 	resolver projectResolver
-	open     func(path string) (searchIndex, error)
+	open     func(path string) (domainsearch.Index, error)
+	embedder EmbedderFactory
 }
 
 type QueryOptions struct {
@@ -68,18 +61,23 @@ func (e IndexNotFoundError) Unwrap() error {
 	return e.Err
 }
 
-func NewService(resolver projectResolver, open func(path string) (searchIndex, error)) Service {
+func NewService(resolver projectResolver, open func(path string) (domainsearch.Index, error)) Service {
+	return NewServiceWithEmbedder(resolver, open, nil)
+}
+
+func NewServiceWithEmbedder(resolver projectResolver, open func(path string) (domainsearch.Index, error), embedder EmbedderFactory) Service {
 	if resolver == nil {
 		resolver = defaultProjectResolver{}
 	}
 	if open == nil {
-		open = func(path string) (searchIndex, error) {
+		open = func(path string) (domainsearch.Index, error) {
 			return sqlite.Open(path)
 		}
 	}
 	return Service{
 		resolver: resolver,
 		open:     open,
+		embedder: embedder,
 	}
 }
 
@@ -101,12 +99,15 @@ func (s Service) Execute(repoRoot string, opts QueryOptions) (QueryExecution, er
 	}
 	defer db.Close()
 
-	hasVectors, _ := db.HasVectors()
+	hasVectors, err := db.HasVectors()
+	if err != nil {
+		return QueryExecution{}, fmt.Errorf("check index vectors: %w", err)
+	}
 	if opts.Semantic {
 		if !hasVectors {
 			return QueryExecution{HasVectors: false}, nil
 		}
-		rows := SemanticSearch(opts.Query, db, opts.Limit)
+		rows := semanticSearch(opts.Query, db, opts.Limit, s.embedder)
 		return QueryExecution{
 			Rows:       rows,
 			HasVectors: hasVectors,
@@ -124,7 +125,7 @@ func (s Service) Execute(repoRoot string, opts QueryOptions) (QueryExecution, er
 		}, nil
 	}
 	if hasVectors {
-		rows = HybridRank(rows, opts.Query, db, opts.Limit, opts.HybridRatio)
+		rows = hybridRank(rows, opts.Query, db, opts.Limit, opts.HybridRatio, s.embedder)
 	} else if len(rows) > opts.Limit {
 		rows = rows[:opts.Limit]
 	}
@@ -140,7 +141,11 @@ func (s Service) Execute(repoRoot string, opts QueryOptions) (QueryExecution, er
 // sqlite.IndexDB.GetEmbeddingMetadata) when vectors exist. Returns at most
 // limit results, already ranked.
 func Query(repoRoot, query string, limit int) ([]domainsearch.Result, error) {
-	execution, err := DefaultService().Execute(repoRoot, QueryOptions{
+	return QueryWithEmbedder(repoRoot, query, limit, nil)
+}
+
+func QueryWithEmbedder(repoRoot, query string, limit int, embedder EmbedderFactory) ([]domainsearch.Result, error) {
+	execution, err := NewServiceWithEmbedder(nil, nil, embedder).Execute(repoRoot, QueryOptions{
 		Query: query,
 		Limit: limit,
 	})
@@ -179,13 +184,20 @@ func RowsToResults(rows []map[string]interface{}, hasVectors bool) []domainsearc
 // cosine similarity and returns the top-limit rows.  No FTS5 is involved.
 // Returns nil (not an error) when vectors are absent, the embedder can't be
 // constructed, or the query fails — the caller decides how to handle that.
-func SemanticSearch(query string, db searchIndex, limit int) []map[string]interface{} {
+func SemanticSearch(query string, db domainsearch.Index, limit int) []map[string]interface{} {
+	return semanticSearch(query, db, limit, nil)
+}
+
+func semanticSearch(query string, db domainsearch.Index, limit int, newEmbedder EmbedderFactory) []map[string]interface{} {
 	meta, ok, err := db.GetEmbeddingMetadata()
 	if err != nil || !ok {
 		return nil
 	}
 
-	embedder, err := embeddings.NewEmbedder(meta.Backend, meta.Model)
+	if newEmbedder == nil {
+		return nil
+	}
+	embedder, err := newEmbedder(meta.Backend, meta.Model)
 	if err != nil {
 		return nil
 	}
@@ -252,7 +264,11 @@ func SemanticSearch(query string, db searchIndex, limit int) []map[string]interf
 // used. Falls back to lexical order alone if no embedding metadata is
 // recorded yet, the embedder can't be constructed, or query embedding fails,
 // so hybrid ranking degrades gracefully rather than erroring the whole search.
-func HybridRank(lexicalResults []map[string]interface{}, query string, db searchIndex, limit int, lexicalWeight float32) []map[string]interface{} {
+func HybridRank(lexicalResults []map[string]interface{}, query string, db domainsearch.Index, limit int, lexicalWeight float32) []map[string]interface{} {
+	return hybridRank(lexicalResults, query, db, limit, lexicalWeight, nil)
+}
+
+func hybridRank(lexicalResults []map[string]interface{}, query string, db domainsearch.Index, limit int, lexicalWeight float32, newEmbedder EmbedderFactory) []map[string]interface{} {
 	if len(lexicalResults) == 0 {
 		return lexicalResults
 	}
@@ -275,7 +291,10 @@ func HybridRank(lexicalResults []map[string]interface{}, query string, db search
 		return fallback() // no vectors embedded yet, or metadata unreadable
 	}
 
-	embedder, err := embeddings.NewEmbedder(meta.Backend, meta.Model)
+	if newEmbedder == nil {
+		return fallback()
+	}
+	embedder, err := newEmbedder(meta.Backend, meta.Model)
 	if err != nil {
 		return fallback()
 	}

@@ -39,5 +39,5 @@ cd librarian/src && go run ./cmd/hawp check
 - `distribution/generated/` is fully generated. Edit `distribution/sources/` then run `hawp distribution sync`.
 - Generated files are validated by CI (`sync-distribution-generated.yml`). A passing build requires clean sync.
 - Work items tracked in `.hawp/work/BACKLOG.md`; active plans in `.hawp/work/active/`; close to `.hawp/work/closed/YYYY/MM/DD/`.
-- Evidence goes in `.hawp/work/evidence/YYYY/MM/DD/`; status snapshots in `.hawp/work/status/YYYY/MM/DD/`.
+- Evidence: `.hawp/work/evidence/YYYY/MM/DD/{uuid}/evidence.md`; status: `.hawp/work/status/YYYY/MM/DD/{uuid}/status.md`; decisions: `.hawp/work/decisions/YYYY/MM/DD/{uuid}/decision.md`; notes: `.hawp/work/notes/YYYY/MM/DD/{uuid}/note.md`. Use `hawp work evidence|status|decision|note --title "<label>"` to generate paths automatically.
 - Prefer compact, decision-useful outputs. Separate direct evidence from inference.

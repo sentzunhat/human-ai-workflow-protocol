@@ -22,6 +22,7 @@ var (
 type ApplyResult struct {
 	ChangedFiles  []string
 	SkippedFiles  []string
+	ReviewFiles   []string
 	ResearchQueue []ResearchItem
 }
 

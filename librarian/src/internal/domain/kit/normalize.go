@@ -1,13 +1,11 @@
 package kit
 
 import (
-	"os"
+	"io/fs"
 	"path/filepath"
 	"regexp"
 	"sort"
 	"strings"
-
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
 )
 
 // FileRename is one planned rename (absolute paths).
@@ -52,11 +50,11 @@ func NormalizeFileName(fileName string) string {
 }
 
 // PlanFileRenames walks the kit and plans lowercase-hyphen renames.
-func PlanFileRenames(kitPath string) []FileRename {
+func PlanFileRenames(kitPath string, readDir func(string) ([]fs.DirEntry, error)) []FileRename {
 	var renames []FileRename
 	var walk func(dir string)
 	walk = func(dir string) {
-		entries, err := os.ReadDir(dir)
+		entries, err := readDir(dir)
 		if err != nil {
 			return
 		}
@@ -77,17 +75,17 @@ func PlanFileRenames(kitPath string) []FileRename {
 
 // PlanLinkUpdates finds relative links whose targets are being renamed and
 // plans the href rewrites. Fenced code blocks are ignored.
-func PlanLinkUpdates(kitPath string, renameMap map[string]string) []LinkUpdate {
+func (s *KitSource) PlanLinkUpdates(kitPath string, renameMap map[string]string, readFile func(string) ([]byte, error)) []LinkUpdate {
 	var updates []LinkUpdate
-	for _, file := range markdown.CollectFiles(kitPath, false) {
-		raw, err := os.ReadFile(file)
+	for _, file := range s.FileLister(kitPath, false) {
+		raw, err := readFile(file)
 		if err != nil {
 			continue
 		}
-		masked := markdown.BlankFences(string(raw))
+		masked := s.BlankFences(string(raw))
 		fileDir := filepath.Dir(file)
 
-		for _, link := range markdown.ExtractLinks(masked) {
+		for _, link := range ExtractLinks(masked) {
 			href := link.Href
 			if href == "" || strings.HasPrefix(href, "http") ||
 				strings.HasPrefix(href, "/") || strings.HasPrefix(href, "#") {
@@ -125,16 +123,16 @@ func PlanLinkUpdates(kitPath string, renameMap map[string]string) []LinkUpdate {
 
 // ApplyRenames performs the renames longest-path-first, refusing to
 // overwrite existing targets. Returns the first conflict path pair, if any.
-func ApplyRenames(renames []FileRename) (conflictFrom, conflictTo string, err error) {
+func ApplyRenames(renames []FileRename, stat func(string) (fs.FileInfo, error), doRename func(string, string) error) (conflictFrom, conflictTo string, err error) {
 	sorted := append([]FileRename(nil), renames...)
 	sort.Slice(sorted, func(i, j int) bool {
 		return len(sorted[i].From) > len(sorted[j].From)
 	})
-	for _, rename := range sorted {
-		if _, statErr := os.Stat(rename.To); statErr == nil {
-			return rename.From, rename.To, nil
+	for _, r := range sorted {
+		if _, statErr := stat(r.To); statErr == nil {
+			return r.From, r.To, nil
 		}
-		if renameErr := os.Rename(rename.From, rename.To); renameErr != nil {
+		if renameErr := doRename(r.From, r.To); renameErr != nil {
 			return "", "", renameErr
 		}
 	}
@@ -143,14 +141,14 @@ func ApplyRenames(renames []FileRename) (conflictFrom, conflictTo string, err er
 
 // ApplyLinkUpdates rewrites hrefs bottom-up per file and returns how many
 // files changed.
-func ApplyLinkUpdates(updates []LinkUpdate) (int, error) {
+func ApplyLinkUpdates(updates []LinkUpdate, readFile func(string) ([]byte, error), writeFile func(string, []byte, fs.FileMode) error) (int, error) {
 	perFile := map[string][]LinkUpdate{}
 	for _, update := range updates {
 		perFile[update.File] = append(perFile[update.File], update)
 	}
 	changed := 0
 	for file, fileUpdates := range perFile {
-		raw, err := os.ReadFile(file)
+		raw, err := readFile(file)
 		if err != nil {
 			return changed, err
 		}
@@ -162,7 +160,7 @@ func ApplyLinkUpdates(updates []LinkUpdate) (int, error) {
 			next = next[:update.Start] + update.To + next[update.End:]
 		}
 		if next != string(raw) {
-			if err := os.WriteFile(file, []byte(next), 0o644); err != nil {
+			if err := writeFile(file, []byte(next), 0o644); err != nil {
 				return changed, err
 			}
 			changed++

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work"
+	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work/normalize"
 )
 
 func TestNormalizeDryRunMigrateFoldersPreviewsChanges(t *testing.T) {

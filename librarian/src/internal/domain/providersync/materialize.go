@@ -2,7 +2,6 @@ package providersync
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -152,13 +151,13 @@ var MaterializationTargets = []MaterializationTarget{
 	},
 }
 
-func ComputeOutputs(repoRoot string) ([]MaterializationResult, error) {
+func ComputeOutputs(repoRoot string, reader func(string) ([]byte, error)) ([]MaterializationResult, error) {
 	sharedRoot := filepath.Join(repoRoot, "core", "providers", "shared", "behaviors")
 	results := make([]MaterializationResult, 0, len(MaterializationTargets))
 
 	for _, target := range MaterializationTargets {
 		behaviorPath := filepath.Join(sharedRoot, target.Behavior+".md")
-		body, err := os.ReadFile(behaviorPath)
+		body, err := reader(behaviorPath)
 		if err != nil {
 			return nil, fmt.Errorf("missing shared behavior %s: %w", behaviorPath, err)
 		}

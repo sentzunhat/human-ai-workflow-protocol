@@ -3,6 +3,123 @@
 All notable changes to the `hawp` Go librarian CLI are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.0.24] - 2026-09-13
+
+LLM intake shaping, `hawp_work_intake` compound MCP tool, `hawp work doc`
+subcommands, CLI source restructure, and v0.1.0 gate passage (95% downstream
+token savings with Ollama).
+
+### Added
+
+- **`hawp_work_intake` MCP tool** — compound search + reshape + token accounting
+  in one call. Retrieves kit/work context for the request, shapes it through the
+  local LLM, and returns structured `WorkIntakeResponse` draft fields
+  (`mission`, `constraints`, `output_spec`, `done_signal`) with token savings
+  metrics. Structured states for uncertainty: `missing_index`,
+  `no_matches`, `blocked_reshape_failed` — never returns a fake usable draft.
+- **`hawp_work_reshape` MCP tool** — standalone reshape of a provided context
+  string via local LLM (Ollama or ONNX), returning structured draft fields.
+- **`hawp_work_doc` MCP tool** — generates canonical work document paths
+  (`status`, `evidence`, `decision`, `note`) under
+  `.hawp/work/<type>/YYYY/MM/DD/<uuid>/`. Accepts `--work-item <id>` to
+  associate with an active plan.
+- **`hawp work doc` CLI subcommands** — `hawp work doc status|evidence|decision|note
+  --title "<label>" [--work-item <id>]` generates the document path and prints it
+  for scripting and agent use.
+- **`OllamaIntakeShaper`** — production intake-shaping path. Benchmarked at
+  10/10 coverage with `mistral:7B`; 95% average downstream token savings vs
+  unstructured request + retrieved context (evidence:
+  `benchmark/runs/2026-09-12-downstream-token-savings-ollama.md`).
+- **`ONNXIntakeShaper`** — ONNX intake-shaping path. Phi-3-mini reached 10/10
+  coverage; SmolLM2-360M-Instruct (tiny) is 1/10 and not a recommended default.
+- **Downstream token savings benchmark** — `hawp search benchmark` extended with
+  a downstream comparison mode: HAWP structured fields vs raw request + context.
+  Ollama `mistral:7B`: 18096 → 831 tokens average (95% savings, 9/10 runs).
+- **v0.1.0 gates PASSED** — search 23% savings, Ollama 10/10 coverage, ONNX
+  Phi-3-mini 10/10 coverage, downstream 95% savings. All four gates met.
+
+### Changed
+
+- Duplicate normalization preserves all copies and artifacts and adds reciprocal
+  links when a working record has exactly one archived counterpart. Ambiguous
+  matches are reported for review. No duplicate files or folders are deleted.
+
+### CLI audit continuation
+
+- Require a valid matching SHA256 checksum before installer/update scripts replace
+  the native binary. Use private destination-local staging with scoped cleanup;
+  download and checksum failures preserve the previously installed binary.
+
+- Preserve custom Codex TOML policies, environment settings, comments outside
+  replaced launch values, and unrelated servers using parser-backed edits shared
+  by init and MCP-only setup. Unsupported layouts fail without rewriting.
+- Pin go-toml v2.4.3 as a focused format dependency; isolate the unstable AST API
+  behind the internal TOML configuration adapter with preservation regressions.
+
+- Add network-free `mcp configure` for selected client configurations, with
+  preflight validation and safe refusal of customized Codex TOML files.
+
+- Validate work-validation arguments strictly: reject unknown flags (including
+  unsupported `--repo-root`), missing/empty paths, and conflicting root options.
+
+- Reject unknown MCP provider selections before configuration writes and
+  deduplicate mixed explicit/all selections without changing all's membership.
+
+- Preserve custom JSON MCP settings when upgrading HAWP launch fields. Reject
+  malformed object structures and incompatible remote entries before writing;
+  preserve unrelated numeric values without floating-point conversion.
+- Install local/CI native builds through a same-directory temporary file and
+  rename instead of overwriting the active executable in place.
+
+- Add `mcp --repo-root` and generate native provider launch commands with explicit
+  repository selection, removing the shell/cwd dependency for new MCP configs.
+
+- Validate normalization arguments before mutation, including conflicting modes,
+  competing roots, unknown flags, and missing path values.
+- Install the native binary to `.hawp/bin/hawp` (the canonical path) so
+  `make install` and CI share the same destination as distribution scripts and
+  MCP config generation. The shell launcher is superseded; `hawp-bin` is
+  preserved as a legacy compatibility binary. The unused core source launcher
+  is retired; installers preserve existing legacy binaries and MCP wrappers.
+
+- Move all CLI command families into nested `cli/<family>/<operation>/` packages:
+  work, kit, links, search, index, model, mcp, usage, update, init, distribution,
+  providers. Each operation owns its handler, private parser, and tests; family
+  roots expose forwarding entrypoints. `run.go` is now the sole routing file.
+  Port and adapter placement guidelines updated to use explicit `providers/`
+  subfolder under the owning layer, with mictlan-pattern inspiration.
+- Separate command dispatch from feature handlers, help text, and corpus walking
+  within the existing CLI package; preserve command names and public contracts.
+- Reject non-finite search hybrid ratios before retrieval, with regression tests.
+- Define a storage-independent search index port and embedding metadata; preserve
+  SQLite compatibility and propagate vector-state read failures.
+- Parse search options with Go's standard flag package; reject malformed input
+  before retrieval and support `--flag=value` alongside separate values.
+- Render new work rows using existing backlog columns and preserve trailing
+  prose; refuse unsupported tables before writes and protect title cell structure.
+- Run Go vet alongside the full test suite in the quality workflow.
+- Abort corpus collection on file-read failures, normalize document paths across
+  platforms, and replace hardcoded closed status with folder-derived lifecycle.
+
+Work-folder normalization, README positioning, and older-repo cleanup hygiene.
+
+### Added
+
+- **Active UUID guardrail** — `hawp work validate` now reports active rows that
+  use non-canonical new-work identifiers, catching descriptive folder drift
+  before it becomes repo workflow state.
+- **Completed active-row cleanup** — `hawp work normalize --apply` now removes
+  stale `done` / `wont-fix` Active Work rows when they already point at an
+  existing closed plan, preserving the closed archive as the source of history.
+
+### Changed
+
+- **README positioning** — the repository README now leads with HAWP as an open,
+  project-owned workflow layer for multi-agent development while keeping
+  benchmark claims tied to local evidence.
+- **Patch version** — the local version constant is advanced to `0.0.24` for
+  the next patch release lane.
+
 ## [0.0.23] - 2026-08-30
 
 Search/context cleanup, safer work-folder migration previewing, and the first

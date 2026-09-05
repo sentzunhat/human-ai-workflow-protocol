@@ -1,20 +1,16 @@
 package work
 
 import (
-	"os"
 	"regexp"
 	"strings"
 )
 
 var separatorRowRe = regexp.MustCompile(`^\|\s*-+`)
 
-// ParseBacklog reads BACKLOG.md and extracts rows from the Active Work,
-// Recently Closed (or Done), and Blocked / Parked sections.
-func ParseBacklog(backlogPath string) (*Backlog, error) {
-	content, err := os.ReadFile(backlogPath)
-	if err != nil {
-		return nil, err
-	}
+// ParseBacklogMarkdown parses backlog table content without accessing the
+// filesystem. Callers that already own the input boundary can use this pure
+// domain function directly.
+func ParseBacklogMarkdown(content string) *Backlog {
 
 	backlog := &Backlog{}
 	section := ""
@@ -76,7 +72,7 @@ func ParseBacklog(backlogPath string) (*Backlog, error) {
 		}
 	}
 
-	return backlog, nil
+	return backlog
 }
 
 func parseTableCells(line string) []string {
