@@ -27,12 +27,54 @@ Current status:
 - no database implementation yet (`hawp db init` is still a layout-planning
   scaffold; real indexing is `fbf12a93`)
 
+## CLI ownership
+
+`internal/platform/cli/run.go` routes commands. Feature handlers live in
+`*_commands.go`; `index_corpus.go` owns corpus walking and `help.go` owns help
+text. They remain private members of the same CLI package, using the existing
+application services and infrastructure adapters. Public command tests live
+under `tests/platform/cli`; tests of private helpers remain beside the package.
+
+Search repository contracts live in `internal/domain/search`; SQLite implements
+the `Index` port, and the search application service accepts an injected opener.
+Default adapter wiring remains in the application constructor. Provider ports
+exist for embeddings and LLMs, but their implementations still share domain
+packages; full provider/composition separation is ongoing audit work.
+
+Search keeps its query-first syntax: `hawp search "multi-word query" --limit=5`.
+Its standard-library flag parser accepts separate or equals-form values and
+rejects unknown flags, extra positionals, missing values, non-positive budgets,
+and invalid formats before retrieval. Tests exercise the parser without storage
+or model providers. The quality workflow runs both `go vet ./...` and the Go suite.
+
+`work new` follows the Active Work table's existing column order, including
+UUID-only and legacy layouts. Unsupported tables fail before files are written.
+An omitted `--hawp-root` discovers the current repository; an explicitly empty
+or whitespace-only value is rejected before discovery or creation.
+
+`kit normalize` previews by default and rejects simultaneously enabled `--apply`
+and `--dry-run` flags. Both kit commands reject explicitly empty/whitespace-only
+`--kit-path` values; omit the flag to use the current repository's kit. Refusal
+happens before validation or normalization touches the target. Tests snapshot a
+temporary repository to verify that rejected mutations preserve files and paths.
+
+`work normalize` uses the same standard-library parsing approach and rejects
+conflicting modes or root overrides before mutation. Installers now place the
+native executable at `.hawp/bin/hawp`; legacy `.hawp/bin/hawp-bin` files are
+preserved for existing installations but are no longer the fresh-install target.
+
+Request-to-intake shaping now has an internal `DraftIntake` use case in
+`internal/application/work` with a domain Draft value and an injected shaper.
+It preserves supplied source text, labels missing context, and rejects incomplete
+proposals. It does not create work records. No default model or public reshape
+command/tool is wired yet; see the work package README for the contract.
+
 ## Command taxonomy
 
 The full `hawp` command surface, mapped across the port phases (see
 `.hawp/work/notes/2026/07/20/librarian-ts-to-go-port-plan.md`) and the
-intelligence lane work items. Aliases keep the existing `.hawp/bin/hawp`
-wrapper surface stable.
+intelligence lane work items. Aliases keep the `.hawp/bin/hawp` command surface
+stable while its implementation moves underneath.
 
 | Command | Source today | Status | Lane / work item |
 | --- | --- | --- | --- |
@@ -204,7 +246,16 @@ cross-compile setup at all.
 hawp embed "The quick brown fox" "A fast auburn fox"      # default model
 hawp embed "some text" --model sentence-transformers/all-mpnet-base-v2
 hawp model pull Xenova/all-MiniLM-L6-v2                   # pull only, no inference
+hawp model pull Xenova/all-MiniLM-L6-v2 --onnx-file onnx/model.onnx
 ```
+
+`model pull` accepts options before or after its single repository argument,
+including `--onnx-file=path`. Unknown options, missing values, empty repositories,
+explicitly empty ONNX paths, and extra positional arguments fail before model
+setup or downloads. `embed` accepts options between text arguments; use `--`
+before text beginning with a dash. Flag values are not input text. These parser
+contracts have offline tests; they do not establish model download or inference
+success for a selected repository.
 
 `hawp embed` defaults to the pinned `Xenova/all-MiniLM-L6-v2` model
 (the same one `hawp init` provisions for the future vector-search work,

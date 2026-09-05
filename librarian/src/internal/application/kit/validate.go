@@ -6,6 +6,7 @@ import (
 	"io"
 
 	domainkit "github.com/sentzunhat/hawp/librarian/src/internal/domain/kit"
+	infrakit "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/kit"
 )
 
 // ValidateResult carries the kit validation outcome for rendering.
@@ -17,7 +18,7 @@ type ValidateResult struct {
 
 // Validate runs the kit checks against kitPath.
 func Validate(kitPath string) ValidateResult {
-	issues, checks := domainkit.Validate(kitPath)
+	issues, checks := infrakit.Validate(kitPath)
 	return ValidateResult{KitPath: kitPath, Issues: issues, Checks: checks}
 }
 

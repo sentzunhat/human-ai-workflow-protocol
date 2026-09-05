@@ -5,6 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 )
 
 func buildKit(t *testing.T, files map[string]string) string {
@@ -31,9 +34,17 @@ func completeKit(t *testing.T) map[string]string {
 	return files
 }
 
+var validateTestSource = &KitSource{
+	ReadDir:        os.ReadDir,
+	FileLister:     func(kitPath string, skipReadme bool) []string { return markdown.CollectFiles(kitPath, skipReadme) },
+	BlankFences:    markdown.BlankFences,
+	Exists:         repo.Exists,
+	ToRepoRelative: repo.ToRepoRelative,
+}
+
 func TestValidateCleanKit(t *testing.T) {
 	kitPath := buildKit(t, completeKit(t))
-	issues, checks := Validate(kitPath)
+	issues, checks := validateTestSource.Validate(kitPath, os.ReadFile)
 	if checks != 3 {
 		t.Errorf("checks = %d, want 3", checks)
 	}
@@ -48,7 +59,7 @@ func TestFileNaming(t *testing.T) {
 	files["README.md"] = "# allowed uppercase"
 	kitPath := buildKit(t, files)
 
-	issues := CheckFileNaming(kitPath)
+	issues := validateTestSource.CheckFileNaming(kitPath)
 	if len(issues) != 1 || !strings.Contains(issues[0].Message, "lowercase-hyphen") {
 		t.Fatalf("naming issues = %+v, want exactly the bad name", issues)
 	}
@@ -59,7 +70,7 @@ func TestRequiredFiles(t *testing.T) {
 	delete(files, "start-here.md")
 	kitPath := buildKit(t, files)
 
-	issues := CheckRequiredFiles(kitPath)
+	issues := validateTestSource.CheckRequiredFiles(kitPath)
 	if len(issues) != 1 || issues[0].File != "start-here.md" {
 		t.Fatalf("required issues = %+v, want missing start-here.md", issues)
 	}
@@ -70,7 +81,7 @@ func TestInternalLinks(t *testing.T) {
 	files["usage/guide.md"] = "[ok](../start-here.md)\n[broken](missing.md)\n[ext](https://x.test)\n```\n[fenced](nope.md)\n```\n"
 	kitPath := buildKit(t, files)
 
-	issues := CheckInternalLinks(kitPath)
+	issues := validateTestSource.CheckInternalLinks(kitPath, os.ReadFile)
 	if len(issues) != 1 || !strings.Contains(issues[0].Message, "missing.md") {
 		t.Fatalf("link issues = %+v, want only the broken link", issues)
 	}

@@ -6,7 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
+	embeddings "github.com/sentzunhat/hawp/librarian/src/internal/domain/providers/embeddings"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models/none"
+	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
 )
 
 func setupEmbedTestDB(t *testing.T) (dbPath string, insertChunk func(text string)) {
@@ -64,7 +66,7 @@ func TestExecuteRejectsMixingModels(t *testing.T) {
 	dbPath, insertChunk := setupEmbedTestDB(t)
 	insertChunk("first chunk")
 
-	svc := NewEmbedService(dbPath)
+	svc := NewEmbedServiceWithFactory(dbPath, func(string, string) (embeddings.Embedder, error) { return none.NewNullEmbedder(), nil })
 
 	result, err := svc.Execute(context.Background(), "none", "none")
 	if err != nil {
@@ -95,7 +97,7 @@ func TestExecuteAllowsSameModelAcrossRuns(t *testing.T) {
 	insertChunk("first chunk")
 	insertChunk("second chunk")
 
-	svc := NewEmbedService(dbPath)
+	svc := NewEmbedServiceWithFactory(dbPath, func(string, string) (embeddings.Embedder, error) { return none.NewNullEmbedder(), nil })
 
 	// Embed just the first chunk isn't easily isolated via the public API,
 	// so instead verify two consecutive full runs with the same

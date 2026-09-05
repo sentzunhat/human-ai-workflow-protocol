@@ -20,7 +20,13 @@ var roots = []string{".hawp", "docs", "README.md"}
 // Archival directories under .hawp/work are excluded, matching the
 // dead-links policy in work validate: frozen history may reference paths
 // that no longer exist.
+//
+// .hawp/.spaces holds embedded agent-worktree mirrors (gitlinks) whose
+// internal relative links resolve against a frozen snapshot layout, not the
+// live tree. They are reference snapshots, not live docs, so link checking
+// is skipped there.
 var skipDirs = map[string]struct{}{
+	".hawp/.spaces":      {},
 	".hawp/work/closed":   {},
 	".hawp/work/evidence": {},
 	".hawp/work/notes":    {},

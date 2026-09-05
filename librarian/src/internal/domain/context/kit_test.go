@@ -3,8 +3,59 @@ package context
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
+
+// testFileLister is a fake file lister that returns files already written
+// to the temp directory by writeFixture, simulating real filesystem walks.
+type testFileLister struct{}
+
+func (f *testFileLister) CollectFiles(dir string, skipReadme bool) []string {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	var files []string
+	for _, entry := range entries {
+		full := filepath.Join(dir, entry.Name())
+		if entry.IsDir() {
+			files = append(files, f.collectRecursive(full, skipReadme)...)
+			continue
+		}
+		if !strings.HasSuffix(entry.Name(), ".md") {
+			continue
+		}
+		if skipReadme && entry.Name() == "README.md" {
+			continue
+		}
+		files = append(files, full)
+	}
+	return files
+}
+
+func (f *testFileLister) collectRecursive(dir string, skipReadme bool) []string {
+	var result []string
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	for _, entry := range entries {
+		full := filepath.Join(dir, entry.Name())
+		if entry.IsDir() {
+			result = append(result, f.collectRecursive(full, skipReadme)...)
+			continue
+		}
+		if !strings.HasSuffix(entry.Name(), ".md") {
+			continue
+		}
+		if skipReadme && entry.Name() == "README.md" {
+			continue
+		}
+		result = append(result, full)
+	}
+	return result
+}
 
 func writeFixture(t *testing.T, root string, files map[string]string) {
 	t.Helper()
@@ -31,6 +82,12 @@ func TestKitRole(t *testing.T) {
 	}
 }
 
+func testSource(t *testing.T) ContextSource {
+	return ContextSource{
+		FileLister: &testFileLister{},
+	}
+}
+
 func TestEnrichKitAssignsRolesAndFolderContext(t *testing.T) {
 	root := t.TempDir()
 	kitPath := filepath.Join(root, ".hawp", "kit")
@@ -41,7 +98,8 @@ func TestEnrichKitAssignsRolesAndFolderContext(t *testing.T) {
 		".hawp/kit/standards/naming.md": "# Naming\n\nUse kebab-case.\n",
 	})
 
-	docs, err := EnrichKit(root, kitPath)
+	src := testSource(t)
+	docs, err := EnrichKit(root, kitPath, os.ReadFile, src)
 	if err != nil {
 		t.Fatal(err)
 	}
