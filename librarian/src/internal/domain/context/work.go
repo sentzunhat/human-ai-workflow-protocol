@@ -1,14 +1,11 @@
 package context
 
 import (
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
 	domainwork "github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 )
 
 // workRoleFolders are the top-level .hawp/work/ subfolders enriched here.
@@ -51,11 +48,14 @@ func resolveID(filename string) string {
 // EnrichWork walks workRoot (a .hawp/work directory) and returns every
 // markdown document tagged with its folder role and, for active/closed/
 // parked records, metadata resolved from BACKLOG.md.
-func EnrichWork(repoRoot, workRoot string) ([]Document, error) {
-	backlog, err := domainwork.ParseBacklog(filepath.Join(workRoot, "BACKLOG.md"))
+//
+// reader injects file content; pass os.ReadFile from application layer.
+func EnrichWork(repoRoot, workRoot string, reader Reader, src ContextSource) ([]Document, error) {
+	backlogRaw, err := reader(filepath.Join(workRoot, "BACKLOG.md"))
 	if err != nil {
 		return nil, err
 	}
+	backlog := src.BacklogParser.ParseBacklog(string(backlogRaw))
 	rowsByRole := map[string][]domainwork.BacklogRow{
 		"active": backlog.Active, "closed": backlog.Closed, "parked": backlog.Parked,
 	}
@@ -63,18 +63,18 @@ func EnrichWork(repoRoot, workRoot string) ([]Document, error) {
 	var documents []Document
 	for _, role := range workRoleFolders {
 		dir := filepath.Join(workRoot, role)
-		for _, file := range markdown.CollectFiles(dir, true) {
-			documents = append(documents, buildWorkDocument(repoRoot, file, role, rowsByRole[role]))
+		for _, file := range src.FileLister.CollectFiles(dir, true) {
+			documents = append(documents, buildWorkDocument(repoRoot, file, role, rowsByRole[role], reader))
 		}
 	}
 	return documents, nil
 }
 
-func buildWorkDocument(repoRoot, file, role string, rows []domainwork.BacklogRow) Document {
-	raw, _ := os.ReadFile(file)
+func buildWorkDocument(repoRoot, file, role string, rows []domainwork.BacklogRow, reader Reader) Document {
+	raw, _ := reader(file)
 	id := resolveID(filepath.Base(file))
 	doc := Document{
-		RelPath: repo.ToRepoRelative(repoRoot, file),
+		RelPath: repoRootToRel(repoRoot, file),
 		Corpus:  CorpusWork,
 		Role:    role,
 		ID:      id,

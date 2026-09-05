@@ -288,6 +288,8 @@ HAWP guidance you want from the provider seed instead of overwriting your file.
 
 Run this from the root of your target repository. No edits are required; branch and provider are already configured in the command. Each run fetches the latest commit from that branch.
 
+Downloadable script artifact: `codex/install/main.sh`.
+
 ```bash
 set -euo pipefail
 
@@ -504,9 +506,10 @@ cp -R "$SRC/.hawp/kit/references" .hawp/kit/
 cp -R "$SRC/.hawp/kit/standards"  .hawp/kit/
 
 # --- 4b. Install hawp CLI binary (platform-detected from GitHub release) ---
-install_hawp_binary() {
+install_hawp_binary() (
+  set -eo pipefail
   local _os _arch _asset _ext _dest _url _checksum_url _expected _actual
-  local _tag
+  local _tag _tmpdir
 
   _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
   _arch="$(uname -m)"
@@ -532,7 +535,7 @@ install_hawp_binary() {
   esac
 
   _asset="hawp-${_os}-${_arch}${_ext}"
-  _dest=".hawp/bin/hawp-bin${_ext}"
+  _dest=".hawp/bin/hawp${_ext}"
 
   # Resolve latest release tag from GitHub API.
   _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" 2>/dev/null \
@@ -544,8 +547,12 @@ install_hawp_binary() {
   fi
 
   if [ -z "$_tag" ]; then
-    echo "hawp install: could not resolve latest release tag — skipping binary install."
-    return 0
+    if [ -f "$_dest" ]; then
+      echo "hawp install: could not resolve latest release tag — installed binary preserved."
+      return 0
+    fi
+    echo "hawp install: could not resolve latest release tag — cannot install binary." >&2
+    return 1
   fi
 
   _url="https://github.com/${OWNER}/${REPO}/releases/download/${_tag}/${_asset}"
@@ -553,47 +560,42 @@ install_hawp_binary() {
 
   echo "hawp binary: ${_asset} (release ${_tag})"
   mkdir -p .hawp/bin
-  curl -fsSL -o "${_dest}.tmp" "$_url" || {
-    echo "hawp install: download failed — skipping binary install."
-    return 0
+  _tmpdir="$(mktemp -d ".hawp/bin/.hawp-download.XXXXXX")"
+  trap "$(printf 'rm -rf -- %q' "$_tmpdir")" EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+  curl -fsSL --proto '=https' --proto-redir '=https' -o "$_tmpdir/binary" "$_url" || {
+    echo "hawp install: binary download failed; installed binary preserved."
+    return 1
   }
-
-  # Verify SHA256 when checksums.txt is available
-  if curl -fsSL -o /tmp/hawp-checksums.txt "$_checksum_url" 2>/dev/null; then
-    _expected="$(grep " ${_asset}$" /tmp/hawp-checksums.txt | awk '{print $1}')"
-    if [ -n "$_expected" ]; then
-      if command -v sha256sum >/dev/null 2>&1; then
-        _actual="$(sha256sum "${_dest}.tmp" | awk '{print $1}')"
-      elif command -v shasum >/dev/null 2>&1; then
-        _actual="$(shasum -a 256 "${_dest}.tmp" | awk '{print $1}')"
-      else
-        _actual=""
-      fi
-      if [ -n "$_actual" ] && [ "$_actual" != "$_expected" ]; then
-        echo "hawp install: SHA256 mismatch — aborting binary install."
-        rm -f "${_dest}.tmp"
-        return 1
-      fi
-      [ -n "$_actual" ] && echo "hawp binary: SHA256 verified."
-    fi
-    rm -f /tmp/hawp-checksums.txt
+  curl -fsSL --proto '=https' --proto-redir '=https' -o "$_tmpdir/checksums" "$_checksum_url" || {
+    echo "hawp install: checksums unavailable; installed binary preserved."
+    return 1
+  }
+  _expected="$(awk -v asset="$_asset" '$2 == asset || $2 == "*" asset { print $1 }' "$_tmpdir/checksums")"
+  if [[ ! "$_expected" =~ ^[[:xdigit:]]{64}$ ]]; then
+    echo "hawp install: expected exactly one valid SHA256 entry for $_asset."
+    return 1
   fi
-
-  mv "${_dest}.tmp" "$_dest"
-  chmod +x "$_dest"
-
-  # Install the shell wrapper at .hawp/bin/hawp so it delegates to hawp-bin.
-  if [ -f "$SRC/.hawp/bin/hawp" ]; then
-    cp "$SRC/.hawp/bin/hawp" .hawp/bin/hawp
-    chmod +x .hawp/bin/hawp
+  _expected="$(printf '%s' "$_expected" | tr '[:upper:]' '[:lower:]')"
+  if command -v sha256sum >/dev/null 2>&1; then
+    _actual="$(sha256sum "$_tmpdir/binary" | awk '{print $1}')"
+  elif command -v shasum >/dev/null 2>&1; then
+    _actual="$(shasum -a 256 "$_tmpdir/binary" | awk '{print $1}')"
+  else
+    echo "hawp install: a SHA256 utility is required."
+    return 1
   fi
-  if [ -f "$SRC/.hawp/bin/hawp-mcp" ]; then
-    cp "$SRC/.hawp/bin/hawp-mcp" .hawp/bin/hawp-mcp
-    chmod +x .hawp/bin/hawp-mcp
+  if [ "$_actual" != "$_expected" ]; then
+    echo "hawp install: SHA256 mismatch; installed binary preserved."
+    return 1
   fi
+  echo "hawp binary: SHA256 verified."
+  chmod 755 "$_tmpdir/binary"
+  mv -f "$_tmpdir/binary" "$_dest"
 
   echo "hawp binary: installed to ${_dest}"
-}
+)
 install_hawp_binary
 
 rm -rf .hawp/templates .hawp/patterns .hawp/reviews .hawp/examples .hawp/types .hawp/usage
@@ -635,7 +637,7 @@ if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
 fi
 
 echo "HAWP install complete (provider: ${PROVIDER})."
-echo "Refreshed: .hawp/LICENSE, .hawp/kit/**, .hawp/bin/hawp (platform binary)"
+echo "Refreshed: .hawp/LICENSE, .hawp/kit/**, .hawp/bin/hawp (native executable)"
 echo "Preserved: .hawp/work/** (no-overwrite)"
 echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .hawp/work/active/ when eligible (see 'reconciled (link):' and 'reconciled (id-fallback):' lines above)"
 ```
@@ -650,6 +652,10 @@ This file is generated. Do not edit it directly.
 Generated output file:
 
 - `distribution/generated/codex/install/main.md`
+
+Generated shell script:
+
+- `distribution/generated/codex/install/main.sh`
 
 Provider: `codex` · Operation: `install` · Branch: `main`
 

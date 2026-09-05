@@ -22,8 +22,8 @@ Use this structure as the default operating model:
 - `.hawp/work/active/{uuid}/plan.md` — open work item (folder-per-item layout)
 - `.hawp/work/parked/{uuid}/plan.md` — paused work item (move back to `active/` to resume)
 - `.hawp/work/closed/YYYY/MM/DD/{uuid}/plan.md` — completed work item, archived by close date
-- `.hawp/work/status/YYYY/MM/DD/` — daily or checkpoint status summaries
-- `.hawp/work/evidence/YYYY/MM/DD/` — verification notes, command output, smoke-test results
+- `.hawp/work/status/YYYY/MM/DD/{uuid}/` — daily or checkpoint status summaries, scoped to a work item
+- `.hawp/work/evidence/YYYY/MM/DD/{uuid}/` — verification notes, command output, smoke-test results, scoped to a work item
 - `.hawp/work/decisions/` — ADRs and project decisions
 
 ### Work item file naming
@@ -156,6 +156,9 @@ If close dates are missing, place files under the best-known close date and capt
 - Keep Recently Closed within the selected cap.
 - Store proof and verification in `.hawp/work/evidence/YYYY/MM/DD/` and link to it.
 - Store checkpoint summaries in `.hawp/work/status/YYYY/MM/DD/`.
+- New artifacts should use the owning work item's UUID folder beneath the date.
+  During migration, preserve legacy flat artifacts and add an explicit work UUID
+  in their front matter or filename; do not infer ownership from dates alone.
 - For repeated maintenance work, keep one active item and archive prior closures.
 
 ## Acceptance Checklist

@@ -7,9 +7,6 @@ import (
 	"regexp"
 	"sort"
 	"strings"
-
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 )
 
 var (
@@ -51,7 +48,7 @@ func canonicalFolderID(content, fallback string) string {
 }
 
 func rewriteMovedMarkdown(content, oldPath, newPath string) string {
-	blanked := markdown.BlankFences(content)
+	blanked := BlankFences(content)
 	matches := markdownLinkRefRe.FindAllStringSubmatchIndex(blanked, -1)
 	if len(matches) == 0 {
 		return content
@@ -72,7 +69,7 @@ func rewriteMovedMarkdown(content, oldPath, newPath string) string {
 }
 
 func rewriteLocalHref(href, oldPath, newPath string) string {
-	if !markdown.IsLocalHref(href) {
+	if !isLocalHref(href) {
 		return href
 	}
 	pathPart, anchor, hasAnchor := strings.Cut(href, "#")
@@ -138,7 +135,7 @@ func moveArtifactDir(oldPath, newPath string) error {
 	return os.Rename(oldPath, newPath)
 }
 
-func applyDirRename(dirPath, targetDir, workRoot string, touched map[string]struct{}, movedPlans *[]movedPlan) error {
+func applyDirRename(w *WorkSource, dirPath, targetDir, workRoot string, touched map[string]struct{}, movedPlans *[]movedPlan) error {
 	if dirPath == targetDir {
 		return nil
 	}
@@ -152,7 +149,7 @@ func applyDirRename(dirPath, targetDir, workRoot string, touched map[string]stru
 		return err
 	}
 
-	for _, newFile := range markdown.CollectFiles(targetDir, false) {
+	for _, newFile := range w.CollectFiles(targetDir, false) {
 		relSuffix, err := filepath.Rel(targetDir, newFile)
 		if err != nil {
 			return err
@@ -327,7 +324,7 @@ func copyTree(srcRoot, dstRoot string) error {
 
 // PreviewWorkItemFolderMigration runs the real migration against an isolated
 // temp copy of .hawp/work and returns the files that would change.
-func PreviewWorkItemFolderMigration(repoRoot string) (ApplyResult, error) {
+func (w *WorkSource) PreviewWorkItemFolderMigration(repoRoot string) (ApplyResult, error) {
 	tempRoot, err := os.MkdirTemp("", "hawp-work-migrate-preview-")
 	if err != nil {
 		return ApplyResult{}, err
@@ -343,12 +340,12 @@ func PreviewWorkItemFolderMigration(repoRoot string) (ApplyResult, error) {
 		return ApplyResult{}, err
 	}
 
-	return ApplyWorkItemFolderMigration(tempRoot)
+	return w.ApplyWorkItemFolderMigration(tempRoot)
 }
 
 // ApplyWorkItemFolderMigration migrates active/parked work-item plans and
 // sidecar artifacts into folder-per-item layout, preserving relative links.
-func ApplyWorkItemFolderMigration(repoRoot string) (ApplyResult, error) {
+func (w *WorkSource) ApplyWorkItemFolderMigration(repoRoot string) (ApplyResult, error) {
 	result := ApplyResult{}
 	workRoot := filepath.Join(repoRoot, ".hawp", "work")
 	touched := map[string]struct{}{}
@@ -376,7 +373,7 @@ func ApplyWorkItemFolderMigration(repoRoot string) (ApplyResult, error) {
 				continue
 			}
 			targetDir := filepath.Join(scopeRoot, canonicalID)
-			if err := applyDirRename(dirPath, targetDir, workRoot, touched, &movedPlans); err != nil {
+			if err := applyDirRename(w, dirPath, targetDir, workRoot, touched, &movedPlans); err != nil {
 				return result, err
 			}
 		}
@@ -422,7 +419,7 @@ func ApplyWorkItemFolderMigration(repoRoot string) (ApplyResult, error) {
 	}
 
 	for path := range touched {
-		result.ChangedFiles = append(result.ChangedFiles, repo.ToRepoRelative(repoRoot, path))
+		result.ChangedFiles = append(result.ChangedFiles, w.ToRepoRelative(repoRoot, path))
 	}
 	sort.Strings(result.ChangedFiles)
 	return result, nil

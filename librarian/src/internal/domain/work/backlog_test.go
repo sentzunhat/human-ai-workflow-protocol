@@ -47,9 +47,9 @@ func writeBacklog(t *testing.T, content string) string {
 }
 
 func TestParseBacklogSections(t *testing.T) {
-	backlog, err := ParseBacklog(writeBacklog(t, sampleBacklog))
-	if err != nil {
-		t.Fatal(err)
+	backlog := ParseBacklogMarkdown(sampleBacklog)
+	if backlog == nil {
+		t.Fatal("expected parsed backlog")
 	}
 	if len(backlog.Active) != 2 {
 		t.Fatalf("active rows = %d, want 2 (nested subsection must not leak)", len(backlog.Active))
@@ -75,8 +75,10 @@ func TestParseBacklogSections(t *testing.T) {
 	}
 }
 
-func TestParseBacklogMissingFile(t *testing.T) {
-	if _, err := ParseBacklog(filepath.Join(t.TempDir(), "nope.md")); err == nil {
-		t.Fatal("expected error for missing backlog")
+func TestParseBacklogMarkdownDoesNotRequireFilesystem(t *testing.T) {
+	backlog := ParseBacklogMarkdown("| ID | Type | Title | Status | Detail |\n| --- | --- | --- | --- | --- |\n| `abc12345` | task | parser | inbox | detail |\n")
+	if len(backlog.Active) != 0 || len(backlog.Closed) != 0 || len(backlog.Parked) != 0 {
+		t.Fatalf("table outside a recognized section should be ignored: %+v", backlog)
 	}
 }
+

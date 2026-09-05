@@ -22,6 +22,9 @@ librarian/src/bin/
 *.local.md
 *.private.md
 
+# Embedded agent-worktree mirrors (gitlinks, 98MB snapshots) — not live docs
+.hawp/.spaces/
+
 # Scratch space inside .hawp/work/ (non-markdown artifacts)
 .hawp/work/tmp/
 .hawp/work/logs/

@@ -5,6 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 )
 
 func TestNormalizeFileName(t *testing.T) {
@@ -29,6 +32,13 @@ func TestNormalizeFileName(t *testing.T) {
 	}
 }
 
+var normalizeTestSource = &KitSource{
+	FileLister:   func(kitPath string, skipReadme bool) []string { return markdown.CollectFiles(kitPath, skipReadme) },
+	BlankFences:  markdown.BlankFences,
+	Exists:       repo.Exists,
+	ToRepoRelative: repo.ToRepoRelative,
+}
+
 func TestPlanAndApplyNormalization(t *testing.T) {
 	kitPath := t.TempDir()
 	mustWrite := func(rel, content string) {
@@ -44,23 +54,23 @@ func TestPlanAndApplyNormalization(t *testing.T) {
 	mustWrite("usage/guide.md", "see [bad](Bad%20Name.md) and [good](../start-here.md)\n")
 	mustWrite("start-here.md", "see [bad too](usage/Bad Name.md)\n")
 
-	renames := PlanFileRenames(kitPath)
+	renames := PlanFileRenames(kitPath, os.ReadDir)
 	if len(renames) != 1 || filepath.Base(renames[0].To) != "bad-name.md" {
 		t.Fatalf("renames = %+v, want one rename to bad-name.md", renames)
 	}
 
 	renameMap := map[string]string{renames[0].From: renames[0].To}
-	updates := PlanLinkUpdates(kitPath, renameMap)
+	updates := normalizeTestSource.PlanLinkUpdates(kitPath, renameMap, os.ReadFile)
 	// Only the plain-path link resolves to the renamed file (the %20 form
 	// does not match on-disk resolution here, matching TS behavior).
 	if len(updates) != 1 || updates[0].To != "usage/bad-name.md" {
 		t.Fatalf("updates = %+v, want start-here.md link update", updates)
 	}
 
-	if from, to, err := ApplyRenames(renames); err != nil || from != "" {
+	if from, to, err := ApplyRenames(renames, os.Stat, os.Rename); err != nil || from != "" {
 		t.Fatalf("ApplyRenames failed: %v conflict=%s->%s", err, from, to)
 	}
-	changed, err := ApplyLinkUpdates(updates)
+	changed, err := ApplyLinkUpdates(updates, os.ReadFile, os.WriteFile)
 	if err != nil || changed != 1 {
 		t.Fatalf("ApplyLinkUpdates changed=%d err=%v, want 1 file", changed, err)
 	}
@@ -82,7 +92,7 @@ func TestApplyRenamesRefusesOverwrite(t *testing.T) {
 		}
 	}
 	renames := []FileRename{{From: filepath.Join(dir, "Doc.md"), To: filepath.Join(dir, "doc.md")}}
-	from, to, err := ApplyRenames(renames)
+	from, to, err := ApplyRenames(renames, os.Stat, os.Rename)
 	if err != nil {
 		t.Fatal(err)
 	}

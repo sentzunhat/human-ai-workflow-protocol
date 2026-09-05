@@ -57,8 +57,9 @@ type DetectionReport struct {
 		Reason  string   `json:"reason"`
 		Details []string `json:"details,omitempty"`
 	} `json:"recommendation"`
-	SyncPlan      []SyncPlanStep `json:"syncPlan"`
-	ResearchQueue []ResearchItem `json:"researchQueue"`
+	SyncPlan       []SyncPlanStep `json:"syncPlan"`
+	ResearchQueue  []ResearchItem `json:"researchQueue"`
+	DuplicateLinks *ApplyResult   `json:"duplicateLinks,omitempty"`
 }
 
 func stableHash(value string) string {
@@ -169,14 +170,14 @@ func buildSyncPlan(operations []FixOperation) []SyncPlanStep {
 				DuplicatePlans: candidates,
 				ApplySteps: []string{
 					fmt.Sprintf("Review candidates for %s and choose one canonical plan file.", op.ItemID),
-					"Move remaining duplicates to the closed archive or remove stale copies.",
+					"Preserve all copies; add cross-references after selecting the matching record.",
 					"Re-run: ./.hawp/bin/hawp backlog upgrade --dry-run --validate",
 				},
 			})
 			continue
 		}
 		var duplicates []string
-		applySteps := []string{"Keep canonical closed plan: " + canonical}
+		applySteps := []string{"Review closed-plan candidate and compare content: " + canonical}
 		for _, c := range candidates {
 			if c == canonical {
 				continue
@@ -184,11 +185,11 @@ func buildSyncPlan(operations []FixOperation) []SyncPlanStep {
 			duplicates = append(duplicates, c)
 			switch {
 			case strings.Contains(c, "/active/"):
-				applySteps = append(applySteps, "Remove stale active copy: "+c)
+				applySteps = append(applySteps, "Review active copy; preserve differing content and supporting artifacts: "+c)
 			case strings.Contains(c, "/parked/"):
-				applySteps = append(applySteps, "Remove stale parked copy: "+c)
+				applySteps = append(applySteps, "Review parked copy; preserve differing content and supporting artifacts: "+c)
 			default:
-				applySteps = append(applySteps, "Archive or remove duplicate copy: "+c)
+				applySteps = append(applySteps, "Preserve and review related copy: "+c)
 			}
 		}
 		applySteps = append(applySteps, "Re-run: ./.hawp/bin/hawp backlog upgrade --dry-run --validate")
@@ -254,6 +255,14 @@ func RenderTextReport(report DetectionReport) string {
 	}
 	w("")
 	w("Operations")
+	if report.DuplicateLinks != nil {
+		for _, path := range report.DuplicateLinks.ChangedFiles {
+			w("Cross-reference update (all copies preserved): " + path)
+		}
+		for _, path := range report.DuplicateLinks.ReviewFiles {
+			w("Preserve duplicate for review (ambiguous archive or non-regular file): " + path)
+		}
+	}
 	w("----------")
 	if len(report.Plan.Operations) == 0 {
 		b.WriteString("No modifications needed.")
