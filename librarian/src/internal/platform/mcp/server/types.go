@@ -98,8 +98,8 @@ type WorkIntakeDraft struct {
 	Context     string `json:"context"`
 	Mission     string `json:"mission"`
 	Constraints string `json:"constraints"`
-	Output      string `json:"output"`
-	Checkpoint  string `json:"checkpoint,omitempty"`
+	Output      string `json:"output_spec"`
+	Checkpoint  string `json:"done_signal,omitempty"`
 }
 
 type WorkIntakeRetrieval struct {

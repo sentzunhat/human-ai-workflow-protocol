@@ -78,6 +78,15 @@ func CreateWorkDoc(docType, title, workDir, workItemID string) (*Result, error) 
 	}
 
 	filePath := filepath.Join(docDir, fileName)
+	if _, err := os.Stat(filePath); err == nil {
+		// File already exists — return the existing path without overwriting.
+		return &Result{
+			UUID:     folderID,
+			DocType:  docType,
+			Title:    title,
+			FilePath: filePath,
+		}, nil
+	}
 	if err := os.WriteFile(filePath, []byte(template(fullUUID, docType, title, date)), 0o644); err != nil {
 		return nil, fmt.Errorf("write doc file: %w", err)
 	}

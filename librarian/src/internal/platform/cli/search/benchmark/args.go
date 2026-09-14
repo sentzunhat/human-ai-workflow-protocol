@@ -27,7 +27,7 @@ func parseArgs(args []string) (options, error) {
 	flags.BoolVar(&opts.tokenMode, "token", false, "run token-savings benchmark")
 	flags.StringVar(&opts.exportPath, "export", "", "export path for token benchmark results")
 	flags.BoolVar(&opts.reshapeToken, "reshape-token", false, "run reshape token-savings benchmark")
-	flags.StringVar(&opts.reshapeBackend, "reshape-backend", "onnx", "reshape backend: ollama or onnx")
+	flags.StringVar(&opts.reshapeBackend, "reshape-backend", "ollama", "reshape backend: ollama or onnx")
 	flags.StringVar(&opts.reshapeModel, "reshape-model", "", "model name for reshape backend (default: backend default)")
 	flags.StringVar(&opts.reshapeURL, "reshape-url", "", "Ollama server URL (default: http://localhost:11434)")
 	flags.BoolVar(&opts.downstreamToken, "downstream-token", false, "run downstream savings benchmark (request + search context vs shaped intake)")

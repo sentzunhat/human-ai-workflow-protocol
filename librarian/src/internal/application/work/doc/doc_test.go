@@ -141,6 +141,21 @@ func TestCreateWorkDoc_PathTraversalRejected(t *testing.T) {
 	}
 }
 
+func TestCreateWorkDoc_IdempotentOnRepeat(t *testing.T) {
+	workDir := t.TempDir()
+	r1, err := doc.CreateWorkDoc("status", "gate check", workDir, "288d543c")
+	if err != nil {
+		t.Fatalf("first call: %v", err)
+	}
+	r2, err := doc.CreateWorkDoc("status", "gate check", workDir, "288d543c")
+	if err != nil {
+		t.Fatalf("second call: %v", err)
+	}
+	if r1.FilePath != r2.FilePath {
+		t.Errorf("expected same path on repeat; got %s then %s", r1.FilePath, r2.FilePath)
+	}
+}
+
 func TestCreateWorkDoc_ValidIDs(t *testing.T) {
 	workDir := t.TempDir()
 	validIDs := []string{

@@ -233,6 +233,9 @@ func TestToolWorkIntakeNoResultsNeedsUserInput(t *testing.T) {
 	if response.Retrieval.ChunksUsed != 0 {
 		t.Fatalf("chunks used = %d, want 0", response.Retrieval.ChunksUsed)
 	}
+	if response.Draft != nil {
+		t.Fatal("draft must be nil when state is needs_user_input")
+	}
 }
 
 func TestToolWorkIntakeMissingIndexIsStructuredBlocker(t *testing.T) {
@@ -242,8 +245,8 @@ func TestToolWorkIntakeMissingIndexIsStructuredBlocker(t *testing.T) {
 	if err != nil {
 		t.Fatalf("runWorkIntake should return structured missing-index response, got: %v", err)
 	}
-	if response.State != "blocked_missing_index" {
-		t.Fatalf("state = %q, want blocked_missing_index", response.State)
+	if response.State != "missing_index" {
+		t.Fatalf("state = %q, want missing_index", response.State)
 	}
 	if len(response.Warnings) == 0 ||
 		(!strings.Contains(response.Warnings[0], "index not found") && !strings.Contains(response.Warnings[0], "no such table")) {

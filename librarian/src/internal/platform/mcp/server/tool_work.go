@@ -152,7 +152,7 @@ func runWorkIntake(ctx context.Context, repoRoot, input string, limit, maxTokens
 				warning = notFound.Error()
 			}
 			return WorkIntakeResponse{
-				State: "blocked_missing_index",
+				State: "missing_index",
 				Retrieval: WorkIntakeRetrieval{
 					Query:  input,
 					Budget: maxTokens,
@@ -209,6 +209,7 @@ func runWorkIntake(ctx context.Context, repoRoot, input string, limit, maxTokens
 	}
 	if contextBlock.ChunksUsed == 0 {
 		response.State = "needs_user_input"
+		response.Draft = nil
 		response.Questions = []string{"No indexed HAWP context matched this request. Ask the user for the missing background or index the relevant documents, then retry intake."}
 		response.Warnings = []string{"No search results were found; the draft was shaped from the request only."}
 	}
