@@ -15,4 +15,4 @@ if [[ "$repo_root" != "$expected_root" ]]; then
   exit 1
 fi
 
-exec go -C "$script_dir" run ./cmd/source-layout --root "$repo_root" "$@"
+exec go -C "$script_dir" run ./cmd/source-layout "$@" --root "$repo_root"

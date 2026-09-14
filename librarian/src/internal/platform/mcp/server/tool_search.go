@@ -59,6 +59,8 @@ func toolSearch(args json.RawMessage, repoRoot string) rpcResponse {
 	}
 	if a.Limit <= 0 {
 		a.Limit = 5
+	} else if a.Limit > 500 {
+		return toolErr("limit must be 500 or less")
 	}
 	if a.MaxTokens <= 0 {
 		a.MaxTokens = 2000

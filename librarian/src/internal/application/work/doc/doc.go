@@ -9,11 +9,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/sentzunhat/hawp/librarian/src/internal/application/uuidgen"
 )
+
+// validFolderID matches 8-char short UUIDs or full 36-char UUIDs.
+var validFolderID = regexp.MustCompile(`^[0-9a-f]{8}(-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?$`)
 
 // ValidTypes lists the accepted secondary document types.
 var ValidTypes = []string{"status", "evidence", "decision", "note"}
@@ -53,10 +57,15 @@ func CreateWorkDoc(docType, title, workDir, workItemID string) (*Result, error) 
 		}
 		fullUUID = id
 		folderID = uuidgen.Short(id)
-	} else if len(folderID) > 8 && strings.Contains(folderID, "-") {
-		// Caller passed a full UUID — use the short form for the folder to
-		// stay consistent with active/ and closed/ naming.
-		folderID = uuidgen.Short(folderID)
+	} else {
+		if !validFolderID.MatchString(folderID) {
+			return nil, fmt.Errorf("invalid work item ID %q: must be an 8-char short UUID or full UUID", folderID)
+		}
+		if len(folderID) > 8 && strings.Contains(folderID, "-") {
+			// Caller passed a full UUID — use the short form for the folder to
+			// stay consistent with active/ and closed/ naming.
+			folderID = uuidgen.Short(folderID)
+		}
 	}
 
 	date := time.Now().Format("2006-01-02")

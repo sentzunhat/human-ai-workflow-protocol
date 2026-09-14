@@ -122,3 +122,35 @@ func TestCreateWorkDoc_EmptyTitleRejected(t *testing.T) {
 		t.Error("expected error for empty title, got nil")
 	}
 }
+
+func TestCreateWorkDoc_PathTraversalRejected(t *testing.T) {
+	workDir := t.TempDir()
+	traversalIDs := []string{
+		"../../etc",
+		"../passwd",
+		"../../../../../../tmp",
+		"bad/id",
+		"not-a-uuid",
+		"12345678-nope",
+	}
+	for _, id := range traversalIDs {
+		_, err := doc.CreateWorkDoc("status", "title", workDir, id)
+		if err == nil {
+			t.Errorf("expected error for work item ID %q, got nil", id)
+		}
+	}
+}
+
+func TestCreateWorkDoc_ValidIDs(t *testing.T) {
+	workDir := t.TempDir()
+	validIDs := []string{
+		"288d543c",
+		"288d543c-1234-5678-abcd-000000000000",
+	}
+	for _, id := range validIDs {
+		_, err := doc.CreateWorkDoc("status", "title", workDir, id)
+		if err != nil {
+			t.Errorf("unexpected error for valid ID %q: %v", id, err)
+		}
+	}
+}
