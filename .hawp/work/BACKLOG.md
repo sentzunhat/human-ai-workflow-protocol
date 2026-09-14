@@ -42,9 +42,9 @@ elicitation/guidance work from `c8d9e1cb`.
 | `c8d9e1cb` | feature | Interactive MCP intake refinement with structured results (`v0.0.24` subset, remainder `v0.0.25`) | `plan-ready` | Codex | [plan](active/c8d9e1cb/plan.md) | 2026-09-13 |
 | `2eea565c` | improvement | MCP capability catalog for HAWP resources and prompts (`v0.0.25`) | `plan-ready` | Codex | [plan](active/2eea565c/plan.md) | 2026-09-13 |
 | `429e075e` | improvement | Remote MCP transport and authorization readiness audit (`v0.0.25`) | `plan-ready` | Codex | [plan](active/429e075e/plan.md) | 2026-09-13 |
-| `cop-path-traversal` | fix | **[High]** Security: validate folderID to prevent path traversal in work doc creation | `inbox` | — | [plan](active/cop-path-traversal/plan.md) | 2026-09-13 |
-| `cop-mcp-limit-overflow` | fix | **[High]** Security: bound MCP search limit before multiply-by-3 to prevent integer overflow | `inbox` | — | [plan](active/cop-mcp-limit-overflow/plan.md) | 2026-09-13 |
-| `cop-root-flag-bypass` | fix | **[High]** Security: fix `--root` flag order in source-layout run.sh (last-wins bypass) | `inbox` | — | [plan](active/cop-root-flag-bypass/plan.md) | 2026-09-13 |
+| `cop-path-traversal` | fix | **[High]** Security: validate folderID to prevent path traversal in work doc creation | `done` | — | [plan](closed/2026/09/14/cop-path-traversal/plan.md) | 2026-09-14 |
+| `cop-mcp-limit-overflow` | fix | **[High]** Security: bound MCP search limit before multiply-by-3 to prevent integer overflow | `done` | — | [plan](closed/2026/09/14/cop-mcp-limit-overflow/plan.md) | 2026-09-14 |
+| `cop-root-flag-bypass` | fix | **[High]** Security: fix `--root` flag order in source-layout run.sh (last-wins bypass) | `done` | — | [plan](closed/2026/09/14/cop-root-flag-bypass/plan.md) | 2026-09-14 |
 | `cop-doc-overwrite` | fix | **[Medium]** Bug: prevent silent overwrite of existing work docs on repeated creation | `inbox` | — | [plan](active/cop-doc-overwrite/plan.md) | 2026-09-13 |
 | `cop-mcp-contract-mismatch` | fix | **[Medium]** Bug: MCP response contract mismatches — state names, JSON tags, draft-on-no-match | `inbox` | — | [plan](active/cop-mcp-contract-mismatch/plan.md) | 2026-09-13 |
 | `cop-reshape-backend-default` | fix | **[Medium]** Bug: `--reshape-backend` defaults to onnx, breaks non-ORT builds and MCP reshape | `inbox` | — | [plan](active/cop-reshape-backend-default/plan.md) | 2026-09-13 |
