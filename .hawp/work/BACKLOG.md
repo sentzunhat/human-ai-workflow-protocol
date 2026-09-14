@@ -48,8 +48,8 @@ elicitation/guidance work from `c8d9e1cb`.
 | `cop-doc-overwrite` | fix | **[Medium]** Bug: prevent silent overwrite of existing work docs on repeated creation | `done` | — | [plan](closed/2026/09/14/cop-doc-overwrite/plan.md) | 2026-09-14 |
 | `cop-mcp-contract-mismatch` | fix | **[Medium]** Bug: MCP response contract mismatches — state names, JSON tags, draft-on-no-match | `done` | — | [plan](closed/2026/09/14/cop-mcp-contract-mismatch/plan.md) | 2026-09-14 |
 | `cop-reshape-backend-default` | fix | **[Medium]** Bug: `--reshape-backend` defaults to onnx, breaks non-ORT builds and MCP reshape | `done` | — | [plan](closed/2026/09/14/cop-reshape-backend-default/plan.md) | 2026-09-14 |
-| `cop-onnx-model-default` | improvement | **[Low]** ONNX LLM default model should be Phi-3-mini (benchmarked), not SmolLM2-360M | `inbox` | — | [plan](active/cop-onnx-model-default/plan.md) | 2026-09-13 |
-| `cop-workdoc-description` | fix | **[Low]** Docs: `hawp_work_doc` tool description has wrong path pattern; CHANGELOG command mismatch | `inbox` | — | [plan](active/cop-workdoc-description/plan.md) | 2026-09-13 |
+| `cop-onnx-model-default` | improvement | **[Low]** ONNX LLM default model should be Phi-3-mini (benchmarked), not SmolLM2-360M | `done` | — | [plan](closed/2026/09/14/cop-onnx-model-default/plan.md) | 2026-09-14 |
+| `cop-workdoc-description` | fix | **[Low]** Docs: `hawp_work_doc` tool description has wrong path pattern; CHANGELOG command mismatch | `done` | — | [plan](closed/2026/09/14/cop-workdoc-description/plan.md) | 2026-09-14 |
 
 ## Blocked / Parked
 

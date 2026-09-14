@@ -45,29 +45,37 @@ type LLMModelInfo struct {
 }
 
 // SupportedLLMModels lists all available LLM models with ONNX export.
-// SmolLM2-360M-Instruct was chosen over FLAN-T5-small after benchmarking
-// (2026-07-26): SmolLM2 is a modern (2026), instruction-tuned generative
-// model trained on 4T tokens — meaningfully higher quality than FLAN-T5's
-// older T5-based architecture at a similar CPU latency (measured ~120ms per
-// 50-token extraction), for ~10x the download size (819MB vs 60-80MB).
-// See librarian/docs/benchmarks-v003.md and v0.1.0-vision.md.
 // NOTE: hugot's ORT generative pipeline requires a genai_config.json —
 // the ONNX Runtime GenAI model-builder format, NOT the standard
-// optimum/Transformers.js ONNX export (HuggingFaceTB/SmolLM2-360M-Instruct
-// itself lacks genai_config.json and does not work here). This repo is a
-// community genai-format conversion of the same model, int4-quantized.
+// optimum/Transformers.js ONNX export. Both entries below use community
+// genai-format conversions that include genai_config.json.
 var SupportedLLMModels = map[string]LLMModelInfo{
+	// Phi-3-mini-4k-instruct: benchmarked at 10/10 coverage for HAWP intake
+	// shaping (2026-09-11). Recommended default. Requires ORT GenAI build.
+	// External data sidecar required — without model.onnx.data, ORT fails
+	// at session-init with "External data path does not exist".
+	"Phi-3-mini-4k-instruct": {
+		Name:             "Phi-3-mini-4k-instruct",
+		HFRepo:           "microsoft/Phi-3-mini-4k-instruct-ort-genai-int4-cpu",
+		ONNXFile:         "model.onnx",
+		ExternalDataFile: "model.onnx.data",
+		Params:           3_800_000_000,
+	},
+	// SmolLM2-360M-Instruct: original default (v0.0.14–v0.0.23), scored 1/10
+	// on HAWP intake shaping. Kept for backwards compatibility with downloaded
+	// models; not recommended for new installs.
 	"SmolLM2-360M-Instruct": {
 		Name:             "SmolLM2-360M-Instruct",
 		HFRepo:           "homen3/SmolLM2-360M-Instruct-ort-genai-int4-cpu",
 		ONNXFile:         "model.onnx",
-		ExternalDataFile: "model.onnx.data", // model weights split into a sidecar file; without downloading this too, ORT fails at session-init with "External data path does not exist"
+		ExternalDataFile: "model.onnx.data",
 		Params:           360_000_000,
 	},
 }
 
 // DefaultLLMModel is the recommended ONNX LLM model for context reshaping.
-const DefaultLLMModel = "SmolLM2-360M-Instruct"
+// Phi-3-mini-4k-instruct benchmarked at 10/10 coverage (2026-09-11).
+const DefaultLLMModel = "Phi-3-mini-4k-instruct"
 
 // onnxRuntimeLibraryPath resolves the DIRECTORY containing the plain ONNX
 // Runtime shared library (libonnxruntime.{dylib,so}, or onnxruntime.dll on

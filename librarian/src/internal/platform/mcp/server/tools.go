@@ -74,7 +74,7 @@ func toolDefs() []map[string]any {
 		},
 		{
 			"name":        "hawp_work_doc",
-			"description": "Create a secondary work document (status report, evidence file, decision record, or note) at the canonical UUID-subfolder path: {type}/YYYY/MM/DD/{id}/{type}.md. Pass work_item_id to use the work item's own ID as the folder name so all artifacts for that item share the same path prefix. Returns the created file path so the caller can append content without knowing path conventions.",
+			"description": "Create a secondary work document at the canonical UUID-subfolder path. Actual directories by type: status→status/YYYY/MM/DD/{id}/status.md, evidence→evidence/YYYY/MM/DD/{id}/evidence.md, decision→decisions/YYYY/MM/DD/{id}/decision.md, note→notes/YYYY/MM/DD/{id}/note.md. Pass work_item_id to use the work item's own ID as the folder name so all artifacts for that item share the same path prefix. Repeated calls with the same type and work_item_id are idempotent — the existing file path is returned without overwriting. Returns the file path so the caller can append content without knowing path conventions.",
 			"inputSchema": map[string]any{
 				"type": "object",
 				"properties": map[string]any{

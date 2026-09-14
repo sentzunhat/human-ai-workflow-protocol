@@ -23,9 +23,10 @@ token savings with Ollama).
   (`status`, `evidence`, `decision`, `note`) under
   `.hawp/work/<type>/YYYY/MM/DD/<uuid>/`. Accepts `--work-item <id>` to
   associate with an active plan.
-- **`hawp work doc` CLI subcommands** — `hawp work doc status|evidence|decision|note
+- **`hawp work` doc subcommands** — `hawp work status|evidence|decision|note
   --title "<label>" [--work-item <id>]` generates the document path and prints it
-  for scripting and agent use.
+  for scripting and agent use. Paths: `status/`, `evidence/`, `decisions/`,
+  `notes/` under `.hawp/work/`.
 - **`OllamaIntakeShaper`** — production intake-shaping path. Benchmarked at
   10/10 coverage with `mistral:7B`; 95% average downstream token savings vs
   unstructured request + retrieved context (evidence:
@@ -314,8 +315,10 @@ ORT release build — ONNX LLM reshaping now ships in official release tarballs.
 
 ### Notes
 
-- Model: `homen3/SmolLM2-360M-Instruct-ort-genai-int4-cpu` (verified working 2026-07-27,
-  ~1.1s/reshape on arm64). Pull it with `hawp model pull homen3/SmolLM2-360M-Instruct-ort-genai-int4-cpu`.
+- Default model: `microsoft/Phi-3-mini-4k-instruct-ort-genai-int4-cpu` (10/10 coverage, 2026-09-11).
+  Pull it with `hawp model pull microsoft/Phi-3-mini-4k-instruct-ort-genai-int4-cpu`.
+  The model requires a `.onnx.data` sidecar — hugot downloads both automatically.
+  `SmolLM2-360M-Instruct` is retained in the registry for backwards compatibility (1/10 quality, not recommended).
 - Set `llm.backend: "onnx"` in `~/.hawp/config/context.json` to activate local LLM reshaping
   for `hawp search --context`.
 
