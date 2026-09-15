@@ -118,6 +118,7 @@ func toolWorkReshape(args json.RawMessage, repoRoot string) rpcResponse {
 func toolWorkIntake(args json.RawMessage, repoRoot string) rpcResponse {
 	var a struct {
 		Input     string `json:"input"`
+		Backend   string `json:"backend"`
 		Model     string `json:"model"`
 		URL       string `json:"url"`
 		Limit     int    `json:"limit"`
@@ -128,6 +129,12 @@ func toolWorkIntake(args json.RawMessage, repoRoot string) rpcResponse {
 	}
 	if strings.TrimSpace(a.Input) == "" {
 		return toolErr("input is required")
+	}
+	if a.Backend == "" {
+		a.Backend = "ollama"
+	}
+	if a.Backend != "ollama" && a.Backend != "onnx" {
+		return toolErr(`backend must be "ollama" or "onnx"`)
 	}
 	if a.Limit <= 0 {
 		a.Limit = 10
@@ -140,7 +147,7 @@ func toolWorkIntake(args json.RawMessage, repoRoot string) rpcResponse {
 		return toolErr("max_tokens must be 32000 or less")
 	}
 
-	shaper, cleanup, err := newMCPReshapeShaper("ollama", a.URL, a.Model)
+	shaper, cleanup, err := newMCPReshapeShaper(a.Backend, a.URL, a.Model)
 	if err != nil {
 		return toolErr("shaper unavailable: " + err.Error())
 	}
@@ -163,7 +170,7 @@ func runWorkIntake(ctx context.Context, repoRoot, input string, limit, maxTokens
 				warning = notFound.Error()
 			}
 			return WorkIntakeResponse{
-				State: "missing_index",
+				State: "blocked_missing_index",
 				Retrieval: WorkIntakeRetrieval{
 					Query:  input,
 					Budget: maxTokens,
@@ -250,26 +257,6 @@ func savingsPct(contextTokens, shapedTokens int) int {
 		return 0
 	}
 	return (saved * 100) / contextTokens
-}
-
-func formatDraft(d domainwork.Draft) string {
-	var b strings.Builder
-	b.WriteString("Input:\n  ")
-	b.WriteString(d.Input)
-	b.WriteString("\n\nContext:\n  ")
-	b.WriteString(d.Context)
-	b.WriteString("\n\nMission:\n  ")
-	b.WriteString(d.Mission)
-	b.WriteString("\n\nConstraints:\n  ")
-	b.WriteString(d.Constraints)
-	b.WriteString("\n\nOutput:\n  ")
-	b.WriteString(d.Output)
-	if strings.TrimSpace(d.Checkpoint) != "" {
-		b.WriteString("\n\nCheckpoint:\n  ")
-		b.WriteString(d.Checkpoint)
-	}
-	b.WriteString("\n")
-	return b.String()
 }
 
 func toolWorkValidate(repoRoot string) rpcResponse {

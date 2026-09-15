@@ -14,13 +14,17 @@ func toolDefs() []map[string]any {
 		usageToolDef(),
 		{
 			"name":        "hawp_work_intake",
-			"description": "Run HAWP search and request reshape in one compound intake call. Returns structured draft fields, retrieval status, warnings/questions, and token accounting. Use this before hawp_work_new so agents do not skip context retrieval. Requires a local search index and Ollama running locally; shape failures return a structured blocked state.",
+			"description": "Run HAWP search and request reshape in one compound intake call. Returns structured draft fields, retrieval status, warnings/questions, and token accounting. Use this before hawp_work_new so agents do not skip context retrieval. Requires a local search index and a running local LLM (Ollama by default; pass backend:onnx to use ONNX instead). Shape failures return a structured blocked state.",
 			"inputSchema": map[string]any{
 				"type": "object",
 				"properties": map[string]any{
 					"input": map[string]any{
 						"type":        "string",
 						"description": "Verbatim user request to retrieve context for and shape",
+					},
+					"backend": map[string]any{
+						"type":        "string",
+						"description": "LLM backend: ollama (default) or onnx",
 					},
 					"limit": map[string]any{
 						"type":        "integer",
@@ -32,11 +36,11 @@ func toolDefs() []map[string]any {
 					},
 					"model": map[string]any{
 						"type":        "string",
-						"description": "Ollama model name (default: mistral)",
+						"description": "Model name (Ollama default: mistral; ONNX default: Phi-3-mini)",
 					},
 					"url": map[string]any{
 						"type":        "string",
-						"description": "Ollama server URL (default: http://localhost:11434)",
+						"description": "Ollama server URL (default: http://localhost:11434); unused for onnx",
 					},
 				},
 				"required": []string{"input"},
