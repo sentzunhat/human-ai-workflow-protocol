@@ -136,6 +136,8 @@ func toolWorkIntake(args json.RawMessage, repoRoot string) rpcResponse {
 	}
 	if a.MaxTokens <= 0 {
 		a.MaxTokens = 2000
+	} else if a.MaxTokens > 32000 {
+		return toolErr("max_tokens must be 32000 or less")
 	}
 
 	shaper, cleanup, err := newMCPReshapeShaper("ollama", a.URL, a.Model)

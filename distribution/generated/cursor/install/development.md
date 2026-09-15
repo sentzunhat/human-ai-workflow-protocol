@@ -519,8 +519,12 @@ install_hawp_binary() (
   fi
 
   if [ -z "$_tag" ]; then
-    echo "hawp install: could not resolve latest release tag — skipping binary install."
-    return 0
+    if [ -f "$_dest" ]; then
+      echo "hawp install: could not resolve latest release tag — installed binary preserved."
+      return 0
+    fi
+    echo "hawp install: could not resolve latest release tag — cannot install binary." >&2
+    return 1
   fi
 
   _url="https://github.com/${OWNER}/${REPO}/releases/download/${_tag}/${_asset}"
