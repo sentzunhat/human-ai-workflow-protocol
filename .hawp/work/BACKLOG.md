@@ -42,9 +42,6 @@ elicitation/guidance work from `c8d9e1cb`.
 | `c8d9e1cb` | feature | Interactive MCP intake refinement with structured results (`v0.0.24` subset, remainder `v0.0.25`) | `plan-ready` | Codex | [plan](active/c8d9e1cb/plan.md) | 2026-09-13 |
 | `2eea565c` | improvement | MCP capability catalog for HAWP resources and prompts (`v0.0.25`) | `plan-ready` | Codex | [plan](active/2eea565c/plan.md) | 2026-09-13 |
 | `429e075e` | improvement | Remote MCP transport and authorization readiness audit (`v0.0.25`) | `plan-ready` | Codex | [plan](active/429e075e/plan.md) | 2026-09-13 |
-| `cd5c215b` | fix | doc: quote YAML front-matter title to prevent newline injection | inbox | unassigned | [plan](active/cd5c215b/plan.md) | 2026-09-15 |
-| `025de149` | fix | intake: add symlink guard for BACKLOG.md and active plan dir writes | inbox | unassigned | [plan](active/025de149/plan.md) | 2026-09-15 |
-| `29b18cef` | fix | source-layout apply: write candidate tree under sourceRoot subdirectory in verify | inbox | unassigned | [plan](active/29b18cef/plan.md) | 2026-09-15 |
 
 ## Blocked / Parked
 
@@ -69,6 +66,9 @@ Limited to the last 5–10 items.
 
 | ID                            | Type        | Title                                                                   | Closed     | Detail                                                        |
 | ----------------------------- | ----------- | ----------------------------------------------------------------------- | ---------- | ------------------------------------------------------------- |
+| `cd5c215b`                    | fix         | **[High]** doc: quote YAML front-matter title (newline injection)       | 2026-09-15 | [plan](closed/2026/09/15/cd5c215b/plan.md)                    |
+| `025de149`                    | fix         | **[High]** intake: symlink guard for BACKLOG.md and active plan dir     | 2026-09-15 | [plan](closed/2026/09/15/025de149/plan.md)                    |
+| `29b18cef`                    | fix         | **[High]** source-layout verify: write candidate tree under sourceRoot  | 2026-09-15 | [plan](closed/2026/09/15/29b18cef/plan.md)                    |
 | `cop-path-traversal`          | fix         | **[High]** Security: path traversal in work doc folderID                | 2026-09-14 | [plan](closed/2026/09/14/cop-path-traversal/plan.md)          |
 | `cop-mcp-limit-overflow`      | fix         | **[High]** Security: MCP search limit overflow before multiply-by-3     | 2026-09-14 | [plan](closed/2026/09/14/cop-mcp-limit-overflow/plan.md)      |
 | `cop-root-flag-bypass`        | fix         | **[High]** Security: `--root` flag bypass in source-layout run.sh       | 2026-09-14 | [plan](closed/2026/09/14/cop-root-flag-bypass/plan.md)        |
@@ -76,9 +76,6 @@ Limited to the last 5–10 items.
 | `cop-mcp-contract-mismatch`   | fix         | **[Medium]** Bug: MCP contract mismatches (state, JSON tags, draft)     | 2026-09-14 | [plan](closed/2026/09/14/cop-mcp-contract-mismatch/plan.md)   |
 | `cop-reshape-backend-default` | fix         | **[Medium]** Bug: `--reshape-backend` defaults to onnx                  | 2026-09-14 | [plan](closed/2026/09/14/cop-reshape-backend-default/plan.md) |
 | `cop-onnx-model-default`      | improvement | **[Low]** ONNX default model updated to Phi-3-mini                      | 2026-09-14 | [plan](closed/2026/09/14/cop-onnx-model-default/plan.md)      |
-| `cop-workdoc-description`     | fix         | **[Low]** `hawp_work_doc` description wrong path pattern                | 2026-09-14 | [plan](closed/2026/09/14/cop-workdoc-description/plan.md)     |
-| `86c3911c`                    | feature     | `hawp work` document-type subcommands and MCP tool                      | 2026-09-12 | [plan](closed/2026/09/12/86c3911c/plan.md)                    |
-| `5b90af26`                    | improvement | UUID subfolder enforcement for secondary work document types             | 2026-09-12 | [plan](closed/2026/09/12/5b90af26/plan.md)                    |
 ---
 
 ## Archive

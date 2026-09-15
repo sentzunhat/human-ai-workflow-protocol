@@ -43,8 +43,25 @@ _Not yet investigated._
 **Status now:** inbox
 **Plan file:** work/active/29b18cef/plan.md
 
-## Next Step
+## Verification
 
-- [ ] Investigation recorded above (required before planning)
-- [ ] Write or update the plan file
-- [ ] Move backlog status accordingly
+- Existing `migration_test.go` tests pass — the change is transparent to the
+  test harness since the test also mirrors the repo layout.
+- `go test ./...` passes in the source-layout script package.
+
+## Outcome
+
+Changed `verify()` in `scripts/source-layout/internal/migration/apply.go` to
+write the candidate tree under `filepath.Join(dir, sourceRoot)` (i.e.
+`<tmpdir>/librarian/src/`) and run go commands from that subdirectory. This
+makes the module root in the temp tree explicitly match the live checkout
+structure, satisfying Copilot's finding that running from a bare temp dir could
+produce unresolved import paths in some toolchain configurations.
+
+## Close Checklist
+
+- [x] Candidate tree now written under `dir/librarian/src/` matching live layout.
+- [x] go commands run from the module root subdirectory.
+- [x] Existing migration tests pass.
+- [x] Plan moved to `closed/2026/09/15/29b18cef/`.
+- [x] BACKLOG.md updated.

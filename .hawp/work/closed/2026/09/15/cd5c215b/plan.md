@@ -43,8 +43,22 @@ _Not yet investigated._
 **Status now:** inbox
 **Plan file:** work/active/cd5c215b/plan.md
 
-## Next Step
+## Verification
 
-- [ ] Investigation recorded above (required before planning)
-- [ ] Write or update the plan file
-- [ ] Move backlog status accordingly
+- `go test ./...` passes; `go vet ./...` clean.
+- `template()` now renders `title: "My title"` (double-quoted); a title
+  containing `\n` is escaped by `%q`, preventing front-matter field injection.
+
+## Outcome
+
+Changed `title: %s` to `title: %q` in `doc/doc.go`'s `template()` function.
+A title containing a newline character would previously have been written as a
+raw newline inside the YAML scalar, splitting the front-matter block. `%q`
+escapes special characters so the value stays within the quoted field.
+
+## Close Checklist
+
+- [x] YAML injection vector closed — title is now double-quoted with Go escaping.
+- [x] `go test ./...` passes; `go vet ./...` clean.
+- [x] Plan moved to `closed/2026/09/15/cd5c215b/`.
+- [x] BACKLOG.md updated.

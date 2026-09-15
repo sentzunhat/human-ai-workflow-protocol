@@ -43,8 +43,30 @@ _Not yet investigated._
 **Status now:** inbox
 **Plan file:** work/active/025de149/plan.md
 
-## Next Step
+## Verification
 
-- [ ] Investigation recorded above (required before planning)
-- [ ] Write or update the plan file
-- [ ] Move backlog status accordingly
+- `go test ./...` passes; `go vet ./...` clean.
+- `RejectSymlinkAncestors(workDir, backlogPath)` called before reading or writing
+  BACKLOG.md; non-regular backlog file rejected with a clear error.
+- `RejectSymlinkAncestors(workDir, planDir)` called before `MkdirAll(planDir)`.
+
+## Outcome
+
+Added `filesystem.RejectSymlinkAncestors` guards in `intake/intake.go`:
+
+1. Before reading BACKLOG.md — blocks a symlinked `.hawp/work/BACKLOG.md` from
+   redirecting writes outside the repository.
+2. Lstat check rejects a non-regular BACKLOG.md (symlink, directory, device).
+3. Before `MkdirAll(planDir)` — blocks a symlinked `active/` subtree.
+
+Mirrors the same protection already applied in `doc.go`, `config.go`, and
+`config_codex.go`.
+
+## Close Checklist
+
+- [x] Symlink guard for backlog path added and verified.
+- [x] Symlink guard for active plan dir added and verified.
+- [x] Non-regular backlog file rejected before read/write.
+- [x] `go test ./...` passes; `go vet ./...` clean.
+- [x] Plan moved to `closed/2026/09/15/025de149/`.
+- [x] BACKLOG.md updated.
