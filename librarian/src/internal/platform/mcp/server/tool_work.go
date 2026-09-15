@@ -164,6 +164,18 @@ func runWorkIntake(ctx context.Context, repoRoot, input string, limit, maxTokens
 		return WorkIntakeResponse{}, fmt.Errorf("search context: %w", err)
 	}
 
+	if contextBlock.ChunksUsed == 0 {
+		return WorkIntakeResponse{
+			State: "needs_user_input",
+			Retrieval: WorkIntakeRetrieval{
+				Query:  contextBlock.Query,
+				Budget: maxTokens,
+			},
+			Questions: []string{"No indexed HAWP context matched this request. Ask the user for the missing background or index the relevant documents, then retry intake."},
+			Warnings:  []string{"No search results were found; the draft was shaped from the request only."},
+		}, nil
+	}
+
 	draft, err := appwork.DraftIntake(ctx, appwork.DraftRequest{
 		Input:   input,
 		Context: contextBlock.Content,
@@ -206,12 +218,6 @@ func runWorkIntake(ctx context.Context, repoRoot, input string, limit, maxTokens
 			ShapedTokens:  estimateDraftTokens(draft),
 			SavingsPct:    savingsPct(contextBlock.TokenCount, estimateDraftTokens(draft)),
 		},
-	}
-	if contextBlock.ChunksUsed == 0 {
-		response.State = "needs_user_input"
-		response.Draft = nil
-		response.Questions = []string{"No indexed HAWP context matched this request. Ask the user for the missing background or index the relevant documents, then retry intake."}
-		response.Warnings = []string{"No search results were found; the draft was shaped from the request only."}
 	}
 	return response, nil
 }

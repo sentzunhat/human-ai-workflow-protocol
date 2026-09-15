@@ -34,6 +34,11 @@ func parseDocArgs(docType string, args []string) (docOptions, error) {
 	if strings.TrimSpace(opts.title) == "" {
 		return docOptions{}, usage(docType)
 	}
+	var rootSet bool
+	flags.Visit(func(f *flag.Flag) { rootSet = rootSet || f.Name == "hawp-root" })
+	if rootSet && strings.TrimSpace(opts.hawpRoot) == "" {
+		return docOptions{}, fmt.Errorf("--hawp-root requires a non-empty path")
+	}
 	return opts, nil
 }
 

@@ -78,8 +78,13 @@ func CreateWorkDoc(docType, title, workDir, workItemID string) (*Result, error) 
 	}
 
 	filePath := filepath.Join(docDir, fileName)
-	if _, err := os.Stat(filePath); err == nil {
-		// File already exists — return the existing path without overwriting.
+	if fi, err := os.Lstat(filePath); err == nil {
+		// Path already exists — return it only when it is a regular file.
+		// A directory or symlink here would make the return value unusable
+		// or redirect writes outside the work tree.
+		if !fi.Mode().IsRegular() {
+			return nil, fmt.Errorf("doc path %s exists but is not a regular file", filePath)
+		}
 		return &Result{
 			UUID:     folderID,
 			DocType:  docType,

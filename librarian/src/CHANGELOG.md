@@ -16,13 +16,13 @@ token savings with Ollama).
   local LLM, and returns structured `WorkIntakeResponse` draft fields
   (`mission`, `constraints`, `output_spec`, `done_signal`) with token savings
   metrics. Structured states for uncertainty: `missing_index`,
-  `no_matches`, `blocked_reshape_failed` — never returns a fake usable draft.
+  `needs_user_input`, `blocked_reshape_failed` — never returns a fake usable draft.
 - **`hawp_work_reshape` MCP tool** — standalone reshape of a provided context
   string via local LLM (Ollama or ONNX), returning structured draft fields.
 - **`hawp_work_doc` MCP tool** — generates canonical work document paths
   (`status`, `evidence`, `decision`, `note`) under
-  `.hawp/work/<type>/YYYY/MM/DD/<uuid>/`. Accepts `--work-item <id>` to
-  associate with an active plan.
+  `.hawp/work/<type>/YYYY/MM/DD/<uuid>/`. Accepts `work_item_id` (MCP JSON
+  property) or `--work-item` (CLI flag) to associate with an active plan.
 - **`hawp work` doc subcommands** — `hawp work status|evidence|decision|note
   --title "<label>" [--work-item <id>]` generates the document path and prints it
   for scripting and agent use. Paths: `status/`, `evidence/`, `decisions/`,

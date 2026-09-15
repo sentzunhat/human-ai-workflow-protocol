@@ -28,6 +28,11 @@ func Run(args []string, cwd string) error {
 		return nil
 	}
 
+	// Reshape-only benchmark does not require an indexed database.
+	if opts.reshapeToken {
+		return runReshapeBenchmark(opts.reshapeBackend, opts.reshapeURL, opts.reshapeModel, opts.exportPath)
+	}
+
 	dbPath := filepath.Join(root, ".hawp", "db", "index.sqlite")
 	db, err := sqlite.Open(dbPath)
 	if err != nil {
@@ -38,9 +43,6 @@ func Run(args []string, cwd string) error {
 
 	if opts.downstreamToken {
 		return runDownstreamBenchmark(opts.downstreamBackend, opts.downstreamURL, opts.downstreamModel, db, opts.exportPath)
-	}
-	if opts.reshapeToken {
-		return runReshapeBenchmark(opts.reshapeBackend, opts.reshapeURL, opts.reshapeModel, opts.exportPath)
 	}
 	if opts.tokenMode {
 		return runTokenBenchmark(db, opts.exportPath)

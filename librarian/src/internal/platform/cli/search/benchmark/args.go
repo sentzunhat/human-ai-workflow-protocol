@@ -42,6 +42,12 @@ func parseArgs(args []string) (options, error) {
 	if flags.NArg() != 0 {
 		return options{}, fmt.Errorf("unexpected search benchmark argument %q", flags.Arg(0))
 	}
+	if opts.reshapeBackend != "ollama" && opts.reshapeBackend != "onnx" {
+		return options{}, fmt.Errorf("--reshape-backend must be ollama or onnx, got %q", opts.reshapeBackend)
+	}
+	if opts.downstreamBackend != "ollama" && opts.downstreamBackend != "onnx" {
+		return options{}, fmt.Errorf("--downstream-backend must be ollama or onnx, got %q", opts.downstreamBackend)
+	}
 
 	return opts, nil
 }
