@@ -34,3 +34,21 @@ root entirely.
 ## Files
 
 - `scripts/source-layout/run.sh` — one-line fix
+
+## Verification
+
+- Running the wrapper with `--root /other/path` at the start of `$@` no longer overrides the enforced root.
+- The enforced `--root "$repo_root"` is now last and wins regardless of caller arguments.
+- `bash -n scripts/source-layout/run.sh` passes.
+
+## Outcome
+
+Reordered `exec go ... run ./cmd/source-layout` to place `"$@"` before `--root "$repo_root"` so the enforced root always wins under last-wins flag parsing. One-line fix in `run.sh`.
+
+## Close Checklist
+
+- [x] `--root` flag placed after `"$@"` in `run.sh`.
+- [x] `bash -n` syntax check passes.
+- [x] Plan status: done.
+- [x] Plan moved to `.hawp/work/closed/2026/09/14/cop-root-flag-bypass/plan.md`.
+- [x] BACKLOG.md updated.

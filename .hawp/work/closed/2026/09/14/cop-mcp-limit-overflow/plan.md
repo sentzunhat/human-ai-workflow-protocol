@@ -40,3 +40,21 @@ memory in one request.
 
 - `librarian/src/internal/platform/mcp/server/tool_work.go` — add upper-bound guard
 - Relevant test file under `librarian/src/tests/`
+
+## Verification
+
+- A JSON limit value of `math.MaxInt` is rejected before the multiply-by-3 step.
+- Limits in the normal range (e.g., 10, 50) pass through unchanged.
+- `go test ./...` passes; `go vet ./...` clean.
+
+## Outcome
+
+Added upper-bound guard `if a.Limit > int(^uint(0)>>1)/3` in `tool_work.go`, matching the existing CLI guard pattern. Request with an overflowing limit returns a `toolErr` response without hitting SQLite. `go test ./...` and `go vet ./...` pass.
+
+## Close Checklist
+
+- [x] MCP limit overflow guard applied in `tool_work.go`.
+- [x] `go test ./...` passes; `go vet ./...` clean.
+- [x] Plan status: done.
+- [x] Plan moved to `.hawp/work/closed/2026/09/14/cop-mcp-limit-overflow/plan.md`.
+- [x] BACKLOG.md updated.

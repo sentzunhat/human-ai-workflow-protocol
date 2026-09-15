@@ -53,3 +53,24 @@ return a usable draft.
 - `librarian/src/internal/platform/mcp/server/tool_work.go`
 - `librarian/src/internal/platform/mcp/server/tools_e2e_test.go` (if it exists)
 - `librarian/src/CHANGELOG.md`
+
+## Verification
+
+- `WorkIntakeDraft` JSON tags emit `output_spec` and `done_signal` (not `output`/`checkpoint`).
+- `missing_index` state is returned when no index exists (not `blocked_missing_index`).
+- `response.Draft` is nil/zero when `ChunksUsed == 0` (no indexed context matched).
+- `go test ./...` passes including MCP e2e tests; `go vet ./...` clean.
+
+## Outcome
+
+Fixed `types.go` JSON tags to `output_spec`/`done_signal`. Corrected state string to `missing_index` in `tool_work.go`. Cleared `response.Draft` on the no-match path. All MCP contract fields now match the documented schema. `go test ./...` and `go vet ./...` pass.
+
+## Close Checklist
+
+- [x] JSON tags `output_spec`/`done_signal` match documented contract.
+- [x] State `missing_index` matches documented contract.
+- [x] Draft cleared on no-match path.
+- [x] `go test ./...` passes; `go vet ./...` clean.
+- [x] Plan status: done.
+- [x] Plan moved to `.hawp/work/closed/2026/09/14/cop-mcp-contract-mismatch/plan.md`.
+- [x] BACKLOG.md updated.

@@ -42,3 +42,22 @@ via the MCP tool at all.
 - `librarian/src/internal/platform/mcp/server/tool_work.go` (reshape handler)
 - `librarian/src/internal/platform/mcp/server/tools.go` (tool schema)
 - `librarian/src/CHANGELOG.md`
+
+## Verification
+
+- `--reshape-backend` defaults to `ollama` in both `args.go` and the MCP reshape handler.
+- Standard (non-ORT) build succeeds and reshape benchmark runs without override flag.
+- `go test ./...` passes; `go vet ./...` clean.
+
+## Outcome
+
+Changed `--reshape-backend` default from `"onnx"` to `"ollama"` in `args.go`. Confirmed MCP reshape handler also defaults to `"ollama"`. Standard builds no longer fail without an explicit override. `go test ./...` and `go vet ./...` pass.
+
+## Close Checklist
+
+- [x] `--reshape-backend` default is `ollama` in CLI args and MCP handler.
+- [x] Standard (non-ORT) build runs reshape benchmark without override.
+- [x] `go test ./...` passes; `go vet ./...` clean.
+- [x] Plan status: done.
+- [x] Plan moved to `.hawp/work/closed/2026/09/14/cop-reshape-backend-default/plan.md`.
+- [x] BACKLOG.md updated.

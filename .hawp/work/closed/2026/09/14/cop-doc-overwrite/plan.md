@@ -36,3 +36,20 @@ description so callers understand repeated calls are idempotent.
 - `librarian/src/internal/application/work/doc/doc.go` — guard before WriteFile
 - `librarian/src/internal/platform/mcp/server/tool_work.go` — propagate the
   "already exists, returning path" result cleanly
+
+## Verification
+
+- Calling `hawp work status --title "foo"` twice for the same date + work-item ID returns the existing path on the second call without overwriting the file.
+- `go test ./...` passes; `go vet ./...` clean.
+
+## Outcome
+
+Added an `os.Stat` check before `os.WriteFile` in `doc.go`: if the file already exists, the function returns the existing path and a nil error instead of overwriting. MCP and CLI callers propagate the result cleanly. `go test ./...` and `go vet ./...` pass.
+
+## Close Checklist
+
+- [x] Idempotent doc creation verified (existing file returned, not overwritten).
+- [x] `go test ./...` passes; `go vet ./...` clean.
+- [x] Plan status: done.
+- [x] Plan moved to `.hawp/work/closed/2026/09/14/cop-doc-overwrite/plan.md`.
+- [x] BACKLOG.md updated.

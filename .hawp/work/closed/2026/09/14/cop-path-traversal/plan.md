@@ -35,3 +35,21 @@ passes an unvalidated work-item ID from MCP tool input.
 - `librarian/src/internal/application/work/doc/doc.go` — add validation helper
 - `librarian/src/internal/platform/mcp/server/tool_work.go` — confirm input is passed through
 - New test in `librarian/src/tests/application/work/` or inline in `doc/`
+
+## Verification
+
+- `folderID` values like `../../../../../../tmp` are rejected with an error before any directory is created.
+- Valid short UUIDs (8 hex chars) and full UUIDs (36-char) are accepted.
+- `go test ./...` passes; `go vet ./...` clean.
+
+## Outcome
+
+Added `validateFolderID` helper in `doc.go` that rejects any ID not matching short or full UUID format. MCP and CLI callers pass raw user input through the same validation gate. Unit tests cover the traversal case and invalid-ID rejection. `go test ./...` and `go vet ./...` pass.
+
+## Close Checklist
+
+- [x] Path traversal rejected at `doc.go` before directory creation.
+- [x] `go test ./...` passes; `go vet ./...` clean.
+- [x] Plan status: done.
+- [x] Plan moved to `.hawp/work/closed/2026/09/14/cop-path-traversal/plan.md`.
+- [x] BACKLOG.md updated.

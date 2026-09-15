@@ -42,14 +42,6 @@ elicitation/guidance work from `c8d9e1cb`.
 | `c8d9e1cb` | feature | Interactive MCP intake refinement with structured results (`v0.0.24` subset, remainder `v0.0.25`) | `plan-ready` | Codex | [plan](active/c8d9e1cb/plan.md) | 2026-09-13 |
 | `2eea565c` | improvement | MCP capability catalog for HAWP resources and prompts (`v0.0.25`) | `plan-ready` | Codex | [plan](active/2eea565c/plan.md) | 2026-09-13 |
 | `429e075e` | improvement | Remote MCP transport and authorization readiness audit (`v0.0.25`) | `plan-ready` | Codex | [plan](active/429e075e/plan.md) | 2026-09-13 |
-| `cop-path-traversal` | fix | **[High]** Security: validate folderID to prevent path traversal in work doc creation | `done` | — | [plan](closed/2026/09/14/cop-path-traversal/plan.md) | 2026-09-14 |
-| `cop-mcp-limit-overflow` | fix | **[High]** Security: bound MCP search limit before multiply-by-3 to prevent integer overflow | `done` | — | [plan](closed/2026/09/14/cop-mcp-limit-overflow/plan.md) | 2026-09-14 |
-| `cop-root-flag-bypass` | fix | **[High]** Security: fix `--root` flag order in source-layout run.sh (last-wins bypass) | `done` | — | [plan](closed/2026/09/14/cop-root-flag-bypass/plan.md) | 2026-09-14 |
-| `cop-doc-overwrite` | fix | **[Medium]** Bug: prevent silent overwrite of existing work docs on repeated creation | `done` | — | [plan](closed/2026/09/14/cop-doc-overwrite/plan.md) | 2026-09-14 |
-| `cop-mcp-contract-mismatch` | fix | **[Medium]** Bug: MCP response contract mismatches — state names, JSON tags, draft-on-no-match | `done` | — | [plan](closed/2026/09/14/cop-mcp-contract-mismatch/plan.md) | 2026-09-14 |
-| `cop-reshape-backend-default` | fix | **[Medium]** Bug: `--reshape-backend` defaults to onnx, breaks non-ORT builds and MCP reshape | `done` | — | [plan](closed/2026/09/14/cop-reshape-backend-default/plan.md) | 2026-09-14 |
-| `cop-onnx-model-default` | improvement | **[Low]** ONNX LLM default model should be Phi-3-mini (benchmarked), not SmolLM2-360M | `done` | — | [plan](closed/2026/09/14/cop-onnx-model-default/plan.md) | 2026-09-14 |
-| `cop-workdoc-description` | fix | **[Low]** Docs: `hawp_work_doc` tool description has wrong path pattern; CHANGELOG command mismatch | `done` | — | [plan](closed/2026/09/14/cop-workdoc-description/plan.md) | 2026-09-14 |
 
 ## Blocked / Parked
 
@@ -74,16 +66,16 @@ Limited to the last 5–10 items.
 
 | ID                            | Type        | Title                                                                   | Closed     | Detail                                                        |
 | ----------------------------- | ----------- | ----------------------------------------------------------------------- | ---------- | ------------------------------------------------------------- |
+| `cop-path-traversal`          | fix         | **[High]** Security: path traversal in work doc folderID                | 2026-09-14 | [plan](closed/2026/09/14/cop-path-traversal/plan.md)          |
+| `cop-mcp-limit-overflow`      | fix         | **[High]** Security: MCP search limit overflow before multiply-by-3     | 2026-09-14 | [plan](closed/2026/09/14/cop-mcp-limit-overflow/plan.md)      |
+| `cop-root-flag-bypass`        | fix         | **[High]** Security: `--root` flag bypass in source-layout run.sh       | 2026-09-14 | [plan](closed/2026/09/14/cop-root-flag-bypass/plan.md)        |
+| `cop-doc-overwrite`           | fix         | **[Medium]** Bug: silent overwrite of existing work docs                | 2026-09-14 | [plan](closed/2026/09/14/cop-doc-overwrite/plan.md)           |
+| `cop-mcp-contract-mismatch`   | fix         | **[Medium]** Bug: MCP contract mismatches (state, JSON tags, draft)     | 2026-09-14 | [plan](closed/2026/09/14/cop-mcp-contract-mismatch/plan.md)   |
+| `cop-reshape-backend-default` | fix         | **[Medium]** Bug: `--reshape-backend` defaults to onnx                  | 2026-09-14 | [plan](closed/2026/09/14/cop-reshape-backend-default/plan.md) |
+| `cop-onnx-model-default`      | improvement | **[Low]** ONNX default model updated to Phi-3-mini                      | 2026-09-14 | [plan](closed/2026/09/14/cop-onnx-model-default/plan.md)      |
+| `cop-workdoc-description`     | fix         | **[Low]** `hawp_work_doc` description wrong path pattern                | 2026-09-14 | [plan](closed/2026/09/14/cop-workdoc-description/plan.md)     |
 | `86c3911c`                    | feature     | `hawp work` document-type subcommands and MCP tool                      | 2026-09-12 | [plan](closed/2026/09/12/86c3911c/plan.md)                    |
 | `5b90af26`                    | improvement | UUID subfolder enforcement for secondary work document types             | 2026-09-12 | [plan](closed/2026/09/12/5b90af26/plan.md)                    |
-| `288d543c`                    | improvement | Token-reduction benchmark harness for reshape and search context        | 2026-09-12 | [plan](closed/2026/09/12/288d543c/plan.md)                    |
-| `a3df8a9c`                    | improvement | Investigate reshape support for HAWP work intake                        | 2026-09-12 | [plan](closed/2026/09/12/a3df8a9c/plan.md)                    |
-| `5b6d4e21`                    | improvement | Provider parity for shared HAWP agent guidance                          | 2026-09-11 | [plan](closed/2026/09/11/5b6d4e21/plan.md)                    |
-| `d1fa0b72`                    | improvement | Install/update contract hardening for all HAWP providers                | 2026-09-11 | [plan](closed/2026/09/11/d1fa0b72/plan.md)                    |
-| `e5fca9c7`                    | release     | HAWP v0.0.24 work-folder normalization and README positioning           | 2026-09-11 | [plan](closed/2026/09/11/e5fca9c7/plan.md)                    |
-| `47c793d6`                    | improvement | v0.0.24 CLI decomposition and architecture audit continuation           | 2026-09-11 | [plan](closed/2026/09/11/47c793d6/plan.md)                    |
-| `multi-repo-context-d9b2f3a1` | improvement | Multi-repo context skill for agent                                      | 2026-09-10 | [plan](closed/2026/09/10/multi-repo-context-d9b2f3a1/plan.md) |
-| `8ddb06ea`                    | improvement | Move filesystem ops out of domain/kit, kitsync, provision, distribution | 2026-09-10 | [plan](closed/2026/09/10/8ddb06ea/plan.md)                    |
 ---
 
 ## Archive
@@ -92,6 +84,19 @@ Limited to the last 5–10 items.
 - Status reports: `status/`
 - Evidence: `evidence/`
 - Decisions: `decisions/`
+
+### Archived Recently-Closed (compacted 2026-09-15)
+
+| ID                            | Type        | Title                                                                   | Closed     | Detail                                                        |
+| ----------------------------- | ----------- | ----------------------------------------------------------------------- | ---------- | ------------------------------------------------------------- |
+| `288d543c`                    | improvement | Token-reduction benchmark harness for reshape and search context        | 2026-09-12 | [plan](closed/2026/09/12/288d543c/plan.md)                    |
+| `a3df8a9c`                    | improvement | Investigate reshape support for HAWP work intake                        | 2026-09-12 | [plan](closed/2026/09/12/a3df8a9c/plan.md)                    |
+| `5b6d4e21`                    | improvement | Provider parity for shared HAWP agent guidance                          | 2026-09-11 | [plan](closed/2026/09/11/5b6d4e21/plan.md)                    |
+| `d1fa0b72`                    | improvement | Install/update contract hardening for all HAWP providers                | 2026-09-11 | [plan](closed/2026/09/11/d1fa0b72/plan.md)                    |
+| `e5fca9c7`                    | release     | HAWP v0.0.24 work-folder normalization and README positioning           | 2026-09-11 | [plan](closed/2026/09/11/e5fca9c7/plan.md)                    |
+| `47c793d6`                    | improvement | v0.0.24 CLI decomposition and architecture audit continuation           | 2026-09-11 | [plan](closed/2026/09/11/47c793d6/plan.md)                    |
+| `multi-repo-context-d9b2f3a1` | improvement | Multi-repo context skill for agent                                      | 2026-09-10 | [plan](closed/2026/09/10/multi-repo-context-d9b2f3a1/plan.md) |
+| `8ddb06ea`                    | improvement | Move filesystem ops out of domain/kit, kitsync, provision, distribution | 2026-09-10 | [plan](closed/2026/09/10/8ddb06ea/plan.md)                    |
 
 ### Archived Recently-Closed (compacted 2026-09-12)
 

@@ -37,3 +37,22 @@ Benchmark run: `benchmark/runs/2026-09-11-reshape-token-savings-onnx-phi3-mini.m
 
 - `librarian/src/internal/infrastructure/models/onnx/llm.go`
 - `librarian/src/CHANGELOG.md`
+
+## Verification
+
+- `DefaultLLMModel` is `"Phi-3-mini-4k-instruct"` in `llm.go`.
+- `SupportedLLMModels` includes the Phi-3-mini entry with correct HFRepo and model files.
+- `go test ./...` passes; `go vet ./...` clean.
+
+## Outcome
+
+Added Phi-3-mini-4k-instruct to `SupportedLLMModels` and set it as `DefaultLLMModel`. SmolLM2-360M-Instruct remains in the registry for users who explicitly request it. Release notes and benchmarks are now consistent with the shipped default. `go test ./...` and `go vet ./...` pass.
+
+## Close Checklist
+
+- [x] `DefaultLLMModel = "Phi-3-mini-4k-instruct"` in `llm.go`.
+- [x] Phi-3-mini entry present in `SupportedLLMModels`.
+- [x] `go test ./...` passes; `go vet ./...` clean.
+- [x] Plan status: done.
+- [x] Plan moved to `.hawp/work/closed/2026/09/14/cop-onnx-model-default/plan.md`.
+- [x] BACKLOG.md updated.

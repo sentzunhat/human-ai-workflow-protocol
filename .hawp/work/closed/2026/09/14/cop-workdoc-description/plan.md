@@ -35,3 +35,22 @@ the `doc` subcommand does not exist in that form.
 
 - `librarian/src/internal/platform/mcp/server/tools.go`
 - `librarian/src/CHANGELOG.md`
+
+## Verification
+
+- `hawp_work_doc` tool description in `tools.go` lists actual per-type directories: `status/`, `evidence/`, `decisions/`, `notes/`.
+- CHANGELOG work doc command examples match the current CLI command signatures.
+- `go test ./...` passes; `go vet ./...` clean.
+
+## Outcome
+
+Updated `hawp_work_doc` description in `tools.go` to show the actual directory mapping (`status|evidence/...` vs `decisions|notes/...`). Corrected CHANGELOG command examples to match current CLI. `go test ./...` and `go vet ./...` pass.
+
+## Close Checklist
+
+- [x] `hawp_work_doc` description reflects actual `decisions/`/`notes/` directories.
+- [x] CHANGELOG examples match current CLI command signatures.
+- [x] `go test ./...` passes; `go vet ./...` clean.
+- [x] Plan status: done.
+- [x] Plan moved to `.hawp/work/closed/2026/09/14/cop-workdoc-description/plan.md`.
+- [x] BACKLOG.md updated.
