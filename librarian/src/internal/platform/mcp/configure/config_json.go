@@ -88,5 +88,9 @@ func writeMCPJSON(path string, entry map[string]any) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
+	// Reject symlinks and non-regular files to prevent redirected writes.
+	if fi, err := os.Lstat(path); err == nil && !fi.Mode().IsRegular() {
+		return fmt.Errorf("refusing to write %s: not a regular file", path)
+	}
 	return os.WriteFile(path, out, 0o644)
 }

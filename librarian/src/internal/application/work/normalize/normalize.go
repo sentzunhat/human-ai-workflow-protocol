@@ -12,6 +12,7 @@ import (
 	work_layout1 "github.com/sentzunhat/hawp/librarian/src/internal/application/work/validation"
 
 	domainwork "github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
+	inframarkdown "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 )
 
@@ -19,6 +20,7 @@ import (
 var defaultWorkSource = &domainwork.WorkSource{
 	Exists:         repo.Exists,
 	ToRepoRelative: repo.ToRepoRelative,
+	CollectFiles:   inframarkdown.CollectFiles,
 }
 
 type migrationPreviewReport struct {

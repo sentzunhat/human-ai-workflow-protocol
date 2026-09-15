@@ -89,6 +89,9 @@ func toolWorkReshape(args json.RawMessage, repoRoot string) rpcResponse {
 	if a.Backend == "" {
 		a.Backend = "ollama"
 	}
+	if a.Backend != "ollama" && a.Backend != "onnx" {
+		return toolErr(`backend must be "ollama" or "onnx"`)
+	}
 
 	shaper, cleanup, err := newMCPReshapeShaper(a.Backend, a.URL, a.Model)
 	if err != nil {
