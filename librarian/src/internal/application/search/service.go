@@ -188,6 +188,12 @@ func SemanticSearch(query string, db domainsearch.Index, limit int) []map[string
 	return semanticSearch(query, db, limit, nil)
 }
 
+// SemanticSearchWithEmbedder is like SemanticSearch but uses the provided
+// EmbedderFactory instead of nil, so actual vector ranking is performed.
+func SemanticSearchWithEmbedder(query string, db domainsearch.Index, limit int, newEmbedder EmbedderFactory) []map[string]interface{} {
+	return semanticSearch(query, db, limit, newEmbedder)
+}
+
 func semanticSearch(query string, db domainsearch.Index, limit int, newEmbedder EmbedderFactory) []map[string]interface{} {
 	meta, ok, err := db.GetEmbeddingMetadata()
 	if err != nil || !ok {
@@ -266,6 +272,12 @@ func semanticSearch(query string, db domainsearch.Index, limit int, newEmbedder 
 // so hybrid ranking degrades gracefully rather than erroring the whole search.
 func HybridRank(lexicalResults []map[string]interface{}, query string, db domainsearch.Index, limit int, lexicalWeight float32) []map[string]interface{} {
 	return hybridRank(lexicalResults, query, db, limit, lexicalWeight, nil)
+}
+
+// HybridRankWithEmbedder is like HybridRank but uses the provided
+// EmbedderFactory so actual semantic re-ranking is performed.
+func HybridRankWithEmbedder(lexicalResults []map[string]interface{}, query string, db domainsearch.Index, limit int, lexicalWeight float32, newEmbedder EmbedderFactory) []map[string]interface{} {
+	return hybridRank(lexicalResults, query, db, limit, lexicalWeight, newEmbedder)
 }
 
 func hybridRank(lexicalResults []map[string]interface{}, query string, db domainsearch.Index, limit int, lexicalWeight float32, newEmbedder EmbedderFactory) []map[string]interface{} {

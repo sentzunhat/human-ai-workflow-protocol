@@ -73,6 +73,9 @@ func CreateWorkDoc(docType, title, workDir, workItemID string) (*Result, error) 
 	fileName := docType + ".md"
 
 	docDir := filepath.Join(workDir, dirName, date[:4], date[5:7], date[8:10], folderID)
+	if err := rejectSymlinkAncestors(workDir, docDir); err != nil {
+		return nil, err
+	}
 	if err := os.MkdirAll(docDir, 0o755); err != nil {
 		return nil, fmt.Errorf("create doc directory: %w", err)
 	}
@@ -113,6 +116,33 @@ func folderName(docType string) string {
 		return "notes"
 	}
 	return docType // "status", "evidence"
+}
+
+// rejectSymlinkAncestors walks every directory component of target that lies
+// under root and returns an error if any component is a symlink. This prevents
+// a symlink planted inside workDir from redirecting MkdirAll (and subsequent
+// writes) outside the .hawp/work tree.
+func rejectSymlinkAncestors(root, target string) error {
+	rel, err := filepath.Rel(root, target)
+	if err != nil {
+		return fmt.Errorf("resolve doc path: %w", err)
+	}
+	parts := strings.Split(rel, string(filepath.Separator))
+	current := root
+	for _, part := range parts {
+		current = filepath.Join(current, part)
+		fi, err := os.Lstat(current)
+		if err != nil {
+			if os.IsNotExist(err) {
+				break // not yet created — MkdirAll will create it
+			}
+			return fmt.Errorf("stat doc path component %s: %w", current, err)
+		}
+		if fi.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("doc path component %s is a symlink; refusing to follow", current)
+		}
+	}
+	return nil
 }
 
 func isValidType(t string) bool {

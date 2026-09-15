@@ -35,9 +35,12 @@ token savings with Ollama).
   coverage; SmolLM2-360M-Instruct (tiny) is 1/10 and not a recommended default.
 - **Downstream token savings benchmark** — `hawp search benchmark` extended with
   a downstream comparison mode: HAWP structured fields vs raw request + context.
-  Ollama `mistral:7B`: 18096 → 831 tokens average (95% savings, 9/10 runs).
-- **v0.1.0 gates PASSED** — search 23% savings, Ollama 10/10 coverage, ONNX
-  Phi-3-mini 10/10 coverage, downstream 95% savings. All four gates met.
+  Ollama `mistral:7B`: 18096 → 831 tokens total across 10 queries (9/10 succeeded;
+  95% savings on succeeded runs).
+- **v0.1.0 gates PASSED** — search 23% savings, Ollama reshape coverage 10/10,
+  ONNX Phi-3-mini reshape coverage 10/10, downstream savings 95%. Coverage gates
+  measure structured-output success rate (not token compression); token compression
+  gate is the downstream savings benchmark. All four gates met.
 
 ### Changed
 

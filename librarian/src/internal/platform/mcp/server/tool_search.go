@@ -65,6 +65,8 @@ func toolSearch(args json.RawMessage, repoRoot string) rpcResponse {
 	}
 	if a.MaxTokens <= 0 {
 		a.MaxTokens = 2000
+	} else if a.MaxTokens > 32000 {
+		return toolErr("max_tokens must be 32000 or less")
 	}
 
 	if a.Context {
@@ -88,7 +90,7 @@ func toolSearch(args json.RawMessage, repoRoot string) rpcResponse {
 
 	hasVectors, _ := db.HasVectors()
 	if hasVectors {
-		rows = appsearch.HybridRank(rows, a.Query, db, a.Limit, 0)
+		rows = appsearch.HybridRankWithEmbedder(rows, a.Query, db, a.Limit, 0, inframodels.NewEmbedder)
 	} else if len(rows) > a.Limit {
 		rows = rows[:a.Limit]
 	}

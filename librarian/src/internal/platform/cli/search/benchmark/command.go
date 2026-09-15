@@ -12,6 +12,7 @@ import (
 	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
 	appintake "github.com/sentzunhat/hawp/librarian/src/internal/application/work/intake"
 	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
+	inframodels "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
 )
@@ -161,14 +162,14 @@ func benchmarkOneQuery(query benchmarkQuery, pattern string, db *sqlite.IndexDB)
 		result.TopResultQuality = assessQuality(query.RelevantKeywords, rows)
 
 	case "semantic":
-		rows := appsearch.SemanticSearch(query.Query, db, 10)
+		rows := appsearch.SemanticSearchWithEmbedder(query.Query, db, 10, inframodels.NewEmbedder)
 		result.ResultCount = len(rows)
 		result.TopResultQuality = assessQuality(query.RelevantKeywords, rows)
 
 	case "hybrid":
 		rows, _ := db.QueryChunksLexical(query.Query, 30)
 		if len(rows) > 0 {
-			rows = appsearch.HybridRank(rows, query.Query, db, 10, 0)
+			rows = appsearch.HybridRankWithEmbedder(rows, query.Query, db, 10, 0, inframodels.NewEmbedder)
 		}
 		result.ResultCount = len(rows)
 		result.TopResultQuality = assessQuality(query.RelevantKeywords, rows)
@@ -344,7 +345,7 @@ func runTokenBenchmark(db *sqlite.IndexDB, exportPath string) error {
 			continue
 		}
 		if hasVectors {
-			rows = appsearch.HybridRank(rows, q.Query, db, 10, 0)
+			rows = appsearch.HybridRankWithEmbedder(rows, q.Query, db, 10, 0, inframodels.NewEmbedder)
 		} else if len(rows) > 10 {
 			rows = rows[:10]
 		}
@@ -633,7 +634,7 @@ func runDownstreamBenchmark(backend, url, model string, db *sqlite.IndexDB, expo
 			continue
 		}
 		if hasVectors {
-			rows = appsearch.HybridRank(rows, q.Query, db, 10, 0)
+			rows = appsearch.HybridRankWithEmbedder(rows, q.Query, db, 10, 0, inframodels.NewEmbedder)
 		} else if len(rows) > 10 {
 			rows = rows[:10]
 		}

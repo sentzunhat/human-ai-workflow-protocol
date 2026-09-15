@@ -10,8 +10,7 @@ status/
     MM/
       DD/
         {uuid}/
-          checkpoint-summary.md
-          manager-review.md
+          status.md
 ```
 
 Keep entries short, decision-useful, and linked from active work when relevant.

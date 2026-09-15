@@ -1,6 +1,6 @@
 # Reshape Token-Savings Benchmark
 
-Backend: **onnx / /Users/beltrd/.hawp/models/llm/homen3_SmolLM2-360M-Instruct-ort-genai-int4-cpu** | Token estimate: `(len(text)+3)/4` | Date: 2026-09-11
+Backend: **onnx / homen3/SmolLM2-360M-Instruct-ort-genai-int4-cpu** | Token estimate: `(len(text)+3)/4` | Date: 2026-09-11
 
 | # | Request (truncated) | Raw tokens | Shaped tokens | Saved | % saved | Note |
 |---|---------------------|------------|---------------|-------|---------|------|
@@ -20,4 +20,4 @@ _Raw tokens = `(len(request)+len(context)+3)/4` on the verbatim user input._
 _Shaped tokens = `(len(mission)+len(constraints)+len(output)+len(checkpoint)+3)/4` on the DraftIntake output._
 _Negative savings (expansion) is expected for short requests: structured intake adds labeled fields._
 _The value of reshaping is precision and downstream filtering, not raw token compression._
-_v0.1.0 gate: avg shaped tokens < avg raw tokens (any net savings across the 10-query suite)._
+_v0.1.0 reshape coverage gate: 10/10 queries return valid structured output. **Not met (1/10)** — SmolLM2-360M is not a recommended model for intake shaping. See `benchmark/runs/2026-09-11-reshape-token-savings-onnx-phi3-mini.md` (Phi-3-mini, 10/10) and `benchmark/runs/2026-09-12-downstream-token-savings-ollama.md` (downstream savings gate, met) for passing evidence._
