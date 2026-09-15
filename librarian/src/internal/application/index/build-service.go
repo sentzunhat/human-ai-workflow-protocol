@@ -9,6 +9,8 @@ import (
 
 	domaincontext "github.com/sentzunhat/hawp/librarian/src/internal/domain/context"
 	domainindex "github.com/sentzunhat/hawp/librarian/src/internal/domain/index"
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
 )
 
 // BuildResult is the enriched document corpus for the requested scope,
@@ -30,9 +32,10 @@ func NewBuildService(repoRoot string) BuildService {
 // document enriched with its folder/record context.
 func (service BuildService) Execute(scope domainindex.DocumentScope) (BuildResult, error) {
 	result := BuildResult{Scope: scope}
+	src := newContextSource()
 
 	if scope == domainindex.ScopeAll || scope == domainindex.ScopeKit {
-		docs, err := domaincontext.EnrichKit(service.RepoRoot, filepath.Join(service.RepoRoot, ".hawp", "kit"))
+		docs, err := domaincontext.EnrichKit(service.RepoRoot, filepath.Join(service.RepoRoot, ".hawp", "kit"), os.ReadFile, src.toContextSource())
 		if err != nil {
 			return BuildResult{}, fmt.Errorf("kit enrichment: %w", err)
 		}
@@ -40,7 +43,7 @@ func (service BuildService) Execute(scope domainindex.DocumentScope) (BuildResul
 	}
 
 	if scope == domainindex.ScopeAll || scope == domainindex.ScopeWork {
-		docs, err := domaincontext.EnrichWork(service.RepoRoot, filepath.Join(service.RepoRoot, ".hawp", "work"))
+		docs, err := domaincontext.EnrichWork(service.RepoRoot, filepath.Join(service.RepoRoot, ".hawp", "work"), os.ReadFile, src.toContextSource())
 		if err != nil {
 			return BuildResult{}, fmt.Errorf("work enrichment: %w", err)
 		}
@@ -49,6 +52,45 @@ func (service BuildService) Execute(scope domainindex.DocumentScope) (BuildResul
 
 	return result, nil
 }
+
+// --- Infrastructure adapters for domain/context boundaries ---
+
+// realFileLister delegates to infrastructure/markdown.CollectFiles.
+type realFileLister struct{}
+
+func (l *realFileLister) CollectFiles(dir string, skipReadme bool) []string {
+	return markdown.CollectFiles(dir, skipReadme)
+}
+
+// workBacklogParser wraps domain/work.ParseBacklogMarkdown to satisfy
+// domain/context.BacklogParser.
+type workBacklogParser struct{}
+
+func (p *workBacklogParser) ParseBacklog(raw string) *work.Backlog {
+	return work.ParseBacklogMarkdown(raw)
+}
+
+// contextSource bundles the adapters so tests can inject fakes.
+type contextSource struct {
+	list   domaincontext.FileLister
+	parser domaincontext.BacklogParser
+}
+
+func newContextSource() contextSource {
+	return contextSource{
+		list:   &realFileLister{},
+		parser: &workBacklogParser{},
+	}
+}
+
+func (s contextSource) toContextSource() domaincontext.ContextSource {
+	return domaincontext.ContextSource{
+		FileLister:    s.list,
+		BacklogParser: s.parser,
+	}
+}
+
+// --- End adapters ---
 
 // String renders a summary report: counts per corpus/role, and for work
 // documents, counts per type. Raw content is never printed here — use

@@ -1,8 +1,11 @@
 package context
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
+
+	domainwork "github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
 )
 
 const backlogFixture = `# Backlog
@@ -26,6 +29,13 @@ const backlogFixture = `# Backlog
 | TASK-003 | bug | fixed thing | 2026-07-05 | [plan](closed/2026/07/05/TASK-003.md) |
 `
 
+// testBacklogParser wraps domain/work.ParseBacklogMarkdown to satisfy BacklogParser.
+type testBacklogParser struct{}
+
+func (p *testBacklogParser) ParseBacklog(raw string) *domainwork.Backlog {
+	return domainwork.ParseBacklogMarkdown(raw)
+}
+
 func TestEnrichWorkResolvesBacklogMetadata(t *testing.T) {
 	root := t.TempDir()
 	writeFixture(t, root, map[string]string{
@@ -36,7 +46,8 @@ func TestEnrichWorkResolvesBacklogMetadata(t *testing.T) {
 		".hawp/work/decisions/2026/07/05/adr-001.md": "# a decision with no backlog row\n",
 	})
 
-	docs, err := EnrichWork(root, filepath.Join(root, ".hawp", "work"))
+	src := ContextSource{FileLister: &testFileLister{}, BacklogParser: &testBacklogParser{}}
+	docs, err := EnrichWork(root, filepath.Join(root, ".hawp", "work"), os.ReadFile, src)
 	if err != nil {
 		t.Fatal(err)
 	}

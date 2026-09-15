@@ -30,12 +30,12 @@ func TestComputeExpectedOutputsProducesAllVariants(t *testing.T) {
 	root := t.TempDir()
 	writeDistributionFixture(t, root)
 
-	outputs, err := ComputeExpectedOutputs(root)
+	outputs, err := ComputeExpectedOutputs(root, os.ReadFile)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	want := len(ActiveProviders) * 2 * 2
+	want := len(ActiveProviders) * 2 * 2 * 2
 	if len(outputs) != want {
 		t.Fatalf("outputs = %d, want %d", len(outputs), want)
 	}
@@ -44,12 +44,28 @@ func TestComputeExpectedOutputsProducesAllVariants(t *testing.T) {
 		if !strings.HasSuffix(output.Content, "\n") {
 			t.Fatalf("trailing newline missing for %s", output.OutputPath)
 		}
-		if !strings.Contains(output.Content, "set -euo pipefail") {
-			t.Fatalf("script body missing for %s", output.OutputPath)
+		if strings.HasSuffix(output.OutputPath, ".md") {
+			if !strings.Contains(output.Content, "set -euo pipefail") {
+				t.Fatalf("script body missing for %s", output.OutputPath)
+			}
+			if !strings.Contains(output.Content, "Downloadable script artifact: `") {
+				t.Fatalf("script artifact pointer missing for %s", output.OutputPath)
+			}
+			if !strings.Contains(output.Content, "Local sync: run `hawp distribution sync`") {
+				t.Fatalf("sync guidance missing for %s", output.OutputPath)
+			}
+			continue
 		}
-		if !strings.Contains(output.Content, "Local sync: run `hawp distribution sync`") {
-			t.Fatalf("sync guidance missing for %s", output.OutputPath)
+		if strings.HasSuffix(output.OutputPath, ".sh") {
+			if !strings.Contains(output.Content, "set -euo pipefail") {
+				t.Fatalf("script body missing for %s", output.OutputPath)
+			}
+			if strings.Contains(output.Content, "```") {
+				t.Fatalf("script output contains markdown fence for %s", output.OutputPath)
+			}
+			continue
 		}
+		t.Fatalf("unexpected generated output extension: %s", output.OutputPath)
 	}
 }
 
@@ -63,7 +79,7 @@ func TestFindDownstreamPathLeaksReportsLeakedPaths(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	leaks, err := FindDownstreamPathLeaks(root)
+	leaks, err := FindDownstreamPathLeaks(root, os.ReadFile)
 	if err != nil {
 		t.Fatal(err)
 	}

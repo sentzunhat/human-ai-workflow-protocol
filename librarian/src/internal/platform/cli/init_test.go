@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	domainprovision "github.com/sentzunhat/hawp/librarian/src/internal/domain/provision"
 	appprovision "github.com/sentzunhat/hawp/librarian/src/internal/application/provision"
-	appmcp "github.com/sentzunhat/hawp/librarian/src/internal/platform/mcp"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/download"
+	domainprovision "github.com/sentzunhat/hawp/librarian/src/internal/domain/provision"
+	download "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/clients/download"
+	appmcp "github.com/sentzunhat/hawp/librarian/src/internal/platform/mcp/configure"
 )
 
 // TestProviderConfigWrittenAfterProvisionFailure is a regression test for the
@@ -32,7 +32,7 @@ func TestProviderConfigWrittenAfterProvisionFailure(t *testing.T) {
 			{
 				Name:     "bad_model",
 				URL:      "http://localhost:1/nonexistent", // unreachable
-				SHA256:   strings.Repeat("0", 64),         // wrong checksum
+				SHA256:   strings.Repeat("0", 64),          // wrong checksum
 				Size:     100,
 				DestName: "bad/model.bin",
 			},

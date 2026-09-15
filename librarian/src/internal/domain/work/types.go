@@ -37,12 +37,13 @@ type SectionCount struct {
 
 // BacklogCheck is the backlog-consistency result.
 type BacklogCheck struct {
-	ActiveWork     SectionCount
-	RecentlyClosed SectionCount
-	ParkedWork     SectionCount
-	OrphanedFiles  []string
-	OrphanedParked []string
-	Status         CheckStatus
+	ActiveWork              SectionCount
+	RecentlyClosed          SectionCount
+	ParkedWork              SectionCount
+	OrphanedFiles           []string
+	OrphanedParked          []string
+	NonCanonicalActiveItems []string
+	Status                  CheckStatus
 }
 
 // FileFinding names a closed record plus context for a report line.

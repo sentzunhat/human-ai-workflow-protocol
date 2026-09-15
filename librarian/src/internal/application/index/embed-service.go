@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/sentzunhat/hawp/librarian/src/internal/domain/embeddings"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
+	embeddings "github.com/sentzunhat/hawp/librarian/src/internal/domain/providers/embeddings"
+	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
 )
 
 // DefaultEmbeddingModel is the model used when none is specified. Matches
@@ -55,12 +55,20 @@ Embedding complete:
 // model catalog, and one auto-download path. No `hawp model pull` step
 // needed anymore for `search embed`.
 type EmbedService struct {
-	dbPath string
+	dbPath      string
+	newEmbedder func(backend, model string) (embeddings.Embedder, error)
 }
 
 // NewEmbedService creates an embed service.
 func NewEmbedService(dbPath string) *EmbedService {
 	return &EmbedService{dbPath: dbPath}
+}
+
+// NewEmbedServiceWithFactory injects model construction at the composition
+// boundary. Production callers should use bootstrap; this constructor keeps
+// the application service independent of infrastructure packages.
+func NewEmbedServiceWithFactory(dbPath string, newEmbedder func(string, string) (embeddings.Embedder, error)) *EmbedService {
+	return &EmbedService{dbPath: dbPath, newEmbedder: newEmbedder}
 }
 
 // Execute embeds all chunks with NULL vectors in the index database.
@@ -114,7 +122,10 @@ func (s *EmbedService) Execute(ctx context.Context, backend, modelID string) (Em
 		}
 	}
 
-	embedder, err := embeddings.NewEmbedder(backend, modelID)
+	if s.newEmbedder == nil {
+		return result, fmt.Errorf("embedder factory is not configured")
+	}
+	embedder, err := s.newEmbedder(backend, modelID)
 	if err != nil {
 		return result, fmt.Errorf("init %s embedder for %s: %w", backend, modelID, err)
 	}

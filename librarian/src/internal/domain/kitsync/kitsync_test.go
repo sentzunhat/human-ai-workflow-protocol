@@ -6,6 +6,28 @@ import (
 	"testing"
 )
 
+// testFileCopier implements FileCopier using real os calls for tests.
+type testFileCopier struct{}
+
+func (testFileCopier) MkdirAll(dir string) error            { return os.MkdirAll(dir, 0o755) }
+func (testFileCopier) ReadDir(dir string) ([]os.DirEntry, error) {
+	return os.ReadDir(dir)
+}
+func (testFileCopier) Stat(path string) (os.FileInfo, error)    { return os.Stat(path) }
+func (testFileCopier) IsNotExist(err error) bool                { return os.IsNotExist(err) }
+func (testFileCopier) Open(path string) (*os.File, error)       { return os.Open(path) }
+func (testFileCopier) CreateTemp(dir, pattern string) (*os.File, string, error) {
+	f, err := os.CreateTemp(dir, pattern)
+	if err != nil {
+		return nil, "", err
+	}
+	return f, f.Name(), nil
+}
+func (testFileCopier) Rename(src, dst string) error { return os.Rename(src, dst) }
+func (testFileCopier) Remove(path string) error     { return os.Remove(path) }
+
+var fc testFileCopier // shared test FileCopier
+
 // sampleManifest mirrors the real core/providers/manifest.yaml shape,
 // including the always-refresh github entries with no install/update
 // fields at all.
@@ -59,7 +81,7 @@ func writeTree(t *testing.T, files map[string]string) string {
 func parseSample(t *testing.T) *Manifest {
 	t.Helper()
 	dir := writeTree(t, map[string]string{"manifest.yaml": sampleManifest})
-	manifest, err := ParseManifest(filepath.Join(dir, "manifest.yaml"))
+	manifest, err := ParseManifest(filepath.Join(dir, "manifest.yaml"), os.ReadFile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -135,7 +157,7 @@ func TestSyncKitCopiesWholeTree(t *testing.T) {
 	})
 	repoRoot := t.TempDir()
 
-	written, err := SyncKit(bundleKit, repoRoot)
+	written, err := SyncKit(fc, bundleKit, repoRoot)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -161,7 +183,7 @@ func TestApplyProviderUpdateRefreshesAndSkips(t *testing.T) {
 		"CLAUDE.md":                  "# user's customized CLAUDE.md, must survive\n",
 	})
 
-	written, skipped, err := ApplyProviderUpdate(bundleRoot, repoRoot, manifest, "claude")
+	written, skipped, err := ApplyProviderUpdate(fc, bundleRoot, repoRoot, manifest, "claude")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -187,7 +209,7 @@ func TestApplyProviderUpdateRefreshesAndSkips(t *testing.T) {
 
 func TestApplyProviderUpdateUnknownProvider(t *testing.T) {
 	manifest := parseSample(t)
-	if _, _, err := ApplyProviderUpdate(t.TempDir(), t.TempDir(), manifest, "nonexistent"); err == nil {
+	if _, _, err := ApplyProviderUpdate(fc, t.TempDir(), t.TempDir(), manifest, "nonexistent"); err == nil {
 		t.Fatal("expected error for unknown provider")
 	}
 }
@@ -202,7 +224,7 @@ func TestApplyProviderUpdateSeedIfMissingDoesNotOverwriteExisting(t *testing.T) 
 		"AGENTS.md": "# repo-specific instructions\n",
 	})
 
-	written, skipped, err := ApplyProviderUpdate(bundleRoot, repoRoot, manifest, "codex")
+	written, skipped, err := ApplyProviderUpdate(fc, bundleRoot, repoRoot, manifest, "codex")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -227,7 +249,7 @@ func TestApplyProviderUpdateSeedIfMissingCreatesAbsentFile(t *testing.T) {
 	})
 	repoRoot := t.TempDir()
 
-	written, skipped, err := ApplyProviderUpdate(bundleRoot, repoRoot, manifest, "codex")
+	written, skipped, err := ApplyProviderUpdate(fc, bundleRoot, repoRoot, manifest, "codex")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -256,7 +278,7 @@ func TestApplyProviderInstallCreatesAllFiles(t *testing.T) {
 	})
 	repoRoot := t.TempDir()
 
-	written, seeded, err := ApplyProviderInstall(bundleRoot, repoRoot, manifest, "claude")
+	written, seeded, err := ApplyProviderInstall(fc, bundleRoot, repoRoot, manifest, "claude")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -290,7 +312,7 @@ func TestApplyProviderInstallSeedIfMissingSkipsExisting(t *testing.T) {
 		"CLAUDE.md": "# my custom content\n",
 	})
 
-	written, _, err := ApplyProviderInstall(bundleRoot, repoRoot, manifest, "claude")
+	written, _, err := ApplyProviderInstall(fc, bundleRoot, repoRoot, manifest, "claude")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -306,7 +328,7 @@ func TestApplyProviderInstallSeedIfMissingSkipsExisting(t *testing.T) {
 
 func TestApplyProviderInstallUnknownProvider(t *testing.T) {
 	manifest := parseSample(t)
-	if _, _, err := ApplyProviderInstall(t.TempDir(), t.TempDir(), manifest, "nonexistent"); err == nil {
+	if _, _, err := ApplyProviderInstall(fc, t.TempDir(), t.TempDir(), manifest, "nonexistent"); err == nil {
 		t.Fatal("expected error for unknown provider")
 	}
 }

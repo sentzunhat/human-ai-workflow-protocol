@@ -1,0 +1,2198 @@
+{
+  "mapping_revision": "2026-09-11-normalize-alignment",
+  "version": 1,
+  "module": "github.com/sentzunhat/hawp/librarian/src",
+  "files": [
+    {
+      "source": "CHANGELOG.md",
+      "destination": "CHANGELOG.md",
+      "before_sha256": "faa6389ff9d21e1fda844630cf4b74346edd150581718893369b52e01d402a9b",
+      "after_sha256": "faa6389ff9d21e1fda844630cf4b74346edd150581718893369b52e01d402a9b",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "Makefile",
+      "destination": "Makefile",
+      "before_sha256": "8f3d52fd056a9fd00032366e01126447134ff3055d135ce194aff9d1e88d353d",
+      "after_sha256": "8f3d52fd056a9fd00032366e01126447134ff3055d135ce194aff9d1e88d353d",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "README.md",
+      "destination": "README.md",
+      "before_sha256": "c6edb5d6e6db38e449f1f6f590fa0e9690a23712ffcd6167a7bfa933d6cc8b33",
+      "after_sha256": "c6edb5d6e6db38e449f1f6f590fa0e9690a23712ffcd6167a7bfa933d6cc8b33",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "cmd/hawp/main.go",
+      "destination": "cmd/hawp/main.go",
+      "before_sha256": "d1ad1ebd0daeac31a914ea29adb64823161c00433348b71345f9ada31e06b750",
+      "after_sha256": "d1ad1ebd0daeac31a914ea29adb64823161c00433348b71345f9ada31e06b750",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "go.mod",
+      "destination": "go.mod",
+      "before_sha256": "2eff81d7da4161d74ad13e5251519701f747f91142dade1156b45f1529be8b86",
+      "after_sha256": "2eff81d7da4161d74ad13e5251519701f747f91142dade1156b45f1529be8b86",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "go.sum",
+      "destination": "go.sum",
+      "before_sha256": "ca86cf5639fae936bdd75103a84b11351f607c7f1a597f48122b1792dbf8df6a",
+      "after_sha256": "ca86cf5639fae936bdd75103a84b11351f607c7f1a597f48122b1792dbf8df6a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/check/check.go",
+      "destination": "internal/application/check/check.go",
+      "before_sha256": "a90a7518c24514d86def8c6e53529a098d697fc7feda9620bc2b9112d04f34c5",
+      "after_sha256": "a90a7518c24514d86def8c6e53529a098d697fc7feda9620bc2b9112d04f34c5",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/context/README.md",
+      "destination": "internal/application/context/README.md",
+      "before_sha256": "5449f5633c6e6d2c19a835a65c4b015b8283fb77814cfe2dc2e14719daa697a9",
+      "after_sha256": "5449f5633c6e6d2c19a835a65c4b015b8283fb77814cfe2dc2e14719daa697a9",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/context/config.go",
+      "destination": "internal/application/context/config.go",
+      "before_sha256": "ed39dc3726a0589daa0eed137017d6eca3c5b86d3653173063a84998847a789f",
+      "after_sha256": "ed39dc3726a0589daa0eed137017d6eca3c5b86d3653173063a84998847a789f",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/context/config_test.go",
+      "destination": "internal/application/context/config_test.go",
+      "before_sha256": "c0ca23dd010fff807081123b6a0af79e5469ca47fbe9c4b72e78cf281e7e684c",
+      "after_sha256": "c0ca23dd010fff807081123b6a0af79e5469ca47fbe9c4b72e78cf281e7e684c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/context/dedup/dedup.go",
+      "destination": "internal/application/context/dedup/dedup.go",
+      "before_sha256": "ee3585cb17a13070a686b3ba3aa0c47f293f545a6ac0bf08906c6d0fb797fbb6",
+      "after_sha256": "ee3585cb17a13070a686b3ba3aa0c47f293f545a6ac0bf08906c6d0fb797fbb6",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/context/dedup/dedup_test.go",
+      "destination": "internal/application/context/dedup/dedup_test.go",
+      "before_sha256": "429485c71497f58b754eaa3a15962827a7d8f25e07135df1b5307b2b668f28da",
+      "after_sha256": "429485c71497f58b754eaa3a15962827a7d8f25e07135df1b5307b2b668f28da",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/context/encryption.go",
+      "destination": "internal/application/context/encryption.go",
+      "before_sha256": "377d9a86e6a93be919579824cdeb15950157d1da2031da215c90121340422bf6",
+      "after_sha256": "377d9a86e6a93be919579824cdeb15950157d1da2031da215c90121340422bf6",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/context/encryption_test.go",
+      "destination": "internal/application/context/encryption_test.go",
+      "before_sha256": "4e986e52a1998c7a0a7c0c575a72977932883dae2b5973368a74a4305fe93390",
+      "after_sha256": "4e986e52a1998c7a0a7c0c575a72977932883dae2b5973368a74a4305fe93390",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/context/format.go",
+      "destination": "internal/application/context/format.go",
+      "before_sha256": "d322cd339a70ac31b8e2c21d18eb6d8efd51a15cb777fb2dc933c2ac4813dc3c",
+      "after_sha256": "d322cd339a70ac31b8e2c21d18eb6d8efd51a15cb777fb2dc933c2ac4813dc3c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/context/format_test.go",
+      "destination": "internal/application/context/format_test.go",
+      "before_sha256": "54304c3e9961d36435ad79fb12af44c2429d97af1a2b61f0f77e05b872ecc4f5",
+      "after_sha256": "54304c3e9961d36435ad79fb12af44c2429d97af1a2b61f0f77e05b872ecc4f5",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/context/rag.go",
+      "destination": "internal/application/context/rag.go",
+      "before_sha256": "e71c555b2edf33d6654d2be248a5446a2d906fb366022fd5f37cc8aef550b6d2",
+      "after_sha256": "e71c555b2edf33d6654d2be248a5446a2d906fb366022fd5f37cc8aef550b6d2",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/context/rag_test.go",
+      "destination": "internal/application/context/rag_test.go",
+      "before_sha256": "72d38d72cd47b44eed2c450f931a30c8fdcd4d032a6de817ec3501ea36f3abb5",
+      "after_sha256": "72d38d72cd47b44eed2c450f931a30c8fdcd4d032a6de817ec3501ea36f3abb5",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/context/reshaper.go",
+      "destination": "internal/application/context/reshaper.go",
+      "before_sha256": "d52ab2b1854f51d61181773e3db9e9ac5f7457530bb2efd5cb55d1ebe1f6d311",
+      "after_sha256": "d52ab2b1854f51d61181773e3db9e9ac5f7457530bb2efd5cb55d1ebe1f6d311",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/context/reshaper_test.go",
+      "destination": "internal/application/context/reshaper_test.go",
+      "before_sha256": "483c845e0165e7cc45e913201c68b5848d72c3506b7a4b3ddefc853c8e04b348",
+      "after_sha256": "483c845e0165e7cc45e913201c68b5848d72c3506b7a4b3ddefc853c8e04b348",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/db/init-service.go",
+      "destination": "internal/application/db/init-service.go",
+      "before_sha256": "20f0d11ea59a3299feb25868ece3d05d3a21baa8abc568a118626937d72bd465",
+      "after_sha256": "20f0d11ea59a3299feb25868ece3d05d3a21baa8abc568a118626937d72bd465",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/distribution/distribution.go",
+      "destination": "internal/application/distribution/distribution.go",
+      "before_sha256": "3bd321c211098d190b8bbc3f4493af53a4d649ef98def1d49129762250df86fd",
+      "after_sha256": "3bd321c211098d190b8bbc3f4493af53a4d649ef98def1d49129762250df86fd",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/embed/embed.go",
+      "destination": "internal/application/embed/embed.go",
+      "before_sha256": "473c8f1429464d14a1bd3fc5b54d6e660f73f71873da74fd0290f2866c7acad3",
+      "after_sha256": "473c8f1429464d14a1bd3fc5b54d6e660f73f71873da74fd0290f2866c7acad3",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/index/build-service.go",
+      "destination": "internal/application/index/build-service.go",
+      "before_sha256": "a9a5658d0ff47736c47e11bc1f6348411df382ffd821f9ee6994730a71357179",
+      "after_sha256": "a9a5658d0ff47736c47e11bc1f6348411df382ffd821f9ee6994730a71357179",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/index/build-service_test.go",
+      "destination": "internal/application/index/build-service_test.go",
+      "before_sha256": "b5aec1bfcd5b8db6f41bdaed1a9e2a12480984d34010644e7398bb8947bbd36d",
+      "after_sha256": "b5aec1bfcd5b8db6f41bdaed1a9e2a12480984d34010644e7398bb8947bbd36d",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/index/embed-service.go",
+      "destination": "internal/application/index/embed-service.go",
+      "before_sha256": "a69a9ac254ed28e6a815a94a22ee2077d8dd1c993cf9059b544bf235a243368a",
+      "after_sha256": "a69a9ac254ed28e6a815a94a22ee2077d8dd1c993cf9059b544bf235a243368a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/index/embed-service_test.go",
+      "destination": "internal/application/index/embed-service_test.go",
+      "before_sha256": "e0ce0e59a483f97c14a5c140802d65102f402eb93279d8bc194f96f0b009e9b1",
+      "after_sha256": "e0ce0e59a483f97c14a5c140802d65102f402eb93279d8bc194f96f0b009e9b1",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/index/embed_integration_test.go",
+      "destination": "internal/application/index/embed_integration_test.go",
+      "before_sha256": "2294eca23ed28afd7460aa331ff4ef0b90cc795bd069ad8ee5cf1a33c978bada",
+      "after_sha256": "2294eca23ed28afd7460aa331ff4ef0b90cc795bd069ad8ee5cf1a33c978bada",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/index/ingest-service.go",
+      "destination": "internal/application/index/ingest-service.go",
+      "before_sha256": "06f4a946d650f39d1878cf76cc7736bc575ca7ace24013d6e5411f4a4e918ba8",
+      "after_sha256": "06f4a946d650f39d1878cf76cc7736bc575ca7ace24013d6e5411f4a4e918ba8",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/index/ingest-service_test.go",
+      "destination": "internal/application/index/ingest-service_test.go",
+      "before_sha256": "5bb3dbc4fb0d1472af2e0fe9e0c6bffa3f26168bd7fab8b9eb5accf9875d6dcd",
+      "after_sha256": "5bb3dbc4fb0d1472af2e0fe9e0c6bffa3f26168bd7fab8b9eb5accf9875d6dcd",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/index/ingest_e2e_test.go",
+      "destination": "internal/application/index/ingest_e2e_test.go",
+      "before_sha256": "93a600768a0669165b245f00e5944d0ebb8e7b37240d7f9b7b3f9849ebe8bc03",
+      "after_sha256": "93a600768a0669165b245f00e5944d0ebb8e7b37240d7f9b7b3f9849ebe8bc03",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/kit/normalize.go",
+      "destination": "internal/application/kit/normalize.go",
+      "before_sha256": "75e25fa78868c30c14ee1ab215c0b4bf408d922be05580b0dcd19b5d513fea1d",
+      "after_sha256": "75e25fa78868c30c14ee1ab215c0b4bf408d922be05580b0dcd19b5d513fea1d",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/kit/validate.go",
+      "destination": "internal/application/kit/validate.go",
+      "before_sha256": "6138b35641e568ee60dc9f4fd2ca41cb5c3f49ebaa23acd9ad01accdf79afb68",
+      "after_sha256": "6138b35641e568ee60dc9f4fd2ca41cb5c3f49ebaa23acd9ad01accdf79afb68",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/kitsync/kitsync.go",
+      "destination": "internal/application/kitsync/kitsync.go",
+      "before_sha256": "87d37ad428108900dea757d9b2f33518330b42a7b73f0c03a41ae6942bc989b8",
+      "after_sha256": "87d37ad428108900dea757d9b2f33518330b42a7b73f0c03a41ae6942bc989b8",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/links/README.md",
+      "destination": "internal/application/links/README.md",
+      "before_sha256": "221b82916253fcb3371898c5d1b705fe79501de4f36e0db81b92c51dd02920b2",
+      "after_sha256": "221b82916253fcb3371898c5d1b705fe79501de4f36e0db81b92c51dd02920b2",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/links/check.go",
+      "destination": "internal/application/links/check.go",
+      "before_sha256": "68ccbeecc8e3bcaad369177cce465ed5f8eccb1b24bf2bf214c58129a2ef2245",
+      "after_sha256": "68ccbeecc8e3bcaad369177cce465ed5f8eccb1b24bf2bf214c58129a2ef2245",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/providersync/providersync.go",
+      "destination": "internal/application/providersync/providersync.go",
+      "before_sha256": "3aa0c78fdee7c5e9be78745665342ae874243aa6a211dd2a8259a4ab1fb7202b",
+      "after_sha256": "3aa0c78fdee7c5e9be78745665342ae874243aa6a211dd2a8259a4ab1fb7202b",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/provision/provision.go",
+      "destination": "internal/application/provision/provision.go",
+      "before_sha256": "8fd12910a378d5643cf1af03778ff535c7c8eea00ab181f13ce47a82db4823fb",
+      "after_sha256": "8fd12910a378d5643cf1af03778ff535c7c8eea00ab181f13ce47a82db4823fb",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/search/config.go",
+      "destination": "internal/application/search/config.go",
+      "before_sha256": "67d6bb9329c48db8e3717d8d55247eb6438db48f8203bb959088215bc203ca33",
+      "after_sha256": "67d6bb9329c48db8e3717d8d55247eb6438db48f8203bb959088215bc203ca33",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/search/service.go",
+      "destination": "internal/application/search/service.go",
+      "before_sha256": "7b5ed34542bd89dec3835d5fc288c9036bc865ab313f48aa7e6b7d7b0113cc4b",
+      "after_sha256": "7b5ed34542bd89dec3835d5fc288c9036bc865ab313f48aa7e6b7d7b0113cc4b",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/update/notifier.go",
+      "destination": "internal/application/update/notifier.go",
+      "before_sha256": "338b15835857e1c12f49204cf3c903b868a7d28fe56fac2008489921c7ce1273",
+      "after_sha256": "338b15835857e1c12f49204cf3c903b868a7d28fe56fac2008489921c7ce1273",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/update/update.go",
+      "destination": "internal/application/update/update.go",
+      "before_sha256": "cf8ee5fc9370a89286270bb441230ee207217d7ec37f5ad605ceeb96a4b74c38",
+      "after_sha256": "cf8ee5fc9370a89286270bb441230ee207217d7ec37f5ad605ceeb96a4b74c38",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/usage/service.go",
+      "destination": "internal/application/usage/service.go",
+      "before_sha256": "18cc21351bf15901229659c3dc8ed215c32374ec7564afb0c4d92aafab2b49ca",
+      "after_sha256": "18cc21351bf15901229659c3dc8ed215c32374ec7564afb0c4d92aafab2b49ca",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/usage/service_test.go",
+      "destination": "internal/application/usage/service_test.go",
+      "before_sha256": "bc6d548228ce1b2fca8cd5b595756f12ece698667ea5d62df2d80810f8d58371",
+      "after_sha256": "bc6d548228ce1b2fca8cd5b595756f12ece698667ea5d62df2d80810f8d58371",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/uuidgen/uuid.go",
+      "destination": "internal/application/uuidgen/uuid.go",
+      "before_sha256": "7400c1f7527bda61164ce693a1cce25a084fcaca609d87e8be2a00c2b1d1b6b3",
+      "after_sha256": "7400c1f7527bda61164ce693a1cce25a084fcaca609d87e8be2a00c2b1d1b6b3",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/work/README.md",
+      "destination": "internal/application/work/README.md",
+      "before_sha256": "3c745ca250bfbd534ca087a6b71ab588fc0f6b311e72ab63c06cd97ecc3868c8",
+      "after_sha256": "3c745ca250bfbd534ca087a6b71ab588fc0f6b311e72ab63c06cd97ecc3868c8",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/work/intake/draft.go",
+      "destination": "internal/application/work/intake/draft.go",
+      "before_sha256": "95e82cefdd1fd8e27e22c463d61dc5bd8a48345027cc6bfe547778454506d2c8",
+      "after_sha256": "95e82cefdd1fd8e27e22c463d61dc5bd8a48345027cc6bfe547778454506d2c8",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/work/intake/draft_test.go",
+      "destination": "internal/application/work/intake/draft_test.go",
+      "before_sha256": "8ba602be8ff8a405db25b833982b967aedbd9c738a27b6c2e4b8e6a4a6f2adc0",
+      "after_sha256": "8ba602be8ff8a405db25b833982b967aedbd9c738a27b6c2e4b8e6a4a6f2adc0",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/work/intake/intake.go",
+      "destination": "internal/application/work/intake/intake.go",
+      "before_sha256": "139e53be7630d62b45ecd53468c23be5f2208b482caaac6deb23532dfd8e8105",
+      "after_sha256": "139e53be7630d62b45ecd53468c23be5f2208b482caaac6deb23532dfd8e8105",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/work/normalize/duplicate_links.go",
+      "destination": "internal/application/work/normalize/duplicate_links.go",
+      "before_sha256": "7833a99986bcc0bb07a381bb881d46991db89c4d9e42f05e7a6996cc991c8f90",
+      "after_sha256": "7833a99986bcc0bb07a381bb881d46991db89c4d9e42f05e7a6996cc991c8f90",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/work/normalize/duplicate_links_test.go",
+      "destination": "internal/application/work/normalize/duplicate_links_test.go",
+      "before_sha256": "d67d05f5ca01607635afc3c8a47abc8d8d560ab7127a1f63a6ba7e0988e7e07b",
+      "after_sha256": "d67d05f5ca01607635afc3c8a47abc8d8d560ab7127a1f63a6ba7e0988e7e07b",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/work/normalize/normalize.go",
+      "destination": "internal/application/work/normalize/normalize.go",
+      "before_sha256": "ec1a8bc3e029a4fa840cc85a66b913726822be5b2547b46c9bd6055261cc1f30",
+      "after_sha256": "ec1a8bc3e029a4fa840cc85a66b913726822be5b2547b46c9bd6055261cc1f30",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/application/work/validation/validate.go",
+      "destination": "internal/application/work/validation/validate.go",
+      "before_sha256": "0330422c3aa439c7889dbfc5368967bb6d8379f9f929984b6ea937a0ac275897",
+      "after_sha256": "0330422c3aa439c7889dbfc5368967bb6d8379f9f929984b6ea937a0ac275897",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/bootstrap/models.go",
+      "destination": "internal/bootstrap/models.go",
+      "before_sha256": "6bb09e74c06a8ef76170ebbcfcdd64f8f57a4b850252cbb07c128819435e956d",
+      "after_sha256": "6bb09e74c06a8ef76170ebbcfcdd64f8f57a4b850252cbb07c128819435e956d",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/context/document.go",
+      "destination": "internal/domain/context/document.go",
+      "before_sha256": "ab56405ec83d3f16e8c83a44da702791fa0aefe434ff80cb0923f6a8be516326",
+      "after_sha256": "ab56405ec83d3f16e8c83a44da702791fa0aefe434ff80cb0923f6a8be516326",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/context/kit.go",
+      "destination": "internal/domain/context/kit.go",
+      "before_sha256": "a920872bd94ec3c0a3766c43d81493061d834f34b9077258476fafb41f09a2e5",
+      "after_sha256": "a920872bd94ec3c0a3766c43d81493061d834f34b9077258476fafb41f09a2e5",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/context/kit_test.go",
+      "destination": "internal/domain/context/kit_test.go",
+      "before_sha256": "bb743259211aa579936cef9186cf054abcb257132dc7bab83f9304c342ed8eda",
+      "after_sha256": "bb743259211aa579936cef9186cf054abcb257132dc7bab83f9304c342ed8eda",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/context/source.go",
+      "destination": "internal/domain/context/source.go",
+      "before_sha256": "fdd02c6d9c57bf34983e40fab8f096e81450861a4b33f2ecada76fb4e195c4a6",
+      "after_sha256": "fdd02c6d9c57bf34983e40fab8f096e81450861a4b33f2ecada76fb4e195c4a6",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/context/work.go",
+      "destination": "internal/domain/context/work.go",
+      "before_sha256": "e9b70d4b5128b47f8c76749dbe0d5af9bcfeb4a309a1092bd48c4b188ee09df3",
+      "after_sha256": "e9b70d4b5128b47f8c76749dbe0d5af9bcfeb4a309a1092bd48c4b188ee09df3",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/context/work_test.go",
+      "destination": "internal/domain/context/work_test.go",
+      "before_sha256": "63233187c17969d3589103d8445c160d0d86cbef4e335163f15fefb45f8ec8f1",
+      "after_sha256": "63233187c17969d3589103d8445c160d0d86cbef4e335163f15fefb45f8ec8f1",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/distribution/binary_download_mocks_test.go",
+      "destination": "internal/domain/distribution/binary_download_mocks_test.go",
+      "before_sha256": "7216326d684063bbddd652556662700d509c3f65147d3be0b1b6ce0505b5894f",
+      "after_sha256": "7216326d684063bbddd652556662700d509c3f65147d3be0b1b6ce0505b5894f",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/distribution/binary_download_test.go",
+      "destination": "internal/domain/distribution/binary_download_test.go",
+      "before_sha256": "95b027a0903c7127ea661f86bc95ae79a08eb5d7cff55989200de2635033d34b",
+      "after_sha256": "95b027a0903c7127ea661f86bc95ae79a08eb5d7cff55989200de2635033d34b",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/distribution/distribution.go",
+      "destination": "internal/domain/distribution/distribution.go",
+      "before_sha256": "52ed27584f66237755535c5094a0512c37665f59bc3e54033ccb29c57bdb186e",
+      "after_sha256": "52ed27584f66237755535c5094a0512c37665f59bc3e54033ccb29c57bdb186e",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/distribution/distribution_test.go",
+      "destination": "internal/domain/distribution/distribution_test.go",
+      "before_sha256": "11d65fdf81bc382e31dd0d629caaca3c0222c12be020a7667188fa97ee286dbd",
+      "after_sha256": "11d65fdf81bc382e31dd0d629caaca3c0222c12be020a7667188fa97ee286dbd",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/index/chunk.go",
+      "destination": "internal/domain/index/chunk.go",
+      "before_sha256": "7628f12fecc217feaea1ded45e4f10616dbeb9c34940b460dc1062ea5434adbb",
+      "after_sha256": "7628f12fecc217feaea1ded45e4f10616dbeb9c34940b460dc1062ea5434adbb",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/index/chunk_test.go",
+      "destination": "internal/domain/index/chunk_test.go",
+      "before_sha256": "9056ebd25ee82a8c3d2158007096cd55f69ad0b197ba6bca9ad5cb7bd4ef974c",
+      "after_sha256": "9056ebd25ee82a8c3d2158007096cd55f69ad0b197ba6bca9ad5cb7bd4ef974c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/index/document-scope.go",
+      "destination": "internal/domain/index/document-scope.go",
+      "before_sha256": "9b3b2c9d179c346e380c11bbb9b4131425d1f9033351138c601ada924c5f9a7a",
+      "after_sha256": "9b3b2c9d179c346e380c11bbb9b4131425d1f9033351138c601ada924c5f9a7a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/kit/links.go",
+      "destination": "internal/domain/kit/links.go",
+      "before_sha256": "98568f1ec9db8e2b974c1a469946274c580552a28ba0784dec4c30bb75fabaff",
+      "after_sha256": "98568f1ec9db8e2b974c1a469946274c580552a28ba0784dec4c30bb75fabaff",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/kit/normalize.go",
+      "destination": "internal/domain/kit/normalize.go",
+      "before_sha256": "1f9572898bfd69806c310a2bfeeb4773faeeaf509a059e29dbd6465db7d0ee03",
+      "after_sha256": "1f9572898bfd69806c310a2bfeeb4773faeeaf509a059e29dbd6465db7d0ee03",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/kit/normalize_test.go",
+      "destination": "internal/domain/kit/normalize_test.go",
+      "before_sha256": "fc1b677c714aa5a63152045c304ea2bee71a42350dbe596aa4265a9fd8865ddf",
+      "after_sha256": "fc1b677c714aa5a63152045c304ea2bee71a42350dbe596aa4265a9fd8865ddf",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/kit/source.go",
+      "destination": "internal/domain/kit/source.go",
+      "before_sha256": "fcc27f2f87ed69c2a3f1b5d3670735f20851e648d92ce89e1491295f34eb3cd2",
+      "after_sha256": "fcc27f2f87ed69c2a3f1b5d3670735f20851e648d92ce89e1491295f34eb3cd2",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/kit/validate.go",
+      "destination": "internal/domain/kit/validate.go",
+      "before_sha256": "fdbebd165fad690eded37cc18207db8ab40d21965fbfd6e608ac4aa160419b63",
+      "after_sha256": "fdbebd165fad690eded37cc18207db8ab40d21965fbfd6e608ac4aa160419b63",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/kit/validate_test.go",
+      "destination": "internal/domain/kit/validate_test.go",
+      "before_sha256": "746c7da2dc1fc19cf4e162abfad4e600de8695838f4a69642682d7d9f7018bc2",
+      "after_sha256": "746c7da2dc1fc19cf4e162abfad4e600de8695838f4a69642682d7d9f7018bc2",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/kitsync/apply.go",
+      "destination": "internal/domain/kitsync/apply.go",
+      "before_sha256": "6f56a5350b6d005bbd0a7d3ec7d2630c9cc8d6f2fdeb80affb62c953ee72b18d",
+      "after_sha256": "6f56a5350b6d005bbd0a7d3ec7d2630c9cc8d6f2fdeb80affb62c953ee72b18d",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/kitsync/detect.go",
+      "destination": "internal/domain/kitsync/detect.go",
+      "before_sha256": "957c9f066430db3796134d2db8bc051a9b17b72cee177970b3f2bee943597686",
+      "after_sha256": "957c9f066430db3796134d2db8bc051a9b17b72cee177970b3f2bee943597686",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/kitsync/filecopier.go",
+      "destination": "internal/domain/kitsync/filecopier.go",
+      "before_sha256": "cdec319f8a6268dfa62cc5e36249f7c23fe36f350ae9ffb6d161b2e01cc1e14b",
+      "after_sha256": "cdec319f8a6268dfa62cc5e36249f7c23fe36f350ae9ffb6d161b2e01cc1e14b",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/kitsync/kitsync_test.go",
+      "destination": "internal/domain/kitsync/kitsync_test.go",
+      "before_sha256": "a1d866630c9d47d289eb0218684dea3fac507667c6a41c14b01ae1f7424d7ba4",
+      "after_sha256": "a1d866630c9d47d289eb0218684dea3fac507667c6a41c14b01ae1f7424d7ba4",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/kitsync/manifest.go",
+      "destination": "internal/domain/kitsync/manifest.go",
+      "before_sha256": "8f40219808003498971342c31888c62761cde7e5ece8530c0b1bbc68eeaacb3a",
+      "after_sha256": "8f40219808003498971342c31888c62761cde7e5ece8530c0b1bbc68eeaacb3a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/providers/embeddings/README.md",
+      "destination": "internal/domain/providers/embeddings/README.md",
+      "before_sha256": "3a28e462b526933d438de0e05863d000c72f107f55a9429b0dbb927b99d52ec4",
+      "after_sha256": "3a28e462b526933d438de0e05863d000c72f107f55a9429b0dbb927b99d52ec4",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/providers/embeddings/embedder.go",
+      "destination": "internal/domain/providers/embeddings/embedder.go",
+      "before_sha256": "528f4536b622eda19680faaafe321c6381eeb7116fe9be24003b27c328720a19",
+      "after_sha256": "528f4536b622eda19680faaafe321c6381eeb7116fe9be24003b27c328720a19",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/providers/llm/README.md",
+      "destination": "internal/domain/providers/llm/README.md",
+      "before_sha256": "0eff4a7d3ae7def8daa553efd4b647988dbd8c4d650b3625a372793861b7b16c",
+      "after_sha256": "0eff4a7d3ae7def8daa553efd4b647988dbd8c4d650b3625a372793861b7b16c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/providers/llm/llm_client.go",
+      "destination": "internal/domain/providers/llm/llm_client.go",
+      "before_sha256": "05f98e8c935438e43f5d83305784ebbb12cd2ec995d473d4d3697322f57ac438",
+      "after_sha256": "05f98e8c935438e43f5d83305784ebbb12cd2ec995d473d4d3697322f57ac438",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/providersync/materialize.go",
+      "destination": "internal/domain/providersync/materialize.go",
+      "before_sha256": "da082ab714ff85809a7a835fb04163b4e1997f705bdbf3a7ae08ce2a2dc9bf5a",
+      "after_sha256": "da082ab714ff85809a7a835fb04163b4e1997f705bdbf3a7ae08ce2a2dc9bf5a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/providersync/materialize_test.go",
+      "destination": "internal/domain/providersync/materialize_test.go",
+      "before_sha256": "e6d2c72ba98330b748627998f7aa797102a12342b8488640cfe1572be8b0a6a3",
+      "after_sha256": "e6d2c72ba98330b748627998f7aa797102a12342b8488640cfe1572be8b0a6a3",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/provision/assets.go",
+      "destination": "internal/domain/provision/assets.go",
+      "before_sha256": "e1c53d6e9d7d2483e121868e4a9c5efbee453d0e97a49543511f534a4d2576a4",
+      "after_sha256": "e1c53d6e9d7d2483e121868e4a9c5efbee453d0e97a49543511f534a4d2576a4",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/provision/manifest.go",
+      "destination": "internal/domain/provision/manifest.go",
+      "before_sha256": "bd666e2ae351f0b294939b8ff8dd39edbf985b5649f7b394a0bfaf376f136707",
+      "after_sha256": "bd666e2ae351f0b294939b8ff8dd39edbf985b5649f7b394a0bfaf376f136707",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/provision/manifest_test.go",
+      "destination": "internal/domain/provision/manifest_test.go",
+      "before_sha256": "64478fb02bb7d35dbf986a1b68333b104e77e7e950d3404eb7adfd36b4570f06",
+      "after_sha256": "64478fb02bb7d35dbf986a1b68333b104e77e7e950d3404eb7adfd36b4570f06",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/search/index.go",
+      "destination": "internal/domain/search/index.go",
+      "before_sha256": "43520c17b7fad928838e067edb1926cd71c29046136ea93cc41ae1e4c5c54185",
+      "after_sha256": "43520c17b7fad928838e067edb1926cd71c29046136ea93cc41ae1e4c5c54185",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/search/result.go",
+      "destination": "internal/domain/search/result.go",
+      "before_sha256": "367f53c7b682ac6f528b8e59c22b5877d82f08a66dd1b15aba56244405d38261",
+      "after_sha256": "367f53c7b682ac6f528b8e59c22b5877d82f08a66dd1b15aba56244405d38261",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/search/similarity.go",
+      "destination": "internal/domain/search/similarity.go",
+      "before_sha256": "5e5929306ca86f940f2925e7daf7fd5ec8150d6790644a603348c933620313e4",
+      "after_sha256": "5e5929306ca86f940f2925e7daf7fd5ec8150d6790644a603348c933620313e4",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/update/asset.go",
+      "destination": "internal/domain/update/asset.go",
+      "before_sha256": "e2022c09a75a2f952786ba12e99beb4e259593787a3b3ac59673f1e15131a1e3",
+      "after_sha256": "e2022c09a75a2f952786ba12e99beb4e259593787a3b3ac59673f1e15131a1e3",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/update/version.go",
+      "destination": "internal/domain/update/version.go",
+      "before_sha256": "be4c7e12f79576fe908b3cd43ec7a86ef8323c695fc63a29cfc8727e1e216465",
+      "after_sha256": "be4c7e12f79576fe908b3cd43ec7a86ef8323c695fc63a29cfc8727e1e216465",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/usage/types.go",
+      "destination": "internal/domain/usage/types.go",
+      "before_sha256": "5345de46d19c3d603c9e20afa7cd41891d2b2c6436852eae9680410e495af373",
+      "after_sha256": "5345de46d19c3d603c9e20afa7cd41891d2b2c6436852eae9680410e495af373",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/backlog.go",
+      "destination": "internal/domain/work/backlog.go",
+      "before_sha256": "45be7c275b79d5dc5dd100d428d1cdb72f87e365582c2c5ddde2e248434af97d",
+      "after_sha256": "45be7c275b79d5dc5dd100d428d1cdb72f87e365582c2c5ddde2e248434af97d",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/backlog_test.go",
+      "destination": "internal/domain/work/backlog_test.go",
+      "before_sha256": "6062b61ff65ec3b36c2a1a6c15eb62afadc7b349812a9c86a3a23ea2f8f923bf",
+      "after_sha256": "6062b61ff65ec3b36c2a1a6c15eb62afadc7b349812a9c86a3a23ea2f8f923bf",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/clarity.go",
+      "destination": "internal/domain/work/clarity.go",
+      "before_sha256": "76e5ca0931505d3a3238a653439986f5545d06fe8404161d7855909e4c9fd470",
+      "after_sha256": "76e5ca0931505d3a3238a653439986f5545d06fe8404161d7855909e4c9fd470",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/completeness.go",
+      "destination": "internal/domain/work/completeness.go",
+      "before_sha256": "5f7a24418dbf93ee74c6cb6620627a6e424a47087b051605df5cbccee587e726",
+      "after_sha256": "5f7a24418dbf93ee74c6cb6620627a6e424a47087b051605df5cbccee587e726",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/consistency.go",
+      "destination": "internal/domain/work/consistency.go",
+      "before_sha256": "fe4017b913ed62fa3993ce8f6857a68966cf82255025bc93d8a8fb93f398f9f8",
+      "after_sha256": "fe4017b913ed62fa3993ce8f6857a68966cf82255025bc93d8a8fb93f398f9f8",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/constants.go",
+      "destination": "internal/domain/work/constants.go",
+      "before_sha256": "bba945ae37d17ed76b0ef467cca710d402525d8ee5be946caeed205e627e1eb2",
+      "after_sha256": "bba945ae37d17ed76b0ef467cca710d402525d8ee5be946caeed205e627e1eb2",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/deadlinks.go",
+      "destination": "internal/domain/work/deadlinks.go",
+      "before_sha256": "a37f088a6cacc9fb91bbd197a7e0cd840e2f2995fc740df2bfed49b512081825",
+      "after_sha256": "a37f088a6cacc9fb91bbd197a7e0cd840e2f2995fc740df2bfed49b512081825",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/draft.go",
+      "destination": "internal/domain/work/draft.go",
+      "before_sha256": "3c3954d5d263919340fc75a7b249587647619990b8b984f2a57540a6244cfb0c",
+      "after_sha256": "3c3954d5d263919340fc75a7b249587647619990b8b984f2a57540a6244cfb0c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/evidence.go",
+      "destination": "internal/domain/work/evidence.go",
+      "before_sha256": "51a4d01d52b2fa465f01ce1f1e9fd396f6ffb02db114837787ff374825dfe3f1",
+      "after_sha256": "51a4d01d52b2fa465f01ce1f1e9fd396f6ffb02db114837787ff374825dfe3f1",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/idparse.go",
+      "destination": "internal/domain/work/idparse.go",
+      "before_sha256": "c62b9539c7b18991d6dabaf6603a2c1edc423769b1cad152de0e1ae3584b060e",
+      "after_sha256": "c62b9539c7b18991d6dabaf6603a2c1edc423769b1cad152de0e1ae3584b060e",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/idparse_test.go",
+      "destination": "internal/domain/work/idparse_test.go",
+      "before_sha256": "6da0a99f3d2ba9959c97d9949e1aedca40254c19b75e83855dcd322c957febee",
+      "after_sha256": "6da0a99f3d2ba9959c97d9949e1aedca40254c19b75e83855dcd322c957febee",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/intake.go",
+      "destination": "internal/domain/work/intake.go",
+      "before_sha256": "af5bd922db62aeb4d96df29b374d37f0dddb562f32d45ef9d189327eb6ea5fe6",
+      "after_sha256": "af5bd922db62aeb4d96df29b374d37f0dddb562f32d45ef9d189327eb6ea5fe6",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/intake_table.go",
+      "destination": "internal/domain/work/intake_table.go",
+      "before_sha256": "360649342ede1d37064890c031f1d4abd91b3c9f3ebdff6af57e5ccb31c21301",
+      "after_sha256": "360649342ede1d37064890c031f1d4abd91b3c9f3ebdff6af57e5ccb31c21301",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/intake_test.go",
+      "destination": "internal/domain/work/intake_test.go",
+      "before_sha256": "0c587b7406f3db284cd0d39268afd0ad55f6dbafb084771de89f02f1e179fca6",
+      "after_sha256": "0c587b7406f3db284cd0d39268afd0ad55f6dbafb084771de89f02f1e179fca6",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/links.go",
+      "destination": "internal/domain/work/links.go",
+      "before_sha256": "ed8b80566ec538b3e778e4f203ca3346d8d092318bc1767fde200aebc4d173f7",
+      "after_sha256": "ed8b80566ec538b3e778e4f203ca3346d8d092318bc1767fde200aebc4d173f7",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/normalize_active_rows.go",
+      "destination": "internal/domain/work/normalize_active_rows.go",
+      "before_sha256": "4b18a9c21a9f6b8ba61f5b9090649a0b8e16a7b45150c55d24e57446c9931662",
+      "after_sha256": "4b18a9c21a9f6b8ba61f5b9090649a0b8e16a7b45150c55d24e57446c9931662",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/normalize_apply.go",
+      "destination": "internal/domain/work/normalize_apply.go",
+      "before_sha256": "33688076a9f40780f5f101bc5d61db73f8fcf96a169efa99f45afad1d71379ad",
+      "after_sha256": "33688076a9f40780f5f101bc5d61db73f8fcf96a169efa99f45afad1d71379ad",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/normalize_migrate.go",
+      "destination": "internal/domain/work/normalize_migrate.go",
+      "before_sha256": "6dcf7f9d3dd47976ffcf3824a2017d51b293303915fe91387773d72505c70954",
+      "after_sha256": "6dcf7f9d3dd47976ffcf3824a2017d51b293303915fe91387773d72505c70954",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/normalize_report.go",
+      "destination": "internal/domain/work/normalize_report.go",
+      "before_sha256": "7aa2f4a876701155f6240b3b05b8839d9277a40ebd986ab8d54823c6aa767265",
+      "after_sha256": "7aa2f4a876701155f6240b3b05b8839d9277a40ebd986ab8d54823c6aa767265",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/normalize_rules.go",
+      "destination": "internal/domain/work/normalize_rules.go",
+      "before_sha256": "e1d273e7f5fff07dc5b5281a6a705f349aab9f0c2fba2822fc0b42a8e40ea482",
+      "after_sha256": "e1d273e7f5fff07dc5b5281a6a705f349aab9f0c2fba2822fc0b42a8e40ea482",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/normalize_scan.go",
+      "destination": "internal/domain/work/normalize_scan.go",
+      "before_sha256": "614dbaad956927d3c38e809b1ef67cecb54e6b5643f362ed8d93ae8156e2c937",
+      "after_sha256": "614dbaad956927d3c38e809b1ef67cecb54e6b5643f362ed8d93ae8156e2c937",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/normalize_test.go",
+      "destination": "internal/domain/work/normalize_test.go",
+      "before_sha256": "9a3415c4a0e1fd522c72a00b10522a9adfe1e34b7fba90cca54826295caf369d",
+      "after_sha256": "9a3415c4a0e1fd522c72a00b10522a9adfe1e34b7fba90cca54826295caf369d",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/types.go",
+      "destination": "internal/domain/work/types.go",
+      "before_sha256": "f3224f9f0334e85417fcdf8a3cdda8b8e575ba4ec6290e4e0d20584b09fb5e05",
+      "after_sha256": "f3224f9f0334e85417fcdf8a3cdda8b8e575ba4ec6290e4e0d20584b09fb5e05",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/validations_test.go",
+      "destination": "internal/domain/work/validations_test.go",
+      "before_sha256": "f9105f4ccc5b2e149930efc159cbe49b8a1dd9e930a9a2a4baca6989d2dbf029",
+      "after_sha256": "f9105f4ccc5b2e149930efc159cbe49b8a1dd9e930a9a2a4baca6989d2dbf029",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/domain/work/work_source.go",
+      "destination": "internal/domain/work/work_source.go",
+      "before_sha256": "abc126abc10f56b02a0f366b143cc52e201368ff14ac558246af7c6b684b5938",
+      "after_sha256": "abc126abc10f56b02a0f366b143cc52e201368ff14ac558246af7c6b684b5938",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/archive/extract.go",
+      "destination": "internal/infrastructure/archive/extract.go",
+      "before_sha256": "e6299cc485cdce1f95c1b9b8c2775bdaa78c48b47d0bfb2f8ac9cbb9eaae2a5b",
+      "after_sha256": "e6299cc485cdce1f95c1b9b8c2775bdaa78c48b47d0bfb2f8ac9cbb9eaae2a5b",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/archive/extract_test.go",
+      "destination": "internal/infrastructure/archive/extract_test.go",
+      "before_sha256": "5cc3bd215a02a54dd82b4da089e28d705350ec960d3258025837f9be6a67ecc3",
+      "after_sha256": "5cc3bd215a02a54dd82b4da089e28d705350ec960d3258025837f9be6a67ecc3",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/archive/targz.go",
+      "destination": "internal/infrastructure/archive/targz.go",
+      "before_sha256": "cee568dc5e8973037faca2c32e9126b223db209e01756128b97e05547c748e4d",
+      "after_sha256": "cee568dc5e8973037faca2c32e9126b223db209e01756128b97e05547c748e4d",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/clients/download/download.go",
+      "destination": "internal/infrastructure/clients/download/download.go",
+      "before_sha256": "8c8cb4bf69410b28ac9c32bf4d1b6a91c0fec7098fbe36cbb8177220f901f0b8",
+      "after_sha256": "8c8cb4bf69410b28ac9c32bf4d1b6a91c0fec7098fbe36cbb8177220f901f0b8",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/clients/download/download_test.go",
+      "destination": "internal/infrastructure/clients/download/download_test.go",
+      "before_sha256": "dbbe2893472840421dfaa5affbd09682ac09f3a2739e319899afe2379cc2d096",
+      "after_sha256": "dbbe2893472840421dfaa5affbd09682ac09f3a2739e319899afe2379cc2d096",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/clients/githubrelease/githubrelease.go",
+      "destination": "internal/infrastructure/clients/githubrelease/githubrelease.go",
+      "before_sha256": "f2235bf53b9155b129ea78caeecb8fd364a7c23a0ab40f10f7eb35e125d64d5f",
+      "after_sha256": "f2235bf53b9155b129ea78caeecb8fd364a7c23a0ab40f10f7eb35e125d64d5f",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/filesystem/hawp_home.go",
+      "destination": "internal/infrastructure/filesystem/hawp_home.go",
+      "before_sha256": "47c95318c80f2f1a4a04579ae75aa6c403ad484d3d00dfe86fdc1a408b3a67b5",
+      "after_sha256": "47c95318c80f2f1a4a04579ae75aa6c403ad484d3d00dfe86fdc1a408b3a67b5",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/filesystem/hawp_project.go",
+      "destination": "internal/infrastructure/filesystem/hawp_project.go",
+      "before_sha256": "edb5e1a2f445631bc3ebbe56c96292e419d8e1dc01d380a3ab20b06596c24fe2",
+      "after_sha256": "edb5e1a2f445631bc3ebbe56c96292e419d8e1dc01d380a3ab20b06596c24fe2",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/filesystem/layout-service.go",
+      "destination": "internal/infrastructure/filesystem/layout-service.go",
+      "before_sha256": "043d73d747519bb8fa7948aa1bcf4b1bdf84368952076f4f21bc02e5084a6393",
+      "after_sha256": "043d73d747519bb8fa7948aa1bcf4b1bdf84368952076f4f21bc02e5084a6393",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/filesystem/readme_generator.go",
+      "destination": "internal/infrastructure/filesystem/readme_generator.go",
+      "before_sha256": "f0275512f15bd9319e9fb9e86d0f00c3c0eac4472633432ff2086649bbacc661",
+      "after_sha256": "f0275512f15bd9319e9fb9e86d0f00c3c0eac4472633432ff2086649bbacc661",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/markdown/markdown.go",
+      "destination": "internal/infrastructure/markdown/markdown.go",
+      "before_sha256": "0dcd1cae707d25a41d482717cb8766baecd1fe1a9780997298a1b3b62791b9a7",
+      "after_sha256": "0dcd1cae707d25a41d482717cb8766baecd1fe1a9780997298a1b3b62791b9a7",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/benchmark_test.go",
+      "destination": "internal/infrastructure/models/benchmark_test.go",
+      "before_sha256": "3d763aa9979f0e2f982e1259993d4f8905b99593df1c79af7992d48b923d933e",
+      "after_sha256": "3d763aa9979f0e2f982e1259993d4f8905b99593df1c79af7992d48b923d933e",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/factory.go",
+      "destination": "internal/infrastructure/models/factory.go",
+      "before_sha256": "78ee0ae5e30981777d2ffe0d03488c2bcd43974ff5d9df8b8cc2cd45a7966df4",
+      "after_sha256": "78ee0ae5e30981777d2ffe0d03488c2bcd43974ff5d9df8b8cc2cd45a7966df4",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/factory_test.go",
+      "destination": "internal/infrastructure/models/factory_test.go",
+      "before_sha256": "2e9ddee3b94c022e5e6c1609c4e25cbd9de0c8b980deea3abc663c16811bc326",
+      "after_sha256": "2e9ddee3b94c022e5e6c1609c4e25cbd9de0c8b980deea3abc663c16811bc326",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/integration_test.go",
+      "destination": "internal/infrastructure/models/integration_test.go",
+      "before_sha256": "2ecebebf83930f6a5c8606c814c452413c44ee38bed7d513636d97b86f12372a",
+      "after_sha256": "2ecebebf83930f6a5c8606c814c452413c44ee38bed7d513636d97b86f12372a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/none/embedder.go",
+      "destination": "internal/infrastructure/models/none/embedder.go",
+      "before_sha256": "6c2e33e655072be8b9958813b38ee9fa17c68bcaec5b1d23e8148fe31a91c9c2",
+      "after_sha256": "6c2e33e655072be8b9958813b38ee9fa17c68bcaec5b1d23e8148fe31a91c9c2",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/none/llm.go",
+      "destination": "internal/infrastructure/models/none/llm.go",
+      "before_sha256": "c2b6164283a2f37fd529e1ef385bfebfbb1774921150495f76feb02b1e40c798",
+      "after_sha256": "c2b6164283a2f37fd529e1ef385bfebfbb1774921150495f76feb02b1e40c798",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/ollama/embedder.go",
+      "destination": "internal/infrastructure/models/ollama/embedder.go",
+      "before_sha256": "e97458662cf145e91906fa3408438c5913965d9746665ad4fc2a874012d37755",
+      "after_sha256": "e97458662cf145e91906fa3408438c5913965d9746665ad4fc2a874012d37755",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/ollama/embedder_test.go",
+      "destination": "internal/infrastructure/models/ollama/embedder_test.go",
+      "before_sha256": "5bb17fd27f9393656b1bbe104347cd080d993a34dc31a5d75d3977b5eec1c691",
+      "after_sha256": "5bb17fd27f9393656b1bbe104347cd080d993a34dc31a5d75d3977b5eec1c691",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/ollama/llm.go",
+      "destination": "internal/infrastructure/models/ollama/llm.go",
+      "before_sha256": "f47b00a016611cb7333bb7984606bc25f4464f9a2ab28252c3eb5fb3d43439ba",
+      "after_sha256": "f47b00a016611cb7333bb7984606bc25f4464f9a2ab28252c3eb5fb3d43439ba",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/ollama/llm_test.go",
+      "destination": "internal/infrastructure/models/ollama/llm_test.go",
+      "before_sha256": "7d8ed74989a4be71f004a0d128ef1bdf098a0da9934c7158b397b86fabeab2db",
+      "after_sha256": "7d8ed74989a4be71f004a0d128ef1bdf098a0da9934c7158b397b86fabeab2db",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/onnx/embedder.go",
+      "destination": "internal/infrastructure/models/onnx/embedder.go",
+      "before_sha256": "6858fe3ae03ca09a044d7ddc3dd5c0152f327db577f328fa69230ec1d4b496b5",
+      "after_sha256": "6858fe3ae03ca09a044d7ddc3dd5c0152f327db577f328fa69230ec1d4b496b5",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/onnx/embedder_test.go",
+      "destination": "internal/infrastructure/models/onnx/embedder_test.go",
+      "before_sha256": "fa9a8b79fd27d43b1fdcae72ea9354255f81814730c68861728312c816523d1e",
+      "after_sha256": "fa9a8b79fd27d43b1fdcae72ea9354255f81814730c68861728312c816523d1e",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/onnx/llm.go",
+      "destination": "internal/infrastructure/models/onnx/llm.go",
+      "before_sha256": "def8228c9d79b4292e50661f8c002fd5d5aec0adfc3b822832c45342dfef4564",
+      "after_sha256": "def8228c9d79b4292e50661f8c002fd5d5aec0adfc3b822832c45342dfef4564",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/models/onnx/llm_test.go",
+      "destination": "internal/infrastructure/models/onnx/llm_test.go",
+      "before_sha256": "bcee82f5fac483bea8d96044d053d63b9b0fdf6e1a9448b7ef915d2e5106336a",
+      "after_sha256": "bcee82f5fac483bea8d96044d053d63b9b0fdf6e1a9448b7ef915d2e5106336a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repo/root.go",
+      "destination": "internal/infrastructure/repo/root.go",
+      "before_sha256": "2fd58df0a8f8772dc05eee75309e68f245830c3cea53512801545e7a3cc5daf8",
+      "after_sha256": "2fd58df0a8f8772dc05eee75309e68f245830c3cea53512801545e7a3cc5daf8",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repo/worktree.go",
+      "destination": "internal/infrastructure/repo/worktree.go",
+      "before_sha256": "c07c66044b5c39be2c61c301fcf4ddbf3b3058737b1f95286aab5b488e18fee9",
+      "after_sha256": "c07c66044b5c39be2c61c301fcf4ddbf3b3058737b1f95286aab5b488e18fee9",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/context/reader.go",
+      "destination": "internal/infrastructure/repositories/context/reader.go",
+      "before_sha256": "f8734d4b7ad6238461884c00c5acf95033663dc82e19ec552347e16ae8271398",
+      "after_sha256": "f8734d4b7ad6238461884c00c5acf95033663dc82e19ec552347e16ae8271398",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/distribution/reader.go",
+      "destination": "internal/infrastructure/repositories/distribution/reader.go",
+      "before_sha256": "33a9ddc1219596c5e4b93eec31d02c9569b1f1b68e639e744ecbe23d314e1e41",
+      "after_sha256": "33a9ddc1219596c5e4b93eec31d02c9569b1f1b68e639e744ecbe23d314e1e41",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/distribution/reader_test.go",
+      "destination": "internal/infrastructure/repositories/distribution/reader_test.go",
+      "before_sha256": "f06b6201f95f885b9d37f08213f37516c449b3a9a82dcc92aaba47dbc1608f74",
+      "after_sha256": "f06b6201f95f885b9d37f08213f37516c449b3a9a82dcc92aaba47dbc1608f74",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/index/domain_models_test.go",
+      "destination": "internal/infrastructure/repositories/index/domain_models_test.go",
+      "before_sha256": "5f596c569760090691156113ac1312677d053b8971d9416c4ec3347d5412cb6d",
+      "after_sha256": "5f596c569760090691156113ac1312677d053b8971d9416c4ec3347d5412cb6d",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/index/embedding_metadata_test.go",
+      "destination": "internal/infrastructure/repositories/index/embedding_metadata_test.go",
+      "before_sha256": "bfdb9b586965da8ee5b8cfb3ea3a69c5aa044c1b7eb2c36a2d2252c8df290be1",
+      "after_sha256": "bfdb9b586965da8ee5b8cfb3ea3a69c5aa044c1b7eb2c36a2d2252c8df290be1",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/index/fts_sync_test.go",
+      "destination": "internal/infrastructure/repositories/index/fts_sync_test.go",
+      "before_sha256": "ab8b4711244a02aecb4d7cdd74b18a6071d20e17a1640f32ade358c29d74560c",
+      "after_sha256": "ab8b4711244a02aecb4d7cdd74b18a6071d20e17a1640f32ade358c29d74560c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/index/index.go",
+      "destination": "internal/infrastructure/repositories/index/index.go",
+      "before_sha256": "d4883cceb9028e557fbc26c32e29fdcaf7b8ed21a18a902182e21d0d99b2605e",
+      "after_sha256": "d4883cceb9028e557fbc26c32e29fdcaf7b8ed21a18a902182e21d0d99b2605e",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/index/index_test.go",
+      "destination": "internal/infrastructure/repositories/index/index_test.go",
+      "before_sha256": "830e7ea9253feb83342ecbd3170e85df0adfd389fd8261b17667189cbbb49aca",
+      "after_sha256": "830e7ea9253feb83342ecbd3170e85df0adfd389fd8261b17667189cbbb49aca",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/index/transaction_test.go",
+      "destination": "internal/infrastructure/repositories/index/transaction_test.go",
+      "before_sha256": "6736b5e5a10083e22373998e18a37d75fd0b943116a203bc043fc0bfca840ccf",
+      "after_sha256": "6736b5e5a10083e22373998e18a37d75fd0b943116a203bc043fc0bfca840ccf",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/kit/validate_reader.go",
+      "destination": "internal/infrastructure/repositories/kit/validate_reader.go",
+      "before_sha256": "9625c7f221597a197336077cf18148bd127d5c10e1d61d84490a8ebfe2ea2250",
+      "after_sha256": "9625c7f221597a197336077cf18148bd127d5c10e1d61d84490a8ebfe2ea2250",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/kit/validate_reader_test.go",
+      "destination": "internal/infrastructure/repositories/kit/validate_reader_test.go",
+      "before_sha256": "86564a6ab3e3b7d3cd538068cea9cfaa5b4047513dcb4cec53914a9a92f61cb4",
+      "after_sha256": "86564a6ab3e3b7d3cd538068cea9cfaa5b4047513dcb4cec53914a9a92f61cb4",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/kitsync/filecopy.go",
+      "destination": "internal/infrastructure/repositories/kitsync/filecopy.go",
+      "before_sha256": "5aa421b7c150801a3979b96347583b28ab91d5c280c62f870157b814eec2e803",
+      "after_sha256": "5aa421b7c150801a3979b96347583b28ab91d5c280c62f870157b814eec2e803",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/kitsync/filecopy_test.go",
+      "destination": "internal/infrastructure/repositories/kitsync/filecopy_test.go",
+      "before_sha256": "7c959b9d68bfa4250b8b0c0511363441ac922a947bd41871ce94fe4ebe49fad8",
+      "after_sha256": "7c959b9d68bfa4250b8b0c0511363441ac922a947bd41871ce94fe4ebe49fad8",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/provision/manifest_adapter.go",
+      "destination": "internal/infrastructure/repositories/provision/manifest_adapter.go",
+      "before_sha256": "6ff035b2489dcc9c0d6992228d888ce9e4de76f6ac5d2e599c5882ca1a2ec746",
+      "after_sha256": "6ff035b2489dcc9c0d6992228d888ce9e4de76f6ac5d2e599c5882ca1a2ec746",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/usage/config.go",
+      "destination": "internal/infrastructure/repositories/usage/config.go",
+      "before_sha256": "808f85a757997fe4775f66ab96cba6769f7a42e7842c22c3d3c3244603d19cde",
+      "after_sha256": "808f85a757997fe4775f66ab96cba6769f7a42e7842c22c3d3c3244603d19cde",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/usage/store.go",
+      "destination": "internal/infrastructure/repositories/usage/store.go",
+      "before_sha256": "5a390082fb417c7c6b8dcb64ffc8a00e273d7d748a716b5efde039e1878cedb9",
+      "after_sha256": "5a390082fb417c7c6b8dcb64ffc8a00e273d7d748a716b5efde039e1878cedb9",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/usage/store_test.go",
+      "destination": "internal/infrastructure/repositories/usage/store_test.go",
+      "before_sha256": "01c5643712d3251afc76b310dc3068367f49e200e853a5453f5b9413a9b0de4d",
+      "after_sha256": "01c5643712d3251afc76b310dc3068367f49e200e853a5453f5b9413a9b0de4d",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/work/backlog_reader.go",
+      "destination": "internal/infrastructure/repositories/work/backlog_reader.go",
+      "before_sha256": "0757a26dc656902dc9e34517497be9fd86ef08f77d677170909d8ef6f332d152",
+      "after_sha256": "0757a26dc656902dc9e34517497be9fd86ef08f77d677170909d8ef6f332d152",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/repositories/work/backlog_reader_test.go",
+      "destination": "internal/infrastructure/repositories/work/backlog_reader_test.go",
+      "before_sha256": "b69c7842a13b3f775ff1ede5ca753138cd70aebca562db3751d77163ff9ad58a",
+      "after_sha256": "b69c7842a13b3f775ff1ede5ca753138cd70aebca562db3751d77163ff9ad58a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/selfreplace/selfreplace.go",
+      "destination": "internal/infrastructure/selfreplace/selfreplace.go",
+      "before_sha256": "fb1aad0f41cd791ad98e05d2d59a593a22c0318650677e19c9333b944610733c",
+      "after_sha256": "fb1aad0f41cd791ad98e05d2d59a593a22c0318650677e19c9333b944610733c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/selfreplace/selfreplace_test.go",
+      "destination": "internal/infrastructure/selfreplace/selfreplace_test.go",
+      "before_sha256": "86ac7841541087685b160ec2389efd507d0487ee2f19ff2919eeb443a2b9d46f",
+      "after_sha256": "86ac7841541087685b160ec2389efd507d0487ee2f19ff2919eeb443a2b9d46f",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/tomlconfig/edits.go",
+      "destination": "internal/infrastructure/tomlconfig/edits.go",
+      "before_sha256": "b5385138c42da73a33ed2f1c8d03901125b5536d9630f3b75668474723f039b3",
+      "after_sha256": "b5385138c42da73a33ed2f1c8d03901125b5536d9630f3b75668474723f039b3",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/tomlconfig/table.go",
+      "destination": "internal/infrastructure/tomlconfig/table.go",
+      "before_sha256": "9b5eccf3b7cf5f829dbabc14f4d9b6a84e26e4c1aa3b3e0ca3e9df29c2c5d9e6",
+      "after_sha256": "9b5eccf3b7cf5f829dbabc14f4d9b6a84e26e4c1aa3b3e0ca3e9df29c2c5d9e6",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/infrastructure/tomlconfig/table_test.go",
+      "destination": "internal/infrastructure/tomlconfig/table_test.go",
+      "before_sha256": "f76dfc14c4f8a393401bc2e9d94bb711d5cd456dda3995d853936266ccfc0426",
+      "after_sha256": "f76dfc14c4f8a393401bc2e9d94bb711d5cd456dda3995d853936266ccfc0426",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/commands.go",
+      "destination": "internal/platform/cli/commands.go",
+      "before_sha256": "646f0a1a310985396127722fc1c25ceac77dd684161167ca388251b8ffeb352b",
+      "after_sha256": "646f0a1a310985396127722fc1c25ceac77dd684161167ca388251b8ffeb352b",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/commands_test.go",
+      "destination": "internal/platform/cli/commands_test.go",
+      "before_sha256": "b3cc698731855d9c9b2df230df148ff76223c4e5e327da3cabbc680039203844",
+      "after_sha256": "b3cc698731855d9c9b2df230df148ff76223c4e5e327da3cabbc680039203844",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/distribution/commands.go",
+      "destination": "internal/platform/cli/distribution/commands.go",
+      "before_sha256": "7ce36dfcfd2ce345f6ab25a158cbe885651d2f7fc5234330663261d0e57ad2c2",
+      "after_sha256": "7ce36dfcfd2ce345f6ab25a158cbe885651d2f7fc5234330663261d0e57ad2c2",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/embed_test.go",
+      "destination": "internal/platform/cli/embed_test.go",
+      "before_sha256": "cf0599666a65e14f1092e0708651b168f6669e1a3469d84c788944e5d6f72c43",
+      "after_sha256": "cf0599666a65e14f1092e0708651b168f6669e1a3469d84c788944e5d6f72c43",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/help.go",
+      "destination": "internal/platform/cli/help.go",
+      "before_sha256": "d3ad5daeeb8009765741551d7b6c3e2e9ab4444efc394313a7bfb637d237d2ac",
+      "after_sha256": "d3ad5daeeb8009765741551d7b6c3e2e9ab4444efc394313a7bfb637d237d2ac",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/index/build/args.go",
+      "destination": "internal/platform/cli/index/build/args.go",
+      "before_sha256": "6a2881ef413088e2170066803fdce6d393ca6caa84df9d7e1b779cb9b824d6a2",
+      "after_sha256": "6a2881ef413088e2170066803fdce6d393ca6caa84df9d7e1b779cb9b824d6a2",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/index/build/command.go",
+      "destination": "internal/platform/cli/index/build/command.go",
+      "before_sha256": "c8782039aae924ca9ba96b550b7fd96a603111ba38b294e6b4a89c5379b3f8b3",
+      "after_sha256": "c8782039aae924ca9ba96b550b7fd96a603111ba38b294e6b4a89c5379b3f8b3",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/index/index_commands.go",
+      "destination": "internal/platform/cli/index/index_commands.go",
+      "before_sha256": "767bd1a1120d68d9d7c7836ef993e84a04ad334f00b14d5bccdcef8558dd231b",
+      "after_sha256": "767bd1a1120d68d9d7c7836ef993e84a04ad334f00b14d5bccdcef8558dd231b",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/index/ingest/command.go",
+      "destination": "internal/platform/cli/index/ingest/command.go",
+      "before_sha256": "b15d6cff2071000476e4b09fa3b880efeb85bd0d24815243d6631f30be0a76b6",
+      "after_sha256": "b15d6cff2071000476e4b09fa3b880efeb85bd0d24815243d6631f30be0a76b6",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/index/ingest/corpus.go",
+      "destination": "internal/platform/cli/index/ingest/corpus.go",
+      "before_sha256": "1c30c81dd07ee8e7c93527b995dc8842df77341e834b0ab6800adbc35696c641",
+      "after_sha256": "1c30c81dd07ee8e7c93527b995dc8842df77341e834b0ab6800adbc35696c641",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/index/ingest/corpus_test.go",
+      "destination": "internal/platform/cli/index/ingest/corpus_test.go",
+      "before_sha256": "1edab1904a016932beff617dd62c9db8d3a4bd771bafc73d44252f0c8d3795e1",
+      "after_sha256": "1edab1904a016932beff617dd62c9db8d3a4bd771bafc73d44252f0c8d3795e1",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/init/args_test.go",
+      "destination": "internal/platform/cli/init/args_test.go",
+      "before_sha256": "f15663d90a10c77595f90738db5c71c12a83b7cb72107d3257946a9944d6cfec",
+      "after_sha256": "f15663d90a10c77595f90738db5c71c12a83b7cb72107d3257946a9944d6cfec",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/init/command.go",
+      "destination": "internal/platform/cli/init/command.go",
+      "before_sha256": "72faa91ffe5f4c51b364314bddaae198fc42e5f8eefe875deadce9c0a940a3b8",
+      "after_sha256": "72faa91ffe5f4c51b364314bddaae198fc42e5f8eefe875deadce9c0a940a3b8",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/init_test.go",
+      "destination": "internal/platform/cli/init_test.go",
+      "before_sha256": "8aab88922c7e235c574366b0506e748c11e421f292962ea35f7cb51d17ee8d89",
+      "after_sha256": "8aab88922c7e235c574366b0506e748c11e421f292962ea35f7cb51d17ee8d89",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/kit/commands.go",
+      "destination": "internal/platform/cli/kit/commands.go",
+      "before_sha256": "c61c10ec59e9144c6a8afc76a34f4ea1f1b4aa2d94ac61177569bc1341235e9c",
+      "after_sha256": "c61c10ec59e9144c6a8afc76a34f4ea1f1b4aa2d94ac61177569bc1341235e9c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/kit/mutation_boundary_test.go",
+      "destination": "internal/platform/cli/kit/mutation_boundary_test.go",
+      "before_sha256": "b55a58f5f0e785f144bd5a0e852bc3f2c65a4613810efdb4af3d0832fdd9b850",
+      "after_sha256": "b55a58f5f0e785f144bd5a0e852bc3f2c65a4613810efdb4af3d0832fdd9b850",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/kit/normalize/args.go",
+      "destination": "internal/platform/cli/kit/normalize/args.go",
+      "before_sha256": "29fe408fc2a315f5bcbfcf20184ac991a5773230e130986e1b5e31c3c4bd643c",
+      "after_sha256": "29fe408fc2a315f5bcbfcf20184ac991a5773230e130986e1b5e31c3c4bd643c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/kit/normalize/args_test.go",
+      "destination": "internal/platform/cli/kit/normalize/args_test.go",
+      "before_sha256": "5f837d8f690ed6a978deac61694d38207c7d8a250ca39188586d87674baf60bf",
+      "after_sha256": "5f837d8f690ed6a978deac61694d38207c7d8a250ca39188586d87674baf60bf",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/kit/normalize/command.go",
+      "destination": "internal/platform/cli/kit/normalize/command.go",
+      "before_sha256": "12dc290aaabf529c4ab75532b2849b42925c7cd8ca32b6fcb2c32311948e9165",
+      "after_sha256": "12dc290aaabf529c4ab75532b2849b42925c7cd8ca32b6fcb2c32311948e9165",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/kit/validate/args.go",
+      "destination": "internal/platform/cli/kit/validate/args.go",
+      "before_sha256": "9411280f5b8877163fa1e2f6a8357477922f521962e522d075f72aad2ca5087d",
+      "after_sha256": "9411280f5b8877163fa1e2f6a8357477922f521962e522d075f72aad2ca5087d",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/kit/validate/args_test.go",
+      "destination": "internal/platform/cli/kit/validate/args_test.go",
+      "before_sha256": "f23c11b68e59884ed6a585ac556062f355c23b6aa41bb0269d61f1c5d53c6e04",
+      "after_sha256": "f23c11b68e59884ed6a585ac556062f355c23b6aa41bb0269d61f1c5d53c6e04",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/kit/validate/command.go",
+      "destination": "internal/platform/cli/kit/validate/command.go",
+      "before_sha256": "6e6f50a33ae76285bfb84cf28a0c8f16553be5cfa89b8ecdd69b20a8e2969463",
+      "after_sha256": "6e6f50a33ae76285bfb84cf28a0c8f16553be5cfa89b8ecdd69b20a8e2969463",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/links/check/command.go",
+      "destination": "internal/platform/cli/links/check/command.go",
+      "before_sha256": "46f3ec49dc02d74a860d4a56fabdf6732f8f1c11948fe3f9f96675699b77d6e3",
+      "after_sha256": "46f3ec49dc02d74a860d4a56fabdf6732f8f1c11948fe3f9f96675699b77d6e3",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/links/clean/args.go",
+      "destination": "internal/platform/cli/links/clean/args.go",
+      "before_sha256": "da4a2ba77a25b67977e9b5e0c90e8c959a6d824ba199174854297ee3d394eded",
+      "after_sha256": "da4a2ba77a25b67977e9b5e0c90e8c959a6d824ba199174854297ee3d394eded",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/links/clean/args_test.go",
+      "destination": "internal/platform/cli/links/clean/args_test.go",
+      "before_sha256": "a0dcbddd048926d645205fbfb98d317e3846766e4bceb6cda8080ffd184f0195",
+      "after_sha256": "a0dcbddd048926d645205fbfb98d317e3846766e4bceb6cda8080ffd184f0195",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/links/clean/command.go",
+      "destination": "internal/platform/cli/links/clean/command.go",
+      "before_sha256": "f3236cde1e2b9af592bc76d0a8143de4b0cc5c68a42eb07c061cf449c8dc2210",
+      "after_sha256": "f3236cde1e2b9af592bc76d0a8143de4b0cc5c68a42eb07c061cf449c8dc2210",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/links/commands.go",
+      "destination": "internal/platform/cli/links/commands.go",
+      "before_sha256": "e6f00c2451e748f79f29351a3d306efa63815169a1473b227538956029ed47cf",
+      "after_sha256": "e6f00c2451e748f79f29351a3d306efa63815169a1473b227538956029ed47cf",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/mcp/commands.go",
+      "destination": "internal/platform/cli/mcp/commands.go",
+      "before_sha256": "b27359f9f2eb580923b8ad4e086161be3b02594a9dc337b72626417a42e73cfc",
+      "after_sha256": "b27359f9f2eb580923b8ad4e086161be3b02594a9dc337b72626417a42e73cfc",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/mcp/commands_test.go",
+      "destination": "internal/platform/cli/mcp/commands_test.go",
+      "before_sha256": "bd71dcd61e9b1e0a77ce26ace2e180f7ae9ab15e7843d04e845b4269cba66aa2",
+      "after_sha256": "bd71dcd61e9b1e0a77ce26ace2e180f7ae9ab15e7843d04e845b4269cba66aa2",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/mcp/configure/command.go",
+      "destination": "internal/platform/cli/mcp/configure/command.go",
+      "before_sha256": "6dd9621e1ff921b2ced828a727b24c58783d41b68ba7368628961c52b4deb6de",
+      "after_sha256": "6dd9621e1ff921b2ced828a727b24c58783d41b68ba7368628961c52b4deb6de",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/mcp/configure/command_test.go",
+      "destination": "internal/platform/cli/mcp/configure/command_test.go",
+      "before_sha256": "d8d455027a692f0b3579382a8831932e6fa9b36e8e602b21a6a8239fd8b88c6a",
+      "after_sha256": "d8d455027a692f0b3579382a8831932e6fa9b36e8e602b21a6a8239fd8b88c6a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/mcp_test.go",
+      "destination": "internal/platform/cli/mcp_test.go",
+      "before_sha256": "e2962e0c6dd3071f93568ba28fa616be398ab6689e3a4584f799b7e102d62601",
+      "after_sha256": "e2962e0c6dd3071f93568ba28fa616be398ab6689e3a4584f799b7e102d62601",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/model/embed/args.go",
+      "destination": "internal/platform/cli/model/embed/args.go",
+      "before_sha256": "f490af8cc21f6f4659dcc377e669275660f140c55887eefdf36c6eeb37d0bdf5",
+      "after_sha256": "f490af8cc21f6f4659dcc377e669275660f140c55887eefdf36c6eeb37d0bdf5",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/model/embed/args_test.go",
+      "destination": "internal/platform/cli/model/embed/args_test.go",
+      "before_sha256": "84d07ca8ed43caf392ab7ae833091ff080f5b6ee8e3726e4d65057a710783238",
+      "after_sha256": "84d07ca8ed43caf392ab7ae833091ff080f5b6ee8e3726e4d65057a710783238",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/model/embed/command.go",
+      "destination": "internal/platform/cli/model/embed/command.go",
+      "before_sha256": "3d86efeb93bc4151283834bd69886250b2591fada5ce43ddf4e904f37e601b70",
+      "after_sha256": "3d86efeb93bc4151283834bd69886250b2591fada5ce43ddf4e904f37e601b70",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/model/location/location.go",
+      "destination": "internal/platform/cli/model/location/location.go",
+      "before_sha256": "9b24435b2e2ed920f6ea7c85a7ee18cf1f999d58c14a8425531c33aed1495ca4",
+      "after_sha256": "9b24435b2e2ed920f6ea7c85a7ee18cf1f999d58c14a8425531c33aed1495ca4",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/model/model_commands.go",
+      "destination": "internal/platform/cli/model/model_commands.go",
+      "before_sha256": "3002be7babb2c03dae08795c541246ad2b2697075b5f516911ab87fc65423079",
+      "after_sha256": "3002be7babb2c03dae08795c541246ad2b2697075b5f516911ab87fc65423079",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/model/pull/args.go",
+      "destination": "internal/platform/cli/model/pull/args.go",
+      "before_sha256": "6174ecb287c1d3963aed36283338ce0f0fce2477b6c25a971cd010aad4df58e4",
+      "after_sha256": "6174ecb287c1d3963aed36283338ce0f0fce2477b6c25a971cd010aad4df58e4",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/model/pull/args_test.go",
+      "destination": "internal/platform/cli/model/pull/args_test.go",
+      "before_sha256": "24ed41272aa10e6923ecbbde2c05ec83f2e3e69677a142062d567fd4abefcead",
+      "after_sha256": "24ed41272aa10e6923ecbbde2c05ec83f2e3e69677a142062d567fd4abefcead",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/model/pull/command.go",
+      "destination": "internal/platform/cli/model/pull/command.go",
+      "before_sha256": "f85623fadc90584cc6d0f3a4c351686c4a3e59e40eda4c42889a457ba5b097ad",
+      "after_sha256": "f85623fadc90584cc6d0f3a4c351686c4a3e59e40eda4c42889a457ba5b097ad",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/model/search-embed/args.go",
+      "destination": "internal/platform/cli/model/search-embed/args.go",
+      "before_sha256": "4b2fcabdbc1259b1ae687f62d976d400789a91f540919b969c55982c9c722185",
+      "after_sha256": "4b2fcabdbc1259b1ae687f62d976d400789a91f540919b969c55982c9c722185",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/model/search-embed/command.go",
+      "destination": "internal/platform/cli/model/search-embed/command.go",
+      "before_sha256": "dbdfcf5c7af62a0f5d0901094bf1ba1d6bed2688493143370143f5cda81411e7",
+      "after_sha256": "dbdfcf5c7af62a0f5d0901094bf1ba1d6bed2688493143370143f5cda81411e7",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/providers/commands.go",
+      "destination": "internal/platform/cli/providers/commands.go",
+      "before_sha256": "ba2b59d0d34c7d75ddd813cdff9fa3689df33ae53ae1c35712a2b3368461acc5",
+      "after_sha256": "ba2b59d0d34c7d75ddd813cdff9fa3689df33ae53ae1c35712a2b3368461acc5",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/registry.go",
+      "destination": "internal/platform/cli/registry.go",
+      "before_sha256": "36117a1ac625c15d99c29fbbb6805c2aa964cb7bd17ae3e46dea9ba3d43fdee8",
+      "after_sha256": "36117a1ac625c15d99c29fbbb6805c2aa964cb7bd17ae3e46dea9ba3d43fdee8",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/run.go",
+      "destination": "internal/platform/cli/run.go",
+      "before_sha256": "f81288f0c26f5af4e7ca9abecd6a1d3366da608d9f288184e5e156b160796aa1",
+      "after_sha256": "f81288f0c26f5af4e7ca9abecd6a1d3366da608d9f288184e5e156b160796aa1",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/search/benchmark/args.go",
+      "destination": "internal/platform/cli/search/benchmark/args.go",
+      "before_sha256": "59096c2461731f36c5edc9a6b7c29c8e830bee981e903ae9cfc1778b8f3f652a",
+      "after_sha256": "59096c2461731f36c5edc9a6b7c29c8e830bee981e903ae9cfc1778b8f3f652a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/search/benchmark/command.go",
+      "destination": "internal/platform/cli/search/benchmark/command.go",
+      "before_sha256": "66e9d093597868fe6d81b3a9965f7b5dc2bc64973835bdeae2fbc25b761e5f24",
+      "after_sha256": "66e9d093597868fe6d81b3a9965f7b5dc2bc64973835bdeae2fbc25b761e5f24",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/search/commands.go",
+      "destination": "internal/platform/cli/search/commands.go",
+      "before_sha256": "5edb6b61debdb3b1186f3370fae1c915f539e6c98eb174ec870c1b921aef640c",
+      "after_sha256": "5edb6b61debdb3b1186f3370fae1c915f539e6c98eb174ec870c1b921aef640c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/search/query/args.go",
+      "destination": "internal/platform/cli/search/query/args.go",
+      "before_sha256": "379fa99b0afe6790f07b49d3dcbe3676b4ee70b872af85116a1f3808cb9cb199",
+      "after_sha256": "379fa99b0afe6790f07b49d3dcbe3676b4ee70b872af85116a1f3808cb9cb199",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/search/query/args_test.go",
+      "destination": "internal/platform/cli/search/query/args_test.go",
+      "before_sha256": "98ecedf6e18611983fbda3d09cae0f291dca5c0ac88e9d9406d708fa3b1ef16c",
+      "after_sha256": "98ecedf6e18611983fbda3d09cae0f291dca5c0ac88e9d9406d708fa3b1ef16c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/search/query/command.go",
+      "destination": "internal/platform/cli/search/query/command.go",
+      "before_sha256": "4bb872d65ca5633372ee5af20c261fe89ea14a9c56f81e63062dc305ab799776",
+      "after_sha256": "4bb872d65ca5633372ee5af20c261fe89ea14a9c56f81e63062dc305ab799776",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/update/args_test.go",
+      "destination": "internal/platform/cli/update/args_test.go",
+      "before_sha256": "cd744ef9e10e941d3e681351fa1b891a49342dda9eca2e6ae7e8e0e5ecb17a66",
+      "after_sha256": "cd744ef9e10e941d3e681351fa1b891a49342dda9eca2e6ae7e8e0e5ecb17a66",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/update/commands.go",
+      "destination": "internal/platform/cli/update/commands.go",
+      "before_sha256": "5e8cf0b643f7a60c2d2b2acd8c45d5811d4fbf9f82feb12a0357b952b786e678",
+      "after_sha256": "5e8cf0b643f7a60c2d2b2acd8c45d5811d4fbf9f82feb12a0357b952b786e678",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/usage/commands.go",
+      "destination": "internal/platform/cli/usage/commands.go",
+      "before_sha256": "e5d3b37c2b3fbcabfb00c5c7ea3f6935d63c43f9ea03b644acec96eb9262e863",
+      "after_sha256": "e5d3b37c2b3fbcabfb00c5c7ea3f6935d63c43f9ea03b644acec96eb9262e863",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/usage/enable/args.go",
+      "destination": "internal/platform/cli/usage/enable/args.go",
+      "before_sha256": "bea667ec2853e2e038775c6be790393cb8d58bda9ad5aeab96c550f3968b7001",
+      "after_sha256": "bea667ec2853e2e038775c6be790393cb8d58bda9ad5aeab96c550f3968b7001",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/usage/enable/args_test.go",
+      "destination": "internal/platform/cli/usage/enable/args_test.go",
+      "before_sha256": "c264c4ad561322c51684fc8d3b66f04c4ac0c1f5b3b4ab43c2fdd80314eb241c",
+      "after_sha256": "c264c4ad561322c51684fc8d3b66f04c4ac0c1f5b3b4ab43c2fdd80314eb241c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/usage/enable/command.go",
+      "destination": "internal/platform/cli/usage/enable/command.go",
+      "before_sha256": "3d7b62e5fe4627a86f7c1cd3f0cfb16391f4f1772b6537606c1f15ba68137c56",
+      "after_sha256": "3d7b62e5fe4627a86f7c1cd3f0cfb16391f4f1772b6537606c1f15ba68137c56",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/work/commands.go",
+      "destination": "internal/platform/cli/work/commands.go",
+      "before_sha256": "428b92fd13496f240819fc65d2965ab9f6dfa530c2a30187678683b913a3ae47",
+      "after_sha256": "428b92fd13496f240819fc65d2965ab9f6dfa530c2a30187678683b913a3ae47",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/work/new/args.go",
+      "destination": "internal/platform/cli/work/new/args.go",
+      "before_sha256": "eae5f4ae6dfae8b27cfa9fb635145ef6018f564e9c3a8b36ff28b42373a305f9",
+      "after_sha256": "eae5f4ae6dfae8b27cfa9fb635145ef6018f564e9c3a8b36ff28b42373a305f9",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/work/new/args_test.go",
+      "destination": "internal/platform/cli/work/new/args_test.go",
+      "before_sha256": "9821f16fca5841b6af4f993264509b08ff86485237cd7ac535d2a7e12114d170",
+      "after_sha256": "9821f16fca5841b6af4f993264509b08ff86485237cd7ac535d2a7e12114d170",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/work/new/command.go",
+      "destination": "internal/platform/cli/work/new/command.go",
+      "before_sha256": "af05b4cdbdd772329ba972ec68b3686ff52dec6ee0cb22e52f1a33c4fdbae14c",
+      "after_sha256": "af05b4cdbdd772329ba972ec68b3686ff52dec6ee0cb22e52f1a33c4fdbae14c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/work/new/mutation_boundary_test.go",
+      "destination": "internal/platform/cli/work/new/mutation_boundary_test.go",
+      "before_sha256": "6a702535aa31a7ea7d338ee5b023dcf72fc2bac28004cf0a27263de973eb9285",
+      "after_sha256": "6a702535aa31a7ea7d338ee5b023dcf72fc2bac28004cf0a27263de973eb9285",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/work/normalize/args.go",
+      "destination": "internal/platform/cli/work/normalize/args.go",
+      "before_sha256": "74359c459d6dc929f1506552deea4133596bf3e501183f021ec12b004cdc7039",
+      "after_sha256": "74359c459d6dc929f1506552deea4133596bf3e501183f021ec12b004cdc7039",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/work/normalize/args_test.go",
+      "destination": "internal/platform/cli/work/normalize/args_test.go",
+      "before_sha256": "c730eceb06859670f194d36a0c8bcd2829c040acd501815b0e9fb18657cdacce",
+      "after_sha256": "c730eceb06859670f194d36a0c8bcd2829c040acd501815b0e9fb18657cdacce",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/work/normalize/command.go",
+      "destination": "internal/platform/cli/work/normalize/command.go",
+      "before_sha256": "5b48e0936a22c596cee5a659a1a6ebeae8540e0652f34962389da80e988610c0",
+      "after_sha256": "5b48e0936a22c596cee5a659a1a6ebeae8540e0652f34962389da80e988610c0",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/work/validate/args.go",
+      "destination": "internal/platform/cli/work/validate/args.go",
+      "before_sha256": "1396b4c1a9eec8cb2a76181695ec4f498c53ec1b6ab84a85687260f053342747",
+      "after_sha256": "1396b4c1a9eec8cb2a76181695ec4f498c53ec1b6ab84a85687260f053342747",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/work/validate/args_test.go",
+      "destination": "internal/platform/cli/work/validate/args_test.go",
+      "before_sha256": "f29bb3c8bf58e8b19fe92eca3e172d6c3a70f38db15b73aa8877a55d97d16a28",
+      "after_sha256": "f29bb3c8bf58e8b19fe92eca3e172d6c3a70f38db15b73aa8877a55d97d16a28",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/cli/work/validate/command.go",
+      "destination": "internal/platform/cli/work/validate/command.go",
+      "before_sha256": "3108e3673913ffc1cee369f3b951ff21e242b2db3f16f20450a17e9139f2f981",
+      "after_sha256": "3108e3673913ffc1cee369f3b951ff21e242b2db3f16f20450a17e9139f2f981",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/exitcode/error.go",
+      "destination": "internal/platform/exitcode/error.go",
+      "before_sha256": "4e00a5bc47815a8d25419751df6a94ae648559a002f9912176af5f9f802ae67c",
+      "after_sha256": "4e00a5bc47815a8d25419751df6a94ae648559a002f9912176af5f9f802ae67c",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/configure/config.go",
+      "destination": "internal/platform/mcp/configure/config.go",
+      "before_sha256": "45efefc4e840df8c24cc582d4a2f30d272670c1e090a84cf8d18dd3d70e88674",
+      "after_sha256": "45efefc4e840df8c24cc582d4a2f30d272670c1e090a84cf8d18dd3d70e88674",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/configure/config_codex.go",
+      "destination": "internal/platform/mcp/configure/config_codex.go",
+      "before_sha256": "a49d9f8cec9a842f44613df790a104ec578858824a260dee2ccd01526963a6ee",
+      "after_sha256": "a49d9f8cec9a842f44613df790a104ec578858824a260dee2ccd01526963a6ee",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/configure/config_codex_args.go",
+      "destination": "internal/platform/mcp/configure/config_codex_args.go",
+      "before_sha256": "8ec59d665cb69152de65d827f13f266c0c199a058109bfc8ec9ae89b1dafd7b9",
+      "after_sha256": "8ec59d665cb69152de65d827f13f266c0c199a058109bfc8ec9ae89b1dafd7b9",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/configure/config_codex_test.go",
+      "destination": "internal/platform/mcp/configure/config_codex_test.go",
+      "before_sha256": "3ba831c87565e3bd1452e9a32c1ad72f44109cc220eff9cdcd259e6c9244fd01",
+      "after_sha256": "3ba831c87565e3bd1452e9a32c1ad72f44109cc220eff9cdcd259e6c9244fd01",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/configure/config_json.go",
+      "destination": "internal/platform/mcp/configure/config_json.go",
+      "before_sha256": "ae7dd15a66a42c05ccf9bcaa3935fe70eeb1157ddf663fbc1bf04b6bf298d83a",
+      "after_sha256": "ae7dd15a66a42c05ccf9bcaa3935fe70eeb1157ddf663fbc1bf04b6bf298d83a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/configure/config_json_test.go",
+      "destination": "internal/platform/mcp/configure/config_json_test.go",
+      "before_sha256": "c2a6837e6c40476271ede3af51d495da36348165afda9ea8ef0488876a8358af",
+      "after_sha256": "c2a6837e6c40476271ede3af51d495da36348165afda9ea8ef0488876a8358af",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/configure/config_providers.go",
+      "destination": "internal/platform/mcp/configure/config_providers.go",
+      "before_sha256": "bf8bfa120d2c9ebd65db4e515a884218c1b98e5a0f231aeb581d5a533b62cc2b",
+      "after_sha256": "bf8bfa120d2c9ebd65db4e515a884218c1b98e5a0f231aeb581d5a533b62cc2b",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/configure/config_providers_test.go",
+      "destination": "internal/platform/mcp/configure/config_providers_test.go",
+      "before_sha256": "80ecdbbf9bdd678fef3612ccbc2d0873ef74dfbe77e82f8f63bbfea36428d708",
+      "after_sha256": "80ecdbbf9bdd678fef3612ccbc2d0873ef74dfbe77e82f8f63bbfea36428d708",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/configure/config_test.go",
+      "destination": "internal/platform/mcp/configure/config_test.go",
+      "before_sha256": "c495563551a1dac1f0da2fb502946bd584b18f484048e0a5c9bde8ed6468e0a1",
+      "after_sha256": "c495563551a1dac1f0da2fb502946bd584b18f484048e0a5c9bde8ed6468e0a1",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/configure/configure.go",
+      "destination": "internal/platform/mcp/configure/configure.go",
+      "before_sha256": "a36fa19808971f4e91d7d50fa67f0241e72bd7e94f51c4b5a2c2c65fd0c70e7a",
+      "after_sha256": "a36fa19808971f4e91d7d50fa67f0241e72bd7e94f51c4b5a2c2c65fd0c70e7a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/configure/configure_test.go",
+      "destination": "internal/platform/mcp/configure/configure_test.go",
+      "before_sha256": "a7cc27c9f5f0a2c083b8ee9f2d00863cb8dda2468d3e2a087f78711acc715819",
+      "after_sha256": "a7cc27c9f5f0a2c083b8ee9f2d00863cb8dda2468d3e2a087f78711acc715819",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/server/server.go",
+      "destination": "internal/platform/mcp/server/server.go",
+      "before_sha256": "42b4c898e3a7592c7f67795e892125fa3716be7c4073b171a6c944f9f1455655",
+      "after_sha256": "42b4c898e3a7592c7f67795e892125fa3716be7c4073b171a6c944f9f1455655",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/server/tool_search.go",
+      "destination": "internal/platform/mcp/server/tool_search.go",
+      "before_sha256": "f70574177449422e4973ea752972f5f81da54a67719c55552f60b7abc51c96fe",
+      "after_sha256": "f70574177449422e4973ea752972f5f81da54a67719c55552f60b7abc51c96fe",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/server/tool_usage.go",
+      "destination": "internal/platform/mcp/server/tool_usage.go",
+      "before_sha256": "ed71f3fb07032e0db1a6add2531365dd9da15529462cbc37cf01ea47b4077f80",
+      "after_sha256": "ed71f3fb07032e0db1a6add2531365dd9da15529462cbc37cf01ea47b4077f80",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/server/tool_work.go",
+      "destination": "internal/platform/mcp/server/tool_work.go",
+      "before_sha256": "8513a7a6ef8a37ed5bb0948524299cf7b647691dd755de22793c3bac118fd33e",
+      "after_sha256": "8513a7a6ef8a37ed5bb0948524299cf7b647691dd755de22793c3bac118fd33e",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/server/tools.go",
+      "destination": "internal/platform/mcp/server/tools.go",
+      "before_sha256": "839cf5503008d1fe3b2c00b0af80b225ae67acd5a7b43ad9844e64d12518f591",
+      "after_sha256": "839cf5503008d1fe3b2c00b0af80b225ae67acd5a7b43ad9844e64d12518f591",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/server/tools_e2e_test.go",
+      "destination": "internal/platform/mcp/server/tools_e2e_test.go",
+      "before_sha256": "ea40542a069f4eb29d099d92662c8e9f2dad848282acee3e72b788459773d1d2",
+      "after_sha256": "ea40542a069f4eb29d099d92662c8e9f2dad848282acee3e72b788459773d1d2",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "internal/platform/mcp/server/types.go",
+      "destination": "internal/platform/mcp/server/types.go",
+      "before_sha256": "aca951745483f1b95b59278b09eb018dd746f01c7d9b9b6a2864b2ba90319a97",
+      "after_sha256": "aca951745483f1b95b59278b09eb018dd746f01c7d9b9b6a2864b2ba90319a97",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/README.md",
+      "destination": "tests/README.md",
+      "before_sha256": "83313b37bd1bf9ea52f44031848e36a5b1b73c7485536f3335cb40dfebfef104",
+      "after_sha256": "83313b37bd1bf9ea52f44031848e36a5b1b73c7485536f3335cb40dfebfef104",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/application/db/init_service_test.go",
+      "destination": "tests/application/db/init_service_test.go",
+      "before_sha256": "a572e7655baa43c3bfcd14adf9287165a0a97871e049c7198df6beaf9287f75a",
+      "after_sha256": "a572e7655baa43c3bfcd14adf9287165a0a97871e049c7198df6beaf9287f75a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/application/links/check_test.go",
+      "destination": "tests/application/links/check_test.go",
+      "before_sha256": "6d59e2e4bf0e95fbfac2b46a672d736563271c585de5cf6a7947f1e3613d905a",
+      "after_sha256": "6d59e2e4bf0e95fbfac2b46a672d736563271c585de5cf6a7947f1e3613d905a",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/application/links/clean_test.go",
+      "destination": "tests/application/links/clean_test.go",
+      "before_sha256": "d660e101e90d9d6bce925a2385824024b1fe7d381f4bb43a94c1d80cd52bd124",
+      "after_sha256": "d660e101e90d9d6bce925a2385824024b1fe7d381f4bb43a94c1d80cd52bd124",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/application/provision/provision_test.go",
+      "destination": "tests/application/provision/provision_test.go",
+      "before_sha256": "49a2e696115e1a0083d0fd130fc7fcf3b49e4e7223822920883d9e8c3632f878",
+      "after_sha256": "49a2e696115e1a0083d0fd130fc7fcf3b49e4e7223822920883d9e8c3632f878",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/application/search/repository_test.go",
+      "destination": "tests/application/search/repository_test.go",
+      "before_sha256": "42f47e46639c1a57c48de7eb453212c06cc6bc98903a783adfa9aa1154e4a0e0",
+      "after_sha256": "42f47e46639c1a57c48de7eb453212c06cc6bc98903a783adfa9aa1154e4a0e0",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/application/search/service_test.go",
+      "destination": "tests/application/search/service_test.go",
+      "before_sha256": "e75ef88de5310bb61a44e43f50cd263acab1fd8b5af0c4afe2451e3fda032b3d",
+      "after_sha256": "e75ef88de5310bb61a44e43f50cd263acab1fd8b5af0c4afe2451e3fda032b3d",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/application/update/update_test.go",
+      "destination": "tests/application/update/update_test.go",
+      "before_sha256": "bc44d861132e8b192473e10a1419a54a71fe0c64a931b646b548a9101f75c4c9",
+      "after_sha256": "bc44d861132e8b192473e10a1419a54a71fe0c64a931b646b548a9101f75c4c9",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/application/uuidgen/uuid_test.go",
+      "destination": "tests/application/uuidgen/uuid_test.go",
+      "before_sha256": "3e2ff2afba7b3bb3377cdc633b3cfd6737a8c62e9f82c61bee47481ca6d2bc60",
+      "after_sha256": "3e2ff2afba7b3bb3377cdc633b3cfd6737a8c62e9f82c61bee47481ca6d2bc60",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/application/work/intake_test.go",
+      "destination": "tests/application/work/intake_test.go",
+      "before_sha256": "0ac2013d754e42ce70d11e55c12ecef83227c693292da5a3f21ed11a7edc6ae6",
+      "after_sha256": "0ac2013d754e42ce70d11e55c12ecef83227c693292da5a3f21ed11a7edc6ae6",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/application/work/normalize_test.go",
+      "destination": "tests/application/work/normalize_test.go",
+      "before_sha256": "739fdf3d7bedca8593e31423d4c16feaf5548a0bf8064a3a2e6f923ca835cf35",
+      "after_sha256": "739fdf3d7bedca8593e31423d4c16feaf5548a0bf8064a3a2e6f923ca835cf35",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/domain/search/similarity_test.go",
+      "destination": "tests/domain/search/similarity_test.go",
+      "before_sha256": "02fb1e01c25641394c87d71bd07327f4ca3282c887fb6e4924f835576920baf3",
+      "after_sha256": "02fb1e01c25641394c87d71bd07327f4ca3282c887fb6e4924f835576920baf3",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/domain/update/version_test.go",
+      "destination": "tests/domain/update/version_test.go",
+      "before_sha256": "ac93905e9cd1fa2b2f2eca7754e46ff473d2e430923bf209470934c4771845bd",
+      "after_sha256": "ac93905e9cd1fa2b2f2eca7754e46ff473d2e430923bf209470934c4771845bd",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/infrastructure/clients/githubrelease/githubrelease_test.go",
+      "destination": "tests/infrastructure/clients/githubrelease/githubrelease_test.go",
+      "before_sha256": "479713973e0bfbed343220600a42b99c25c7091f2dd8a1f640ff9373231fd08f",
+      "after_sha256": "479713973e0bfbed343220600a42b99c25c7091f2dd8a1f640ff9373231fd08f",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/infrastructure/filesystem/hawp_project_test.go",
+      "destination": "tests/infrastructure/filesystem/hawp_project_test.go",
+      "before_sha256": "9b061e738e806f57b3b60626d6423e2ec63fd55d8f834fdeb0ec4e126e794ab5",
+      "after_sha256": "9b061e738e806f57b3b60626d6423e2ec63fd55d8f834fdeb0ec4e126e794ab5",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/platform/cli/run_test.go",
+      "destination": "tests/platform/cli/run_test.go",
+      "before_sha256": "109e960a14689aed70db55c21edf908139bacf86da720e8217b76e69e991c664",
+      "after_sha256": "109e960a14689aed70db55c21edf908139bacf86da720e8217b76e69e991c664",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    },
+    {
+      "source": "tests/platform/cli/search_test.go",
+      "destination": "tests/platform/cli/search_test.go",
+      "before_sha256": "d764feb25a3edf432a95d4028dafa4a8d93a643023054e1bfc8dec2c3d5de93d",
+      "after_sha256": "d764feb25a3edf432a95d4028dafa4a8d93a643023054e1bfc8dec2c3d5de93d",
+      "mode": 420,
+      "reason": "retain existing cohesive owner or module support file"
+    }
+  ],
+  "remaining": [
+    "domain/work normalization still has historical closed-record evidence review; folder normalization is clean",
+    "domain/context, kit, kitsync, providersync and distribution still mix policy with I/O; imports alone cannot separate them",
+    "application/context configuration and index storage wiring need consumer ports before further layer extraction",
+    "MCP server tool handlers share private RPC contracts; keep them together until that contract is extracted",
+    "No production file is deleted based on absent filename references; moved sources are removed only after verification"
+  ]
+}

@@ -3,7 +3,6 @@ package kitsync
 import (
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
 )
 
@@ -11,9 +10,9 @@ import (
 // file wholesale (kit content is canonical/generated, never hand-edited
 // downstream — same assumption the existing distribution update guides
 // already make).
-func SyncKit(bundleKitDir, repoRoot string) (int, error) {
+func SyncKit(fc FileCopier, bundleKitDir, repoRoot string) (int, error) {
 	destRoot := filepath.Join(repoRoot, ".hawp", "kit")
-	return copyTree(bundleKitDir, destRoot, "")
+	return copyTree(fc, bundleKitDir, destRoot, "")
 }
 
 // ApplyProviderUpdate applies providerName's update rules from bundleRoot
@@ -23,7 +22,7 @@ func SyncKit(bundleKitDir, repoRoot string) (int, error) {
 // update:refresh overwrites from the provider pack; update:seed-if-missing
 // writes only when the destination is absent; update:skip leaves the path
 // untouched.
-func ApplyProviderUpdate(bundleRoot, repoRoot string, manifest *Manifest, providerName string) (int, []string, error) {
+func ApplyProviderUpdate(fc FileCopier, bundleRoot, repoRoot string, manifest *Manifest, providerName string) (int, []string, error) {
 	provider, ok := manifest.Providers[providerName]
 	if !ok {
 		return 0, nil, fmt.Errorf("unknown provider %q", providerName)
@@ -42,20 +41,20 @@ func ApplyProviderUpdate(bundleRoot, repoRoot string, manifest *Manifest, provid
 			srcPath := filepath.Join(sourceBase, rule.From)
 			destPath := filepath.Join(repoRoot, rule.Dest)
 
-			info, err := os.Stat(srcPath)
+			info, err := fc.Stat(srcPath)
 			if err != nil {
 				return written, skipped, fmt.Errorf("provider %s rule %s: source %s: %w", providerName, rule.Dest, srcPath, err)
 			}
 
 			if info.IsDir() {
-				count, err := seedTree(srcPath, destPath, rule.Pattern)
+				count, err := seedTree(fc, srcPath, destPath, rule.Pattern)
 				if err != nil {
 					return written, skipped, err
 				}
 				written += count
 			} else {
-				if _, statErr := os.Stat(destPath); os.IsNotExist(statErr) {
-					if err := copyFile(srcPath, destPath); err != nil {
+				if _, statErr := fc.Stat(destPath); fc.IsNotExist(statErr) {
+					if err := copyFile(fc, srcPath, destPath); err != nil {
 						return written, skipped, err
 					}
 					written++
@@ -67,20 +66,20 @@ func ApplyProviderUpdate(bundleRoot, repoRoot string, manifest *Manifest, provid
 		srcPath := filepath.Join(sourceBase, rule.From)
 		destPath := filepath.Join(repoRoot, rule.Dest)
 
-		info, err := os.Stat(srcPath)
+		info, err := fc.Stat(srcPath)
 		if err != nil {
 			return written, skipped, fmt.Errorf("provider %s rule %s: source %s: %w", providerName, rule.Dest, srcPath, err)
 		}
 
 		if !info.IsDir() {
-			if err := copyFile(srcPath, destPath); err != nil {
+			if err := copyFile(fc, srcPath, destPath); err != nil {
 				return written, skipped, err
 			}
 			written++
 			continue
 		}
 
-		count, err := copyTree(srcPath, destPath, rule.Pattern)
+		count, err := copyTree(fc, srcPath, destPath, rule.Pattern)
 		if err != nil {
 			return written, skipped, err
 		}
@@ -94,12 +93,12 @@ func ApplyProviderUpdate(bundleRoot, repoRoot string, manifest *Manifest, provid
 // filtered by an fnmatch-style pattern on the base filename (recurses
 // into subdirectories; the pattern only applies to file names, not
 // directory names, so nested files still match e.g. "hawp-*.md").
-func copyTree(srcDir, destDir, pattern string) (int, error) {
-	entries, err := os.ReadDir(srcDir)
+func copyTree(fc FileCopier, srcDir, destDir, pattern string) (int, error) {
+	entries, err := fc.ReadDir(srcDir)
 	if err != nil {
 		return 0, err
 	}
-	if err := os.MkdirAll(destDir, 0o755); err != nil {
+	if err := fc.MkdirAll(destDir); err != nil {
 		return 0, err
 	}
 
@@ -109,7 +108,7 @@ func copyTree(srcDir, destDir, pattern string) (int, error) {
 		destPath := filepath.Join(destDir, entry.Name())
 
 		if entry.IsDir() {
-			count, err := copyTree(srcPath, destPath, pattern)
+			count, err := copyTree(fc, srcPath, destPath, pattern)
 			if err != nil {
 				return written, err
 			}
@@ -122,7 +121,7 @@ func copyTree(srcDir, destDir, pattern string) (int, error) {
 				continue
 			}
 		}
-		if err := copyFile(srcPath, destPath); err != nil {
+		if err := copyFile(fc, srcPath, destPath); err != nil {
 			return written, err
 		}
 		written++
@@ -135,7 +134,7 @@ func copyTree(srcDir, destDir, pattern string) (int, error) {
 // the file when the destination does not already exist (e.g. CLAUDE.md,
 // AGENTS.md — the user will customise them). Rules without that flag are
 // always written (refresh behaviour).
-func ApplyProviderInstall(bundleRoot, repoRoot string, manifest *Manifest, providerName string) (int, []string, error) {
+func ApplyProviderInstall(fc FileCopier, bundleRoot, repoRoot string, manifest *Manifest, providerName string) (int, []string, error) {
 	provider, ok := manifest.Providers[providerName]
 	if !ok {
 		return 0, nil, fmt.Errorf("unknown provider %q", providerName)
@@ -149,21 +148,21 @@ func ApplyProviderInstall(bundleRoot, repoRoot string, manifest *Manifest, provi
 		srcPath := filepath.Join(sourceBase, rule.From)
 		destPath := filepath.Join(repoRoot, rule.Dest)
 
-		info, err := os.Stat(srcPath)
+		info, err := fc.Stat(srcPath)
 		if err != nil {
 			return written, seeded, fmt.Errorf("provider %s rule %s: source %s: %w", providerName, rule.Dest, srcPath, err)
 		}
 
 		if rule.IsSeedIfMissing() {
 			if info.IsDir() {
-				count, err := seedTree(srcPath, destPath, rule.Pattern)
+				count, err := seedTree(fc, srcPath, destPath, rule.Pattern)
 				if err != nil {
 					return written, seeded, err
 				}
 				written += count
 			} else {
-				if _, statErr := os.Stat(destPath); os.IsNotExist(statErr) {
-					if err := copyFile(srcPath, destPath); err != nil {
+				if _, statErr := fc.Stat(destPath); fc.IsNotExist(statErr) {
+					if err := copyFile(fc, srcPath, destPath); err != nil {
 						return written, seeded, err
 					}
 					written++
@@ -174,13 +173,13 @@ func ApplyProviderInstall(bundleRoot, repoRoot string, manifest *Manifest, provi
 		}
 
 		if !info.IsDir() {
-			if err := copyFile(srcPath, destPath); err != nil {
+			if err := copyFile(fc, srcPath, destPath); err != nil {
 				return written, seeded, err
 			}
 			written++
 			continue
 		}
-		count, err := copyTree(srcPath, destPath, rule.Pattern)
+		count, err := copyTree(fc, srcPath, destPath, rule.Pattern)
 		if err != nil {
 			return written, seeded, err
 		}
@@ -191,12 +190,12 @@ func ApplyProviderInstall(bundleRoot, repoRoot string, manifest *Manifest, provi
 }
 
 // seedTree copies only files that do not already exist at their destination.
-func seedTree(srcDir, destDir, pattern string) (int, error) {
-	entries, err := os.ReadDir(srcDir)
+func seedTree(fc FileCopier, srcDir, destDir, pattern string) (int, error) {
+	entries, err := fc.ReadDir(srcDir)
 	if err != nil {
 		return 0, err
 	}
-	if err := os.MkdirAll(destDir, 0o755); err != nil {
+	if err := fc.MkdirAll(destDir); err != nil {
 		return 0, err
 	}
 	written := 0
@@ -204,7 +203,7 @@ func seedTree(srcDir, destDir, pattern string) (int, error) {
 		srcPath := filepath.Join(srcDir, entry.Name())
 		destPath := filepath.Join(destDir, entry.Name())
 		if entry.IsDir() {
-			count, err := seedTree(srcPath, destPath, pattern)
+			count, err := seedTree(fc, srcPath, destPath, pattern)
 			if err != nil {
 				return written, err
 			}
@@ -216,10 +215,10 @@ func seedTree(srcDir, destDir, pattern string) (int, error) {
 				continue
 			}
 		}
-		if _, statErr := os.Stat(destPath); !os.IsNotExist(statErr) {
+		if _, statErr := fc.Stat(destPath); !fc.IsNotExist(statErr) {
 			continue // already exists
 		}
-		if err := copyFile(srcPath, destPath); err != nil {
+		if err := copyFile(fc, srcPath, destPath); err != nil {
 			return written, err
 		}
 		written++
@@ -227,22 +226,21 @@ func seedTree(srcDir, destDir, pattern string) (int, error) {
 	return written, nil
 }
 
-func copyFile(srcPath, destPath string) error {
-	src, err := os.Open(srcPath)
+func copyFile(fc FileCopier, srcPath, destPath string) error {
+	src, err := fc.Open(srcPath)
 	if err != nil {
 		return err
 	}
 	defer src.Close()
 
-	if err := os.MkdirAll(filepath.Dir(destPath), 0o755); err != nil {
+	if err := fc.MkdirAll(filepath.Dir(destPath)); err != nil {
 		return err
 	}
-	temp, err := os.CreateTemp(filepath.Dir(destPath), ".kitsync-*")
+	temp, tempName, err := fc.CreateTemp(filepath.Dir(destPath), ".kitsync-*")
 	if err != nil {
 		return err
 	}
-	tempPath := temp.Name()
-	defer os.Remove(tempPath)
+	defer fc.Remove(tempName)
 
 	if _, err := io.Copy(temp, src); err != nil {
 		temp.Close()
@@ -251,5 +249,5 @@ func copyFile(srcPath, destPath string) error {
 	if err := temp.Close(); err != nil {
 		return err
 	}
-	return os.Rename(tempPath, destPath)
+	return fc.Rename(tempName, destPath)
 }
