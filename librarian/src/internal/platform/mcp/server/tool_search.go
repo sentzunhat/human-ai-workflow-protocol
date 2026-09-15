@@ -11,6 +11,7 @@ import (
 	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
 	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
 	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
+	inframodels "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models"
 )
 
 const contextRadius = 40 // lines above/below source line for context window
@@ -136,7 +137,7 @@ func toolSearchContext(query string, limit, maxTokens int, repoRoot string) rpcR
 }
 
 func searchContextResponse(query string, limit, maxTokens int, repoRoot string) (ContextSearchResponse, error) {
-	results, err := appsearch.Query(repoRoot, query, limit)
+	results, err := appsearch.QueryWithEmbedder(repoRoot, query, limit, inframodels.NewEmbedder)
 	if err != nil {
 		return ContextSearchResponse{}, err
 	}

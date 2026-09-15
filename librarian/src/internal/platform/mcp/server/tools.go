@@ -96,7 +96,7 @@ func toolDefs() []map[string]any {
 		},
 		{
 			"name":        "hawp_work_reshape",
-			"description": "Shape a raw user request into HAWP intake fields (mission, constraints, output, checkpoint) using a local Ollama model. Returns a proposed shape for review — does NOT create a work item. Requires Ollama running locally.",
+			"description": "Shape a raw user request into HAWP intake fields (mission, constraints, output_spec, done_signal) using a local LLM. Returns a structured WorkReshapeResponse — does NOT create a work item. Supports backend=ollama (default) or backend=onnx (-tags ORT build required).",
 			"inputSchema": map[string]any{
 				"type": "object",
 				"properties": map[string]any{
@@ -108,9 +108,13 @@ func toolDefs() []map[string]any {
 						"type":        "string",
 						"description": "Optional background context the user supplied",
 					},
+					"backend": map[string]any{
+						"type":        "string",
+						"description": "LLM backend: ollama (default) or onnx",
+					},
 					"model": map[string]any{
 						"type":        "string",
-						"description": "Ollama model name (default: mistral)",
+						"description": "Model name (default: backend default)",
 					},
 					"url": map[string]any{
 						"type":        "string",

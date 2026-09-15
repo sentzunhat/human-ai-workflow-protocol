@@ -15,7 +15,6 @@ import (
 	appdoc "github.com/sentzunhat/hawp/librarian/src/internal/application/work/doc"
 	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work/intake"
 	domainwork "github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
-	ollamainfra "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models/ollama"
 )
 
 func toolWorkNew(args json.RawMessage, repoRoot string) rpcResponse {
@@ -77,6 +76,7 @@ func toolWorkReshape(args json.RawMessage, repoRoot string) rpcResponse {
 	var a struct {
 		Input   string `json:"input"`
 		Context string `json:"context"`
+		Backend string `json:"backend"`
 		Model   string `json:"model"`
 		URL     string `json:"url"`
 	}
@@ -86,14 +86,16 @@ func toolWorkReshape(args json.RawMessage, repoRoot string) rpcResponse {
 	if strings.TrimSpace(a.Input) == "" {
 		return toolErr("input is required")
 	}
-
-	llmClient, err := ollamainfra.NewOllamaLLMClient(a.URL, a.Model)
-	if err != nil {
-		return toolErr("ollama unavailable: " + err.Error())
+	if a.Backend == "" {
+		a.Backend = "ollama"
 	}
-	defer llmClient.Close()
 
-	shaper := ollamainfra.NewOllamaIntakeShaper(llmClient, 512)
+	shaper, cleanup, err := newMCPReshapeShaper(a.Backend, a.URL, a.Model)
+	if err != nil {
+		return toolErr("shaper unavailable: " + err.Error())
+	}
+	defer cleanup()
+
 	draft, err := appwork.DraftIntake(context.Background(), appwork.DraftRequest{
 		Input:   a.Input,
 		Context: a.Context,
@@ -102,7 +104,12 @@ func toolWorkReshape(args json.RawMessage, repoRoot string) rpcResponse {
 		return toolErr("reshape failed: " + err.Error())
 	}
 
-	return text(formatDraft(draft))
+	return jsonResult(WorkReshapeResponse{
+		Mission:     draft.Mission,
+		Constraints: draft.Constraints,
+		Output:      draft.Output,
+		Checkpoint:  draft.Checkpoint,
+	})
 }
 
 func toolWorkIntake(args json.RawMessage, repoRoot string) rpcResponse {
@@ -128,13 +135,12 @@ func toolWorkIntake(args json.RawMessage, repoRoot string) rpcResponse {
 		a.MaxTokens = 2000
 	}
 
-	llmClient, err := ollamainfra.NewOllamaLLMClient(a.URL, a.Model)
+	shaper, cleanup, err := newMCPReshapeShaper("ollama", a.URL, a.Model)
 	if err != nil {
-		return toolErr("ollama unavailable: " + err.Error())
+		return toolErr("shaper unavailable: " + err.Error())
 	}
-	defer llmClient.Close()
+	defer cleanup()
 
-	shaper := ollamainfra.NewOllamaIntakeShaper(llmClient, 512)
 	response, err := runWorkIntake(context.Background(), repoRoot, a.Input, a.Limit, a.MaxTokens, shaper)
 	if err != nil {
 		return toolErr("intake failed: " + err.Error())

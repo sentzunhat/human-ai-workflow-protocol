@@ -114,3 +114,12 @@ type TokenAccounting struct {
 	ShapedTokens  int `json:"shaped_tokens"`
 	SavingsPct    int `json:"savings_pct"`
 }
+
+// WorkReshapeResponse is the structured response from hawp_work_reshape.
+// Fields match the WorkIntakeDraft contract so callers can deserialize them.
+type WorkReshapeResponse struct {
+	Mission     string `json:"mission"`
+	Constraints string `json:"constraints"`
+	Output      string `json:"output_spec"`
+	Checkpoint  string `json:"done_signal,omitempty"`
+}
