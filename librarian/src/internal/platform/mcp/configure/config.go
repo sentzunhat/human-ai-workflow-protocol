@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 func hawpBinaryPath(repoRoot string) string {
@@ -67,6 +69,9 @@ func WriteProviderConfigs(repoRoot string, providers []string) error {
 
 		case "cursor":
 			dir := filepath.Join(repoRoot, ".cursor")
+			if err := filesystem.RejectSymlinkAncestors(repoRoot, dir); err != nil {
+				return fmt.Errorf("cursor MCP config: %w", err)
+			}
 			if err := os.MkdirAll(dir, 0o755); err != nil {
 				return fmt.Errorf("cursor MCP config: %w", err)
 			}
@@ -88,6 +93,9 @@ func WriteProviderConfigs(repoRoot string, providers []string) error {
 
 		case "codex":
 			codexDir := filepath.Join(repoRoot, ".codex")
+			if err := filesystem.RejectSymlinkAncestors(repoRoot, codexDir); err != nil {
+				return fmt.Errorf("codex MCP config: %w", err)
+			}
 			if err := os.MkdirAll(codexDir, 0o755); err != nil {
 				return fmt.Errorf("codex MCP config: %w", err)
 			}

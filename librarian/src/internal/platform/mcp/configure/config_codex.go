@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/pelletier/go-toml/v2"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/tomlconfig"
 )
 
@@ -86,7 +87,11 @@ func writeCodexTOML(path, root string) error {
 	if bytes.Equal(data, out) {
 		return nil
 	}
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+	destDir := filepath.Dir(path)
+	if err := filesystem.RejectSymlinkAncestors(root, destDir); err != nil {
+		return fmt.Errorf("refusing symlinked Codex config directory: %w", err)
+	}
+	if err := os.MkdirAll(destDir, 0o755); err != nil {
 		return err
 	}
 	return os.WriteFile(path, out, 0o644)
