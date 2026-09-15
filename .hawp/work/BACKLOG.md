@@ -42,6 +42,9 @@ elicitation/guidance work from `c8d9e1cb`.
 | `c8d9e1cb` | feature | Interactive MCP intake refinement with structured results (`v0.0.24` subset, remainder `v0.0.25`) | `plan-ready` | Codex | [plan](active/c8d9e1cb/plan.md) | 2026-09-13 |
 | `2eea565c` | improvement | MCP capability catalog for HAWP resources and prompts (`v0.0.25`) | `plan-ready` | Codex | [plan](active/2eea565c/plan.md) | 2026-09-13 |
 | `429e075e` | improvement | Remote MCP transport and authorization readiness audit (`v0.0.25`) | `plan-ready` | Codex | [plan](active/429e075e/plan.md) | 2026-09-13 |
+| `cd5c215b` | fix | doc: quote YAML front-matter title to prevent newline injection | inbox | unassigned | [plan](active/cd5c215b/plan.md) | 2026-09-15 |
+| `025de149` | fix | intake: add symlink guard for BACKLOG.md and active plan dir writes | inbox | unassigned | [plan](active/025de149/plan.md) | 2026-09-15 |
+| `29b18cef` | fix | source-layout apply: write candidate tree under sourceRoot subdirectory in verify | inbox | unassigned | [plan](active/29b18cef/plan.md) | 2026-09-15 |
 
 ## Blocked / Parked
 

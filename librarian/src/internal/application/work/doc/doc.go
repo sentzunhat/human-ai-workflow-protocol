@@ -131,7 +131,7 @@ func isValidType(t string) bool {
 func template(id, docType, title, date string) string {
 	return fmt.Sprintf(`---
 uuid: %s
-title: %s
+title: %q
 type: %s
 date: %s
 ---

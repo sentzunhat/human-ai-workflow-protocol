@@ -81,12 +81,15 @@ func verify(files []*file) error {
 		return err
 	}
 	defer os.RemoveAll(dir)
-	if err = writeFiles(dir, files); err != nil {
+	// Write files under the module-relative source root so that go.mod sits
+	// at modRoot and imports resolve relative to it (mirroring the live tree).
+	modRoot := filepath.Join(dir, filepath.FromSlash(sourceRoot))
+	if err = writeFiles(modRoot, files); err != nil {
 		return err
 	}
 	for _, args := range [][]string{{"test", "-run", "^$", "./..."}, {"test", "-tags", "integration,benchmark", "-run", "^$", "./..."}, {"vet", "./..."}} {
 		cmd := exec.Command("go", args...)
-		cmd.Dir = dir
+		cmd.Dir = modRoot
 		cmd.Env = append(os.Environ(), "GOWORK=off")
 		out, err := cmd.CombinedOutput()
 		if err != nil {

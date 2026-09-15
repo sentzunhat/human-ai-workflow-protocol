@@ -9,6 +9,7 @@ import (
 
 	"github.com/sentzunhat/hawp/librarian/src/internal/application/uuidgen"
 	domainwork "github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // NewItemResult reports what NewItem created.
@@ -68,6 +69,12 @@ func NewItem(workDir, itemType, title, inputText string) (*NewItemResult, error)
 	date := time.Now().Format("2006-01-02")
 
 	backlogPath := filepath.Join(workDir, "BACKLOG.md")
+	if err := filesystem.RejectSymlinkAncestors(workDir, backlogPath); err != nil {
+		return nil, fmt.Errorf("backlog path: %w", err)
+	}
+	if fi, err := os.Lstat(backlogPath); err == nil && !fi.Mode().IsRegular() {
+		return nil, fmt.Errorf("BACKLOG.md is not a regular file")
+	}
 	backlogBytes, err := os.ReadFile(backlogPath)
 	if err != nil {
 		return nil, fmt.Errorf("read BACKLOG.md: %w", err)
@@ -79,6 +86,9 @@ func NewItem(workDir, itemType, title, inputText string) (*NewItemResult, error)
 	}
 
 	planDir := filepath.Join(workDir, "active", item.PlanDirName())
+	if err := filesystem.RejectSymlinkAncestors(workDir, planDir); err != nil {
+		return nil, fmt.Errorf("active item path: %w", err)
+	}
 	planPath := filepath.Join(planDir, item.PlanFileName())
 	if _, err := os.Stat(planPath); err == nil {
 		return nil, fmt.Errorf("plan file already exists: %s (slug collision — try a more distinct title)", planPath)
