@@ -47,13 +47,21 @@ func cursorServerEntry(repoRoot string) map[string]any {
 	}
 }
 
+// vscodeServerEntry uses the workspace MCP shape consumed by VS Code's
+// GitHub/Copilot integration. Keep this repo-local so init never writes to a
+// user's global VS Code profile.
+func vscodeServerEntry(repoRoot string) map[string]any {
+	return cursorServerEntry(repoRoot)
+}
+
 // WriteProviderConfigs writes (or merges) the hawp MCP server entry into the
 // relevant provider config file for each named provider. Existing HAWP launch
 // fields are upgraded; JSON provider-specific settings are preserved.
 //
-// File-writing providers: claude (.mcp.json), cursor (.cursor/mcp.json), codex (.codex/config.toml).
-// Continue prints a manual config block (no standard file location).
-// github/Copilot prints a note (VS Code manages its own MCP config).
+// File-writing providers: claude (.mcp.json), cursor (.cursor/mcp.json),
+// codex (.codex/config.toml), and github (.vscode/mcp.json).
+// Continue prints a manual config block because its working config is the
+// user-scoped ~/.continue/config.yaml file.
 // WriteProviderConfigs validates and writes provider configs for each named provider.
 // It expands shorthand names (e.g. "all") before writing. Callers that have already
 // validated and expanded the list should call writeProviderConfigs directly to avoid
@@ -107,11 +115,25 @@ func writeProviderConfigs(repoRoot string, providers []string) error {
 
 		case "continue":
 			fmt.Println("MCP (Continue): add this block to .continue/config.yaml:")
-			fmt.Println("  mcp:")
-			fmt.Println("    servers:")
-			fmt.Println("      - name: hawp")
-			fmt.Printf("        command: %q\n", hawpBinaryPath(repoRoot))
-			fmt.Printf("        args: [mcp, --repo-root, %q]\n", repoRoot)
+			fmt.Println("  mcpServers:")
+			fmt.Println("    - name: hawp")
+			fmt.Printf("      command: %q\n", hawpBinaryPath(repoRoot))
+			fmt.Printf("      args: [mcp, --repo-root, %q]\n", repoRoot)
+
+		case "github":
+			dir := filepath.Join(repoRoot, ".vscode")
+			if err := filesystem.RejectSymlinkAncestors(repoRoot, dir); err != nil {
+				return wrapErr("github", err)
+			}
+			if err := os.MkdirAll(dir, 0o755); err != nil {
+				return wrapErr("github", err)
+			}
+			if err := writeServerJSON(filepath.Join(dir, "mcp.json"), vscodeServerEntry(repoRoot), "servers"); err != nil {
+				return wrapErr("github", err)
+			}
+			written = append(written, "github")
+			fmt.Println("MCP: wrote .vscode/mcp.json (GitHub/Copilot)")
+			fmt.Println("  Open the VS Code MCP panel and enable the workspace server.")
 
 		case "codex":
 			codexDir := filepath.Join(repoRoot, ".codex")
@@ -129,9 +151,6 @@ func writeProviderConfigs(repoRoot string, providers []string) error {
 			fmt.Println("  Note: Codex only loads project MCP config for trusted projects.")
 			fmt.Println("  Trust this repo in Codex settings, then start a fresh task/session.")
 			fmt.Println("  CLI: `codex mcp list` confirms whether hawp is visible.")
-
-		case "github":
-			fmt.Println("MCP (github/Copilot): configure via VS Code MCP panel or .vscode/mcp.json — no file written.")
 
 		}
 	}

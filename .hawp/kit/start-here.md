@@ -72,28 +72,6 @@ HAWP is a **shaping protocol**, not a runtime. Better results come from stronger
 
 ## Next Resources
 
-### HAWP Tools And Record Updates
-
-Provider setup and reusable worker instructions:
-[Codex, Claude Code, and GitHub Copilot](usage/mcp/README.md).
-
-- Prefer available HAWP MCP tools for their supported operations:
-  `hawp_work_intake` for compound search + reshape, `hawp_search` for direct
-  indexed context lookup, `hawp_work_new` for a genuinely new item, and
-  `hawp_work_validate` before and after workflow changes. Confirm the server's
-  repository scope before any write. Use the local HAWP CLI if MCP is unavailable.
-- Check the backlog and existing plan before creating an item. Add new context,
-  decisions, changed constraints, and verification to that same plan when the
-  intent is unchanged. Preserve its UUID, artifacts, and historical evidence.
-- Discover the tools actually exposed by the connected server. Do not invent
-  `hawp_add` or `hawp_work_update`: when no update tool exists, edit the existing
-  plan and backlog directly, then validate. Do not create duplicate items as a
-  substitute for updating context.
-- Search indexes can be stale or incomplete. Confirm source files before edits
-  or status claims; no search hit does not establish that an item is absent.
-- Never overwrite unmatched work records or fabricate identity, outcome, or
-  verification. Keep unresolved matches for explicit review.
-
 ### Learning & Examples
 
 - **Authoring guidance**: [references/authoring-patterns.md](references/authoring-patterns.md) — guidance for recurring task types
@@ -107,6 +85,7 @@ Provider setup and reusable worker instructions:
 3. **[usage/status-report.md](usage/status-report.md)** — context handoff and session continuity
 4. **[usage/workflow-loop.md](usage/workflow-loop.md)** — multi-iteration work across sessions (instruction-based; autonomous or gated; review/approve/retry without CLI)
 5. **[usage/search.md](usage/search.md)** — index and search kit/work documents via CLI or MCP (`hawp_search` tool)
+6. **[usage/hawp-first-workflow.md](usage/hawp-first-workflow.md)** — hawp-first session workflow: use `hawp_search` as the default context strategy instead of direct file reads
 
 ### Templates by Task Type
 

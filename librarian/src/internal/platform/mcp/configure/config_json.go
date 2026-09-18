@@ -11,6 +11,10 @@ import (
 // Preserve unrelated settings as raw JSON, including large numeric values.
 // Only the supplied HAWP launch fields belong to this migration.
 func mergeMCPJSON(data []byte, entry map[string]any) ([]byte, error) {
+	return mergeServerJSON(data, entry, "mcpServers")
+}
+
+func mergeServerJSON(data []byte, entry map[string]any, rootKey string) ([]byte, error) {
 	config := map[string]json.RawMessage{}
 	if len(data) > 0 {
 		if err := decodeConfigObject(data, &config); err != nil {
@@ -18,15 +22,15 @@ func mergeMCPJSON(data []byte, entry map[string]any) ([]byte, error) {
 		}
 	}
 	servers := map[string]json.RawMessage{}
-	if raw, ok := config["mcpServers"]; ok {
+	if raw, ok := config[rootKey]; ok {
 		if err := decodeConfigObject(raw, &servers); err != nil {
-			return nil, fmt.Errorf("mcpServers: %w", err)
+			return nil, fmt.Errorf("%s: %w", rootKey, err)
 		}
 	}
 	hawp := map[string]json.RawMessage{}
 	if raw, ok := servers["hawp"]; ok {
 		if err := decodeConfigObject(raw, &hawp); err != nil {
-			return nil, fmt.Errorf("mcpServers.hawp: %w", err)
+			return nil, fmt.Errorf("%s.hawp: %w", rootKey, err)
 		}
 	}
 	// A remote server cannot be converted to stdio by merely changing command.
@@ -50,7 +54,7 @@ func mergeMCPJSON(data []byte, entry map[string]any) ([]byte, error) {
 	if servers["hawp"], err = json.Marshal(hawp); err != nil {
 		return nil, err
 	}
-	if config["mcpServers"], err = json.Marshal(servers); err != nil {
+	if config[rootKey], err = json.Marshal(servers); err != nil {
 		return nil, err
 	}
 	out, err := json.MarshalIndent(config, "", "  ")
@@ -71,6 +75,10 @@ func decodeConfigObject(data []byte, target *map[string]json.RawMessage) error {
 }
 
 func writeMCPJSON(path string, entry map[string]any) error {
+	return writeServerJSON(path, entry, "mcpServers")
+}
+
+func writeServerJSON(path string, entry map[string]any, rootKey string) error {
 	data, err := os.ReadFile(path)
 	if err != nil && !os.IsNotExist(err) {
 		return err
@@ -78,7 +86,7 @@ func writeMCPJSON(path string, entry map[string]any) error {
 	if err == nil && len(bytes.TrimSpace(data)) == 0 {
 		return fmt.Errorf("parse %s: empty configuration; review manually", path)
 	}
-	out, err := mergeMCPJSON(data, entry)
+	out, err := mergeServerJSON(data, entry, rootKey)
 	if err != nil {
 		return fmt.Errorf("parse %s: %w", path, err)
 	}

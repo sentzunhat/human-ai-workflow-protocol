@@ -24,11 +24,11 @@ func configureFixture(t *testing.T) string {
 func TestConfigureFreshAndRepeat(t *testing.T) {
 	root := configureFixture(t)
 	for i := 0; i < 2; i++ {
-		if err := Configure(root, []string{"claude", "codex", "cursor"}); err != nil {
+		if err := Configure(root, []string{"claude", "codex", "cursor", "github"}); err != nil {
 			t.Fatal(err)
 		}
 	}
-	for _, name := range []string{".mcp.json", ".codex/config.toml", ".cursor/mcp.json"} {
+	for _, name := range []string{".mcp.json", ".codex/config.toml", ".cursor/mcp.json", ".vscode/mcp.json"} {
 		data, err := os.ReadFile(filepath.Join(root, name))
 		if err != nil || !strings.Contains(string(data), "--repo-root") {
 			t.Fatalf("%s: %s %v", name, data, err)

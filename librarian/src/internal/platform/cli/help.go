@@ -30,7 +30,7 @@ COMMANDS
   distribution validate                validate generated install/update guides
   distribution sync                    providers sync + build + validate generated guides
   check                                combined kit + work + links validation
-  init [--provider <name>|all]           provision ~/.hawp, sync kit, write MCP configs (claude|cursor|codex|continue|all)
+  init [--provider <name>|all]           provision ~/.hawp, sync kit, write MCP configs (claude|cursor|codex|continue|github|all)
   mcp [--repo-root <path>]               start stdio MCP server for the selected repository
   mcp configure --provider <name>       configure MCP only; no downloads or kit sync
   version                               print the running hawp version

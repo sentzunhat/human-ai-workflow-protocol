@@ -6,14 +6,20 @@
 | --- | --- | --- |
 | Codex | Writes project TOML | Live validation passed in this repository |
 | Claude Code | Writes project JSON | User-reported MCP PASS on 2026-09-06; not independently observed |
-| Cursor | Writes project JSON | Config tests pass; client test still required |
-| Continue | Prints manual configuration advice | Client test still required |
-| GitHub Copilot | Prints manual setup advice | User subsequently reported actual MCP PASS; not independently observed |
+| Cursor | Writes project JSON | User-reported live `hawp_work_validate` and `hawp_search` tests passed in this repository |
+| Continue | Reads `~/.continue/config.yaml` (`mcpServers`) | Live `hawp_work_validate` passed after adding the HAWP server; known link warnings remain |
+| GitHub Copilot | Prints manual setup advice | Live `mcp_hawp_hawp_work_validate` passed in VS Code; repository link warnings remain |
 
 This is a maintenance snapshot, not a guarantee for other machines or versions.
-The user accepts Cursor/Continue live testing as deferred for this release.
-Copilot's successful reported tool was `mcp_hawp2_hawp_work_validate`; the
+The user reported that Cursor passed the target conversation tests after
+approving the project server. The successful calls were read-only and used the
+provider's prefixed HAWP tool names. Continue's live call used the unprefixed
+`hawp_work_validate` tool name exposed by its MCP bridge.
+Copilot's successful reported tool was `mcp_hawp_hawp_work_validate`; the
 client prefix differs without changing the underlying HAWP tool identity.
+The live result reported the correct repository root, zero work issues, and
+one warning; aggregate `hawp check` still failed its links check for two known
+broken local Markdown links.
 The five names identify client integrations, not model or infrastructure backends.
 `all` retains its four-provider meaning: Claude, Cursor, Continue, Codex.
 GitHub advice is explicitly selected. Unknown names fail in the configuration
@@ -36,6 +42,38 @@ Do not count CLI fallback as MCP proof. A server listing proves configuration
 visibility, while a successful tool call proves more of the actual connection.
 Keep each client's result separate. See the [setup guides](README.md) for
 Codex, Claude Code, and VS Code Copilot commands and official references.
+
+## Read-only search test
+
+After `hawp_work_validate` succeeds, use this exact provider-conversation test:
+
+```text
+Now perform one additional read-only HAWP MCP test.
+
+Call the HAWP search tool through MCP, preferably hawp_search or its
+provider-prefixed equivalent, with:
+
+query: "MCP provider configuration"
+limit: 3
+context: false
+
+Do not use terminal commands or shell fallback.
+
+Report:
+
+1. The exact tool name used.
+2. Whether MCP was used.
+3. Number of results.
+4. The source paths returned.
+5. Whether any result contains an absolute home-directory path, credential,
+   API key, token, or other personal information.
+
+Do not modify files or work records.
+```
+
+Record the provider, exact tool name, result count, source paths, and leakage
+assessment as direct evidence. Do not treat a server listing or CLI result as a
+provider-side tool invocation.
 
 ## Keep Extension Simple
 

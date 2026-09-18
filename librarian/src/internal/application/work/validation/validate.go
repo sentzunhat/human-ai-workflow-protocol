@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	domainwork "github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
 	infraRepo "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 	reposwork "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/work"
 )
@@ -15,6 +16,7 @@ import (
 var defaultWorkSource = &domainwork.WorkSource{
 	Exists:         infraRepo.Exists,
 	ToRepoRelative: infraRepo.ToRepoRelative,
+	CollectFiles:   markdown.CollectFiles,
 }
 
 // Validate parses the backlog and runs all five checks against workDir

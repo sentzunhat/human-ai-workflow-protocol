@@ -59,13 +59,7 @@ type EmbedService struct {
 	newEmbedder func(backend, model string) (embeddings.Embedder, error)
 }
 
-// NewEmbedService creates an embed service.
-func NewEmbedService(dbPath string) *EmbedService {
-	return &EmbedService{dbPath: dbPath}
-}
-
 // NewEmbedServiceWithFactory injects model construction at the composition
-// boundary. Production callers should use bootstrap; this constructor keeps
 // the application service independent of infrastructure packages.
 func NewEmbedServiceWithFactory(dbPath string, newEmbedder func(string, string) (embeddings.Embedder, error)) *EmbedService {
 	return &EmbedService{dbPath: dbPath, newEmbedder: newEmbedder}

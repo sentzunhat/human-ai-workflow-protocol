@@ -32,7 +32,7 @@ Files this task may read for context but must not edit.
 
 - `.hawp/kit/references/backlog-alignment.md`
 - `README.md`
-- `librarian/src/go.mod`
+- `package.json`
 
 ---
 
@@ -111,8 +111,11 @@ git diff --name-status
 # Check no trailing whitespace
 git diff --check
 
+# Verify TypeScript (if applicable)
+npm run typecheck
+
 # Verify HAWP workflow structure
-.hawp/bin/hawp work validate
+hawp work validate
 
 # Final commit validation
 git log -1 --oneline

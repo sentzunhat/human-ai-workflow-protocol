@@ -11,7 +11,7 @@ func TestConfigProviderExpansion(t *testing.T) {
 		input, want []string
 	}{
 		{nil, nil},
-		{[]string{"all"}, []string{"claude", "cursor", "continue", "codex"}},
+		{[]string{"all"}, []string{"claude", "cursor", "continue", "codex", "github"}},
 		{[]string{"codex", "all", "claude", "all", "github"}, []string{"codex", "claude", "cursor", "continue", "github"}},
 		{[]string{"github", "github"}, []string{"github"}},
 	} {

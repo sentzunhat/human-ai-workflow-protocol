@@ -1,9 +1,0 @@
-{
-  "servers": {
-    "hawp": {
-      "type": "stdio",
-      "command": "${workspaceFolder}/.hawp/bin/hawp",
-      "args": ["mcp", "--repo-root", "${workspaceFolder}"]
-    }
-  }
-}

@@ -77,4 +77,4 @@ Measurement method (to be implemented):
 
 ## Tracked by
 
-- [`288d543c`](../../../active/288d543c/plan.md) — token-reduction benchmark harness
+- [`288d543c`](../../../../closed/2026/09/12/288d543c/plan.md) — token-reduction benchmark harness

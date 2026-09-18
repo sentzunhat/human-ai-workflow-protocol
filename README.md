@@ -122,7 +122,7 @@ The `hawp` CLI ships with:
 - **`hawp search <query>`** — hybrid lexical+vector search over kit and work docs
 - **`hawp search --context`** — packs results into a single LLM-ready block with token cap and dedup
 - **`hawp mcp`** — stdio MCP server; wire it into Claude Code, Cursor, or Continue in one command
-- **`hawp init --provider <name>`** — provisions `~/.hawp/` and writes the MCP config for your agent
+- **`hawp init --provider <name>|all`** — provisions `~/.hawp/`, syncs the kit, and configures Claude, Cursor, Codex, GitHub/Copilot, plus Continue guidance
 - **`hawp update`** — self-updates the binary and kit from the latest release (48h auto-update notifier built in; Windows uses manual binary replacement)
 - **`hawp work new`** — scaffolds a new work item with UUID, plan file, and BACKLOG row
 
@@ -156,8 +156,11 @@ hawp search embed --backend ollama
 # Or completely local
 hawp search embed --backend onnx
 
-# Connect your agent through MCP
-hawp init --provider claude
+# Connect all supported providers through MCP
+hawp init --provider all
+
+# Or configure only one provider without downloads or kit sync
+hawp mcp configure --provider continue --repo-root .
 
 # Shape the first task
 open .hawp/kit/start-here.md

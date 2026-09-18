@@ -2,8 +2,9 @@ package mcp
 
 import "fmt"
 
-// Validate the entire selection before configuration writes. Preserve the
-// historical meaning of all: GitHub remains an explicitly requested advisory.
+// Validate the entire selection before configuration writes. "all" covers
+// every supported provider integration, including the repo-local VS Code
+// configuration used by GitHub/Copilot.
 func expandConfigProviders(providers []string) ([]string, error) {
 	var result []string
 	seen := map[string]bool{}
@@ -11,7 +12,7 @@ func expandConfigProviders(providers []string) ([]string, error) {
 		names := []string{provider}
 		switch provider {
 		case "all":
-			names = []string{"claude", "cursor", "continue", "codex"}
+			names = []string{"claude", "cursor", "continue", "codex", "github"}
 		case "claude", "cursor", "continue", "codex", "github":
 		default:
 			return nil, fmt.Errorf("unknown MCP provider %q; use claude, cursor, continue, codex, github, or all", provider)
