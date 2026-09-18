@@ -90,6 +90,9 @@ func writeProviderConfigs(repoRoot string, providers []string) error {
 
 		switch p {
 		case "claude":
+			if err := ensureGitignoreEntry(repoRoot, ".mcp.json"); err != nil {
+				return wrapErr("claude", err)
+			}
 			if err := writeMCPJSON(filepath.Join(repoRoot, ".mcp.json"), claudeServerEntry(repoRoot)); err != nil {
 				return wrapErr("claude", err)
 			}
@@ -97,6 +100,9 @@ func writeProviderConfigs(repoRoot string, providers []string) error {
 			fmt.Println("MCP: wrote .mcp.json (Claude Code)")
 
 		case "cursor":
+			if err := ensureGitignoreEntry(repoRoot, ".cursor/mcp.json"); err != nil {
+				return wrapErr("cursor", err)
+			}
 			dir := filepath.Join(repoRoot, ".cursor")
 			if err := filesystem.RejectSymlinkAncestors(repoRoot, dir); err != nil {
 				return wrapErr("cursor", err)
@@ -121,6 +127,9 @@ func writeProviderConfigs(repoRoot string, providers []string) error {
 			fmt.Printf("      args: [mcp, --repo-root, %q]\n", repoRoot)
 
 		case "github":
+			if err := ensureGitignoreEntry(repoRoot, ".vscode/mcp.json"); err != nil {
+				return wrapErr("github", err)
+			}
 			dir := filepath.Join(repoRoot, ".vscode")
 			if err := filesystem.RejectSymlinkAncestors(repoRoot, dir); err != nil {
 				return wrapErr("github", err)
@@ -136,6 +145,9 @@ func writeProviderConfigs(repoRoot string, providers []string) error {
 			fmt.Println("  Open the VS Code MCP panel and enable the workspace server.")
 
 		case "codex":
+			if err := ensureGitignoreEntry(repoRoot, ".codex/config.toml"); err != nil {
+				return wrapErr("codex", err)
+			}
 			codexDir := filepath.Join(repoRoot, ".codex")
 			if err := filesystem.RejectSymlinkAncestors(repoRoot, codexDir); err != nil {
 				return wrapErr("codex", err)
@@ -155,4 +167,28 @@ func writeProviderConfigs(repoRoot string, providers []string) error {
 		}
 	}
 	return nil
+}
+
+// ensureGitignoreEntry protects generated provider configuration from being
+// committed. Entries are repo-relative, exact, and idempotent; existing
+// comments and unrelated rules are preserved.
+func ensureGitignoreEntry(repoRoot, entry string) error {
+	path := filepath.Join(repoRoot, ".gitignore")
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		data = nil
+	} else if err != nil {
+		return err
+	}
+	for _, line := range strings.Split(strings.ReplaceAll(string(data), "\r\n", "\n"), "\n") {
+		if strings.TrimSpace(line) == entry {
+			return nil
+		}
+	}
+	content := string(data)
+	if content != "" && !strings.HasSuffix(content, "\n") {
+		content += "\n"
+	}
+	content += entry + "\n"
+	return os.WriteFile(path, []byte(content), 0o644)
 }

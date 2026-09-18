@@ -41,6 +41,15 @@ func TestConfigureFreshAndRepeat(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(root, ".hawp/kit")); !os.IsNotExist(err) {
 		t.Fatal("created kit")
 	}
+	ignore, err := os.ReadFile(filepath.Join(root, ".gitignore"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range []string{".mcp.json", ".cursor/mcp.json", ".codex/config.toml", ".vscode/mcp.json"} {
+		if strings.Count(string(ignore), entry) != 1 {
+			t.Fatalf("gitignore entry %q count = %d, content:\n%s", entry, strings.Count(string(ignore), entry), ignore)
+		}
+	}
 }
 
 func TestConfigurePreservesRemoteCodexBeforeOtherWrites(t *testing.T) {
