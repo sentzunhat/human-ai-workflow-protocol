@@ -26,6 +26,9 @@ func RejectSymlinkAncestors(root, target string) error {
 	if err != nil {
 		return fmt.Errorf("resolve path: %w", err)
 	}
+	if rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return fmt.Errorf("target %s is outside root %s; refusing to inspect", target, root)
+	}
 	parts := strings.Split(rel, string(filepath.Separator))
 	current := root
 	for _, part := range parts {

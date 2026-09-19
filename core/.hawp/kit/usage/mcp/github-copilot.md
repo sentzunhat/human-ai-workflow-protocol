@@ -6,8 +6,9 @@ Copilot CLI, or remote containers. Those require host-specific setup.
 
 ## Setup
 
-`hawp init --provider github` can sync the GitHub instruction overlay, but
-does not write MCP configuration. Use manual setup for MCP alone.
+`hawp init --provider github` syncs the GitHub instruction overlay and writes
+the repo-local MCP configuration. Use `hawp mcp configure --provider github`
+when you want MCP configuration without provisioning or kit sync.
 
 Merge this entry into `.vscode/mcp.json`; retain other servers and settings:
 

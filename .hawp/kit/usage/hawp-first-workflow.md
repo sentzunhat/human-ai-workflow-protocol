@@ -117,7 +117,7 @@ git push origin --delete feature/v008-some-subtask
 
 ### hawp init: provision failure blocked provider config writes (v0.0.8)
 
-**What broke:** `hawp init --provider codex` exited 1 before writing `codex.toml` whenever
+**What broke:** `hawp init --provider codex` exited 1 before writing `.codex/config.toml` whenever
 any asset download failed — including BGE model files whose SHA-256 checksums had been
 placeholder values since v0.0.2 and could never verify correctly.
 
@@ -138,7 +138,7 @@ failures. Carry failures forward; report them at the end. Never gate unrelated w
 optional steps.
 
 **Verification:** if `hawp init --provider <name>` exits 1 but the config file
-(`codex.toml`, `.mcp.json`, etc.) IS written, the command succeeded at its core job.
+(`.codex/config.toml`, `.mcp.json`, etc.) IS written, the command succeeded at its core job.
 Asset download failures are a separate concern and require separate remediation.
 
 ---
