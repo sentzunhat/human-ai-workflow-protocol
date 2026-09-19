@@ -13,6 +13,7 @@ import (
 )
 
 var (
+	uuidFieldRe       = regexp.MustCompile("(?i)\\*\\*UUID:\\*\\*\\s*`?([0-9a-f]{8}(?:-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})?)`?")
 	filesStemRe       = regexp.MustCompile(`(?i)^(.*)-files$`)
 	workItemLineRe    = regexp.MustCompile(`(?m)^\*\*Work Item:\*\*\s+.*$`)
 	planFileLineRe    = regexp.MustCompile(`(?m)^\*\*Plan file:\*\*\s+.*$`)
