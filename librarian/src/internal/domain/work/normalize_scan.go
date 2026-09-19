@@ -11,6 +11,21 @@ type PlanFileRecord = normalization.PlanFileRecord
 type PlanScan = normalization.PlanScan
 type FixOperation = normalization.FixOperation
 type BlockedInfo = normalization.BlockedInfo
+type ResearchItem = normalization.ResearchItem
+type ApplyResult = normalization.ApplyResult
+type FixPlan = normalization.FixPlan
+type SyncPlanStep = normalization.SyncPlanStep
+type DetectionReport = normalization.DetectionReport
+
+func BuildDetectionReport(scannedAt, backlogPath string, filesScanned, itemsAnalyzed int, operations []FixOperation) DetectionReport {
+	return normalization.BuildDetectionReport(scannedAt, backlogPath, filesScanned, itemsAnalyzed, operations)
+}
+
+func RenderTextReport(report DetectionReport) string { return normalization.RenderTextReport(report) }
+func RenderJSONReport(report DetectionReport) (string, error) {
+	return normalization.RenderJSONReport(report)
+}
+func RenderJSONValue(value any) (string, error) { return normalization.RenderJSONValue(value) }
 
 const (
 	SectionActive  = normalization.SectionActive

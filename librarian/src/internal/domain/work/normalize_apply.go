@@ -18,14 +18,6 @@ var (
 	verifyHeadBodyRe   = regexp.MustCompile(`(?ms)(^##\s+Verification\b[^\n]*\n)(.*?)(?:^##\s+|\z)`)
 )
 
-// ApplyResult summarizes an apply-mode normalization run.
-type ApplyResult struct {
-	ChangedFiles  []string
-	SkippedFiles  []string
-	ReviewFiles   []string
-	ResearchQueue []ResearchItem
-}
-
 func inferBacklogIDFromPath(path string) string {
 	return strings.ToUpper(legacyIDInPathRe.FindString(path))
 }

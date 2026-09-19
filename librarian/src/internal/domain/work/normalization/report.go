@@ -1,4 +1,4 @@
-package work
+package normalization
 
 import (
 	"crypto/sha256"
@@ -37,6 +37,14 @@ type ResearchItem struct {
 	FilePath          string `json:"filePath"`
 	LineNumber        int    `json:"lineNumber"`
 	RecommendedAction string `json:"recommendedAction"`
+}
+
+// ApplyResult summarizes an apply-mode normalization run.
+type ApplyResult struct {
+	ChangedFiles  []string
+	SkippedFiles  []string
+	ReviewFiles   []string
+	ResearchQueue []ResearchItem
 }
 
 // DetectionReport is the dry-run scan result.
