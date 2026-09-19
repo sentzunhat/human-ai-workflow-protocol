@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/identity"
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/markdown"
 )
 
 var (
@@ -50,7 +51,7 @@ func canonicalFolderID(content, fallback string) string {
 }
 
 func rewriteMovedMarkdown(content, oldPath, newPath string) string {
-	blanked := BlankFences(content)
+	blanked := markdown.BlankFences(content)
 	matches := markdownLinkRefRe.FindAllStringSubmatchIndex(blanked, -1)
 	if len(matches) == 0 {
 		return content
@@ -71,7 +72,7 @@ func rewriteMovedMarkdown(content, oldPath, newPath string) string {
 }
 
 func rewriteLocalHref(href, oldPath, newPath string) string {
-	if !isLocalHref(href) {
+	if !markdown.IsLocalHref(href) {
 		return href
 	}
 	pathPart, anchor, hasAnchor := strings.Cut(href, "#")

@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/markdown"
 )
 
 // Only active work is scanned — archives (closed/, evidence/, notes/,
@@ -42,20 +44,20 @@ func (w *WorkSource) CheckDeadLinks(workDir string) DeadLinksCheck {
 			warnf("skipping unreadable file %s: %v", file, err)
 			continue
 		}
-		content := BlankFences(string(raw))
+		content := markdown.BlankFences(string(raw))
 		rel := w.ToRepoRelative(workDir, file)
 
-		for _, link := range extractLinks(content) {
-			if !isLocalHref(link.href) {
+		for _, link := range markdown.ExtractLinks(content) {
+			if !markdown.IsLocalHref(link.Href) {
 				continue
 			}
-			part := pathPart(link.href)
+			part := markdown.PathPart(link.Href)
 			if part == "" {
 				continue
 			}
 			target := filepath.Join(filepath.Dir(file), part)
 			if !w.Exists(target) {
-				result.Broken = append(result.Broken, BrokenLink{ID: rel, Link: link.href})
+				result.Broken = append(result.Broken, BrokenLink{ID: rel, Link: link.Href})
 			}
 		}
 	}

@@ -55,6 +55,7 @@ splits that would require exporting many private functions.
 - Added boundary-local identity tests while retaining the parent package API tests.
 - Moved the identity parsing test file into `internal/domain/work/identity` and added a focused compatibility-wrapper test in the parent package.
 - Extracted shared Markdown table primitives into `internal/domain/work/table`; backlog parsing, intake-table insertion, and normalization scanning now depend on that boundary instead of private helpers in `backlog.go`.
+- Moved work-domain Markdown link scanning into `internal/domain/work/markdown`; dead-link validation and normalization migration now use the explicit link boundary.
 - `go test ./...`, `go vet ./...`, `git diff --check`, and source-layout candidate checks passed.
 - Source-layout preview reports 288 files, 0 moves, and 0 content updates.
 - `scripts/source-layout/run.sh --preview --check --diff` passed against the
