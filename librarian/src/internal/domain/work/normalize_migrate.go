@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/identity"
 )
 
 var (
@@ -24,10 +26,10 @@ type movedPlan struct {
 func canonicalFolderID(content, fallback string) string {
 	if m := uuidFieldRe.FindStringSubmatch(content); m != nil {
 		raw := strings.ToLower(strings.TrimSpace(m[1]))
-		if fullUUIDRe.MatchString(raw) {
+		if identity.IsFullUUID(raw) {
 			return raw[:8]
 		}
-		if shortUUIDRe.MatchString(raw) {
+		if identity.ExtractShortUUID(raw) != "" {
 			return raw
 		}
 	}

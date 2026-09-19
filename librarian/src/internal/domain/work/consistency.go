@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/identity"
 )
 
 var (
@@ -85,10 +87,10 @@ func CheckBacklogConsistency(workDir string, backlog *Backlog) BacklogCheck {
 }
 
 func isNonCanonicalActiveID(id string) bool {
-	if ExtractShortUUID(id) != "" || fullUUIDRe.MatchString(id) {
+	if ExtractShortUUID(id) != "" || identity.IsFullUUID(id) {
 		return false
 	}
-	if canonicalIDRe.MatchString(id) || numericIDRe.MatchString(id) {
+	if canonicalIDRe.MatchString(id) || identity.IsNumericID(id) {
 		return false
 	}
 	return true

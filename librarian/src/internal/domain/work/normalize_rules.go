@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/identity"
 )
 
 // FixOperation is one detected fix (auto-fixable or blocked).
@@ -54,7 +56,7 @@ func isISODateOrEmpty(value string) bool {
 }
 
 func isCanonicalID(value string) bool {
-	return canonicalIDRe.MatchString(value) || numericRowIDRe.MatchString(value) || fullUUIDRe.MatchString(value) || ExtractShortUUID(value) != ""
+	return canonicalIDRe.MatchString(value) || numericRowIDRe.MatchString(value) || identity.IsFullUUID(value) || ExtractShortUUID(value) != ""
 }
 
 func inferTypeFromID(id string) string {
@@ -233,7 +235,7 @@ func (e *ruleEvaluator) evaluateRow(row NormalizeRow) {
 	candidates := e.scan.ByID[row.ID]
 
 	if row.Type == "" {
-		if numericIDRe.MatchString(row.ID) {
+		if identity.IsNumericID(row.ID) {
 			// Older repositories often use a compact "#" column without a
 			// separate Type column. Keep normalize focused on structural drift
 			// for those rows instead of forcing a speculative type.
