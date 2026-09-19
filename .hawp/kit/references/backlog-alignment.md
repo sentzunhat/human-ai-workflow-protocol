@@ -24,9 +24,9 @@ Use this structure as the default operating model:
   (move back to `active/{uuid}/` to resume)
 - `.hawp/work/closed/YYYY/MM/DD/{uuid}/plan.md` - completed work item detail files,
   archived by close date
-- `.hawp/work/status/YYYY/MM/DD/` - daily or checkpoint status summaries
-- `.hawp/work/evidence/YYYY/MM/DD/` - verification notes, command output summaries, screenshots, smoke-test notes, review evidence
-- `.hawp/work/decisions/` - ADRs and project decisions
+- `.hawp/work/status/YYYY/MM/DD/{uuid}/status.md` - daily or checkpoint status summaries
+- `.hawp/work/evidence/YYYY/MM/DD/{uuid}/evidence.md` - verification notes, command output summaries, screenshots, smoke-test notes, review evidence
+- `.hawp/work/decisions/YYYY/MM/DD/{uuid}/decision.md` - ADRs and project decisions
 
 ## Active Backlog Rules
 
@@ -115,9 +115,9 @@ Limited to the last 5-10 items or last 14-30 days.
 ## Archive
 
 - Closed work: .hawp/work/closed/
-- Status reports: .hawp/work/status/
-- Evidence: .hawp/work/evidence/
-- Decisions: .hawp/work/decisions/
+- Status reports: .hawp/work/status/YYYY/MM/DD/{uuid}/status.md
+- Evidence: .hawp/work/evidence/YYYY/MM/DD/{uuid}/evidence.md
+- Decisions: .hawp/work/decisions/YYYY/MM/DD/{uuid}/decision.md
 ```
 
 ## Migration Guidance for Long Backlogs
