@@ -53,6 +53,7 @@ splits that would require exporting many private functions.
 - Preserved the `internal/domain/work` API with compatibility wrappers in `idparse.go`.
 - Updated consistency and normalization callers to use the identity boundary for UUID and numeric-ID checks.
 - Added boundary-local identity tests while retaining the parent package API tests.
+- Moved the identity parsing test file into `internal/domain/work/identity` and added a focused compatibility-wrapper test in the parent package.
 - `go test ./...`, `go vet ./...`, `git diff --check`, and source-layout candidate checks passed.
 - Source-layout preview reports 288 files, 0 moves, and 0 content updates.
 - `scripts/source-layout/run.sh --preview --check --diff` passed against the
