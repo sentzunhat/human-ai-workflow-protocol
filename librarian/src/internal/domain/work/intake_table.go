@@ -3,6 +3,8 @@ package work
 import (
 	"fmt"
 	"strings"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/table"
 )
 
 // InsertNewItem preserves the Active Work table's column order and optional
@@ -22,7 +24,7 @@ func InsertNewItem(backlog string, item NewItemInput, date string) (string, erro
 		if !active || !strings.HasPrefix(trimmed, "|") {
 			continue
 		}
-		headers := parseTableCells(trimmed)
+		headers := table.Cells(trimmed)
 		if n+1 >= len(lines) || !isTableSeparator(lines[n+1], len(headers)) {
 			return "", fmt.Errorf("Active Work table is missing its separator row")
 		}
@@ -72,7 +74,7 @@ func InsertNewItem(backlog string, item NewItemInput, date string) (string, erro
 }
 
 func isTableSeparator(line string, width int) bool {
-	cells := parseTableCells(strings.TrimSpace(line))
+	cells := table.Cells(strings.TrimSpace(line))
 	if width == 0 || len(cells) != width {
 		return false
 	}

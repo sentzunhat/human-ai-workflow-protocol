@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/table"
 )
 
 // NormalizeSection identifies which backlog section a row came from.
@@ -43,7 +45,7 @@ func extractMarkdownLinkTarget(value string) string {
 	if m := mdLinkTargetRe.FindStringSubmatch(value); m != nil {
 		return strings.TrimSpace(m[1])
 	}
-	return strings.TrimSpace(stripCodeSpan(value))
+	return strings.TrimSpace(table.StripCodeSpan(value))
 }
 
 func normalizeSectionHeader(line string) NormalizeSection {
@@ -89,7 +91,7 @@ func ParseNormalizeBacklog(backlogPath string) (*NormalizeBacklog, error) {
 		if !strings.HasPrefix(line, "|") {
 			continue
 		}
-		cells := parseTableCells(line)
+		cells := table.Cells(line)
 		if len(cells) < 4 {
 			continue
 		}
@@ -106,7 +108,7 @@ func ParseNormalizeBacklog(backlogPath string) (*NormalizeBacklog, error) {
 
 		var candidates []string
 		for _, alias := range []string{"legacy id", "id", "uuid", "#"} {
-			value := stripCodeSpan(mappedCell(cells, headerMap, alias))
+			value := table.StripCodeSpan(table.Cell(cells, headerMap, alias))
 			if value != "" && value != "—" && value != "-" {
 				candidates = append(candidates, value)
 			}
@@ -145,25 +147,25 @@ func ParseNormalizeBacklog(backlogPath string) (*NormalizeBacklog, error) {
 			Section:    section,
 			LineNumber: index + 1,
 			ID:         id,
-			Type:       mappedCell(cells, headerMap, "type"),
-			Title:      mappedCell(cells, headerMap, "title"),
+			Type:       table.Cell(cells, headerMap, "type"),
+			Title:      table.Cell(cells, headerMap, "title"),
 		}
 		switch section {
 		case SectionActive:
-			row.Status = mappedCell(cells, headerMap, "status")
-			row.PlanPath = extractMarkdownLinkTarget(mappedCell(cells, headerMap, "plan file", "detail"))
-			row.Updated = mappedCell(cells, headerMap, "updated")
+			row.Status = table.Cell(cells, headerMap, "status")
+			row.PlanPath = extractMarkdownLinkTarget(table.Cell(cells, headerMap, "plan file", "detail"))
+			row.Updated = table.Cell(cells, headerMap, "updated")
 		case SectionBlocked:
-			row.Reason = mappedCell(cells, headerMap, "reason", "status")
-			row.PlanPath = extractMarkdownLinkTarget(mappedCell(cells, headerMap, "detail", "plan file"))
-			row.Updated = mappedCell(cells, headerMap, "updated")
+			row.Reason = table.Cell(cells, headerMap, "reason", "status")
+			row.PlanPath = extractMarkdownLinkTarget(table.Cell(cells, headerMap, "detail", "plan file"))
+			row.Updated = table.Cell(cells, headerMap, "updated")
 		case SectionClosed:
-			row.Updated = mappedCell(cells, headerMap, "closed", "updated")
-			row.PlanPath = extractMarkdownLinkTarget(mappedCell(cells, headerMap, "detail", "plan file"))
+			row.Updated = table.Cell(cells, headerMap, "closed", "updated")
+			row.PlanPath = extractMarkdownLinkTarget(table.Cell(cells, headerMap, "detail", "plan file"))
 		default:
-			row.Status = mappedCell(cells, headerMap, "status", "reason", "closed")
-			row.PlanPath = extractMarkdownLinkTarget(mappedCell(cells, headerMap, "detail", "plan file"))
-			row.Updated = mappedCell(cells, headerMap, "updated", "closed")
+			row.Status = table.Cell(cells, headerMap, "status", "reason", "closed")
+			row.PlanPath = extractMarkdownLinkTarget(table.Cell(cells, headerMap, "detail", "plan file"))
+			row.Updated = table.Cell(cells, headerMap, "updated", "closed")
 		}
 		result.Rows = append(result.Rows, row)
 	}

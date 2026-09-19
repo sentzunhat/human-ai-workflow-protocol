@@ -54,6 +54,7 @@ splits that would require exporting many private functions.
 - Updated consistency and normalization callers to use the identity boundary for UUID and numeric-ID checks.
 - Added boundary-local identity tests while retaining the parent package API tests.
 - Moved the identity parsing test file into `internal/domain/work/identity` and added a focused compatibility-wrapper test in the parent package.
+- Extracted shared Markdown table primitives into `internal/domain/work/table`; backlog parsing, intake-table insertion, and normalization scanning now depend on that boundary instead of private helpers in `backlog.go`.
 - `go test ./...`, `go vet ./...`, `git diff --check`, and source-layout candidate checks passed.
 - Source-layout preview reports 288 files, 0 moves, and 0 content updates.
 - `scripts/source-layout/run.sh --preview --check --diff` passed against the
@@ -111,3 +112,4 @@ private references, destination collisions, or candidate test/vet failure.
 - [x] Review preview diff and retain the candidate without mechanical file moves
 - [ ] Extract the next reviewed shared boundary only after the identity slice remains stable
 - [ ] Re-audit normalization parser/link helpers before selecting that boundary
+- [x] Extract the shared table-parser boundary used by backlog, intake, and normalization scan
