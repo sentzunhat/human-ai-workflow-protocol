@@ -111,8 +111,12 @@ git diff --name-status
 # Check no trailing whitespace
 git diff --check
 
+# Verify the repository's implementation (Go for this repository; use the
+# project's documented command when adapting this template elsewhere)
+cd librarian/src && go test ./...
+
 # Verify HAWP workflow structure
-.hawp/bin/hawp work validate
+hawp work validate
 
 # Final commit validation
 git log -1 --oneline

@@ -1,20 +1,18 @@
 package work
 
 import (
-	"os"
 	"regexp"
 	"strings"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/table"
 )
 
 var separatorRowRe = regexp.MustCompile(`^\|\s*-+`)
 
-// ParseBacklog reads BACKLOG.md and extracts rows from the Active Work,
-// Recently Closed (or Done), and Blocked / Parked sections.
-func ParseBacklog(backlogPath string) (*Backlog, error) {
-	content, err := os.ReadFile(backlogPath)
-	if err != nil {
-		return nil, err
-	}
+// ParseBacklogMarkdown parses backlog table content without accessing the
+// filesystem. Callers that already own the input boundary can use this pure
+// domain function directly.
+func ParseBacklogMarkdown(content string) *Backlog {
 
 	backlog := &Backlog{}
 	section := ""
@@ -50,7 +48,7 @@ func ParseBacklog(backlogPath string) (*Backlog, error) {
 			continue
 		}
 
-		cells := parseTableCells(line)
+		cells := table.Cells(line)
 		if len(cells) == 0 {
 			continue
 		}
@@ -76,35 +74,7 @@ func ParseBacklog(backlogPath string) (*Backlog, error) {
 		}
 	}
 
-	return backlog, nil
-}
-
-func parseTableCells(line string) []string {
-	parts := strings.Split(line, "|")
-	if len(parts) < 3 {
-		return nil
-	}
-	cells := parts[1 : len(parts)-1]
-	for i, cell := range cells {
-		cells[i] = strings.TrimSpace(cell)
-	}
-	return cells
-}
-
-func mappedCell(cells []string, headerMap map[string]int, aliases ...string) string {
-	for _, alias := range aliases {
-		if index, ok := headerMap[alias]; ok {
-			if index < len(cells) {
-				return cells[index]
-			}
-			return ""
-		}
-	}
-	return ""
-}
-
-func stripCodeSpan(value string) string {
-	return strings.Trim(value, "`")
+	return backlog
 }
 
 // buildRow resolves the row ID from the Legacy ID / ID / UUID / # cells,
@@ -112,7 +82,7 @@ func stripCodeSpan(value string) string {
 func buildRow(cells []string, headerMap map[string]int) (BacklogRow, bool) {
 	var candidates []string
 	for _, alias := range []string{"legacy id", "id", "uuid", "#"} {
-		value := stripCodeSpan(mappedCell(cells, headerMap, alias))
+		value := table.StripCodeSpan(table.Cell(cells, headerMap, alias))
 		if value != "" && value != "—" && value != "-" {
 			candidates = append(candidates, value)
 		}
@@ -154,9 +124,9 @@ func buildRow(cells []string, headerMap map[string]int) (BacklogRow, bool) {
 
 	return BacklogRow{
 		ID:     id,
-		Type:   mappedCell(cells, headerMap, "type"),
-		Title:  mappedCell(cells, headerMap, "title"),
-		Status: mappedCell(cells, headerMap, "status", "reason", "closed"),
-		Detail: mappedCell(cells, headerMap, "plan file", "detail"),
+		Type:   table.Cell(cells, headerMap, "type"),
+		Title:  table.Cell(cells, headerMap, "title"),
+		Status: table.Cell(cells, headerMap, "status", "reason", "closed"),
+		Detail: table.Cell(cells, headerMap, "plan file", "detail"),
 	}, true
 }

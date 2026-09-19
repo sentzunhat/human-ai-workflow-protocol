@@ -5,8 +5,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 )
 
 var supportingSuffixes = []string{
@@ -97,7 +95,7 @@ func CheckClosedTaskCompleteness(workDir string) ClosedTaskCheck {
 
 		if len(missing) > 0 {
 			finding.Sections = missing
-			if entry.date == "" || entry.date < repo.LegacyClosedCutoff {
+			if entry.date == "" || entry.date < LegacyClosedCutoff {
 				result.Warnings = append(result.Warnings, finding)
 			} else {
 				result.Failing = append(result.Failing, finding)
@@ -117,7 +115,7 @@ func classifyClosedFile(filename, date, content string) classification {
 	nameWithoutExt := strings.TrimSuffix(filename, ".md")
 	nameLower := strings.ToLower(nameWithoutExt)
 	id := ExtractIDFromFilename(nameWithoutExt)
-	isLegacy := date == "" || date < repo.LegacyClosedCutoff
+	isLegacy := date == "" || date < LegacyClosedCutoff
 
 	// Shared batch-close record: **Closes:** line names every backlog row it covers
 	if strings.Contains(content, "**Closes:**") {

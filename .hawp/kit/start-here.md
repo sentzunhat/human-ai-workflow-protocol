@@ -85,6 +85,7 @@ HAWP is a **shaping protocol**, not a runtime. Better results come from stronger
 3. **[usage/status-report.md](usage/status-report.md)** — context handoff and session continuity
 4. **[usage/workflow-loop.md](usage/workflow-loop.md)** — multi-iteration work across sessions (instruction-based; autonomous or gated; review/approve/retry without CLI)
 5. **[usage/search.md](usage/search.md)** — index and search kit/work documents via CLI or MCP (`hawp_search` tool)
+6. **[usage/hawp-first-workflow.md](usage/hawp-first-workflow.md)** — hawp-first session workflow: use `hawp_search` as the default context strategy instead of direct file reads
 
 ### Templates by Task Type
 

@@ -5,8 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/markdown"
 )
 
 // Only active work is scanned — archives (closed/, evidence/, notes/,
@@ -18,11 +17,11 @@ var (
 
 // CheckDeadLinks verifies local markdown links in BACKLOG.md and the flat
 // active/ and parked/ plan files.
-func CheckDeadLinks(workDir string) DeadLinksCheck {
+func (w *WorkSource) CheckDeadLinks(workDir string) DeadLinksCheck {
 	var files []string
 	for _, name := range activeRootFiles {
 		full := filepath.Join(workDir, name)
-		if repo.Exists(full) {
+		if w.Exists(full) {
 			files = append(files, full)
 		}
 	}
@@ -46,18 +45,18 @@ func CheckDeadLinks(workDir string) DeadLinksCheck {
 			continue
 		}
 		content := markdown.BlankFences(string(raw))
-		rel := repo.ToRepoRelative(workDir, file)
+		rel := w.ToRepoRelative(workDir, file)
 
 		for _, link := range markdown.ExtractLinks(content) {
 			if !markdown.IsLocalHref(link.Href) {
 				continue
 			}
-			pathPart := markdown.PathPart(link.Href)
-			if pathPart == "" {
+			part := markdown.PathPart(link.Href)
+			if part == "" {
 				continue
 			}
-			target := filepath.Join(filepath.Dir(file), pathPart)
-			if !repo.Exists(target) {
+			target := filepath.Join(filepath.Dir(file), part)
+			if !w.Exists(target) {
 				result.Broken = append(result.Broken, BrokenLink{ID: rel, Link: link.Href})
 			}
 		}

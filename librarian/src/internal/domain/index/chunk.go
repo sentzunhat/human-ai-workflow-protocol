@@ -8,12 +8,12 @@ import (
 
 // Document is a document to be indexed (kit guide, work plan, evidence file, etc).
 type Document struct {
-	ID         int64   // assigned by DB
-	Category   string  // "kit" or "work"
-	Type       string  // "guide", "plan", "backlog-row", "evidence"
-	Path       string  // file source
-	FolderRole string  // "kit/start-here", "work/active", etc.
-	Content    string  // full text
+	ID         int64  // assigned by DB
+	Category   string // "kit" or "work"
+	Type       string // "guide", "plan", "backlog-row", "evidence"
+	Path       string // file source
+	FolderRole string // "kit/start-here", "work/active", etc.
+	Content    string // full text
 }
 
 // DocumentMetadata is work-item-specific metadata (optional, for category='work').
@@ -32,8 +32,10 @@ type Chunk struct {
 	DocumentID    int64   // FK to documents.id
 	ChunkIdx      int     // 0, 1, 2, ... within the doc
 	Text          string  // raw text (what gets embedded)
-	FolderContext string  // metadata prefix (returned with search results)
+	FolderContext *string // optional metadata prefix (returned with search results)
 	MetadataJSON  *string // structured metadata as JSON
+	LineStart     int     // 1-indexed source line; zero when unknown
+	LineEnd       int     // inclusive source line; zero when unknown
 }
 
 // ChunkRange is a chunk with its line range in the source document (1-indexed).

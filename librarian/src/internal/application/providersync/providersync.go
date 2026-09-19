@@ -19,7 +19,7 @@ type ValidateResult struct {
 }
 
 func Materialize(repoRoot string) (MaterializeResult, error) {
-	outputs, err := domainprovidersync.ComputeOutputs(repoRoot)
+	outputs, err := domainprovidersync.ComputeOutputs(repoRoot, os.ReadFile)
 	if err != nil {
 		return MaterializeResult{}, err
 	}
@@ -50,7 +50,7 @@ func Materialize(repoRoot string) (MaterializeResult, error) {
 }
 
 func Validate(repoRoot string) (ValidateResult, error) {
-	outputs, err := domainprovidersync.ComputeOutputs(repoRoot)
+	outputs, err := domainprovidersync.ComputeOutputs(repoRoot, os.ReadFile)
 	if err != nil {
 		return ValidateResult{}, err
 	}

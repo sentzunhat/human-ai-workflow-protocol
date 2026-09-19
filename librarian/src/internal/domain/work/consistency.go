@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/identity"
 )
 
 var (
@@ -25,6 +27,9 @@ func CheckBacklogConsistency(workDir string, backlog *Backlog) BacklogCheck {
 
 	result.ActiveWork.Total = len(backlog.Active)
 	for _, row := range backlog.Active {
+		if isNonCanonicalActiveID(row.ID) {
+			result.NonCanonicalActiveItems = append(result.NonCanonicalActiveItems, row.ID)
+		}
 		if findActiveFile(workDir, row.ID) {
 			result.ActiveWork.Found++
 		} else {
@@ -75,19 +80,32 @@ func CheckBacklogConsistency(workDir string, backlog *Backlog) BacklogCheck {
 
 	if len(result.ActiveWork.Missing) > 0 || len(result.RecentlyClosed.Missing) > 0 ||
 		len(result.ParkedWork.Missing) > 0 || len(result.OrphanedFiles) > 0 ||
-		len(result.OrphanedParked) > 0 {
+		len(result.OrphanedParked) > 0 || len(result.NonCanonicalActiveItems) > 0 {
 		result.Status = StatusFail
 	}
 	return result
 }
 
-func idSet(rows []BacklogRow) map[string]struct{} {
+func isNonCanonicalActiveID(id string) bool {
+	if ExtractShortUUID(id) != "" || identity.IsFullUUID(id) {
+		return false
+	}
+	if canonicalIDRe.MatchString(id) || identity.IsNumericID(id) {
+		return false
+	}
+	return true
+}
+
+// IDSet returns a set of row IDs from the given backlog rows.
+func IDSet(rows []BacklogRow) map[string]struct{} {
 	ids := make(map[string]struct{}, len(rows))
 	for _, row := range rows {
 		ids[row.ID] = struct{}{}
 	}
 	return ids
 }
+
+func idSet(rows []BacklogRow) map[string]struct{} { return IDSet(rows) }
 
 // findActiveFile supports flat active/<ID>.md, folder-per-item
 // active/<ID>/plan.md, flat short-UUID prefix matches, and date-nested

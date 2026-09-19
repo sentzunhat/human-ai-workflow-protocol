@@ -25,11 +25,11 @@ type AssetRecord struct {
 
 const manifestSchemaVersion = 1
 
-// LoadManifest reads manifest.json from root, returning an empty manifest
-// (not an error) when the file does not exist yet.
-func LoadManifest(root string) (*Manifest, error) {
+// LoadManifest reads manifest.json from root using the injected reader function,
+// returning an empty manifest (not an error) when the file does not exist yet.
+func LoadManifest(root string, read func(string) ([]byte, error)) (*Manifest, error) {
 	path := filepath.Join(root, "manifest.json")
-	data, err := os.ReadFile(path)
+	data, err := read(path)
 	if os.IsNotExist(err) {
 		return &Manifest{SchemaVersion: manifestSchemaVersion, Assets: map[string]AssetRecord{}}, nil
 	}
@@ -46,14 +46,14 @@ func LoadManifest(root string) (*Manifest, error) {
 	return &manifest, nil
 }
 
-// Save writes the manifest to root/manifest.json.
-func (m *Manifest) Save(root string) error {
+// Save writes the manifest to root/manifest.json using the injected writer function.
+func (m *Manifest) Save(root string, write func(string, []byte, os.FileMode) error) error {
 	m.SchemaVersion = manifestSchemaVersion
 	data, err := json.MarshalIndent(m, "", "  ")
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filepath.Join(root, "manifest.json"), append(data, '\n'), 0o644)
+	return write(filepath.Join(root, "manifest.json"), append(data, '\n'), 0o644)
 }
 
 // Satisfies reports whether the manifest already records this exact asset

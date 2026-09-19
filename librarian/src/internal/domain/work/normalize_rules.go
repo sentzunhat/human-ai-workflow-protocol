@@ -6,33 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/identity"
 )
-
-// FixOperation is one detected fix (auto-fixable or blocked).
-type FixOperation struct {
-	OpID         string       `json:"opId"`
-	Type         string       `json:"type"`
-	ItemID       string       `json:"itemId"`
-	FileToModify string       `json:"fileToModify"`
-	LineRange    [2]int       `json:"lineRange"`
-	Description  string       `json:"description"`
-	Safety       string       `json:"safety"` // safe | blocked
-	Confidence   float64      `json:"confidence"`
-	RuleID       string       `json:"ruleId,omitempty"`
-	Blocked      *BlockedInfo `json:"blocked,omitempty"`
-}
-
-// BlockedInfo details a blocked operation.
-type BlockedInfo struct {
-	ID         string   `json:"id"`
-	Rule       string   `json:"rule"`
-	ItemID     string   `json:"itemId"`
-	Confidence float64  `json:"confidence"`
-	Candidates []string `json:"candidates"`
-	Reason     string   `json:"reason"`
-	Recovery   string   `json:"recovery"`
-}
 
 var (
 	isoDateRe        = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
@@ -56,7 +31,7 @@ func isISODateOrEmpty(value string) bool {
 }
 
 func isCanonicalID(value string) bool {
-	return canonicalIDRe.MatchString(value) || numericRowIDRe.MatchString(value) || fullUUIDRe.MatchString(value) || ExtractShortUUID(value) != ""
+	return canonicalIDRe.MatchString(value) || numericRowIDRe.MatchString(value) || identity.IsFullUUID(value) || ExtractShortUUID(value) != ""
 }
 
 func inferTypeFromID(id string) string {
@@ -155,7 +130,7 @@ func isLegacyClosedPath(path string) bool {
 	if m == nil {
 		return false
 	}
-	return m[1]+"-"+m[2]+"-"+m[3] < repo.LegacyClosedCutoff
+	return m[1]+"-"+m[2]+"-"+m[3] < LegacyClosedCutoff
 }
 
 type ruleEvaluator struct {
@@ -164,6 +139,7 @@ type ruleEvaluator struct {
 	backlogPath string
 	scan        *PlanScan
 	planByPath  map[string]*PlanFileRecord
+	source      *WorkSource
 	opCounter   int
 	ops         []FixOperation
 }
@@ -198,10 +174,10 @@ func (e *ruleEvaluator) blockedFix(ruleID, itemID, file string, line int, reason
 
 // EvaluateRules runs the detection rule set (A1-A8, B1-B5, B7) over the
 // backlog rows and plan scan, producing ordered fix operations.
-func EvaluateRules(repoRoot, workRoot, backlogPath string, backlog *NormalizeBacklog, scan *PlanScan) []FixOperation {
+func EvaluateRules(repoRoot, workRoot, backlogPath string, backlog *NormalizeBacklog, scan *PlanScan, source *WorkSource) []FixOperation {
 	e := &ruleEvaluator{
 		repoRoot: repoRoot, workRoot: workRoot, backlogPath: backlogPath,
-		scan: scan, planByPath: map[string]*PlanFileRecord{}, opCounter: 1,
+		scan: scan, planByPath: map[string]*PlanFileRecord{}, opCounter: 1, source: source,
 	}
 	for i := range scan.Files {
 		e.planByPath[scan.Files[i].Path] = &scan.Files[i]
@@ -234,7 +210,11 @@ func (e *ruleEvaluator) evaluateRow(row NormalizeRow) {
 	candidates := e.scan.ByID[row.ID]
 
 	if row.Type == "" {
-		if inferred := inferTypeFromID(row.ID); inferred != "" {
+		if identity.IsNumericID(row.ID) {
+			// Older repositories often use a compact "#" column without a
+			// separate Type column. Keep normalize focused on structural drift
+			// for those rows instead of forcing a speculative type.
+		} else if inferred := inferTypeFromID(row.ID); inferred != "" {
 			e.autoFix("A1", "add-field", row.ID, e.backlogPath, row.LineNumber,
 				fmt.Sprintf("A1: add missing type field inferred from ID prefix (%s)", inferred))
 		} else {
@@ -250,7 +230,7 @@ func (e *ruleEvaluator) evaluateRow(row NormalizeRow) {
 			fmt.Sprintf("A2: normalize date '%s' to YYYY-MM-DD", row.Updated))
 	}
 
-	if !isCanonicalID(row.ID) {
+	if row.Section == SectionActive && !isCanonicalID(row.ID) {
 		e.autoFix("A3", "fix-malformed-id", row.ID, e.backlogPath, row.LineNumber,
 			"A3: fix malformed backlog ID format")
 	}
@@ -262,7 +242,7 @@ func (e *ruleEvaluator) evaluateRow(row NormalizeRow) {
 			e.blockedFix("B2", row.ID, e.backlogPath, row.LineNumber,
 				"Referenced plan path escapes the work root: "+row.PlanPath, nil,
 				"Use a plan link relative to .hawp/work without '..' segments")
-		} else if !repo.Exists(linkedPath) {
+		} else if !e.source.Exists(linkedPath) {
 			e.blockedFix("B2", row.ID, e.backlogPath, row.LineNumber,
 				"Referenced plan path is missing: "+row.PlanPath, nil,
 				"Update BACKLOG.md link or restore the plan file")
@@ -276,7 +256,7 @@ func (e *ruleEvaluator) evaluateRow(row NormalizeRow) {
 	if len(candidates) > 1 {
 		rel := make([]string, len(candidates))
 		for i, c := range candidates {
-			rel[i] = repo.ToRepoRelative(e.repoRoot, c)
+			rel[i] = e.source.ToRepoRelative(e.repoRoot, c)
 		}
 		e.blockedFix("B3", row.ID, e.backlogPath, row.LineNumber,
 			"Multiple plan files matched the same backlog ID", rel,
@@ -291,7 +271,7 @@ func (e *ruleEvaluator) evaluateRow(row NormalizeRow) {
 	if row.Section == SectionClosed && linkedPlan != nil {
 		content := linkedPlan.Content
 		isLegacy := isLegacyClosedPath(linkedPlan.Path)
-		planRel := repo.ToRepoRelative(e.repoRoot, linkedPlan.Path)
+		planRel := e.source.ToRepoRelative(e.repoRoot, linkedPlan.Path)
 
 		if !isLegacy && !hasHeadingNamed(content, "Outcome") {
 			e.autoFix("A4", "add-section-header", row.ID, planRel, 1,

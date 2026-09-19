@@ -12,8 +12,9 @@ import (
 
 	domainkitsync "github.com/sentzunhat/hawp/librarian/src/internal/domain/kitsync"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/archive"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/download"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/githubrelease"
+	download "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/clients/download"
+	githubrelease "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/clients/githubrelease"
+	reposkitsync "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/kitsync"
 )
 
 // BundleAssetName is the release asset that carries the kit + provider
@@ -63,13 +64,15 @@ func Sync(fetcher download.Fetcher, client githubrelease.Client, repo, repoRoot 
 		return Result{}, err
 	}
 
-	manifest, err := domainkitsync.ParseManifest(filepath.Join(bundleRoot, "providers", "manifest.yaml"))
+	manifest, err := domainkitsync.ParseManifest(filepath.Join(bundleRoot, "providers", "manifest.yaml"), os.ReadFile)
 	if err != nil {
 		return Result{}, fmt.Errorf("parse bundled manifest: %w", err)
 	}
 
+	fc := reposkitsync.NewFileCopier()
+
 	result := Result{Providers: map[string]int{}, ProviderInstalls: map[string]bool{}}
-	result.KitFilesWritten, err = domainkitsync.SyncKit(filepath.Join(bundleRoot, "kit"), repoRoot)
+	result.KitFilesWritten, err = domainkitsync.SyncKit(fc, filepath.Join(bundleRoot, "kit"), repoRoot)
 	if err != nil {
 		return result, fmt.Errorf("sync kit: %w", err)
 	}
@@ -85,7 +88,7 @@ func Sync(fetcher download.Fetcher, client githubrelease.Client, repo, repoRoot 
 
 	for _, name := range targets {
 		if installed[name] {
-			written, skipped, err := domainkitsync.ApplyProviderUpdate(bundleRoot, repoRoot, manifest, name)
+			written, skipped, err := domainkitsync.ApplyProviderUpdate(fc, bundleRoot, repoRoot, manifest, name)
 			if err != nil {
 				return result, fmt.Errorf("update provider %s: %w", name, err)
 			}
@@ -93,7 +96,7 @@ func Sync(fetcher download.Fetcher, client githubrelease.Client, repo, repoRoot 
 			result.ProviderInstalls[name] = false
 			result.SkippedRules = append(result.SkippedRules, skipped...)
 		} else {
-			written, seeded, err := domainkitsync.ApplyProviderInstall(bundleRoot, repoRoot, manifest, name)
+			written, seeded, err := domainkitsync.ApplyProviderInstall(fc, bundleRoot, repoRoot, manifest, name)
 			if err != nil {
 				return result, fmt.Errorf("install provider %s: %w", name, err)
 			}
