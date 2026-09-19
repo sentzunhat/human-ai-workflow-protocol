@@ -58,6 +58,7 @@ splits that would require exporting many private functions.
 - Moved work-domain Markdown link scanning into `internal/domain/work/markdown`; dead-link validation and normalization migration now use the explicit link boundary.
 - Moved normalization backlog/plan scanning into `internal/domain/work/normalization`; parent aliases preserve the existing application API while rules remain in `domain/work`.
 - The scan boundary compiles independently; normalization rules/report and mutation/migration remain coupled to `WorkSource` and `ApplyResult` and are intentionally not moved in this slice.
+- Moved pure normalization operation value types into `internal/domain/work/normalization`; rule evaluation retains the parent package until its `WorkSource` dependency is separated.
 - `go test ./...`, `go vet ./...`, `git diff --check`, and source-layout candidate checks passed.
 - Source-layout preview reports 288 files, 0 moves, and 0 content updates.
 - `scripts/source-layout/run.sh --preview --check --diff` passed against the

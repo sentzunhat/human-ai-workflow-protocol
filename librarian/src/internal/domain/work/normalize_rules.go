@@ -9,31 +9,6 @@ import (
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/identity"
 )
 
-// FixOperation is one detected fix (auto-fixable or blocked).
-type FixOperation struct {
-	OpID         string       `json:"opId"`
-	Type         string       `json:"type"`
-	ItemID       string       `json:"itemId"`
-	FileToModify string       `json:"fileToModify"`
-	LineRange    [2]int       `json:"lineRange"`
-	Description  string       `json:"description"`
-	Safety       string       `json:"safety"` // safe | blocked
-	Confidence   float64      `json:"confidence"`
-	RuleID       string       `json:"ruleId,omitempty"`
-	Blocked      *BlockedInfo `json:"blocked,omitempty"`
-}
-
-// BlockedInfo details a blocked operation.
-type BlockedInfo struct {
-	ID         string   `json:"id"`
-	Rule       string   `json:"rule"`
-	ItemID     string   `json:"itemId"`
-	Confidence float64  `json:"confidence"`
-	Candidates []string `json:"candidates"`
-	Reason     string   `json:"reason"`
-	Recovery   string   `json:"recovery"`
-}
-
 var (
 	isoDateRe        = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
 	canonicalIDRe    = regexp.MustCompile(`^(TASK|BUG)-\d+$`)

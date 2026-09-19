@@ -9,6 +9,8 @@ type NormalizeRow = normalization.NormalizeRow
 type NormalizeBacklog = normalization.NormalizeBacklog
 type PlanFileRecord = normalization.PlanFileRecord
 type PlanScan = normalization.PlanScan
+type FixOperation = normalization.FixOperation
+type BlockedInfo = normalization.BlockedInfo
 
 const (
 	SectionActive  = normalization.SectionActive
