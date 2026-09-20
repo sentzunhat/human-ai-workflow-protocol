@@ -47,4 +47,7 @@ _Raw tokens = `(len(request)+len(context)+3)/4` on the verbatim user input._
 _Shaped tokens = `(len(mission)+len(constraints)+len(output)+len(checkpoint)+3)/4` on the DraftIntake output._
 _Note: negative savings (expansion) is expected for short requests even on success — structured intake adds labeled fields._
 _The value of reshaping is precision and downstream filtering, not raw token compression._
-_v0.1.0 gate: avg shaped tokens < avg raw tokens (any net savings across the 10-query suite). Gate NOT MET._
+_v0.1.0 reshape coverage gate: 0/10 queries returned valid structured output.
+**Not met.** The token-compression comparison is not meaningful for this failed
+run; see the Phi-3-mini and downstream benchmark artifacts for the supported
+paths._

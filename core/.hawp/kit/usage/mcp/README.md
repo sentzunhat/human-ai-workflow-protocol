@@ -10,6 +10,10 @@ v0.0.24 is published or that every provider has passed a live connection test.
 - [Lessons and troubleshooting](lessons.md)
 - [Connection checks and provider extension](verification.md)
 
+For a release or pull-request review, use the [review-derived lessons and
+pre-publication checklist](lessons.md#review-derived-contract-lessons) after
+the worker flow is aligned with the implementation.
+
 ## Before Setup
 
 Work from the intended repository root. Read its HAWP operating guide and
@@ -68,6 +72,9 @@ investigation. Keep `input` verbatim; use `context` only for known facts,
 `mission` for one objective, `constraints` for actual limits, and `output` for
 what done looks like. Omit `checkpoint` unless a handoff is needed. Mark missing
 information as unknown instead of inventing requirements, approval, or evidence.
+
+The HAWP shape names are `output` and `checkpoint`; in MCP JSON responses these
+are serialized as `output_spec` and `done_signal` respectively.
 
 Check the backlog and source plans first. Continue the same UUID when the intent
 matches. For genuinely new work, call `hawp_work_new` with the original request

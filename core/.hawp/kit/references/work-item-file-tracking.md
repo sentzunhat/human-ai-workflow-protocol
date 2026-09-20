@@ -43,7 +43,8 @@ File tracking is a **manual convention** for now.
 
 **The backlog is a summary/report surface only.**
 
-- File tracking lives in `.hawp/work/active/<TASK-ID>/files.md`.
+- File tracking lives in `.hawp/work/active/{uuid}/files.md` for new UUID-native
+  work items. Legacy `TASK-*` items remain readable until closure.
 - The backlog may link to a work item and summarize status.
 - The backlog must not rebuild file ownership from scratch.
 - The backlog must not list files per task.
@@ -135,12 +136,12 @@ Why this model:
     files.md         # File tracking (optional, co-located with plan)
 ```
 
-**Legacy (flat file) — still accepted by the validator:**
+**Legacy flat file — still accepted by the validator:**
 
 ```text
 .hawp/work/active/
-  TASK-030.md            # Work item plan
-  TASK-030-files.md      # File tracking
+  TASK-030.md            # Legacy work item plan
+  TASK-030-files.md      # Legacy file tracking
 ```
 
 New work items should use the folder-per-item layout. You may inline file tracking
@@ -233,7 +234,7 @@ The backlog may reference work item file tracking:
 Legacy format (still valid):
 
 ```md
-| TASK-030 | task | Implement file-tracking v0.1 | in-progress | [plan](active/TASK-030.md) | Files: [tracking](active/TASK-030-files.md) |
+| `TASK-030` | task | Implement file-tracking v0.1 | in-progress | [plan](active/TASK-030.md) | Files: [tracking](active/TASK-030-files.md) |
 ```
 
 The backlog must NOT:

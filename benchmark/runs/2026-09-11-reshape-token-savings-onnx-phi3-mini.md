@@ -20,4 +20,7 @@ _Raw tokens = `(len(request)+len(context)+3)/4` on the verbatim user input._
 _Shaped tokens = `(len(mission)+len(constraints)+len(output)+len(checkpoint)+3)/4` on the DraftIntake output._
 _Negative savings (expansion) is expected for short requests: structured intake adds labeled fields._
 _The value of reshaping is precision and downstream filtering, not raw token compression._
-_v0.1.0 reshape coverage gate: 10/10 queries return valid structured output. **Met (10/10).** Token-compression gate (shaped < raw) is **not met** here — short requests expand into labeled fields, which is expected. See `benchmark/runs/2026-09-12-downstream-token-savings-ollama.md` for the downstream savings gate (95% reduction, **met**)._
+_v0.1.0 reshape coverage gate: 10/10 queries return valid structured output.
+**Met (10/10).** The short-request token-compression gate is **not met** here
+(247 raw tokens versus 710 shaped tokens); downstream savings is measured
+separately in `benchmark/runs/2026-09-12-downstream-token-savings-ollama.md`._

@@ -93,3 +93,56 @@ concrete filesystem source out of `domain/work`. The remaining production
 `validation_adapters.go`; after those are moved, verify zero production `os`
 imports across all of `domain/work` before auditing `domain/kit` and
 `domain/kitsync`.
+
+## Later v0.0.24 Checkpoint
+
+The domain-boundary audit and MCP intake guidance are complete. Work items
+`620ba34c`, `9c660e32`, and `a8797f44` are closed, and the complete worker flow
+is documented as `hawp_work_intake` → optional questions → `hawp_work_new` →
+`hawp_work_doc` → `hawp_work_validate`.
+
+The synchronized branch commit for this checkpoint is `b13ca7aa`. Repository
+tests, vet, diff checks, and `hawp check` were verified. The next strategic lane
+is v0.0.25 MCP elicitation research, capability catalog/resources/prompts, and
+remote transport readiness.
+
+## 2026-09-19 PR Review-Ready Closure
+
+Before, PR #40 had a stale title and description, inconsistent MCP state and
+field names, outdated work-document CLI examples, and benchmark language that
+could overstate raw token compression. Review-derived patterns were not yet
+captured as reusable worker guidance.
+
+After, the PR is titled `HAWP v0.0.24: Domain Boundary Hardening and MCP Intake
+Workflow`, its description matches the shipped contract and verified evidence,
+and the review lessons plus pre-publication checklist are recorded in the MCP
+guide. All repository changes were consolidated into commit `de983a24` and
+pushed to `feature/v0.0.24-work-folder-normalization`.
+
+Directly verified: local tests, vet, build, source-layout tests, `hawp check`,
+provider validation, distribution validation, and diff checks passed. GitHub
+`quality` and `validate-generated` checks passed. The PR remains
+`REVIEW_REQUIRED` pending a fresh review; no new GPU, infrastructure, financial,
+or unrelated product direction changed.
+
+## 2026-09-20 Domain Kit Boundary Checkpoint
+
+Before, `internal/domain/kit` still owned its Markdown-link primitives beside
+validation and filename normalization, while `internal/domain/kitsync` had not
+yet been mapped into cohesive boundaries.
+
+After, shared kit Markdown-link behavior lives in
+`internal/domain/kit/markdown`, with compatibility wrappers preserving the
+parent `kit` API. Commit `5a6d15c` records the extraction. `kitsync` was mapped
+without edits: manifest/model parsing, provider detection, and file-copy/
+application operations remain distinct concerns behind the existing
+`FileCopier` boundary.
+
+Directly verified: full Go tests, full vet, `git diff --check`, source-layout
+preview/check/diff (307 retained paths, 0 moves), `hawp check`, and
+`hawp work validate` passed. Work validation reported 0 issues and 1
+evidence-clarity warning. The branch is one commit ahead of origin; the
+pre-existing status-file modification remains uncommitted.
+
+The next bounded architecture slice is a reviewed `kitsync` model/detection/
+copy mapping; do not split it mechanically or weaken `FileCopier`.

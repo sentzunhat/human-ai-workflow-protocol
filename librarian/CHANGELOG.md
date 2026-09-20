@@ -18,7 +18,7 @@ token savings with Ollama).
   in one call. Retrieves kit/work context for the request, shapes it through the
   local LLM, and returns structured `WorkIntakeResponse` draft fields
   (`mission`, `constraints`, `output_spec`, `done_signal`) with token savings
-  metrics. Structured states for uncertainty: `missing_index`,
+  metrics. Structured states for uncertainty: `blocked_missing_index`,
   `needs_user_input`, `blocked_reshape_failed` — never returns a fake usable draft.
 - **`hawp_work_reshape` MCP tool** — standalone reshape of a provided context
   string via local LLM (Ollama or ONNX), returning structured draft fields.
@@ -31,15 +31,15 @@ token savings with Ollama).
   for scripting and agent use. Paths: `status/`, `evidence/`, `decisions/`,
   `notes/` under `.hawp/work/`.
 - **`OllamaIntakeShaper`** — production intake-shaping path. Benchmarked at
-  10/10 coverage with `mistral:7B`; 95% average downstream token savings vs
+  10/10 coverage with `mistral:7B`; 95% aggregate downstream token reduction vs
   unstructured request + retrieved context (evidence:
   `benchmark/runs/2026-09-12-downstream-token-savings-ollama.md`).
 - **`ONNXIntakeShaper`** — ONNX intake-shaping path. Phi-3-mini reached 10/10
   coverage; SmolLM2-360M-Instruct (tiny) is 1/10 and not a recommended default.
 - **Downstream token savings benchmark** — `hawp search benchmark` extended with
   a downstream comparison mode: HAWP structured fields vs raw request + context.
-  Ollama `mistral:7B`: 18096 → 831 tokens total across 10 queries (9/10 succeeded;
-  95% savings on succeeded runs).
+  Ollama `mistral:7B`: 18,096 → 831 tokens across the 9 successful queries
+  (9/10 suite queries succeeded; 95% aggregate reduction on successful runs).
 - **v0.1.0 gates PASSED** — search 23% savings, Ollama reshape coverage 10/10,
   ONNX Phi-3-mini reshape coverage 10/10, downstream savings 95%. Coverage gates
   measure structured-output success rate (not token compression); token compression

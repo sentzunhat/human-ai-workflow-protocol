@@ -31,7 +31,7 @@ Use .github/prompts/hawp-change-review-and-reference-sync.prompt.md when the use
 
 Saved status reports belong in:
 
-- .hawp/work/status/YYYY/MM/DD/
+- .hawp/work/status/YYYY/MM/DD/{uuid}/status.md
 
 For bugs/tasks, track in .hawp/work/BACKLOG.md. Active plan files go in .hawp/work/active/. Deferred items can live in .hawp/work/parked/. Close by moving to .hawp/work/closed/YYYY/MM/DD/.
 Do not append completed work endlessly to BACKLOG.md. Move closed work to .hawp/work/closed/YYYY/MM/DD/ and keep BACKLOG.md compact.
@@ -107,7 +107,7 @@ go run ./cmd/hawp check
 
 **Regex quoting:** Always wrap rg/grep patterns containing `|`, `-`, or shell metacharacters in single quotes. Unquoted alternations split into positional arguments or pipe operators, causing silent failures and wrong matches.
 
-**Session checkpoints before compaction:** Before any `/compact` or context-reset, write a structured checkpoint to `.hawp/work/status/YYYY/MM/DD/checkpoint.md` capturing: current plan IDs, completed commits (SHA), pending files, verification status. After compaction, read the latest checkpoint and resume without re-investigation.
+**Session checkpoints before compaction:** Before any `/compact` or context-reset, write or append a structured checkpoint to `.hawp/work/status/YYYY/MM/DD/{uuid}/status.md` using `hawp work status --title "checkpoint" --work-item <uuid>`; capture current plan IDs, completed commits (SHA), pending files, and verification status. After compaction, read the latest checkpoint entry and resume without re-investigation.
 
 **Batch reads before writes:** When planning changes to N files, read all N files first (in parallel). Don't interleave reads and writes within a single change set.
 

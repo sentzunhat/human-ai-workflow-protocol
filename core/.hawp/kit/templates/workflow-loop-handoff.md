@@ -1,6 +1,6 @@
 # Workflow Loop — Iteration Handoff
 
-Save to: `.hawp/work/status/YYYY/MM/DD/<ID>-iter-<NNN>.md`
+Save to: `.hawp/work/status/YYYY/MM/DD/<ID>/status.md` (append one entry per iteration)
 
 Compact continuity artifact for the next session. Not a transcript dump — link to plan and evidence.
 

@@ -116,8 +116,8 @@ This repository uses HAWP as a lightweight task-shaping protocol.
 - Track bugs and tasks in `.hawp/work/BACKLOG.md`
 - Write active plans to `.hawp/work/active/<id>.md`
 - Close by moving to `.hawp/work/closed/YYYY/MM/DD/`
-- Status reports belong in `.hawp/work/status/YYYY/MM/DD/`
-- Evidence belongs in `.hawp/work/evidence/YYYY/MM/DD/`
+- Status reports belong in `.hawp/work/status/YYYY/MM/DD/<uuid>/status.md`
+- Evidence belongs in `.hawp/work/evidence/YYYY/MM/DD/<uuid>/evidence.md`
 
 HAWP is a shaping protocol, not a runtime. Do not invent per-field runtime folders.
 
