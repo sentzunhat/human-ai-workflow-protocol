@@ -3,9 +3,11 @@ package archive
 import (
 	"archive/tar"
 	"compress/gzip"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // ExtractAll extracts every regular file and directory from a .tar.gz
@@ -35,7 +37,10 @@ func ExtractAll(archivePath, destDir string) error {
 			return err
 		}
 
-		target := filepath.Join(destDir, header.Name)
+		target, err := archiveTarget(destDir, header.Name)
+		if err != nil {
+			return err
+		}
 		switch header.Typeflag {
 		case tar.TypeDir:
 			if err := os.MkdirAll(target, 0o755); err != nil {
@@ -56,4 +61,30 @@ func ExtractAll(archivePath, destDir string) error {
 			out.Close()
 		}
 	}
+}
+
+// archiveTarget resolves a tar member below destDir without allowing an
+// absolute or parent-traversal member name to escape the extraction root.
+func archiveTarget(destDir, memberName string) (string, error) {
+	if memberName == "" {
+		return "", fmt.Errorf("archive member has an empty name")
+	}
+	name := filepath.FromSlash(memberName)
+	if filepath.IsAbs(name) {
+		return "", fmt.Errorf("archive member %q is absolute", memberName)
+	}
+
+	root, err := filepath.Abs(destDir)
+	if err != nil {
+		return "", fmt.Errorf("resolve extraction root: %w", err)
+	}
+	target := filepath.Join(root, name)
+	relative, err := filepath.Rel(root, target)
+	if err != nil {
+		return "", fmt.Errorf("check archive member %q: %w", memberName, err)
+	}
+	if relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("archive member %q escapes extraction root", memberName)
+	}
+	return target, nil
 }

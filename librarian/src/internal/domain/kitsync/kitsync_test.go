@@ -335,6 +335,53 @@ func TestApplyProviderInstallUnknownProvider(t *testing.T) {
 	}
 }
 
+func TestApplyProviderUpdateRejectsManifestTraversal(t *testing.T) {
+	manifest := &Manifest{Providers: map[string]Provider{
+		"evil": {
+			Source: "providers/.evil",
+			InstallsTo: []InstallRule{{
+				From: "rules/../../outside.txt",
+				Dest: ".hawp/kit/evil.md",
+			}},
+		},
+	}}
+	bundleRoot := writeTree(t, map[string]string{
+		"providers/.evil/outside.txt": "must not be read",
+	})
+	repoRoot := t.TempDir()
+
+	if _, _, err := ApplyProviderUpdate(fc, bundleRoot, repoRoot, manifest, "evil"); err == nil {
+		t.Fatal("expected manifest source traversal to be rejected")
+	}
+}
+
+func TestApplyProviderInstallRejectsManifestDestinationTraversal(t *testing.T) {
+	manifest := &Manifest{Providers: map[string]Provider{
+		"evil": {
+			Source: "providers/.evil",
+			InstallsTo: []InstallRule{{
+				From: "payload.txt",
+				Dest: "../../outside.txt",
+			}},
+		},
+	}}
+	bundleRoot := writeTree(t, map[string]string{
+		"providers/.evil/payload.txt": "must not write",
+	})
+	root := t.TempDir()
+	repoRoot := filepath.Join(root, "repo")
+	if err := os.MkdirAll(repoRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, _, err := ApplyProviderInstall(fc, bundleRoot, repoRoot, manifest, "evil"); err == nil {
+		t.Fatal("expected manifest destination traversal to be rejected")
+	}
+	if _, err := os.Stat(filepath.Join(root, "outside.txt")); !os.IsNotExist(err) {
+		t.Fatalf("destination traversal target was created: %v", err)
+	}
+}
+
 func TestIsSeedIfMissing(t *testing.T) {
 	cases := []struct {
 		install string

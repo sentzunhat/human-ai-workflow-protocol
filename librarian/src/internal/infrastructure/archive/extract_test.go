@@ -116,3 +116,30 @@ func TestExtractMemberUnsupportedType(t *testing.T) {
 		t.Fatal("expected error for unsupported archive type")
 	}
 }
+
+func TestExtractAllRejectsTraversalMember(t *testing.T) {
+	archivePath := buildTarGz(t, map[string]string{"../../escaped.txt": "must not write"})
+	root := t.TempDir()
+	dest := filepath.Join(root, "extracted")
+
+	if err := ExtractAll(archivePath, dest); err == nil {
+		t.Fatal("expected traversal member to be rejected")
+	}
+	if _, err := os.Stat(filepath.Join(root, "escaped.txt")); !os.IsNotExist(err) {
+		t.Fatalf("traversal target was created: %v", err)
+	}
+}
+
+func TestExtractAllRejectsAbsoluteMember(t *testing.T) {
+	root := t.TempDir()
+	absolute := filepath.Join(root, "absolute.txt")
+	archivePath := buildTarGz(t, map[string]string{absolute: "must not write"})
+	dest := filepath.Join(root, "extracted")
+
+	if err := ExtractAll(archivePath, dest); err == nil {
+		t.Fatal("expected absolute member to be rejected")
+	}
+	if _, err := os.Stat(absolute); !os.IsNotExist(err) {
+		t.Fatalf("absolute target was created: %v", err)
+	}
+}

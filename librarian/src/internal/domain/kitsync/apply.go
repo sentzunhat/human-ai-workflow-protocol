@@ -4,7 +4,60 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"strings"
 )
+
+type resolvedRule struct {
+	rule   InstallRule
+	source string
+	dest   string
+}
+
+// resolveWithinRoot accepts only relative manifest paths whose cleaned target
+// remains below root. Manifest content arrives from a downloaded release
+// bundle, so it must not be allowed to select arbitrary filesystem paths.
+func resolveWithinRoot(root, value, field string) (string, error) {
+	if value == "" {
+		return "", fmt.Errorf("%s must not be empty", field)
+	}
+	pathValue := filepath.FromSlash(value)
+	if filepath.IsAbs(pathValue) {
+		return "", fmt.Errorf("%s %q must be relative", field, value)
+	}
+	root, err := filepath.Abs(root)
+	if err != nil {
+		return "", fmt.Errorf("resolve %s root: %w", field, err)
+	}
+	target := filepath.Join(root, pathValue)
+	relative, err := filepath.Rel(root, target)
+	if err != nil {
+		return "", fmt.Errorf("check %s %q: %w", field, value, err)
+	}
+	if relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("%s %q escapes root %s", field, value, root)
+	}
+	return target, nil
+}
+
+func resolveRules(bundleRoot, repoRoot string, provider Provider) ([]resolvedRule, error) {
+	sourceBase, err := resolveWithinRoot(bundleRoot, provider.Source, "provider source")
+	if err != nil {
+		return nil, err
+	}
+	rules := make([]resolvedRule, 0, len(provider.InstallsTo))
+	for _, rule := range provider.InstallsTo {
+		source, err := resolveWithinRoot(sourceBase, rule.From, "rule source")
+		if err != nil {
+			return nil, err
+		}
+		dest, err := resolveWithinRoot(repoRoot, rule.Dest, "rule destination")
+		if err != nil {
+			return nil, err
+		}
+		rules = append(rules, resolvedRule{rule: rule, source: source, dest: dest})
+	}
+	return rules, nil
+}
 
 // SyncKit refreshes repoRoot/.hawp/kit/ from bundleKitDir, copying every
 // file wholesale (kit content is canonical/generated, never hand-edited
@@ -28,18 +81,23 @@ func ApplyProviderUpdate(fc FileCopier, bundleRoot, repoRoot string, manifest *M
 		return 0, nil, fmt.Errorf("unknown provider %q", providerName)
 	}
 
+	rules, err := resolveRules(bundleRoot, repoRoot, provider)
+	if err != nil {
+		return 0, nil, fmt.Errorf("provider %s manifest paths: %w", providerName, err)
+	}
+
 	written := 0
 	var skipped []string
-	sourceBase := filepath.Join(bundleRoot, provider.Source)
 
-	for _, rule := range provider.InstallsTo {
+	for _, resolved := range rules {
+		rule := resolved.rule
 		switch rule.UpdateMode() {
 		case "skip":
 			skipped = append(skipped, providerName+":"+rule.Dest)
 			continue
 		case "seed-if-missing":
-			srcPath := filepath.Join(sourceBase, rule.From)
-			destPath := filepath.Join(repoRoot, rule.Dest)
+			srcPath := resolved.source
+			destPath := resolved.dest
 
 			info, err := fc.Stat(srcPath)
 			if err != nil {
@@ -63,8 +121,8 @@ func ApplyProviderUpdate(fc FileCopier, bundleRoot, repoRoot string, manifest *M
 			continue
 		}
 
-		srcPath := filepath.Join(sourceBase, rule.From)
-		destPath := filepath.Join(repoRoot, rule.Dest)
+		srcPath := resolved.source
+		destPath := resolved.dest
 
 		info, err := fc.Stat(srcPath)
 		if err != nil {
@@ -140,13 +198,18 @@ func ApplyProviderInstall(fc FileCopier, bundleRoot, repoRoot string, manifest *
 		return 0, nil, fmt.Errorf("unknown provider %q", providerName)
 	}
 
+	rules, err := resolveRules(bundleRoot, repoRoot, provider)
+	if err != nil {
+		return 0, nil, fmt.Errorf("provider %s manifest paths: %w", providerName, err)
+	}
+
 	written := 0
 	var seeded []string
-	sourceBase := filepath.Join(bundleRoot, provider.Source)
 
-	for _, rule := range provider.InstallsTo {
-		srcPath := filepath.Join(sourceBase, rule.From)
-		destPath := filepath.Join(repoRoot, rule.Dest)
+	for _, resolved := range rules {
+		rule := resolved.rule
+		srcPath := resolved.source
+		destPath := resolved.dest
 
 		info, err := fc.Stat(srcPath)
 		if err != nil {

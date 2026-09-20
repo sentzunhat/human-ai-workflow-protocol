@@ -1,9 +1,7 @@
 package pull
 
 import (
-	"flag"
 	"fmt"
-	"io"
 	"strings"
 )
 
@@ -15,36 +13,38 @@ type modelPullOptions struct {
 func parseModelPullArgs(args []string) (modelPullOptions, error) {
 	opts := modelPullOptions{}
 
-	flags := flag.NewFlagSet("model pull", flag.ContinueOnError)
-	flags.SetOutput(io.Discard)
-	flags.StringVar(&opts.onnxFile, "onnx-file", "", "path to ONNX file in repo")
-	flags.Bool("no-update-check", false, "suppress update notice")
-
-	if err := flags.Parse(args); err != nil {
-		return modelPullOptions{}, fmt.Errorf("model pull arguments: %w", err)
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+		switch {
+		case arg == "--onnx-file":
+			i++
+			if i >= len(args) || strings.TrimSpace(args[i]) == "" {
+				return modelPullOptions{}, fmt.Errorf("--onnx-file requires a non-empty path")
+			}
+			opts.onnxFile = args[i]
+		case strings.HasPrefix(arg, "--onnx-file="):
+			value := strings.TrimPrefix(arg, "--onnx-file=")
+			if strings.TrimSpace(value) == "" {
+				return modelPullOptions{}, fmt.Errorf("--onnx-file requires a non-empty path")
+			}
+			opts.onnxFile = value
+		case arg == "--no-update-check":
+			// Accepted for consistency with the other CLI commands. Update
+			// notification handling is owned by the command dispatcher.
+		case strings.HasPrefix(arg, "-"):
+			return modelPullOptions{}, fmt.Errorf("model pull arguments: unknown option %q", arg)
+		case opts.modelRepo == "":
+			opts.modelRepo = arg
+		default:
+			return modelPullOptions{}, fmt.Errorf("unexpected extra argument %q", arg)
+		}
 	}
-	if flags.NArg() == 0 {
+
+	if opts.modelRepo == "" {
 		return modelPullOptions{}, fmt.Errorf("usage: hawp model pull <hf-org/hf-repo> [--onnx-file <path-in-repo>]")
 	}
-	opts.modelRepo = flags.Arg(0)
 	if strings.TrimSpace(opts.modelRepo) == "" {
 		return modelPullOptions{}, fmt.Errorf("model repository must not be empty")
-	}
-	// Preserve leading options while accepting the documented repo-first form.
-	if err := flags.Parse(flags.Args()[1:]); err != nil {
-		return modelPullOptions{}, fmt.Errorf("model pull arguments: %w", err)
-	}
-	if flags.NArg() != 0 {
-		return modelPullOptions{}, fmt.Errorf("unexpected extra argument %q", flags.Arg(0))
-	}
-	var emptyPath bool
-	flags.Visit(func(f *flag.Flag) {
-		if f.Name == "onnx-file" && strings.TrimSpace(opts.onnxFile) == "" {
-			emptyPath = true
-		}
-	})
-	if emptyPath {
-		return modelPullOptions{}, fmt.Errorf("--onnx-file requires a non-empty path")
 	}
 
 	return opts, nil
