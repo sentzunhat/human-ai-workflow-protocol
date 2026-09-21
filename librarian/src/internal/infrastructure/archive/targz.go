@@ -8,6 +8,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // ExtractAll extracts every regular file and directory from a .tar.gz
@@ -15,6 +17,17 @@ import (
 // Unlike ExtractMember, this pulls out the whole tree (used for the kit +
 // providers bundle, not a single named file).
 func ExtractAll(archivePath, destDir string) error {
+	if err := os.MkdirAll(destDir, 0o755); err != nil {
+		return err
+	}
+	root, err := filepath.Abs(destDir)
+	if err != nil {
+		return fmt.Errorf("resolve extraction root: %w", err)
+	}
+	if err := filesystem.RejectSymlinkAncestors(root, root); err != nil {
+		return fmt.Errorf("refusing symlinked extraction root: %w", err)
+	}
+
 	f, err := os.Open(archivePath)
 	if err != nil {
 		return err
@@ -37,9 +50,12 @@ func ExtractAll(archivePath, destDir string) error {
 			return err
 		}
 
-		target, err := archiveTarget(destDir, header.Name)
+		target, err := archiveTarget(root, header.Name)
 		if err != nil {
 			return err
+		}
+		if err := filesystem.RejectSymlinkAncestors(root, target); err != nil {
+			return fmt.Errorf("refusing symlinked archive target %q: %w", header.Name, err)
 		}
 		switch header.Typeflag {
 		case tar.TypeDir:

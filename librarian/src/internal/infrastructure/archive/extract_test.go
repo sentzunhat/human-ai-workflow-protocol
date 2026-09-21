@@ -143,3 +143,30 @@ func TestExtractAllRejectsAbsoluteMember(t *testing.T) {
 		t.Fatalf("absolute target was created: %v", err)
 	}
 }
+
+func TestExtractAllRejectsSymlinkAncestor(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink permissions are not reliable on Windows")
+	}
+
+	root := t.TempDir()
+	dest := filepath.Join(root, "extracted")
+	outside := filepath.Join(root, "outside")
+	if err := os.Mkdir(outside, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(dest, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(dest, "sub")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	archivePath := buildTarGz(t, map[string]string{"sub/escaped.txt": "must not write"})
+	if err := ExtractAll(archivePath, dest); err == nil {
+		t.Fatal("expected symlink ancestor to be rejected")
+	}
+	if _, err := os.Stat(filepath.Join(outside, "escaped.txt")); !os.IsNotExist(err) {
+		t.Fatalf("symlink target was created: %v", err)
+	}
+}
