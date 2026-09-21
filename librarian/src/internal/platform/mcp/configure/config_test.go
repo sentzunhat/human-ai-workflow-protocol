@@ -37,7 +37,7 @@ func TestWriteCodexTOMLCreatesFile(t *testing.T) {
 	if !strings.Contains(content, `enabled = true`) {
 		t.Errorf(".codex/config.toml missing enabled=true, got:\n%s", content)
 	}
-	if !strings.Contains(content, `enabled_tools = ["hawp_search", "hawp_usage", "hawp_work_intake", "hawp_work_new", "hawp_work_validate"]`) {
+	if !strings.Contains(content, `enabled_tools = ["hawp_search", "hawp_usage", "hawp_work_intake", "hawp_work_new", "hawp_work_validate", "hawp_work_doc", "hawp_work_reshape"]`) {
 		t.Errorf(".codex/config.toml missing enabled tool list, got:\n%s", content)
 	}
 }
@@ -89,7 +89,7 @@ func TestWriteCodexTOMLUpgradesExistingRelativeBlock(t *testing.T) {
 	if server["command"] != expectedBin || server["cwd"] != repoRoot {
 		t.Fatalf("launch paths were not migrated: %s", content)
 	}
-	if !reflect.DeepEqual(server["enabled_tools"], []any{"hawp_search", "hawp_usage", "hawp_work_intake", "hawp_work_new", "hawp_work_validate"}) {
+	if !reflect.DeepEqual(server["enabled_tools"], []any{"hawp_search", "hawp_usage", "hawp_work_intake", "hawp_work_new", "hawp_work_validate", "hawp_work_doc", "hawp_work_reshape"}) {
 		t.Fatalf("missing tool defaults: %s", content)
 	}
 	if strings.Contains(content, `command = ".hawp/bin/hawp"`) || strings.Contains(content, `cwd = "."`) {

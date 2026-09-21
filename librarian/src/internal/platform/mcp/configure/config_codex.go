@@ -57,7 +57,12 @@ func mergeCodexTOML(data []byte, root string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	fields := map[string]any{"command": want["command"], "args": args, "cwd": root}
+	fields := map[string]any{
+		"command":       want["command"],
+		"args":          args,
+		"cwd":           root,
+		"enabled_tools": want["enabled_tools"],
+	}
 	for key, value := range want {
 		if _, exists := server[key]; !exists {
 			if _, overridden := fields[key]; !overridden {

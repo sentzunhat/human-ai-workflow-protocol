@@ -22,7 +22,7 @@ func TestCodexMigrationPreservesCustomSettingsAndComments(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, exact := range []string{"# keep header\r\nmodel = 'custom'", "[ mcp_servers . \"hawp\" ] # keep table note\r\n", "# keep command note\r\n", "enabled = false # never enable silently\r\n", "startup_timeout_sec = 123\r\n", "enabled_tools = ['hawp_work_validate']\r\n", "custom = '''line one\r\n[mcp_servers.fake]\r\nline three'''\r\n", "[mcp_servers.hawp.env]\r\nLOCAL_ONLY = 'keep'\r\n[mcp_servers.other]\r\ncommand = 'untouched'\r\n"} {
+	for _, exact := range []string{"# keep header\r\nmodel = 'custom'", "[ mcp_servers . \"hawp\" ] # keep table note\r\n", "# keep command note\r\n", "enabled = false # never enable silently\r\n", "startup_timeout_sec = 123\r\n", "custom = '''line one\r\n[mcp_servers.fake]\r\nline three'''\r\n", "[mcp_servers.hawp.env]\r\nLOCAL_ONLY = 'keep'\r\n[mcp_servers.other]\r\ncommand = 'untouched'\r\n"} {
 		if !strings.Contains(string(out), exact) {
 			t.Fatalf("lost bytes %q in %s", exact, out)
 		}
@@ -34,6 +34,9 @@ func TestCodexMigrationPreservesCustomSettingsAndComments(t *testing.T) {
 	server := doc["mcp_servers"].(map[string]any)["hawp"].(map[string]any)
 	if server["enabled"] != false || server["command"] != hawpBinaryPath(root) || server["cwd"] != root {
 		t.Fatalf("bad migration: %s", out)
+	}
+	if !reflect.DeepEqual(server["enabled_tools"], []any{"hawp_search", "hawp_usage", "hawp_work_intake", "hawp_work_new", "hawp_work_validate", "hawp_work_doc", "hawp_work_reshape"}) {
+		t.Fatalf("Codex tool allowlist was not upgraded: %s", out)
 	}
 	if !reflect.DeepEqual(server["args"], []any{"mcp", "--no-update-check", "--repo-root", root}) {
 		t.Fatalf("lost args: %s", out)
