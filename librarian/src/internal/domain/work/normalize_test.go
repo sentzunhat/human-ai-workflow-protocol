@@ -1,11 +1,45 @@
 package work
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 )
+
+// defaultWorkSource for domain/work tests.
+var defaultWorkSource = &WorkSource{
+	Exists:         fileExists,
+	ToRepoRelative: func(_, p string) string { return p },
+	CollectFiles:   collectFiles,
+	ReadDir:        os.ReadDir,
+	ReadFile:       os.ReadFile,
+	WriteFile:      os.WriteFile,
+	MkdirAll:       os.MkdirAll,
+	MkdirTemp:      os.MkdirTemp,
+	Rename:         os.Rename,
+	Remove:         os.Remove,
+	RemoveAll:      os.RemoveAll,
+	Stat:           os.Stat,
+	Lstat:          os.Lstat,
+	EvalSymlinks:   filepath.EvalSymlinks,
+}
+
+// collectFiles returns all regular files under dir, recursively.
+func collectFiles(dir string, _ bool) []string {
+	var result []string
+	_ = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			result = append(result, path)
+		}
+		return nil
+	})
+	return result
+}
 
 // buildRepoFixture creates a repo root with a .hawp/work tree.
 func buildRepoFixture(t *testing.T, files map[string]string) string {
@@ -31,7 +65,23 @@ func detect(t *testing.T, root string) []FixOperation {
 		t.Fatal(err)
 	}
 	scan := ScanPlanFiles(workRoot)
-	return EvaluateRules(root, workRoot, ".hawp/work/BACKLOG.md", backlog, scan)
+	source := &WorkSource{
+		Exists:         fileExists,
+		ToRepoRelative: func(_, p string) string { return p },
+		CollectFiles:   collectFiles,
+	}
+	return EvaluateRules(root, workRoot, ".hawp/work/BACKLOG.md", backlog, scan, source)
+}
+
+var defaultWorkSourceForTests = &WorkSource{
+	Exists:         fileExists,
+	ToRepoRelative: func(_, p string) string { return p },
+	CollectFiles:   collectFiles,
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }
 
 func rulesOf(ops []FixOperation) []string {
@@ -113,13 +163,24 @@ func TestRulesAcceptLegacySubsectionsAndPlainPlanPaths(t *testing.T) {
 		".hawp/work/closed/2026/07/27/042.md": closedPlanComplete,
 	})
 	ops := detect(t, root)
-	if len(ops) != 3 {
-		t.Fatalf("legacy repo produced %d operations, want 3 type warnings: %v", len(ops), rulesOf(ops))
+	if len(ops) != 0 {
+		t.Fatalf("legacy numeric repo produced operations: %v", rulesOf(ops))
 	}
-	for _, op := range ops {
-		if op.RuleID != "B1" {
-			t.Fatalf("legacy repo produced non-type operation: %+v", op)
-		}
+}
+
+func TestRulesAllowLinkedLegacySlugsOutsideActiveRows(t *testing.T) {
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/BACKLOG.md": cleanBacklogHeader + backlogFooter +
+			"| release-benchmark-backfill | planning | benchmark backfill | parked | [plan](parked/release-benchmark-backfill/plan.md) | 2026-08-31 |\n" +
+			"| multi-repo-context-d9b2f3a1 | improvement | multi repo context | 2026-09-10 | [plan](closed/2026/09/10/multi-repo-context-d9b2f3a1/plan.md) |\n",
+		".hawp/work/active/.keep":                                          "",
+		".hawp/work/parked/release-benchmark-backfill/plan.md":             "# parked\n",
+		".hawp/work/closed/2026/09/10/multi-repo-context-d9b2f3a1/plan.md": closedPlanComplete,
+	})
+
+	ops := detect(t, root)
+	if hasRule(ops, "A3") {
+		t.Fatalf("linked parked/recently closed legacy slugs should not trigger A3: %v", rulesOf(ops))
 	}
 }
 
@@ -236,7 +297,7 @@ func TestApplyClosedRecordNormalization(t *testing.T) {
 		".hawp/work/closed/2026/07/01/TASK-020.md":                 "# closed record without sections\n",
 		".hawp/work/closed/misplaced/2026-07-02-TASK-021-thing.md": "# date-prefixed, wrong folder\n",
 	})
-	result, err := ApplyClosedRecordNormalization(root)
+	result, err := defaultWorkSource.ApplyClosedRecordNormalization(root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -262,12 +323,91 @@ func TestApplyClosedRecordNormalization(t *testing.T) {
 	}
 
 	// Re-running is idempotent.
-	again, err := ApplyClosedRecordNormalization(root)
+	again, err := defaultWorkSource.ApplyClosedRecordNormalization(root)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(again.ChangedFiles) != 0 {
 		t.Errorf("second apply changed files: %v", again.ChangedFiles)
+	}
+}
+
+func TestApplyCompletedActiveRowCleanupRemovesDoneRowsPointingToClosedPlans(t *testing.T) {
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/BACKLOG.md": cleanBacklogHeader +
+			"| 048 | task | done stale | done | [plan](closed/2026/09/01/048.md) | 2026-09-01 |\n" +
+			"| 049 | task | still active | in-progress | [plan](active/049.md) | 2026-09-01 |\n" +
+			"| 050 | task | done but missing closed plan | done | [plan](closed/2026/09/01/050.md) | 2026-09-01 |\n" + backlogFooter +
+			"| 048 | task | done stale | 2026-09-01 | [plan](closed/2026/09/01/048.md) |\n",
+		".hawp/work/active/049.md":            "# active\n",
+		".hawp/work/closed/2026/09/01/048.md": closedPlanComplete,
+	})
+	source := &WorkSource{Exists: fileExists, ToRepoRelative: func(_, p string) string { return p }, ReadDir: os.ReadDir, ReadFile: os.ReadFile, Stat: os.Stat, Lstat: os.Lstat, EvalSymlinks: filepath.EvalSymlinks, WriteFile: os.WriteFile}
+	result, err := source.ApplyCompletedActiveRowCleanup(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.ChangedFiles) != 1 {
+		t.Fatalf("changed files = %v, want BACKLOG.md", result.ChangedFiles)
+	}
+	backlog, err := os.ReadFile(filepath.Join(root, ".hawp/work/BACKLOG.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	content := string(backlog)
+	if strings.Contains(content, "| 048 | task | done stale | done |") {
+		t.Fatalf("stale active row still present:\n%s", content)
+	}
+	if !strings.Contains(content, "| 049 | task | still active | in-progress |") {
+		t.Fatalf("active row removed unexpectedly:\n%s", content)
+	}
+	if !strings.Contains(content, "| 050 | task | done but missing closed plan | done |") {
+		t.Fatalf("missing-plan done row should be preserved:\n%s", content)
+	}
+	if strings.Count(content, "| 048 | task | done stale | 2026-09-01 |") != 1 {
+		t.Fatalf("recently closed row not preserved exactly once:\n%s", content)
+	}
+}
+
+func TestApplyCompletedActiveRowCleanupRejectsTraversalAndSymlinkedBacklog(t *testing.T) {
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/BACKLOG.md": cleanBacklogHeader +
+			"| 048 | task | traversal | done | [plan](closed/../active/048/plan.md) | 2026-09-01 |\n" + backlogFooter,
+		".hawp/work/active/048/plan.md": "# active\n",
+	})
+	source := &WorkSource{Exists: fileExists, ToRepoRelative: func(_, p string) string { return p }, ReadDir: os.ReadDir, ReadFile: os.ReadFile, Stat: os.Stat, Lstat: os.Lstat, EvalSymlinks: filepath.EvalSymlinks, WriteFile: os.WriteFile}
+	result, err := source.ApplyCompletedActiveRowCleanup(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.ChangedFiles) != 0 {
+		t.Fatalf("traversal row was removed: %v", result.ChangedFiles)
+	}
+
+	backlogPath := filepath.Join(root, ".hawp/work/BACKLOG.md")
+	outside := filepath.Join(root, "outside.md")
+	outsideContent := cleanBacklogHeader +
+		"| 049 | task | outside | done | [plan](closed/2026/09/01/049.md) | 2026-09-01 |\n" + backlogFooter
+	if err := os.WriteFile(outside, []byte(outsideContent), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, "outside-closed", "2026", "09", "01"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Join(root, ".hawp/work/closed/2026/09/01"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, ".hawp/work/closed/2026/09/01/049.md"), []byte(closedPlanComplete), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(backlogPath); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, backlogPath); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	if _, err := source.ApplyCompletedActiveRowCleanup(root); err == nil {
+		t.Fatal("expected symlinked BACKLOG.md to be rejected")
 	}
 }
 
@@ -329,7 +469,7 @@ See [notes](../notes/context.md).
 		".hawp/work/closed/.keep":     "",
 	})
 
-	result, err := ApplyWorkItemFolderMigration(root)
+	result, err := defaultWorkSource.ApplyWorkItemFolderMigration(root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -390,7 +530,7 @@ See [notes](../notes/context.md).
 		t.Errorf("backlog parked link not rewritten:\n%s", string(backlog))
 	}
 
-	again, err := ApplyWorkItemFolderMigration(root)
+	again, err := defaultWorkSource.ApplyWorkItemFolderMigration(root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -416,7 +556,7 @@ func TestApplyWorkItemFolderMigrationRenamesFolderToUUID(t *testing.T) {
 		".hawp/work/closed/.keep": "",
 	})
 
-	result, err := ApplyWorkItemFolderMigration(root)
+	result, err := defaultWorkSource.ApplyWorkItemFolderMigration(root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -460,7 +600,7 @@ func TestPreviewWorkItemFolderMigrationMatchesApplyWithoutMutatingSource(t *test
 		".hawp/work/closed/.keep": "",
 	})
 
-	preview, err := PreviewWorkItemFolderMigration(root)
+	preview, err := defaultWorkSource.PreviewWorkItemFolderMigration(root)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -474,11 +614,28 @@ func TestPreviewWorkItemFolderMigrationMatchesApplyWithoutMutatingSource(t *test
 		t.Fatalf("preview should not create migrated folder in source repo, stat err = %v", err)
 	}
 
-	applied, err := ApplyWorkItemFolderMigration(root)
+	applied, err := defaultWorkSource.ApplyWorkItemFolderMigration(root)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Join(preview.ChangedFiles, "\n") != strings.Join(applied.ChangedFiles, "\n") {
-		t.Fatalf("preview changes %v do not match apply changes %v", preview.ChangedFiles, applied.ChangedFiles)
+	previewNorm := normalizeMigratePaths(preview.ChangedFiles)
+	applyNorm := normalizeMigratePaths(applied.ChangedFiles)
+	if strings.Join(previewNorm, "\n") != strings.Join(applyNorm, "\n") {
+		t.Fatalf("preview changes %v do not match apply changes %v", previewNorm, applyNorm)
 	}
+}
+
+// normalizeMigratePaths strips the work-root prefix so absolute paths
+// from different temp roots become comparable relative identifiers.
+func normalizeMigratePaths(paths []string) []string {
+	out := make([]string, len(paths))
+	for i, p := range paths {
+		idx := strings.Index(p, string(filepath.Separator)+".hawp"+string(filepath.Separator)+"work")
+		if idx >= 0 {
+			out[i] = p[idx:]
+		} else {
+			out[i] = p
+		}
+	}
+	return out
 }

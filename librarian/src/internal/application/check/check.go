@@ -9,7 +9,7 @@ import (
 
 	appkit "github.com/sentzunhat/hawp/librarian/src/internal/application/kit"
 	applinks "github.com/sentzunhat/hawp/librarian/src/internal/application/links"
-	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work"
+	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work/validation"
 	domainwork "github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
 )
 

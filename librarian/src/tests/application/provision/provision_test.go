@@ -13,7 +13,7 @@ import (
 
 	appprovision "github.com/sentzunhat/hawp/librarian/src/internal/application/provision"
 	domainprovision "github.com/sentzunhat/hawp/librarian/src/internal/domain/provision"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/download"
+	download "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/clients/download"
 )
 
 func hashHex(b []byte) string {

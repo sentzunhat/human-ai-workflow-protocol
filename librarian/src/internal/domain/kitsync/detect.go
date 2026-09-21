@@ -1,7 +1,6 @@
 package kitsync
 
 import (
-	"os"
 	"path/filepath"
 	"sort"
 )
@@ -14,10 +13,10 @@ import (
 // signal: e.g. ".claude/rules/hawp-*.md" existing, not just ".claude/"
 // existing, which avoids false positives from unrelated tooling that
 // happens to use the same directory name).
-func DetectProviders(repoRoot string, manifest *Manifest) []string {
+func DetectProviders(fc FileCopier, repoRoot string, manifest *Manifest) []string {
 	var detected []string
 	for name, provider := range manifest.Providers {
-		if providerInstalled(repoRoot, provider) {
+		if providerInstalled(fc, repoRoot, provider) {
 			detected = append(detected, name)
 		}
 	}
@@ -25,13 +24,13 @@ func DetectProviders(repoRoot string, manifest *Manifest) []string {
 	return detected
 }
 
-func providerInstalled(repoRoot string, provider Provider) bool {
+func providerInstalled(fc FileCopier, repoRoot string, provider Provider) bool {
 	for _, rule := range provider.InstallsTo {
 		if rule.Pattern == "" {
 			continue
 		}
 		dir := filepath.Join(repoRoot, rule.Dest)
-		entries, err := os.ReadDir(dir)
+		entries, err := fc.ReadDir(dir)
 		if err != nil {
 			continue
 		}

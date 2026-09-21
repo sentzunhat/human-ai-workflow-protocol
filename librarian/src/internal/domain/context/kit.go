@@ -1,13 +1,12 @@
 package context
 
 import (
-	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 )
+
+// Reader is the function signature for reading file content in domain context functions.
+type Reader func(string) ([]byte, error)
 
 // kitRole classifies a kit-relative path by its top-level segment, e.g.
 // "usage/init.md" -> "usage"; "start-here.md" (no subfolder) -> "root".
@@ -37,29 +36,31 @@ func firstDescriptiveLine(content string) string {
 // README.md files) tagged with its folder role and a context prefix.
 // Folders with a README.md contribute their first descriptive line as
 // shared context for every other document in that folder.
-func EnrichKit(repoRoot, kitPath string) ([]Document, error) {
-	files := markdown.CollectFiles(kitPath, false)
+//
+// reader injects file content from the application layer.
+func EnrichKit(repoRoot, kitPath string, reader Reader, src ContextSource) ([]Document, error) {
+	files := src.FileLister.CollectFiles(kitPath, false)
 
 	folderContext := map[string]string{}
 	for _, file := range files {
 		if filepath.Base(file) != "README.md" {
 			continue
 		}
-		raw, err := os.ReadFile(file)
+		raw, err := reader(file)
 		if err != nil {
 			continue
 		}
-		role := kitRole(repo.ToRepoRelative(kitPath, file))
+		role := kitRole(fileToKitRel(kitPath, file))
 		folderContext[role] = firstDescriptiveLine(string(raw))
 	}
 
 	documents := make([]Document, 0, len(files))
 	for _, file := range files {
-		raw, err := os.ReadFile(file)
+		raw, err := reader(file)
 		if err != nil {
 			continue
 		}
-		kitRel := repo.ToRepoRelative(kitPath, file)
+		kitRel := fileToKitRel(kitPath, file)
 		role := kitRole(kitRel)
 
 		prefix := "[kit/" + role + "]"
@@ -68,7 +69,7 @@ func EnrichKit(repoRoot, kitPath string) ([]Document, error) {
 		}
 
 		documents = append(documents, Document{
-			RelPath:       repo.ToRepoRelative(repoRoot, file),
+			RelPath:       repoRootToRel(repoRoot, file),
 			Corpus:        CorpusKit,
 			Role:          role,
 			ContextPrefix: prefix,
@@ -76,4 +77,20 @@ func EnrichKit(repoRoot, kitPath string) ([]Document, error) {
 		})
 	}
 	return documents, nil
+}
+
+// fileToKitRel converts an absolute file path to a kit-relative path
+// with the kitPath root stripped so it becomes just the nested portion
+// (e.g. ".hawp/kit/foo/bar.md" → "foo/bar.md").
+func fileToKitRel(kitPath, absFile string) string {
+	return strings.TrimPrefix(absFile, filepath.Clean(kitPath)+string(filepath.Separator))
+}
+
+// repoRootToRel converts an absolute file path to a repo-relative POSIX path.
+func repoRootToRel(repoRoot, absFile string) string {
+	rel, err := filepath.Rel(repoRoot, absFile)
+	if err != nil {
+		return absFile
+	}
+	return strings.ReplaceAll(rel, "\\", "/")
 }

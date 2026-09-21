@@ -73,15 +73,9 @@ hawp search embed         generate and store embedding vectors
 
 When using Claude Code with the HAWP MCP server (`hawp mcp`), the `hawp_search` tool provides structured results with precise line positions and context windows — suitable for automated code navigation and documentation lookup.
 
-Configure MCP in `.mcp.json` at repo root:
-
-```json
-{
-  "mcpServers": {
-    "hawp": { "command": ".hawp/bin/hawp", "args": ["mcp"] }
-  }
-}
-```
+Follow the [provider MCP setup guides](mcp/README.md) for Codex, Claude Code,
+or GitHub Copilot. They select the native executable and an explicit repository
+root; provider-specific configuration formats are not interchangeable.
 
 Tool input:
 

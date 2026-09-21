@@ -7,9 +7,9 @@ import (
 	"time"
 
 	domainupdate "github.com/sentzunhat/hawp/librarian/src/internal/domain/update"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/download"
+	download "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/clients/download"
+	githubrelease "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/clients/githubrelease"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/githubrelease"
 )
 
 const (

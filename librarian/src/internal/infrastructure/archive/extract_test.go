@@ -116,3 +116,57 @@ func TestExtractMemberUnsupportedType(t *testing.T) {
 		t.Fatal("expected error for unsupported archive type")
 	}
 }
+
+func TestExtractAllRejectsTraversalMember(t *testing.T) {
+	archivePath := buildTarGz(t, map[string]string{"../../escaped.txt": "must not write"})
+	root := t.TempDir()
+	dest := filepath.Join(root, "extracted")
+
+	if err := ExtractAll(archivePath, dest); err == nil {
+		t.Fatal("expected traversal member to be rejected")
+	}
+	if _, err := os.Stat(filepath.Join(root, "escaped.txt")); !os.IsNotExist(err) {
+		t.Fatalf("traversal target was created: %v", err)
+	}
+}
+
+func TestExtractAllRejectsAbsoluteMember(t *testing.T) {
+	root := t.TempDir()
+	absolute := filepath.Join(root, "absolute.txt")
+	archivePath := buildTarGz(t, map[string]string{absolute: "must not write"})
+	dest := filepath.Join(root, "extracted")
+
+	if err := ExtractAll(archivePath, dest); err == nil {
+		t.Fatal("expected absolute member to be rejected")
+	}
+	if _, err := os.Stat(absolute); !os.IsNotExist(err) {
+		t.Fatalf("absolute target was created: %v", err)
+	}
+}
+
+func TestExtractAllRejectsSymlinkAncestor(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink permissions are not reliable on Windows")
+	}
+
+	root := t.TempDir()
+	dest := filepath.Join(root, "extracted")
+	outside := filepath.Join(root, "outside")
+	if err := os.Mkdir(outside, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(dest, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(dest, "sub")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	archivePath := buildTarGz(t, map[string]string{"sub/escaped.txt": "must not write"})
+	if err := ExtractAll(archivePath, dest); err == nil {
+		t.Fatal("expected symlink ancestor to be rejected")
+	}
+	if _, err := os.Stat(filepath.Join(outside, "escaped.txt")); !os.IsNotExist(err) {
+		t.Fatalf("symlink target was created: %v", err)
+	}
+}

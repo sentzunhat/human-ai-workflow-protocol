@@ -1,10 +1,40 @@
 package kitsync
 
 import (
+	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
+
+// testFileCopier implements FileCopier using real os calls for tests.
+type testFileCopier struct{}
+
+func (testFileCopier) RejectSymlinkAncestors(root, target string) error {
+	return filesystem.RejectSymlinkAncestors(root, target)
+}
+
+func (testFileCopier) MkdirAll(dir string) error { return os.MkdirAll(dir, 0o755) }
+func (testFileCopier) ReadDir(dir string) ([]fs.DirEntry, error) {
+	return os.ReadDir(dir)
+}
+func (testFileCopier) Stat(path string) (fs.FileInfo, error)   { return os.Stat(path) }
+func (testFileCopier) IsNotExist(err error) bool               { return os.IsNotExist(err) }
+func (testFileCopier) Open(path string) (io.ReadCloser, error) { return os.Open(path) }
+func (testFileCopier) CreateTemp(dir, pattern string) (io.WriteCloser, string, error) {
+	f, err := os.CreateTemp(dir, pattern)
+	if err != nil {
+		return nil, "", err
+	}
+	return f, f.Name(), nil
+}
+func (testFileCopier) Rename(src, dst string) error { return os.Rename(src, dst) }
+func (testFileCopier) Remove(path string) error     { return os.Remove(path) }
+
+var fc testFileCopier // shared test FileCopier
 
 // sampleManifest mirrors the real core/providers/manifest.yaml shape,
 // including the always-refresh github entries with no install/update
@@ -59,7 +89,7 @@ func writeTree(t *testing.T, files map[string]string) string {
 func parseSample(t *testing.T) *Manifest {
 	t.Helper()
 	dir := writeTree(t, map[string]string{"manifest.yaml": sampleManifest})
-	manifest, err := ParseManifest(filepath.Join(dir, "manifest.yaml"))
+	manifest, err := ParseManifest(filepath.Join(dir, "manifest.yaml"), os.ReadFile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -106,7 +136,7 @@ func TestDetectProvidersFindsPatternMarkedFiles(t *testing.T) {
 		".claude/rules/hawp-core.md": "# core\n",
 		".claude/rules/other.md":     "# non-hawp file, should not itself trigger detection\n",
 	})
-	detected := DetectProviders(repoRoot, manifest)
+	detected := DetectProviders(fc, repoRoot, manifest)
 	if len(detected) != 1 || detected[0] != "claude" {
 		t.Fatalf("detected = %v, want [claude]", detected)
 	}
@@ -122,7 +152,7 @@ func TestDetectProvidersIgnoresUnrelatedGithubFolder(t *testing.T) {
 	repoRoot := writeTree(t, map[string]string{
 		".github/workflows/ci.yml": "name: CI\n",
 	})
-	detected := DetectProviders(repoRoot, manifest)
+	detected := DetectProviders(fc, repoRoot, manifest)
 	if len(detected) != 0 {
 		t.Fatalf("detected = %v, want none (github has no pattern-marked rule)", detected)
 	}
@@ -135,7 +165,7 @@ func TestSyncKitCopiesWholeTree(t *testing.T) {
 	})
 	repoRoot := t.TempDir()
 
-	written, err := SyncKit(bundleKit, repoRoot)
+	written, err := SyncKit(fc, bundleKit, repoRoot)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -145,6 +175,25 @@ func TestSyncKitCopiesWholeTree(t *testing.T) {
 	content, err := os.ReadFile(filepath.Join(repoRoot, ".hawp", "kit", "usage", "init.md"))
 	if err != nil || string(content) != "# init\n" {
 		t.Fatalf("kit file not synced correctly: %v %q", err, content)
+	}
+}
+
+func TestSyncKitRejectsSymlinkedDestinationAncestor(t *testing.T) {
+	bundleKit := writeTree(t, map[string]string{"start-here.md": "# start\n"})
+	repoRoot := t.TempDir()
+	external := t.TempDir()
+	if err := os.Mkdir(filepath.Join(repoRoot, ".hawp"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(external, filepath.Join(repoRoot, ".hawp", "kit")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	if _, err := SyncKit(fc, bundleKit, repoRoot); err == nil {
+		t.Fatal("expected symlinked kit destination to be rejected")
+	}
+	if _, err := os.Stat(filepath.Join(external, "start-here.md")); !os.IsNotExist(err) {
+		t.Fatalf("external destination was modified: %v", err)
 	}
 }
 
@@ -161,7 +210,7 @@ func TestApplyProviderUpdateRefreshesAndSkips(t *testing.T) {
 		"CLAUDE.md":                  "# user's customized CLAUDE.md, must survive\n",
 	})
 
-	written, skipped, err := ApplyProviderUpdate(bundleRoot, repoRoot, manifest, "claude")
+	written, skipped, err := ApplyProviderUpdate(fc, bundleRoot, repoRoot, manifest, "claude")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -187,7 +236,7 @@ func TestApplyProviderUpdateRefreshesAndSkips(t *testing.T) {
 
 func TestApplyProviderUpdateUnknownProvider(t *testing.T) {
 	manifest := parseSample(t)
-	if _, _, err := ApplyProviderUpdate(t.TempDir(), t.TempDir(), manifest, "nonexistent"); err == nil {
+	if _, _, err := ApplyProviderUpdate(fc, t.TempDir(), t.TempDir(), manifest, "nonexistent"); err == nil {
 		t.Fatal("expected error for unknown provider")
 	}
 }
@@ -202,7 +251,7 @@ func TestApplyProviderUpdateSeedIfMissingDoesNotOverwriteExisting(t *testing.T) 
 		"AGENTS.md": "# repo-specific instructions\n",
 	})
 
-	written, skipped, err := ApplyProviderUpdate(bundleRoot, repoRoot, manifest, "codex")
+	written, skipped, err := ApplyProviderUpdate(fc, bundleRoot, repoRoot, manifest, "codex")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -227,7 +276,7 @@ func TestApplyProviderUpdateSeedIfMissingCreatesAbsentFile(t *testing.T) {
 	})
 	repoRoot := t.TempDir()
 
-	written, skipped, err := ApplyProviderUpdate(bundleRoot, repoRoot, manifest, "codex")
+	written, skipped, err := ApplyProviderUpdate(fc, bundleRoot, repoRoot, manifest, "codex")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -256,7 +305,7 @@ func TestApplyProviderInstallCreatesAllFiles(t *testing.T) {
 	})
 	repoRoot := t.TempDir()
 
-	written, seeded, err := ApplyProviderInstall(bundleRoot, repoRoot, manifest, "claude")
+	written, seeded, err := ApplyProviderInstall(fc, bundleRoot, repoRoot, manifest, "claude")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -290,7 +339,7 @@ func TestApplyProviderInstallSeedIfMissingSkipsExisting(t *testing.T) {
 		"CLAUDE.md": "# my custom content\n",
 	})
 
-	written, _, err := ApplyProviderInstall(bundleRoot, repoRoot, manifest, "claude")
+	written, _, err := ApplyProviderInstall(fc, bundleRoot, repoRoot, manifest, "claude")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -306,8 +355,55 @@ func TestApplyProviderInstallSeedIfMissingSkipsExisting(t *testing.T) {
 
 func TestApplyProviderInstallUnknownProvider(t *testing.T) {
 	manifest := parseSample(t)
-	if _, _, err := ApplyProviderInstall(t.TempDir(), t.TempDir(), manifest, "nonexistent"); err == nil {
+	if _, _, err := ApplyProviderInstall(fc, t.TempDir(), t.TempDir(), manifest, "nonexistent"); err == nil {
 		t.Fatal("expected error for unknown provider")
+	}
+}
+
+func TestApplyProviderUpdateRejectsManifestTraversal(t *testing.T) {
+	manifest := &Manifest{Providers: map[string]Provider{
+		"evil": {
+			Source: "providers/.evil",
+			InstallsTo: []InstallRule{{
+				From: "rules/../../outside.txt",
+				Dest: ".hawp/kit/evil.md",
+			}},
+		},
+	}}
+	bundleRoot := writeTree(t, map[string]string{
+		"providers/.evil/outside.txt": "must not be read",
+	})
+	repoRoot := t.TempDir()
+
+	if _, _, err := ApplyProviderUpdate(fc, bundleRoot, repoRoot, manifest, "evil"); err == nil {
+		t.Fatal("expected manifest source traversal to be rejected")
+	}
+}
+
+func TestApplyProviderInstallRejectsManifestDestinationTraversal(t *testing.T) {
+	manifest := &Manifest{Providers: map[string]Provider{
+		"evil": {
+			Source: "providers/.evil",
+			InstallsTo: []InstallRule{{
+				From: "payload.txt",
+				Dest: "../../outside.txt",
+			}},
+		},
+	}}
+	bundleRoot := writeTree(t, map[string]string{
+		"providers/.evil/payload.txt": "must not write",
+	})
+	root := t.TempDir()
+	repoRoot := filepath.Join(root, "repo")
+	if err := os.MkdirAll(repoRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, _, err := ApplyProviderInstall(fc, bundleRoot, repoRoot, manifest, "evil"); err == nil {
+		t.Fatal("expected manifest destination traversal to be rejected")
+	}
+	if _, err := os.Stat(filepath.Join(root, "outside.txt")); !os.IsNotExist(err) {
+		t.Fatalf("destination traversal target was created: %v", err)
 	}
 }
 

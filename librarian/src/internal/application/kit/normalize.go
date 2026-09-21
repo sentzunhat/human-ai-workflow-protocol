@@ -3,8 +3,10 @@ package kit
 import (
 	"fmt"
 	"io"
+	"os"
 
 	domainkit "github.com/sentzunhat/hawp/librarian/src/internal/domain/kit"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 )
 
@@ -13,6 +15,13 @@ type NormalizeOptions struct {
 	KitPath  string
 	RepoRoot string
 	Apply    bool
+}
+
+var defaultKitSource = &domainkit.KitSource{
+	FileLister:     func(kitPath string, skipReadme bool) []string { return markdown.CollectFiles(kitPath, skipReadme) },
+	BlankFences:    markdown.BlankFences,
+	Exists:         repo.Exists,
+	ToRepoRelative: repo.ToRepoRelative,
 }
 
 // Normalize plans (and in apply mode performs) kit file renames and link
@@ -27,12 +36,12 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 	}
 	fmt.Fprintf(out, "mode: %s\n\n", mode)
 
-	renames := domainkit.PlanFileRenames(opts.KitPath)
+	renames := domainkit.PlanFileRenames(opts.KitPath, os.ReadDir)
 	renameMap := make(map[string]string, len(renames))
 	for _, rename := range renames {
 		renameMap[rename.From] = rename.To
 	}
-	linkUpdates := domainkit.PlanLinkUpdates(opts.KitPath, renameMap)
+	linkUpdates := defaultKitSource.PlanLinkUpdates(opts.KitPath, renameMap, os.ReadFile)
 
 	if !opts.Apply {
 		if len(renames) == 0 && len(linkUpdates) == 0 {
@@ -62,7 +71,7 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 		return 1
 	}
 
-	conflictFrom, conflictTo, err := domainkit.ApplyRenames(renames)
+	conflictFrom, conflictTo, err := domainkit.ApplyRenames(renames, os.Stat, os.Rename)
 	if err != nil {
 		fmt.Fprintf(errOut, "kit normalize error: %v\n", err)
 		return 1
@@ -74,7 +83,7 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 		return 1
 	}
 
-	changedFiles, err := domainkit.ApplyLinkUpdates(linkUpdates)
+	changedFiles, err := domainkit.ApplyLinkUpdates(linkUpdates, os.ReadFile, os.WriteFile)
 	if err != nil {
 		fmt.Fprintf(errOut, "kit normalize error: %v\n", err)
 		return 1

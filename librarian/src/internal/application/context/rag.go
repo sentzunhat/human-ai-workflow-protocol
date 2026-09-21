@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/sentzunhat/hawp/librarian/src/internal/application/search"
+	embeddings "github.com/sentzunhat/hawp/librarian/src/internal/domain/providers/embeddings"
 )
 
 // DocumentReference tracks the source and position of a retrieved document.
@@ -55,6 +56,7 @@ type RAGPipeline interface {
 type DefaultRAGPipeline struct {
 	reshaper *ContextReshaper
 	repoRoot string
+	embedder search.EmbedderFactory
 }
 
 // NewDefaultRAGPipeline creates a RAG pipeline with the specified
@@ -77,8 +79,8 @@ type DefaultRAGPipeline struct {
 //
 //	block, err := pipeline.Retrieve(ctx, "how does auth work", 10)
 //	output, err := pipeline.Reshape(ctx, block, 2000)
-func NewDefaultRAGPipeline(config ReshapingConfig, repoRoot string) (*DefaultRAGPipeline, error) {
-	reshaper, err := NewContextReshaper(config)
+func NewDefaultRAGPipeline(config ReshapingConfig, repoRoot string, newEmbedder EmbedderFactory, newLLM LLMFactory) (*DefaultRAGPipeline, error) {
+	reshaper, err := NewContextReshaper(config, newEmbedder, newLLM)
 	if err != nil {
 		return nil, fmt.Errorf("initialize reshaper: %w", err)
 	}
@@ -86,7 +88,17 @@ func NewDefaultRAGPipeline(config ReshapingConfig, repoRoot string) (*DefaultRAG
 	return &DefaultRAGPipeline{
 		reshaper: reshaper,
 		repoRoot: repoRoot,
+		embedder: newEmbedderAdapter(newEmbedder),
 	}, nil
+}
+
+func newEmbedderAdapter(factory EmbedderFactory) search.EmbedderFactory {
+	if factory == nil {
+		return nil
+	}
+	return func(backend, model string) (embeddings.Embedder, error) {
+		return factory(backend, model, "")
+	}
 }
 
 // Retrieve runs query against the local index (internal/application/search —
@@ -101,7 +113,7 @@ func NewDefaultRAGPipeline(config ReshapingConfig, repoRoot string) (*DefaultRAG
 // (e.g. one of MongoDB's mdbr-leaf models) would slot in as just another
 // entry in embeddings.SupportedModels, not a new subsystem.
 func (p *DefaultRAGPipeline) Retrieve(ctx context.Context, query string, topK int) (ContextBlock, error) {
-	results, err := search.Query(p.repoRoot, query, topK)
+	results, err := search.QueryWithEmbedder(p.repoRoot, query, topK, p.embedder)
 	if err != nil {
 		return ContextBlock{}, fmt.Errorf("retrieve: %w", err)
 	}

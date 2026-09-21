@@ -7,7 +7,7 @@ import (
 	"time"
 
 	domainindex "github.com/sentzunhat/hawp/librarian/src/internal/domain/index"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
+	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
 )
 
 // IngestResult summarizes an ingest run.
@@ -94,7 +94,7 @@ func (s *IngestService) Execute(corpus *EnrichedCorpus) (IngestResult, error) {
 
 		// If it's a work item, insert metadata
 		if enriched.Category == "work" && enriched.WorkUUID != nil {
-			metadata := sqlite.DocumentMetadata{
+			metadata := domainindex.DocumentMetadata{
 				DocumentID: docID,
 				WorkUUID:   *enriched.WorkUUID,
 				Status:     *enriched.Status,
@@ -146,7 +146,7 @@ func (s *IngestService) Execute(corpus *EnrichedCorpus) (IngestResult, error) {
 
 		chunks := domainindex.ChunkBySectionWithLines(enriched.Content)
 		for i, cr := range chunks {
-			chunk := sqlite.Chunk{
+			chunk := domainindex.Chunk{
 				DocumentID:    docID,
 				ChunkIdx:      i,
 				Text:          cr.Text,

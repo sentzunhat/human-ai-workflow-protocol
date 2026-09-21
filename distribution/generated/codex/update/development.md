@@ -226,6 +226,8 @@ Development update of HAWP kit plus Codex `AGENTS.md` instructions.
 
 Run this from the root of your target repository. No edits are required; branch and provider are already configured in the command. Each run fetches the latest commit from that branch.
 
+Downloadable script artifact: `codex/update/development.sh`.
+
 ```bash
 set -euo pipefail
 
@@ -273,6 +275,16 @@ else
   fi
   echo "Source mode: remote archive"
 fi
+
+reject_hawp_symlinks() {
+  [ -d ".hawp" ] || return 0
+  link_path="$(find .hawp -type l -print -quit 2>/dev/null || true)"
+  if [ -n "$link_path" ]; then
+    echo "Error: refusing to follow symlink inside .hawp: $link_path"
+    exit 1
+  fi
+}
+reject_hawp_symlinks
 
 if [ ! -d ".hawp" ]; then
   echo "Preflight: .hawp/ not found in this repository."
@@ -337,6 +349,12 @@ reconcile_closed_plans_from_backlog() {
     closed_path="${closed_path%%#*}"
 
     if [ -n "$closed_path" ]; then
+      case "/$closed_path/" in
+        */../*|*/./*)
+          echo "  skipped unsafe closed-plan path: $link_path"
+          continue
+          ;;
+      esac
       plan_name="$(basename "$closed_path")"
       src=".hawp/work/active/$plan_name"
       dest=".hawp/work/$closed_path"
@@ -442,11 +460,12 @@ cp -R "$SRC/.hawp/kit/references" .hawp/kit/
 cp -R "$SRC/.hawp/kit/standards"  .hawp/kit/
 
 # --- 4b. Update hawp CLI binary (platform-detected from GitHub release) ---
-# Downloads the latest Go binary to .hawp/bin/hawp-bin (beside the shell
-# wrapper at .hawp/bin/hawp). Never copies the shell wrapper over the binary.
-update_hawp_binary() {
+# Downloads the latest Go binary to .hawp/bin/hawp. Existing legacy
+# .hawp/bin/hawp-bin files are preserved but no longer refreshed by this script.
+update_hawp_binary() (
+  set -eo pipefail
   local _os _arch _asset _ext _dest _url _checksum_url _expected _actual
-  local _tag
+  local _tag _tmpdir
 
   _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
   _arch="$(uname -m)"
@@ -472,7 +491,7 @@ update_hawp_binary() {
   esac
 
   _asset="hawp-${_os}-${_arch}${_ext}"
-  _dest=".hawp/bin/hawp-bin${_ext}"
+  _dest=".hawp/bin/hawp${_ext}"
 
   _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" 2>/dev/null \
     | awk -F'"' '/"tag_name"/ { print $4; exit }' || true)"
@@ -492,46 +511,42 @@ update_hawp_binary() {
 
   echo "hawp binary: ${_asset} (release ${_tag})"
   mkdir -p .hawp/bin
-  curl -fsSL -o "${_dest}.tmp" "$_url" || {
-    echo "hawp update: download failed — skipping binary update."
-    return 0
+  _tmpdir="$(mktemp -d ".hawp/bin/.hawp-download.XXXXXX")"
+  trap "$(printf 'rm -rf -- %q' "$_tmpdir")" EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+  curl -fsSL --proto '=https' --proto-redir '=https' -o "$_tmpdir/binary" "$_url" || {
+    echo "hawp update: binary download failed; installed binary preserved."
+    return 1
   }
-
-  if curl -fsSL -o /tmp/hawp-checksums.txt "$_checksum_url" 2>/dev/null; then
-    _expected="$(grep " ${_asset}$" /tmp/hawp-checksums.txt | awk '{print $1}')"
-    if [ -n "$_expected" ]; then
-      if command -v sha256sum >/dev/null 2>&1; then
-        _actual="$(sha256sum "${_dest}.tmp" | awk '{print $1}')"
-      elif command -v shasum >/dev/null 2>&1; then
-        _actual="$(shasum -a 256 "${_dest}.tmp" | awk '{print $1}')"
-      else
-        _actual=""
-      fi
-      if [ -n "$_actual" ] && [ "$_actual" != "$_expected" ]; then
-        echo "hawp update: SHA256 mismatch — aborting binary update."
-        rm -f "${_dest}.tmp"
-        return 1
-      fi
-      [ -n "$_actual" ] && echo "hawp binary: SHA256 verified."
-    fi
-    rm -f /tmp/hawp-checksums.txt
+  curl -fsSL --proto '=https' --proto-redir '=https' -o "$_tmpdir/checksums" "$_checksum_url" || {
+    echo "hawp update: checksums unavailable; installed binary preserved."
+    return 1
+  }
+  _expected="$(awk -v asset="$_asset" '$2 == asset || $2 == "*" asset { print $1 }' "$_tmpdir/checksums")"
+  if [[ ! "$_expected" =~ ^[[:xdigit:]]{64}$ ]]; then
+    echo "hawp update: expected exactly one valid SHA256 entry for $_asset."
+    return 1
   fi
-
-  mv "${_dest}.tmp" "$_dest"
-  chmod +x "$_dest"
-
-  # Install the shell wrapper alongside the binary (idempotent).
-  if [ -f "$SRC/.hawp/bin/hawp" ]; then
-    cp "$SRC/.hawp/bin/hawp" .hawp/bin/hawp
-    chmod +x .hawp/bin/hawp
+  _expected="$(printf '%s' "$_expected" | tr '[:upper:]' '[:lower:]')"
+  if command -v sha256sum >/dev/null 2>&1; then
+    _actual="$(sha256sum "$_tmpdir/binary" | awk '{print $1}')"
+  elif command -v shasum >/dev/null 2>&1; then
+    _actual="$(shasum -a 256 "$_tmpdir/binary" | awk '{print $1}')"
+  else
+    echo "hawp update: a SHA256 utility is required."
+    return 1
   fi
-  if [ -f "$SRC/.hawp/bin/hawp-mcp" ]; then
-    cp "$SRC/.hawp/bin/hawp-mcp" .hawp/bin/hawp-mcp
-    chmod +x .hawp/bin/hawp-mcp
+  if [ "$_actual" != "$_expected" ]; then
+    echo "hawp update: SHA256 mismatch; installed binary preserved."
+    return 1
   fi
+  echo "hawp binary: SHA256 verified."
+  chmod 755 "$_tmpdir/binary"
+  mv -f "$_tmpdir/binary" "$_dest"
 
   echo "hawp binary: updated to ${_tag} at ${_dest}"
-}
+)
 update_hawp_binary
 
 rm -rf .hawp/templates .hawp/patterns .hawp/reviews .hawp/examples .hawp/types .hawp/usage
@@ -588,6 +603,10 @@ This file is generated. Do not edit it directly.
 Generated output file:
 
 - `distribution/generated/codex/update/development.md`
+
+Generated shell script:
+
+- `distribution/generated/codex/update/development.sh`
 
 Provider: `codex` · Operation: `update` · Branch: `development`
 

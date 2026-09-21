@@ -69,6 +69,25 @@ func TestBacklogConsistencyPassAndFail(t *testing.T) {
 	}
 }
 
+func TestBacklogConsistencyFailsNonCanonicalActiveNewWorkID(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"active/cleanup-docs-work-items-2026-09-02/plan.md": "# plan",
+	})
+	backlog := &Backlog{
+		Active: []BacklogRow{{
+			ID:     "cleanup-docs-work-items-2026-09-02",
+			Detail: "[plan](active/cleanup-docs-work-items-2026-09-02/plan.md)",
+		}},
+	}
+	result := CheckBacklogConsistency(workDir, backlog)
+	if result.Status != StatusFail {
+		t.Fatalf("status = %s, want FAIL", result.Status)
+	}
+	if len(result.NonCanonicalActiveItems) != 1 || result.NonCanonicalActiveItems[0] != "cleanup-docs-work-items-2026-09-02" {
+		t.Fatalf("non-canonical active items = %+v", result.NonCanonicalActiveItems)
+	}
+}
+
 func TestBacklogConsistencyMatchesSlugClosedFolder(t *testing.T) {
 	workDir := buildWorkDir(t, map[string]string{
 		"closed/2026/08/25/manager-branch-kit-pattern/plan.md": closedPlanComplete,
@@ -155,9 +174,8 @@ func TestBacklogConsistencyAcceptsHashColumnAndNumericIDs(t *testing.T) {
 		"closed/2026/07/27/042.md": closedPlanComplete,
 		"parked/040.md":            "# parked",
 	})
-	backlog, err := ParseBacklog(filepath.Join(workDir, "BACKLOG.md"))
-	if err == nil || backlog != nil {
-		t.Fatal("expected missing backlog fixture to fail before explicit parse fixture setup")
+	if _, statErr := os.Stat(filepath.Join(workDir, "BACKLOG.md")); statErr == nil {
+		t.Fatal("expected BACKLOG.md to be absent before explicit parse fixture setup")
 	}
 
 	workDir = buildWorkDir(t, map[string]string{
@@ -186,10 +204,11 @@ func TestBacklogConsistencyAcceptsHashColumnAndNumericIDs(t *testing.T) {
 		"parked/040.md":            "# parked",
 	})
 
-	backlog, err = ParseBacklog(filepath.Join(workDir, "BACKLOG.md"))
-	if err != nil {
-		t.Fatal(err)
+	rawBacklog, readErr := os.ReadFile(filepath.Join(workDir, "BACKLOG.md"))
+	if readErr != nil {
+		t.Fatal(readErr)
 	}
+	backlog := ParseBacklogMarkdown(string(rawBacklog))
 	if len(backlog.Active) != 1 || backlog.Active[0].ID != "049" {
 		t.Fatalf("active rows = %+v, want numeric 049 row", backlog.Active)
 	}
@@ -345,7 +364,8 @@ func TestDeadLinks(t *testing.T) {
 		"BACKLOG.md":         "see [plan](active/TASK-001.md) and [gone](active/missing.md)\n",
 		"active/TASK-001.md": "```\n[example in fence](nowhere.md)\n```\n",
 	})
-	result := CheckDeadLinks(workDir)
+	source := &WorkSource{Exists: fileExists, ToRepoRelative: func(_, p string) string { return p }, ReadDir: os.ReadDir, ReadFile: os.ReadFile}
+	result := source.CheckDeadLinks(workDir)
 	if result.Scanned != 2 {
 		t.Fatalf("scanned = %d, want 2", result.Scanned)
 	}

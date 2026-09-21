@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	domaindistribution "github.com/sentzunhat/hawp/librarian/src/internal/domain/distribution"
+	infradistribution "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/distribution"
 )
 
 type BuildResult struct {
@@ -21,7 +22,7 @@ type ValidateResult struct {
 }
 
 func Build(repoRoot string) (BuildResult, error) {
-	outputs, err := domaindistribution.ComputeExpectedOutputs(repoRoot)
+	outputs, err := infradistribution.ComputeExpectedOutputs(repoRoot)
 	if err != nil {
 		return BuildResult{}, err
 	}
@@ -52,12 +53,12 @@ func Build(repoRoot string) (BuildResult, error) {
 }
 
 func Validate(repoRoot string) (ValidateResult, error) {
-	outputs, err := domaindistribution.ComputeExpectedOutputs(repoRoot)
+	outputs, err := infradistribution.ComputeExpectedOutputs(repoRoot)
 	if err != nil {
 		return ValidateResult{}, err
 	}
 
-	leaks, err := domaindistribution.FindDownstreamPathLeaks(repoRoot)
+	leaks, err := infradistribution.FindDownstreamPathLeaks(repoRoot)
 	if err != nil {
 		return ValidateResult{}, err
 	}
