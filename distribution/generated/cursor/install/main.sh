@@ -1,0 +1,369 @@
+set -euo pipefail
+
+OWNER="sentzunhat"
+REPO="human-ai-workflow-protocol"
+REF="main"
+PROVIDER="cursor"
+
+echo "Source: ${OWNER}/${REPO}@${REF}"
+echo "Provider: ${PROVIDER}"
+echo "Archive: https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz"
+
+TMP_DIR=""
+if [ -n "${HAWP_LOCAL_CORE:-}" ]; then
+  SRC="${HAWP_LOCAL_CORE}"
+  if [ ! -d "$SRC/.hawp/kit" ]; then
+    echo "Error: HAWP_LOCAL_CORE must point to a core directory containing .hawp/kit"
+    exit 1
+  fi
+  echo "Source mode: local core (${SRC})"
+else
+  TMP_DIR="$(mktemp -d)"
+  cleanup_tmp_dir() {
+    if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
+      rm -rf "$TMP_DIR"
+    fi
+  }
+  trap cleanup_tmp_dir EXIT
+  curl -fsSL "https://github.com/${OWNER}/${REPO}/archive/refs/heads/${REF}.tar.gz" \
+    | tar -xz -C "$TMP_DIR"
+  SRC=""
+  if [ -d "$TMP_DIR/${REPO}-${REF}/core/.hawp/kit" ]; then
+    SRC="$TMP_DIR/${REPO}-${REF}/core"
+  else
+    for candidate in "$TMP_DIR"/*/core; do
+      if [ -d "$candidate/.hawp/kit" ]; then
+        SRC="$candidate"
+        break
+      fi
+    done
+  fi
+  if [ -z "$SRC" ]; then
+    echo "Error: downloaded archive did not contain core/"
+    exit 1
+  fi
+  echo "Source mode: remote archive"
+fi
+
+reject_hawp_symlinks() {
+  [ -d ".hawp" ] || return 0
+  link_path="$(find .hawp -type l -print -quit 2>/dev/null || true)"
+  if [ -n "$link_path" ]; then
+    echo "Error: refusing to follow symlink inside .hawp: $link_path"
+    exit 1
+  fi
+}
+reject_hawp_symlinks
+
+if [ -d ".hawp" ]; then
+  echo "Preflight: detected existing .hawp/."
+  echo "Switching to update-compatible refresh mode for this run."
+  echo "Tip: use the matching update guide next time when .hawp/ already exists."
+fi
+
+# --- Helpers (no-clobber copy; never overwrite repo-owned files) ---
+copy_dir_no_clobber() {
+  src="$1"; dest="$2"
+  if [ -d "$src" ]; then
+    mkdir -p "$dest"
+    cp -Rn "$src"/. "$dest"/ 2>/dev/null || true
+  fi
+}
+copy_file_no_clobber() {
+  src="$1"; dest="$2"
+  if [ -f "$src" ] && [ ! -f "$dest" ]; then
+    mkdir -p "$(dirname "$dest")"
+    cp "$src" "$dest"
+  fi
+}
+reconcile_closed_plans_from_backlog() {
+  backlog=".hawp/work/BACKLOG.md"
+  [ -f "$backlog" ] || return 0
+
+  awk -F'|' '
+    function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
+    /^## Done/        { section="done";   next }
+    /^## Active/      { section="active"; next }
+    /^## /            { section="";       next }
+    section != "" && /^\|/ {
+      id   = trim($2)
+      col5 = trim($5)
+      col6 = trim($6)
+      if (id == "" || id ~ /^-+$/ || id == "ID") next
+      if (section == "done") {
+        closed = col5
+        plan   = col6
+      } else {
+        if (col5 !~ /^(done|wont-fix)$/ && col5 !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) next
+        closed = (col5 ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) ? col5 : ""
+        plan   = col6
+      }
+      link = ""
+      if (match(plan, /\(([^)]+)\)/)) {
+        link = substr(plan, RSTART + 1, RLENGTH - 2)
+      } else {
+        link = plan
+      }
+      print id "\t" closed "\t" link
+    }
+  ' "$backlog" | while IFS=$'\t' read -r id closed link_path; do
+    [ -n "$id" ] || continue
+
+    closed_path=""
+    case "$link_path" in
+      .hawp/work/closed/*) closed_path="${link_path#.hawp/work/}" ;;
+      work/closed/*) closed_path="${link_path#work/}" ;;
+      closed/*) closed_path="$link_path" ;;
+    esac
+    closed_path="${closed_path%%#*}"
+
+    if [ -n "$closed_path" ]; then
+      case "/$closed_path/" in
+        */../*|*/./*)
+          echo "  skipped unsafe closed-plan path: $link_path"
+          continue
+          ;;
+      esac
+      plan_name="$(basename "$closed_path")"
+      src=".hawp/work/active/$plan_name"
+      dest=".hawp/work/$closed_path"
+      if [ -f "$src" ] && [ ! -e "$dest" ]; then
+        mkdir -p "$(dirname "$dest")"
+        mv "$src" "$dest"
+        echo "  reconciled (link): $src -> $dest"
+      fi
+      continue
+    fi
+
+    case "$closed" in
+      [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]) closed_dir="${closed//-//}" ;;
+      *) closed_dir="" ;;
+    esac
+
+    for src in .hawp/work/active/*-"$id"-*.md; do
+      [ -f "$src" ] || continue
+      [ -n "$src" ] || continue
+      local_dir="$closed_dir"
+      if [ -z "$local_dir" ]; then
+        fname="$(basename "$src")"
+        case "$fname" in
+          [0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-*)
+            file_date="${fname:0:10}"
+            local_dir="${file_date//-//}"
+            ;;
+          *)
+            local_dir="$(date +%Y/%m/%d)"
+            ;;
+        esac
+      fi
+      dest=".hawp/work/closed/$local_dir/$(basename "$src")"
+      if [ ! -e "$dest" ]; then
+        mkdir -p "$(dirname "$dest")"
+        mv "$src" "$dest"
+        echo "  reconciled (id-fallback): $src -> $dest"
+      fi
+    done
+  done
+}
+MDATE="$(date +%Y/%m/%d)"
+
+# --- 1. Migration: legacy hawp/ -> .hawp/ ---
+if [ -d "hawp" ] && [ ! -L "hawp" ]; then
+  mkdir -p .hawp/work
+  copy_dir_no_clobber "hawp/work" ".hawp/work"
+  if [ -d "hawp/usage" ]; then
+    copy_file_no_clobber "hawp/usage/BACKLOG.md" ".hawp/work/BACKLOG.md"
+    copy_dir_no_clobber  "hawp/usage/status"     ".hawp/work/active"
+    mkdir -p ".hawp/work/decisions/$MDATE"
+    for f in hawp/usage/*_ADR.md; do
+      [ -f "$f" ] && copy_file_no_clobber "$f" ".hawp/work/decisions/$MDATE/$(basename "$f")"
+    done
+  fi
+  mkdir -p ".hawp/work/notes/$MDATE"
+  copy_dir_no_clobber "hawp/status" ".hawp/work/notes/$MDATE"
+  copy_file_no_clobber "hawp/LICENSE" ".hawp/LICENSE"
+  rm -rf hawp
+fi
+
+# --- 2. Migration: legacy .hawp/usage/ -> .hawp/work/ ---
+if [ -d ".hawp/usage" ]; then
+  copy_file_no_clobber ".hawp/usage/BACKLOG.md" ".hawp/work/BACKLOG.md"
+  copy_dir_no_clobber  ".hawp/usage/status"     ".hawp/work/active"
+  mkdir -p ".hawp/work/decisions/$MDATE"
+  for f in .hawp/usage/*_ADR.md; do
+    [ -f "$f" ] && copy_file_no_clobber "$f" ".hawp/work/decisions/$MDATE/$(basename "$f")"
+  done
+fi
+
+# --- 3. Migration: .hawp/status/ -> .hawp/work/notes/ ---
+if [ -d ".hawp/status" ]; then
+  mkdir -p ".hawp/work/notes/$MDATE"
+  copy_file_no_clobber ".hawp/status/STATUS.md" ".hawp/work/STATUS.md"
+  copy_dir_no_clobber ".hawp/status" ".hawp/work/notes/$MDATE"
+fi
+
+# --- 3b. Migration: .hawp/work/adrs/ -> decisions/ ---
+if [ -d ".hawp/work/adrs" ]; then
+  mkdir -p ".hawp/work/decisions/$MDATE"
+  if cp -Rn .hawp/work/adrs/. ".hawp/work/decisions/$MDATE"/ 2>/dev/null; then
+    rm -rf .hawp/work/adrs
+  fi
+fi
+
+reconcile_closed_plans_from_backlog
+
+# --- 4. Refresh .hawp/LICENSE and .hawp/kit/** ---
+rm -rf .hawp/kit
+mkdir -p .hawp/kit
+cp "$SRC/.hawp/LICENSE" .hawp/
+cp "$SRC/.hawp/kit/README.md"             .hawp/kit/
+cp "$SRC/.hawp/kit/start-here.md"         .hawp/kit/
+cp -R "$SRC/.hawp/kit/instructions" .hawp/kit/
+cp -R "$SRC/.hawp/kit/templates" .hawp/kit/
+cp -R "$SRC/.hawp/kit/patterns"  .hawp/kit/
+cp -R "$SRC/.hawp/kit/reviews"   .hawp/kit/
+cp -R "$SRC/.hawp/kit/examples"  .hawp/kit/
+cp -R "$SRC/.hawp/kit/types"      .hawp/kit/
+cp -R "$SRC/.hawp/kit/usage"      .hawp/kit/
+cp -R "$SRC/.hawp/kit/references" .hawp/kit/
+cp -R "$SRC/.hawp/kit/standards"  .hawp/kit/
+
+# --- 4b. Install hawp CLI binary (platform-detected from GitHub release) ---
+install_hawp_binary() (
+  set -eo pipefail
+  local _os _arch _asset _ext _dest _url _checksum_url _expected _actual
+  local _tag _tmpdir
+
+  _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+  _arch="$(uname -m)"
+  _ext=""
+
+  case "$_os" in
+    linux)  _os="linux"  ;;
+    darwin) _os="darwin" ;;
+    mingw*|msys*|cygwin*|windows_nt*) _os="windows"; _ext=".exe" ;;
+    *)
+      echo "hawp install: unsupported OS '$_os' — skipping binary install."
+      return 0
+      ;;
+  esac
+
+  case "$_arch" in
+    x86_64|amd64)  _arch="amd64" ;;
+    aarch64|arm64) _arch="arm64" ;;
+    *)
+      echo "hawp install: unsupported arch '$_arch' — skipping binary install."
+      return 0
+      ;;
+  esac
+
+  _asset="hawp-${_os}-${_arch}${_ext}"
+  _dest=".hawp/bin/hawp${_ext}"
+
+  # Resolve latest release tag from GitHub API.
+  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" 2>/dev/null \
+    | awk -F'"' '/"tag_name"/ { print $4; exit }' || true)"
+  if [ -z "$_tag" ]; then
+    _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases?per_page=1" 2>/dev/null \
+      | awk -F'"' '/"tag_name"/ { print $4; exit }' || true)"
+    [ -n "$_tag" ] && echo "hawp install: /releases/latest unavailable; using releases list fallback."
+  fi
+
+  if [ -z "$_tag" ]; then
+    if [ -f "$_dest" ]; then
+      echo "hawp install: could not resolve latest release tag — installed binary preserved."
+      return 0
+    fi
+    echo "hawp install: could not resolve latest release tag — cannot install binary." >&2
+    return 1
+  fi
+
+  _url="https://github.com/${OWNER}/${REPO}/releases/download/${_tag}/${_asset}"
+  _checksum_url="https://github.com/${OWNER}/${REPO}/releases/download/${_tag}/checksums.txt"
+
+  echo "hawp binary: ${_asset} (release ${_tag})"
+  mkdir -p .hawp/bin
+  _tmpdir="$(mktemp -d ".hawp/bin/.hawp-download.XXXXXX")"
+  trap "$(printf 'rm -rf -- %q' "$_tmpdir")" EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+  curl -fsSL --proto '=https' --proto-redir '=https' -o "$_tmpdir/binary" "$_url" || {
+    echo "hawp install: binary download failed; installed binary preserved."
+    return 1
+  }
+  curl -fsSL --proto '=https' --proto-redir '=https' -o "$_tmpdir/checksums" "$_checksum_url" || {
+    echo "hawp install: checksums unavailable; installed binary preserved."
+    return 1
+  }
+  _expected="$(awk -v asset="$_asset" '$2 == asset || $2 == "*" asset { print $1 }' "$_tmpdir/checksums")"
+  if [[ ! "$_expected" =~ ^[[:xdigit:]]{64}$ ]]; then
+    echo "hawp install: expected exactly one valid SHA256 entry for $_asset."
+    return 1
+  fi
+  _expected="$(printf '%s' "$_expected" | tr '[:upper:]' '[:lower:]')"
+  if command -v sha256sum >/dev/null 2>&1; then
+    _actual="$(sha256sum "$_tmpdir/binary" | awk '{print $1}')"
+  elif command -v shasum >/dev/null 2>&1; then
+    _actual="$(shasum -a 256 "$_tmpdir/binary" | awk '{print $1}')"
+  else
+    echo "hawp install: a SHA256 utility is required."
+    return 1
+  fi
+  if [ "$_actual" != "$_expected" ]; then
+    echo "hawp install: SHA256 mismatch; installed binary preserved."
+    return 1
+  fi
+  echo "hawp binary: SHA256 verified."
+  chmod 755 "$_tmpdir/binary"
+  mv -f "$_tmpdir/binary" "$_dest"
+
+  echo "hawp binary: installed to ${_dest}"
+)
+install_hawp_binary
+
+rm -rf .hawp/templates .hawp/patterns .hawp/reviews .hawp/examples .hawp/types .hawp/usage
+rm -f .hawp/README.md .hawp/spec.md .hawp/start-here.md .hawp/authoring-patterns.md
+find .hawp -name .gitkeep -type f -delete 2>/dev/null || true
+
+# --- 5. Seed .hawp/work/ scaffold (only when missing) ---
+mkdir -p .hawp/work/active .hawp/work/parked .hawp/work/closed .hawp/work/decisions .hawp/work/evidence .hawp/work/status .hawp/work/notes
+copy_file_no_clobber "$SRC/.hawp/work/README.md"               ".hawp/work/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/STATUS.md"               ".hawp/work/STATUS.md"
+copy_file_no_clobber "$SRC/.hawp/work/BACKLOG.md"              ".hawp/work/BACKLOG.md"
+copy_file_no_clobber "$SRC/.hawp/work/active/README.md"        ".hawp/work/active/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/parked/README.md"        ".hawp/work/parked/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/closed/README.md"        ".hawp/work/closed/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/decisions/README.md"     ".hawp/work/decisions/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/evidence/README.md"      ".hawp/work/evidence/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/status/README.md"        ".hawp/work/status/README.md"
+copy_file_no_clobber "$SRC/.hawp/work/notes/README.md"         ".hawp/work/notes/README.md"
+
+# --- Provider overlay: Cursor (core/providers/.cursor/ -> .cursor/, AGENTS.md) ---
+resolve_provider_pack() {
+  if [ -d "$SRC/providers/.cursor" ]; then
+    echo "$SRC/providers/.cursor"
+    return 0
+  fi
+  echo "Error: Cursor provider pack not found at core/providers/.cursor/" >&2
+  return 1
+}
+install_provider_overlay() {
+  pack="$(resolve_provider_pack)" || return 1
+  mkdir -p .cursor/rules
+  if [ -d "$pack/rules" ]; then
+    cp "$pack/rules/"*.mdc .cursor/rules/ 2>/dev/null || true
+  fi
+  copy_file_no_clobber "$pack/AGENTS.md.seed" AGENTS.md
+  echo "  installed: core/providers/.cursor/ -> .cursor/rules/, AGENTS.md (seed if missing)"
+}
+install_provider_overlay || exit 1
+echo "Provider overlay: .cursor/rules/*, AGENTS.md (seed if missing)"
+
+if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
+  rm -rf "$TMP_DIR"
+fi
+
+echo "HAWP install complete (provider: ${PROVIDER})."
+echo "Refreshed: .hawp/LICENSE, .hawp/kit/**, .hawp/bin/hawp (native executable)"
+echo "Preserved: .hawp/work/** (no-overwrite)"
+echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .hawp/work/active/ when eligible (see 'reconciled (link):' and 'reconciled (id-fallback):' lines above)"

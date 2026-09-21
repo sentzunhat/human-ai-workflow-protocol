@@ -22,8 +22,8 @@ Use this structure as the default operating model:
 - `.hawp/work/active/{uuid}/plan.md` — open work item (folder-per-item layout)
 - `.hawp/work/parked/{uuid}/plan.md` — paused work item (move back to `active/` to resume)
 - `.hawp/work/closed/YYYY/MM/DD/{uuid}/plan.md` — completed work item, archived by close date
-- `.hawp/work/status/YYYY/MM/DD/` — daily or checkpoint status summaries
-- `.hawp/work/evidence/YYYY/MM/DD/` — verification notes, command output, smoke-test results
+- `.hawp/work/status/YYYY/MM/DD/{uuid}/status.md` — daily or checkpoint status summaries
+- `.hawp/work/evidence/YYYY/MM/DD/{uuid}/evidence.md` — verification notes, command output, smoke-test results
 - `.hawp/work/decisions/` — ADRs and project decisions
 
 ### Work item file naming
@@ -100,7 +100,7 @@ For repeated maintenance items such as "Update HAWP from GitHub main":
 
 - Keep the current active update task in Active Work.
 - Move closed update tasks to `.hawp/work/closed/YYYY/MM/DD/`.
-- Add monthly or daily summary files under `.hawp/work/status/` if useful.
+- Add or update the owning artifact at `.hawp/work/status/YYYY/MM/DD/{uuid}/status.md` if useful.
 - Keep only the latest few update entries in Recently Closed.
 
 ## Example Compact BACKLOG.md
@@ -154,8 +154,8 @@ If close dates are missing, place files under the best-known close date and capt
 - Do not append every completed item forever to the main backlog.
 - On close, move detail files to `.hawp/work/closed/YYYY/MM/DD/`.
 - Keep Recently Closed within the selected cap.
-- Store proof and verification in `.hawp/work/evidence/YYYY/MM/DD/` and link to it.
-- Store checkpoint summaries in `.hawp/work/status/YYYY/MM/DD/`.
+- Store proof and verification in `.hawp/work/evidence/YYYY/MM/DD/{uuid}/evidence.md` and link to it.
+- Store checkpoint summaries in `.hawp/work/status/YYYY/MM/DD/{uuid}/status.md`.
 - For repeated maintenance work, keep one active item and archive prior closures.
 
 ## Acceptance Checklist

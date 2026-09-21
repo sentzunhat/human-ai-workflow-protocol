@@ -4,7 +4,12 @@ import (
 	"context"
 	"strings"
 	"testing"
+
+	inframodels "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models"
 )
+
+var testEmbedderFactory = inframodels.NewEmbedderWithURL
+var testLLMFactory = inframodels.NewLLMClientWithURL
 
 func TestNewContextReshaper(t *testing.T) {
 	// Note: ONNX LLM is blocked on hugot's CGO ORT backend (see
@@ -18,7 +23,7 @@ func TestNewContextReshaper(t *testing.T) {
 		TopK:              5,
 	}
 
-	reshaper, err := NewContextReshaper(config)
+	reshaper, err := NewContextReshaper(config, testEmbedderFactory, testLLMFactory)
 	if err != nil {
 		// Ollama might not be running - skip this test
 		if strings.Contains(err.Error(), "Ollama") || strings.Contains(err.Error(), "connect") {
@@ -46,7 +51,7 @@ func TestNewContextReshaperDefaults(t *testing.T) {
 		// TopK and MaxTokens not set
 	}
 
-	reshaper, err := NewContextReshaper(config)
+	reshaper, err := NewContextReshaper(config, testEmbedderFactory, testLLMFactory)
 	if err != nil {
 		if strings.Contains(err.Error(), "Ollama") || strings.Contains(err.Error(), "connect") {
 			t.Skipf("Skipping: Ollama required for test")
@@ -196,7 +201,7 @@ func TestReshapeEmptyBlock(t *testing.T) {
 		LLMModel:          "mistral",
 	}
 
-	reshaper, err := NewContextReshaper(config)
+	reshaper, err := NewContextReshaper(config, testEmbedderFactory, testLLMFactory)
 	if err != nil {
 		if strings.Contains(err.Error(), "Ollama") || strings.Contains(err.Error(), "connect") {
 			t.Skipf("Skipping: Ollama required for test")
@@ -235,7 +240,7 @@ func TestReshapeWithONNX(t *testing.T) {
 		TopK:              3,
 	}
 
-	reshaper, err := NewContextReshaper(config)
+	reshaper, err := NewContextReshaper(config, testEmbedderFactory, testLLMFactory)
 	if err != nil {
 		// Skip if Ollama not available (expected in CI)
 		if strings.Contains(err.Error(), "Ollama") || strings.Contains(err.Error(), "connect") {
@@ -297,7 +302,7 @@ func TestReshapeWithOllama(t *testing.T) {
 		TopK:              3,
 	}
 
-	reshaper, err := NewContextReshaper(config)
+	reshaper, err := NewContextReshaper(config, testEmbedderFactory, testLLMFactory)
 	if err != nil {
 		t.Skipf("Skipping: Ollama not available (%v)", err)
 	}
@@ -347,7 +352,7 @@ func TestReshapeHybridONNXOllama(t *testing.T) {
 		TopK:              3,
 	}
 
-	reshaper, err := NewContextReshaper(config)
+	reshaper, err := NewContextReshaper(config, testEmbedderFactory, testLLMFactory)
 	if err != nil {
 		if strings.Contains(err.Error(), "Ollama") {
 			t.Skipf("Skipping: Ollama not available")
@@ -394,7 +399,7 @@ func TestIdentifyKeyConcepts(t *testing.T) {
 		TopK:              3,
 	}
 
-	reshaper, err := NewContextReshaper(config)
+	reshaper, err := NewContextReshaper(config, testEmbedderFactory, testLLMFactory)
 	if err != nil {
 		// Skip if Ollama not available (expected in CI)
 		if strings.Contains(err.Error(), "Ollama") || strings.Contains(err.Error(), "connect") {
@@ -433,7 +438,7 @@ func TestReshapedBlockInheritsReferences(t *testing.T) {
 		TopK:              3,
 	}
 
-	reshaper, err := NewContextReshaper(config)
+	reshaper, err := NewContextReshaper(config, testEmbedderFactory, testLLMFactory)
 	if err != nil {
 		if strings.Contains(err.Error(), "Ollama") || strings.Contains(err.Error(), "connect") {
 			t.Skipf("Skipping: Ollama required for test")

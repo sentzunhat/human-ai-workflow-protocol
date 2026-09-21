@@ -10,7 +10,7 @@ supported, `hawp-kit-bundle.tar.gz`, and one `checksums.txt` file.
 ## Prepare
 
 1. Update `librarian/src/internal/domain/update/version.go`.
-2. Add a matching section to `librarian/src/CHANGELOG.md`.
+2. Add a matching section to `librarian/CHANGELOG.md`.
 3. Run the local release checks from `librarian/src`.
 
 ```bash

@@ -6,10 +6,11 @@
 package kitsync
 
 import (
-	"os"
-
 	"gopkg.in/yaml.v3"
 )
+
+// Reader is the function signature for reading file content in domain manifest functions.
+type Reader func(string) ([]byte, error)
 
 // InstallRule is one source->destination mapping for a provider, matching
 // manifest.yaml's installs_to entries exactly.
@@ -67,9 +68,9 @@ func (m *Manifest) AllProviderNames() []string {
 	return names
 }
 
-// ParseManifest reads and parses manifest.yaml at path.
-func ParseManifest(path string) (*Manifest, error) {
-	data, err := os.ReadFile(path)
+// ParseManifest reads and parses manifest.yaml at path using the injected reader.
+func ParseManifest(path string, reader Reader) (*Manifest, error) {
+	data, err := reader(path)
 	if err != nil {
 		return nil, err
 	}

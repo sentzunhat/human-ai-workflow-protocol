@@ -305,9 +305,9 @@ jobs:
             $0 ~ "^## \\[" ver "\\]" { found=1; print; next }
             found && /^## \[/ { exit }
             found { print }
-          ' librarian/src/CHANGELOG.md > /tmp/release-notes.md
+          ' librarian/CHANGELOG.md > /tmp/release-notes.md
           if [ ! -s /tmp/release-notes.md ]; then
-            echo "::error::No librarian/src/CHANGELOG.md section found for version $ver — add one before releasing." >&2
+            echo "::error::No librarian/CHANGELOG.md section found for version $ver — add one before releasing." >&2
             exit 1
           fi
 

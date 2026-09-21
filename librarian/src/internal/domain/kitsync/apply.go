@@ -3,17 +3,69 @@ package kitsync
 import (
 	"fmt"
 	"io"
-	"os"
 	"path/filepath"
+	"strings"
 )
+
+type resolvedRule struct {
+	rule   InstallRule
+	source string
+	dest   string
+}
+
+// resolveWithinRoot accepts only relative manifest paths whose cleaned target
+// remains below root. Manifest content arrives from a downloaded release
+// bundle, so it must not be allowed to select arbitrary filesystem paths.
+func resolveWithinRoot(root, value, field string) (string, error) {
+	if value == "" {
+		return "", fmt.Errorf("%s must not be empty", field)
+	}
+	pathValue := filepath.FromSlash(value)
+	if filepath.IsAbs(pathValue) {
+		return "", fmt.Errorf("%s %q must be relative", field, value)
+	}
+	root, err := filepath.Abs(root)
+	if err != nil {
+		return "", fmt.Errorf("resolve %s root: %w", field, err)
+	}
+	target := filepath.Join(root, pathValue)
+	relative, err := filepath.Rel(root, target)
+	if err != nil {
+		return "", fmt.Errorf("check %s %q: %w", field, value, err)
+	}
+	if relative == ".." || strings.HasPrefix(relative, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("%s %q escapes root %s", field, value, root)
+	}
+	return target, nil
+}
+
+func resolveRules(bundleRoot, repoRoot string, provider Provider) ([]resolvedRule, error) {
+	sourceBase, err := resolveWithinRoot(bundleRoot, provider.Source, "provider source")
+	if err != nil {
+		return nil, err
+	}
+	rules := make([]resolvedRule, 0, len(provider.InstallsTo))
+	for _, rule := range provider.InstallsTo {
+		source, err := resolveWithinRoot(sourceBase, rule.From, "rule source")
+		if err != nil {
+			return nil, err
+		}
+		dest, err := resolveWithinRoot(repoRoot, rule.Dest, "rule destination")
+		if err != nil {
+			return nil, err
+		}
+		rules = append(rules, resolvedRule{rule: rule, source: source, dest: dest})
+	}
+	return rules, nil
+}
 
 // SyncKit refreshes repoRoot/.hawp/kit/ from bundleKitDir, copying every
 // file wholesale (kit content is canonical/generated, never hand-edited
 // downstream — same assumption the existing distribution update guides
 // already make).
-func SyncKit(bundleKitDir, repoRoot string) (int, error) {
+func SyncKit(fc FileCopier, bundleKitDir, repoRoot string) (int, error) {
 	destRoot := filepath.Join(repoRoot, ".hawp", "kit")
-	return copyTree(bundleKitDir, destRoot, "")
+	return copyTree(fc, repoRoot, bundleKitDir, destRoot, "")
 }
 
 // ApplyProviderUpdate applies providerName's update rules from bundleRoot
@@ -23,39 +75,44 @@ func SyncKit(bundleKitDir, repoRoot string) (int, error) {
 // update:refresh overwrites from the provider pack; update:seed-if-missing
 // writes only when the destination is absent; update:skip leaves the path
 // untouched.
-func ApplyProviderUpdate(bundleRoot, repoRoot string, manifest *Manifest, providerName string) (int, []string, error) {
+func ApplyProviderUpdate(fc FileCopier, bundleRoot, repoRoot string, manifest *Manifest, providerName string) (int, []string, error) {
 	provider, ok := manifest.Providers[providerName]
 	if !ok {
 		return 0, nil, fmt.Errorf("unknown provider %q", providerName)
 	}
 
+	rules, err := resolveRules(bundleRoot, repoRoot, provider)
+	if err != nil {
+		return 0, nil, fmt.Errorf("provider %s manifest paths: %w", providerName, err)
+	}
+
 	written := 0
 	var skipped []string
-	sourceBase := filepath.Join(bundleRoot, provider.Source)
 
-	for _, rule := range provider.InstallsTo {
+	for _, resolved := range rules {
+		rule := resolved.rule
 		switch rule.UpdateMode() {
 		case "skip":
 			skipped = append(skipped, providerName+":"+rule.Dest)
 			continue
 		case "seed-if-missing":
-			srcPath := filepath.Join(sourceBase, rule.From)
-			destPath := filepath.Join(repoRoot, rule.Dest)
+			srcPath := resolved.source
+			destPath := resolved.dest
 
-			info, err := os.Stat(srcPath)
+			info, err := fc.Stat(srcPath)
 			if err != nil {
 				return written, skipped, fmt.Errorf("provider %s rule %s: source %s: %w", providerName, rule.Dest, srcPath, err)
 			}
 
 			if info.IsDir() {
-				count, err := seedTree(srcPath, destPath, rule.Pattern)
+				count, err := seedTree(fc, repoRoot, srcPath, destPath, rule.Pattern)
 				if err != nil {
 					return written, skipped, err
 				}
 				written += count
 			} else {
-				if _, statErr := os.Stat(destPath); os.IsNotExist(statErr) {
-					if err := copyFile(srcPath, destPath); err != nil {
+				if _, statErr := fc.Stat(destPath); fc.IsNotExist(statErr) {
+					if err := copyFile(fc, repoRoot, srcPath, destPath); err != nil {
 						return written, skipped, err
 					}
 					written++
@@ -64,23 +121,23 @@ func ApplyProviderUpdate(bundleRoot, repoRoot string, manifest *Manifest, provid
 			continue
 		}
 
-		srcPath := filepath.Join(sourceBase, rule.From)
-		destPath := filepath.Join(repoRoot, rule.Dest)
+		srcPath := resolved.source
+		destPath := resolved.dest
 
-		info, err := os.Stat(srcPath)
+		info, err := fc.Stat(srcPath)
 		if err != nil {
 			return written, skipped, fmt.Errorf("provider %s rule %s: source %s: %w", providerName, rule.Dest, srcPath, err)
 		}
 
 		if !info.IsDir() {
-			if err := copyFile(srcPath, destPath); err != nil {
+			if err := copyFile(fc, repoRoot, srcPath, destPath); err != nil {
 				return written, skipped, err
 			}
 			written++
 			continue
 		}
 
-		count, err := copyTree(srcPath, destPath, rule.Pattern)
+		count, err := copyTree(fc, repoRoot, srcPath, destPath, rule.Pattern)
 		if err != nil {
 			return written, skipped, err
 		}
@@ -94,12 +151,15 @@ func ApplyProviderUpdate(bundleRoot, repoRoot string, manifest *Manifest, provid
 // filtered by an fnmatch-style pattern on the base filename (recurses
 // into subdirectories; the pattern only applies to file names, not
 // directory names, so nested files still match e.g. "hawp-*.md").
-func copyTree(srcDir, destDir, pattern string) (int, error) {
-	entries, err := os.ReadDir(srcDir)
+func copyTree(fc FileCopier, repoRoot, srcDir, destDir, pattern string) (int, error) {
+	entries, err := fc.ReadDir(srcDir)
 	if err != nil {
 		return 0, err
 	}
-	if err := os.MkdirAll(destDir, 0o755); err != nil {
+	if err := fc.RejectSymlinkAncestors(repoRoot, destDir); err != nil {
+		return 0, err
+	}
+	if err := fc.MkdirAll(destDir); err != nil {
 		return 0, err
 	}
 
@@ -109,7 +169,7 @@ func copyTree(srcDir, destDir, pattern string) (int, error) {
 		destPath := filepath.Join(destDir, entry.Name())
 
 		if entry.IsDir() {
-			count, err := copyTree(srcPath, destPath, pattern)
+			count, err := copyTree(fc, repoRoot, srcPath, destPath, pattern)
 			if err != nil {
 				return written, err
 			}
@@ -122,7 +182,7 @@ func copyTree(srcDir, destDir, pattern string) (int, error) {
 				continue
 			}
 		}
-		if err := copyFile(srcPath, destPath); err != nil {
+		if err := copyFile(fc, repoRoot, srcPath, destPath); err != nil {
 			return written, err
 		}
 		written++
@@ -135,35 +195,40 @@ func copyTree(srcDir, destDir, pattern string) (int, error) {
 // the file when the destination does not already exist (e.g. CLAUDE.md,
 // AGENTS.md — the user will customise them). Rules without that flag are
 // always written (refresh behaviour).
-func ApplyProviderInstall(bundleRoot, repoRoot string, manifest *Manifest, providerName string) (int, []string, error) {
+func ApplyProviderInstall(fc FileCopier, bundleRoot, repoRoot string, manifest *Manifest, providerName string) (int, []string, error) {
 	provider, ok := manifest.Providers[providerName]
 	if !ok {
 		return 0, nil, fmt.Errorf("unknown provider %q", providerName)
 	}
 
+	rules, err := resolveRules(bundleRoot, repoRoot, provider)
+	if err != nil {
+		return 0, nil, fmt.Errorf("provider %s manifest paths: %w", providerName, err)
+	}
+
 	written := 0
 	var seeded []string
-	sourceBase := filepath.Join(bundleRoot, provider.Source)
 
-	for _, rule := range provider.InstallsTo {
-		srcPath := filepath.Join(sourceBase, rule.From)
-		destPath := filepath.Join(repoRoot, rule.Dest)
+	for _, resolved := range rules {
+		rule := resolved.rule
+		srcPath := resolved.source
+		destPath := resolved.dest
 
-		info, err := os.Stat(srcPath)
+		info, err := fc.Stat(srcPath)
 		if err != nil {
 			return written, seeded, fmt.Errorf("provider %s rule %s: source %s: %w", providerName, rule.Dest, srcPath, err)
 		}
 
 		if rule.IsSeedIfMissing() {
 			if info.IsDir() {
-				count, err := seedTree(srcPath, destPath, rule.Pattern)
+				count, err := seedTree(fc, repoRoot, srcPath, destPath, rule.Pattern)
 				if err != nil {
 					return written, seeded, err
 				}
 				written += count
 			} else {
-				if _, statErr := os.Stat(destPath); os.IsNotExist(statErr) {
-					if err := copyFile(srcPath, destPath); err != nil {
+				if _, statErr := fc.Stat(destPath); fc.IsNotExist(statErr) {
+					if err := copyFile(fc, repoRoot, srcPath, destPath); err != nil {
 						return written, seeded, err
 					}
 					written++
@@ -174,13 +239,13 @@ func ApplyProviderInstall(bundleRoot, repoRoot string, manifest *Manifest, provi
 		}
 
 		if !info.IsDir() {
-			if err := copyFile(srcPath, destPath); err != nil {
+			if err := copyFile(fc, repoRoot, srcPath, destPath); err != nil {
 				return written, seeded, err
 			}
 			written++
 			continue
 		}
-		count, err := copyTree(srcPath, destPath, rule.Pattern)
+		count, err := copyTree(fc, repoRoot, srcPath, destPath, rule.Pattern)
 		if err != nil {
 			return written, seeded, err
 		}
@@ -191,12 +256,15 @@ func ApplyProviderInstall(bundleRoot, repoRoot string, manifest *Manifest, provi
 }
 
 // seedTree copies only files that do not already exist at their destination.
-func seedTree(srcDir, destDir, pattern string) (int, error) {
-	entries, err := os.ReadDir(srcDir)
+func seedTree(fc FileCopier, repoRoot, srcDir, destDir, pattern string) (int, error) {
+	entries, err := fc.ReadDir(srcDir)
 	if err != nil {
 		return 0, err
 	}
-	if err := os.MkdirAll(destDir, 0o755); err != nil {
+	if err := fc.RejectSymlinkAncestors(repoRoot, destDir); err != nil {
+		return 0, err
+	}
+	if err := fc.MkdirAll(destDir); err != nil {
 		return 0, err
 	}
 	written := 0
@@ -204,7 +272,7 @@ func seedTree(srcDir, destDir, pattern string) (int, error) {
 		srcPath := filepath.Join(srcDir, entry.Name())
 		destPath := filepath.Join(destDir, entry.Name())
 		if entry.IsDir() {
-			count, err := seedTree(srcPath, destPath, pattern)
+			count, err := seedTree(fc, repoRoot, srcPath, destPath, pattern)
 			if err != nil {
 				return written, err
 			}
@@ -216,10 +284,10 @@ func seedTree(srcDir, destDir, pattern string) (int, error) {
 				continue
 			}
 		}
-		if _, statErr := os.Stat(destPath); !os.IsNotExist(statErr) {
+		if _, statErr := fc.Stat(destPath); !fc.IsNotExist(statErr) {
 			continue // already exists
 		}
-		if err := copyFile(srcPath, destPath); err != nil {
+		if err := copyFile(fc, repoRoot, srcPath, destPath); err != nil {
 			return written, err
 		}
 		written++
@@ -227,22 +295,24 @@ func seedTree(srcDir, destDir, pattern string) (int, error) {
 	return written, nil
 }
 
-func copyFile(srcPath, destPath string) error {
-	src, err := os.Open(srcPath)
+func copyFile(fc FileCopier, repoRoot, srcPath, destPath string) error {
+	src, err := fc.Open(srcPath)
 	if err != nil {
 		return err
 	}
 	defer src.Close()
 
-	if err := os.MkdirAll(filepath.Dir(destPath), 0o755); err != nil {
+	if err := fc.RejectSymlinkAncestors(repoRoot, destPath); err != nil {
 		return err
 	}
-	temp, err := os.CreateTemp(filepath.Dir(destPath), ".kitsync-*")
+	if err := fc.MkdirAll(filepath.Dir(destPath)); err != nil {
+		return err
+	}
+	temp, tempName, err := fc.CreateTemp(filepath.Dir(destPath), ".kitsync-*")
 	if err != nil {
 		return err
 	}
-	tempPath := temp.Name()
-	defer os.Remove(tempPath)
+	defer fc.Remove(tempName)
 
 	if _, err := io.Copy(temp, src); err != nil {
 		temp.Close()
@@ -251,5 +321,5 @@ func copyFile(srcPath, destPath string) error {
 	if err := temp.Close(); err != nil {
 		return err
 	}
-	return os.Rename(tempPath, destPath)
+	return fc.Rename(tempName, destPath)
 }
