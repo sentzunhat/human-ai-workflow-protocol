@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var evidenceLinkRe = regexp.MustCompile(`Evidence:\s*(?:link to )?\.\./evidence/([\w/.-]+\.md)`)
+var evidenceLinkRe = regexp.MustCompile(`Evidence:\*{0,2}\s*(?:inline or )?(?:link to )?((?:\.\./evidence/|\.hawp/work/evidence/)[\w/.-]+\.md(?:#[\w.-]+)?)`)
 
 // CollectClosedPlanFiles gathers closed-plan markdown files from both the
 // legacy flat layout (`closed/YYYY/MM/DD/<id>.md`) and the current
@@ -68,8 +68,9 @@ func closedPlanID(filePath string) string {
 	return strings.TrimSuffix(base, ".md")
 }
 
-// CheckEvidenceIntegrity verifies that `Evidence: ../evidence/...` links in
-// closed plans resolve inside the evidence folder.
+// CheckEvidenceIntegrity verifies both legacy `../evidence/...` references
+// and current repo-relative `.hawp/work/evidence/...` references in closed
+// plans, resolving both forms inside the work evidence folder.
 func CheckEvidenceIntegrity(workDir string, closedFiles []string, source Source) EvidenceCheck {
 	result := EvidenceCheck{Status: StatusPass}
 	evidenceRoot := filepath.Join(workDir, "evidence")
@@ -87,17 +88,27 @@ func CheckEvidenceIntegrity(workDir string, closedFiles []string, source Source)
 			if m == nil {
 				continue
 			}
-			relativePath := m[1]
-			fullPath := filepath.Clean(filepath.Join(evidenceRoot, relativePath))
+			reference := m[1]
+			pathPart, _, _ := strings.Cut(reference, "#")
+			relativePath := ""
+			switch {
+			case strings.HasPrefix(pathPart, "../evidence/"):
+				relativePath = strings.TrimPrefix(pathPart, "../evidence/")
+			case strings.HasPrefix(pathPart, ".hawp/work/evidence/"):
+				relativePath = strings.TrimPrefix(pathPart, ".hawp/work/evidence/")
+			default:
+				continue
+			}
+			fullPath := filepath.Clean(filepath.Join(evidenceRoot, filepath.FromSlash(relativePath)))
 			if !strings.HasPrefix(fullPath, evidenceRoot+string(filepath.Separator)) {
-				warnf(source, "evidence link escapes evidence folder, skipping: %s", relativePath)
+				warnf(source, "evidence link escapes evidence folder, skipping: %s", reference)
 				continue
 			}
 			result.Total++
 			if _, err := source.Stat(fullPath); err == nil {
 				result.Valid++
 			} else {
-				result.Broken = append(result.Broken, BrokenLink{ID: fileName, Link: "../evidence/" + relativePath})
+				result.Broken = append(result.Broken, BrokenLink{ID: fileName, Link: reference})
 			}
 		}
 	}

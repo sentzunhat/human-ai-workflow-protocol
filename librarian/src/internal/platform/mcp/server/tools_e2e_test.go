@@ -90,6 +90,54 @@ func must(t *testing.T, err error) {
 	}
 }
 
+func TestToolSearchRejectsWhitespaceAndInvalidNumericOptions(t *testing.T) {
+	root := setupTestRepo(t)
+	tests := []struct {
+		name string
+		args map[string]any
+		want string
+	}{
+		{name: "whitespace query", args: map[string]any{"query": " \t\n"}, want: "query is required"},
+		{name: "zero limit", args: map[string]any{"query": "backlog", "limit": 0}, want: "limit must be positive"},
+		{name: "negative limit", args: map[string]any{"query": "backlog", "limit": -1}, want: "limit must be positive"},
+		{name: "zero max tokens", args: map[string]any{"query": "backlog", "max_tokens": 0}, want: "max_tokens must be positive"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			args, err := json.Marshal(tt.args)
+			must(t, err)
+			result := toolSearch(args, root).Result.(toolResult)
+			if !result.IsError || len(result.Content) == 0 || !strings.Contains(result.Content[0].Text, tt.want) {
+				t.Fatalf("result = %+v, want error containing %q", result, tt.want)
+			}
+		})
+	}
+}
+
+func TestToolWorkIntakeRejectsInvalidNumericOptions(t *testing.T) {
+	tests := []struct {
+		name string
+		args map[string]any
+		want string
+	}{
+		{name: "zero limit", args: map[string]any{"input": "review work", "limit": 0}, want: "limit must be positive"},
+		{name: "negative limit", args: map[string]any{"input": "review work", "limit": -1}, want: "limit must be positive"},
+		{name: "zero max tokens", args: map[string]any{"input": "review work", "max_tokens": 0}, want: "max_tokens must be positive"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			args, err := json.Marshal(tt.args)
+			must(t, err)
+			result := toolWorkIntake(args, t.TempDir()).Result.(toolResult)
+			if !result.IsError || len(result.Content) == 0 || !strings.Contains(result.Content[0].Text, tt.want) {
+				t.Fatalf("result = %+v, want error containing %q", result, tt.want)
+			}
+		})
+	}
+}
+
 // resolveTestHome returns the hawp home paths for a given HOME directory.
 func resolveTestHome(t *testing.T, home string) filesystem.HawpHome {
 	t.Helper()
@@ -161,6 +209,31 @@ func TestToolSearchNoIndex(t *testing.T) {
 	res := resp.Result.(toolResult)
 	if !res.IsError {
 		t.Error("expected IsError=true when no index exists")
+	}
+}
+
+func TestToolSearchRejectsSymlinkedDatabaseAncestor(t *testing.T) {
+
+	root := t.TempDir()
+	outside := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, ".hawp"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(root, ".hawp", "db")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	args, _ := json.Marshal(map[string]any{"query": "anything"})
+	resp := toolSearch(args, root)
+	res := resp.Result.(toolResult)
+	if !res.IsError {
+		t.Fatal("expected symlinked database ancestor to be rejected")
+	}
+	if len(res.Content) == 0 || !strings.Contains(res.Content[0].Text, "unsafe") {
+		t.Fatalf("expected unsafe index-path error, got %#v", res.Content)
+	}
+	if _, err := os.Stat(filepath.Join(outside, "index.sqlite")); !os.IsNotExist(err) {
+		t.Fatalf("search created database through symlink: %v", err)
 	}
 }
 

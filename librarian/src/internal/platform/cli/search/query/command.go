@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"unicode/utf8"
 
 	appcontext "github.com/sentzunhat/hawp/librarian/src/internal/application/context"
 	appcontext_layout1 "github.com/sentzunhat/hawp/librarian/src/internal/application/context/dedup"
@@ -72,9 +73,7 @@ func Run(args []string, cwd string) error {
 			)
 			fmt.Printf("    Context: %s\n", getStr(result, "folder_context"))
 			text := getStr(result, "text")
-			if len(text) > 150 {
-				text = text[:150] + "..."
-			}
+			text = truncatePreview(text, 150)
 			fmt.Printf("    %q\n\n", text)
 		}
 		return nil
@@ -167,4 +166,15 @@ func getInt(m map[string]interface{}, key string) int64 {
 		}
 	}
 	return 0
+}
+
+func truncatePreview(text string, maxBytes int) string {
+	if len(text) <= maxBytes {
+		return text
+	}
+	end := maxBytes
+	for end > 0 && !utf8.RuneStart(text[end]) {
+		end--
+	}
+	return text[:end] + "..."
 }

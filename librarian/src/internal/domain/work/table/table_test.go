@@ -14,3 +14,17 @@ func TestCellsAndCell(t *testing.T) {
 		t.Fatalf("StripCodeSpan() = %q", got)
 	}
 }
+
+func TestCellsUnescapesPipesAndBackslashes(t *testing.T) {
+	cells := Cells(`| ID | title with \| pipe and \\ slash | status |`)
+	if len(cells) != 3 || cells[1] != `title with | pipe and \ slash` {
+		t.Fatalf("Cells() = %#v", cells)
+	}
+}
+
+func TestCellsUnescapesAmpersands(t *testing.T) {
+	cells := Cells(`| title A &amp; B |`)
+	if len(cells) != 1 || cells[0] != "title A & B" {
+		t.Fatalf("Cells() = %#v", cells)
+	}
+}

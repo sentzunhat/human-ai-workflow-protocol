@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -125,6 +126,57 @@ func TestApplyAndAlreadyApplied(t *testing.T) {
 	}
 }
 
+func TestApplyReplacesInPlaceHardLinkWithoutChangingExternalTarget(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("hard-link behavior is not reliable on Windows")
+	}
+
+	root := fixture(t)
+	p, files := prepared(t, root)
+	var target *file
+	for i := range files {
+		if files[i].Source == "assets/schema.json" {
+			target = files[i]
+			break
+		}
+	}
+	if target == nil {
+		t.Fatal("fixture did not contain retained schema")
+	}
+
+	external := filepath.Join(t.TempDir(), "schema.json")
+	if err := os.WriteFile(external, target.after, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	schema := filepath.Join(root, sourceRoot, target.Source)
+	if err := os.Remove(schema); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Link(external, schema); err != nil {
+		t.Skipf("hard links unavailable: %v", err)
+	}
+
+	updated := []byte(`{"keep":false}` + "\n")
+	target.after = updated
+	for i := range p.Files {
+		if p.Files[i].Source == target.Source {
+			p.Files[i].After = digest(updated)
+			files[i].After = digest(updated)
+		}
+	}
+	if err := apply(root, p, files); err != nil {
+		t.Fatal(err)
+	}
+	content, err := os.ReadFile(external)
+	if err != nil || string(content) != string(target.before) {
+		t.Fatalf("external hard-link target changed: %q, %v", content, err)
+	}
+	content, err = os.ReadFile(schema)
+	if err != nil || string(content) != string(updated) {
+		t.Fatalf("in-place destination = %q, %v", content, err)
+	}
+}
+
 func TestApplyRollsBackPostWriteMismatch(t *testing.T) {
 	root := fixture(t)
 	p, files := prepared(t, root)
@@ -217,10 +269,21 @@ func TestArtifactCannotWriteSourceOrFollowSymlink(t *testing.T) {
 	}
 	link := filepath.Join(root, "preview.md")
 	if err := os.Symlink(filepath.Join(root, sourceRoot, "go.mod"), link); err != nil {
-		t.Fatal(err)
+		t.Skipf("symlink capability unavailable (enable Windows Developer Mode or SeCreateSymbolicLinkPrivilege): %v", err)
 	}
 	if err := writeArtifact(root, link, []byte("bad")); err == nil {
 		t.Fatal("artifact followed symlink")
+	}
+	outside := t.TempDir()
+	redirect := filepath.Join(root, "review-link")
+	if err := os.Symlink(outside, redirect); err != nil {
+		t.Skipf("symlink capability unavailable (enable Windows Developer Mode or SeCreateSymbolicLinkPrivilege): %v", err)
+	}
+	if err := writeArtifact(root, filepath.Join(redirect, "plan.json"), []byte("bad")); err == nil {
+		t.Fatal("artifact followed a symlinked parent")
+	}
+	if _, err := os.Stat(filepath.Join(outside, "plan.json")); !os.IsNotExist(err) {
+		t.Fatalf("artifact escaped through symlinked parent: %v", err)
 	}
 	requireState(t, root, p, "ready")
 }

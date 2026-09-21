@@ -3,8 +3,6 @@ package benchmark
 import (
 	"context"
 	"fmt"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -12,6 +10,7 @@ import (
 	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
 	appintake "github.com/sentzunhat/hawp/librarian/src/internal/application/work/intake"
 	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	inframodels "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
@@ -34,7 +33,10 @@ func Run(args []string, cwd string) error {
 		return runReshapeBenchmark(opts.reshapeBackend, opts.reshapeURL, opts.reshapeModel, opts.exportPath)
 	}
 
-	dbPath := filepath.Join(root, ".hawp", "db", "index.sqlite")
+	dbPath, err := filesystem.ResolveSafeSearchIndexPath(root)
+	if err != nil {
+		return err
+	}
 	db, err := sqlite.Open(dbPath)
 	if err != nil {
 		fmt.Printf("Index not found at %s. Run `hawp search index` first.\n", dbPath)
@@ -388,7 +390,7 @@ func runTokenBenchmark(db *sqlite.IndexDB, exportPath string) error {
 	fmt.Print("\n" + report)
 
 	if exportPath != "" {
-		if err := os.WriteFile(exportPath, []byte(report), 0o644); err != nil {
+		if err := filesystem.AtomicWriteFileAtPath(exportPath, []byte(report), 0o644); err != nil {
 			return fmt.Errorf("export: %w", err)
 		}
 		fmt.Printf("Evidence written to: %s\n", exportPath)
@@ -528,10 +530,7 @@ func runReshapeBenchmark(backend, url, model, exportPath string) error {
 	fmt.Print("\n" + report)
 
 	if exportPath != "" {
-		if err := os.MkdirAll(filepath.Dir(exportPath), 0o755); err != nil {
-			return fmt.Errorf("create export directory: %w", err)
-		}
-		if err := os.WriteFile(exportPath, []byte(report), 0o644); err != nil {
+		if err := filesystem.AtomicWriteFileAtPath(exportPath, []byte(report), 0o644); err != nil {
 			return fmt.Errorf("export: %w", err)
 		}
 		fmt.Printf("Evidence written to: %s\n", exportPath)
@@ -546,7 +545,7 @@ func formatReshapeReport(results []reshapeBenchResult, backend, model string) st
 		modelNote = backend + " / " + model
 	}
 	fmt.Fprintf(&sb, "# Reshape Token-Savings Benchmark\n\n")
-	fmt.Fprintf(&sb, "Backend: **%s** | Token estimate: `(len(text)+3)/4` | Date: 2026-09-11\n\n", modelNote)
+	fmt.Fprintf(&sb, "Backend: **%s** | Token estimate: `(len(text)+3)/4` | Date: %s\n\n", modelNote, time.Now().UTC().Format("2006-01-02"))
 	fmt.Fprintln(&sb, "| # | Request (truncated) | Raw tokens | Shaped tokens | Saved | % saved | Note |")
 	fmt.Fprintln(&sb, "|---|---------------------|------------|---------------|-------|---------|------|")
 
@@ -561,7 +560,6 @@ func formatReshapeReport(results []reshapeBenchResult, backend, model string) st
 			note = "error: " + r.ErrNote
 			errorCount++
 			fmt.Fprintf(&sb, "| %d | %s | %d | — | — | — | %s |\n", i+1, short, r.RawTokens, note)
-			totalRaw += r.RawTokens
 			continue
 		}
 		saved := r.RawTokens - r.ShapedTokens
@@ -698,10 +696,7 @@ func runDownstreamBenchmark(backend, url, model string, db *sqlite.IndexDB, expo
 	fmt.Print("\n" + report)
 
 	if exportPath != "" {
-		if err := os.MkdirAll(filepath.Dir(exportPath), 0o755); err != nil {
-			return fmt.Errorf("create export directory: %w", err)
-		}
-		if err := os.WriteFile(exportPath, []byte(report), 0o644); err != nil {
+		if err := filesystem.AtomicWriteFileAtPath(exportPath, []byte(report), 0o644); err != nil {
 			return fmt.Errorf("export: %w", err)
 		}
 		fmt.Printf("Evidence written to: %s\n", exportPath)
@@ -716,7 +711,7 @@ func formatDownstreamReport(results []downstreamBenchResult, backend, model stri
 		modelNote = backend + " / " + model
 	}
 	fmt.Fprintf(&sb, "# Downstream Savings Benchmark\n\n")
-	fmt.Fprintf(&sb, "Backend: **%s** | Token estimate: `(len(text)+3)/4` | Date: 2026-09-12\n\n", modelNote)
+	fmt.Fprintf(&sb, "Backend: **%s** | Token estimate: `(len(text)+3)/4` | Date: %s\n\n", modelNote, time.Now().UTC().Format("2006-01-02"))
 	fmt.Fprintln(&sb, "| # | Query (intent) | Raw (req+ctx) tokens | Shaped tokens | Saved | % saved |")
 	fmt.Fprintln(&sb, "|---|----------------|----------------------|---------------|-------|---------|")
 
@@ -725,7 +720,6 @@ func formatDownstreamReport(results []downstreamBenchResult, backend, model stri
 		if r.ErrNote != "" {
 			errorCount++
 			fmt.Fprintf(&sb, "| %d | %s | %d | — | — | — |\n", i+1, r.Intent, r.RawTokens)
-			totalRaw += r.RawTokens
 			continue
 		}
 		saved := r.RawTokens - r.ShapedTokens
@@ -755,4 +749,3 @@ func formatDownstreamReport(results []downstreamBenchResult, backend, model stri
 	fmt.Fprintln(&sb, "_v0.1.0 gate: ≥20% average savings across succeeded queries._")
 	return sb.String()
 }
-

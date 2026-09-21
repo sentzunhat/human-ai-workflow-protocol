@@ -20,9 +20,9 @@ should rerun the sync commands after branch integration.
 Worktree branches were created from the current branch state:
 
 - `codex/provider-parity-agent-guidance` at
-  `/Users/beltrd/.codex/worktrees/0dfc/human-ai-workflow-protocol`
+  a local managed Codex worktree
 - `codex/provider-install-update-contracts` at
-  `/Users/beltrd/.codex/worktrees/4631/human-ai-workflow-protocol`
+  a local managed Codex worktree
 
 ## What Was Inspected
 

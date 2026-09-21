@@ -6,13 +6,32 @@ import "strings"
 
 // Cells splits a pipe-delimited Markdown row and trims each cell.
 func Cells(line string) []string {
-	parts := strings.Split(line, "|")
-	if len(parts) < 3 {
+	line = strings.TrimSpace(line)
+	if len(line) < 2 || line[0] != '|' || line[len(line)-1] != '|' {
 		return nil
 	}
-	cells := parts[1 : len(parts)-1]
-	for i, cell := range cells {
-		cells[i] = strings.TrimSpace(cell)
+
+	var cells []string
+	var cell strings.Builder
+	for i := 1; i < len(line)-1; i++ {
+		if line[i] == '\\' && i+1 < len(line)-1 && (line[i+1] == '\\' || line[i+1] == '|') {
+			cell.WriteByte(line[i+1])
+			i++
+			continue
+		}
+		if line[i] == '|' {
+			cells = append(cells, strings.TrimSpace(cell.String()))
+			cell.Reset()
+			continue
+		}
+		cell.WriteByte(line[i])
+	}
+	cells = append(cells, strings.TrimSpace(cell.String()))
+	for i := range cells {
+		cells[i] = strings.NewReplacer("&#124;", "|", "&amp;", "&").Replace(cells[i])
+	}
+	if len(cells) < 1 {
+		return nil
 	}
 	return cells
 }

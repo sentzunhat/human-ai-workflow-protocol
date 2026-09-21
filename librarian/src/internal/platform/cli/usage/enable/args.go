@@ -7,7 +7,8 @@ import (
 )
 
 type options struct {
-	logBodies bool
+	logBodies    bool
+	logBodiesSet bool
 }
 
 func parseArgs(args []string) (options, error) {
@@ -22,5 +23,10 @@ func parseArgs(args []string) (options, error) {
 	if flags.NArg() != 0 {
 		return options{}, fmt.Errorf("usage enable accepts no positional arguments, got %d", flags.NArg())
 	}
+	flags.Visit(func(f *flag.Flag) {
+		if f.Name == "log-bodies" {
+			opts.logBodiesSet = true
+		}
+	})
 	return opts, nil
 }

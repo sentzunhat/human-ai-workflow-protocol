@@ -9,8 +9,10 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+	"unicode/utf8"
 
 	domainusage "github.com/sentzunhat/hawp/librarian/src/internal/domain/usage"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	_ "modernc.org/sqlite"
 )
 
@@ -27,8 +29,29 @@ const migrateQueryText = `ALTER TABLE usage_log ADD COLUMN query_text TEXT;`
 type sqliteStore struct{ db *sql.DB }
 
 func Open(path string) (domainusage.Store, error) {
+	path, err := filepath.Abs(path)
+	if err != nil {
+		return nil, fmt.Errorf("resolve usage DB path: %w", err)
+	}
+	if err := filesystem.RejectSymlinkPathAncestors(path); err != nil {
+		return nil, fmt.Errorf("unsafe usage DB path: %w", err)
+	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return nil, err
+	}
+	// Recheck after creating the parent, then validate every SQLite file that
+	// can receive writes. This also covers pre-planted WAL, SHM, and rollback
+	// journal sidecars before SQLite opens the database.
+	if err := filesystem.RejectSymlinkPathAncestors(path); err != nil {
+		return nil, fmt.Errorf("unsafe usage DB path: %w", err)
+	}
+	for _, candidate := range []string{path, path + "-wal", path + "-shm", path + "-journal"} {
+		if err := filesystem.RejectSymlinkPathAncestors(candidate); err != nil {
+			return nil, fmt.Errorf("unsafe usage DB path: %w", err)
+		}
+		if err := filesystem.RejectHardLinkedFile(candidate); err != nil {
+			return nil, fmt.Errorf("unsafe usage DB path: %w", err)
+		}
 	}
 	db, err := sql.Open("sqlite", path)
 	if err != nil {
@@ -52,7 +75,11 @@ func extractQueryText(inputJSON []byte) *string {
 	for _, key := range []string{"query", "title"} {
 		if v, ok := m[key].(string); ok && v != "" {
 			if len(v) > 256 {
-				v = v[:256]
+				end := 256
+				for !utf8.ValidString(v[:end]) {
+					end--
+				}
+				v = v[:end]
 			}
 			return &v
 		}

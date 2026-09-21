@@ -14,6 +14,7 @@ import (
 	"github.com/knights-analytics/hugot/pipelines"
 
 	domainllm "github.com/sentzunhat/hawp/librarian/src/internal/domain/providers/llm"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // ONNXLLMClient performs text generation via ONNX Runtime (local, fast, private).
@@ -178,12 +179,16 @@ func NewONNXLLMClient(model string) (*ONNXLLMClient, error) {
 	}
 
 	modelsDir := filepath.Join(home, ".hawp", "models", "llm")
-	if err := os.MkdirAll(modelsDir, 0755); err != nil {
+	if err := prepareModelDirectory(modelsDir); err != nil {
 		session.Destroy()
-		return nil, fmt.Errorf("create models directory: %w", err)
+		return nil, err
 	}
 
 	modelPath := filepath.Join(modelsDir, model)
+	if err := filesystem.RejectSymlinkPathAncestors(modelPath); err != nil {
+		session.Destroy()
+		return nil, fmt.Errorf("unsafe model path: %w", err)
+	}
 
 	if _, err := os.Stat(modelPath); os.IsNotExist(err) {
 		opts := hugot.NewDownloadOptions()
@@ -194,6 +199,10 @@ func NewONNXLLMClient(model string) (*ONNXLLMClient, error) {
 			session.Destroy()
 			return nil, fmt.Errorf("download model %s from %s: %w", model, info.HFRepo, err)
 		}
+	}
+	if err := filesystem.RejectSymlinkPathAncestors(modelPath); err != nil {
+		session.Destroy()
+		return nil, fmt.Errorf("unsafe model path: %w", err)
 	}
 
 	return &ONNXLLMClient{

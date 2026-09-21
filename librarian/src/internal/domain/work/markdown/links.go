@@ -15,8 +15,9 @@ type Link struct {
 }
 
 var (
-	linkRe  = regexp.MustCompile(`\[([^\]]*)\]\(([^)]+)\)`)
-	fenceRe = regexp.MustCompile("(?ms)^```.*?^```")
+	linkRe   = regexp.MustCompile(`\[([^\]]*)\]\(([^)]+)\)`)
+	fenceRe  = regexp.MustCompile("(?ms)^```.*?^```")
+	schemeRe = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9+.-]*:`)
 )
 
 func BlankFences(content string) string {
@@ -44,8 +45,8 @@ func ExtractLinks(content string) []Link {
 }
 
 func IsLocalHref(href string) bool {
-	return href != "" && !strings.HasPrefix(href, "http") &&
-		!strings.HasPrefix(href, "/") && !strings.HasPrefix(href, "#")
+	return href != "" && !strings.HasPrefix(href, "/") &&
+		!strings.HasPrefix(href, "#") && !schemeRe.MatchString(href)
 }
 
 func PathPart(href string) string { part, _, _ := strings.Cut(href, "#"); return part }

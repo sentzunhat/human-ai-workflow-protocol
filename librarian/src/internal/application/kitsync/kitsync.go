@@ -82,7 +82,11 @@ func Sync(fetcher download.Fetcher, client githubrelease.Client, repo, repoRoot 
 
 	// Determine which are already installed so we can route install vs update.
 	installed := map[string]bool{}
-	for _, name := range domainkitsync.DetectProviders(fc, repoRoot, manifest) {
+	detected, err := domainkitsync.DetectProviders(fc, repoRoot, manifest)
+	if err != nil {
+		return result, fmt.Errorf("detect installed providers: %w", err)
+	}
+	for _, name := range detected {
 		installed[name] = true
 	}
 

@@ -8,6 +8,6 @@ func (w *WorkSource) ApplyCompletedActiveRowCleanup(repoRoot string) (ApplyResul
 	return normalization.ApplyCompletedActiveRowCleanup(repoRoot, normalization.ActiveSource{
 		ScanSource:     normalization.ScanSource{ReadDir: w.ReadDir, ReadFile: w.ReadFile, Stat: w.Stat},
 		ToRepoRelative: w.ToRepoRelative,
-		EvalSymlinks:   w.EvalSymlinks, Lstat: w.Lstat, WriteFile: w.WriteFile,
+		EvalSymlinks:   w.EvalSymlinks, Lstat: w.Lstat, AtomicWriteFile: w.AtomicWriteFile,
 	})
 }

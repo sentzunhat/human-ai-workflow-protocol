@@ -14,8 +14,8 @@ var (
 	activeRootFiles = []string{"BACKLOG.md"}
 )
 
-// CheckDeadLinks verifies local markdown links in BACKLOG.md and the flat
-// active/ and parked/ plan files.
+// CheckDeadLinks verifies local markdown links in BACKLOG.md and active/ and
+// parked/ plan files, including canonical folder-per-item plans.
 func CheckDeadLinks(workDir string, source Source) DeadLinksCheck {
 	var files []string
 	for _, name := range activeRootFiles {
@@ -25,15 +25,7 @@ func CheckDeadLinks(workDir string, source Source) DeadLinksCheck {
 		}
 	}
 	for _, dir := range activeDirs {
-		entries, err := source.ReadDir(filepath.Join(workDir, dir))
-		if err != nil {
-			continue
-		}
-		for _, entry := range entries {
-			if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".md") {
-				files = append(files, filepath.Join(workDir, dir, entry.Name()))
-			}
-		}
+		collectMarkdownFiles(filepath.Join(workDir, dir), source, &files)
 	}
 
 	result := DeadLinksCheck{Scanned: len(files), Status: StatusPass}
@@ -65,4 +57,21 @@ func CheckDeadLinks(workDir string, source Source) DeadLinksCheck {
 		result.Status = StatusFail
 	}
 	return result
+}
+
+func collectMarkdownFiles(root string, source Source, files *[]string) {
+	entries, err := source.ReadDir(root)
+	if err != nil {
+		return
+	}
+	for _, entry := range entries {
+		full := filepath.Join(root, entry.Name())
+		if entry.IsDir() {
+			collectMarkdownFiles(full, source, files)
+			continue
+		}
+		if strings.HasSuffix(entry.Name(), ".md") {
+			*files = append(*files, full)
+		}
+	}
 }

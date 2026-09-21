@@ -158,7 +158,7 @@ jobs:
           Copy lib/ next to the hawp binary, or run:
             sudo cp lib/* /usr/local/lib/ && sudo ldconfig
 
-          Then set llm.backend: "onnx" in ~/.hawp/config/context.json to
+          Then set llm.engine: "onnx" in ~/.hawp/config/context.json to
           use local ONNX LLM reshaping (hawp search --context).
           EOF
           tar -C stage -czf librarian/src/bin/hawp-linux-amd64-ort.tar.gz .
@@ -235,7 +235,7 @@ jobs:
           or install system-wide:
             sudo cp lib/*.dylib /usr/local/lib/
 
-          Then set llm.backend: "onnx" in ~/.hawp/config/context.json to
+          Then set llm.engine: "onnx" in ~/.hawp/config/context.json to
           use local ONNX LLM reshaping (hawp search --context).
           EOF
           tar -C stage -czf librarian/src/bin/hawp-darwin-arm64-ort.tar.gz .

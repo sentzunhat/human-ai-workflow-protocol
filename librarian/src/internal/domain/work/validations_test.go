@@ -268,6 +268,27 @@ func TestEvidenceIntegrity(t *testing.T) {
 	}
 }
 
+func TestEvidenceIntegrityAcceptsUUIDScopedRepoRelativePaths(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"closed/2026/09/22/361fb08e/plan.md": `## Verification
+
+- [x] repo-relative **Evidence:** .hawp/work/evidence/2026/09/22/361fb08e/evidence.md#claim-1
+- [x] template wording **Evidence:** inline or link to .hawp/work/evidence/2026/09/22/361fb08e/evidence.md#claim-2
+- [x] missing **Evidence:** .hawp/work/evidence/2026/09/22/361fb08e/missing.md#claim-3
+`,
+		"evidence/2026/09/22/361fb08e/evidence.md": "# evidence\n",
+	})
+	files := CollectClosedPlanFiles(filepath.Join(workDir, "closed"))
+	result := CheckEvidenceIntegrity(workDir, files)
+	if result.Total != 3 || result.Valid != 2 || len(result.Broken) != 1 {
+		t.Fatalf("repo-relative evidence = %+v, want 3 total / 2 valid / 1 broken", result)
+	}
+	wantBroken := ".hawp/work/evidence/2026/09/22/361fb08e/missing.md#claim-3"
+	if result.Broken[0].Link != wantBroken {
+		t.Fatalf("broken link = %q, want %q", result.Broken[0].Link, wantBroken)
+	}
+}
+
 func TestCollectClosedPlanFilesIncludesFolderPlans(t *testing.T) {
 	workDir := buildWorkDir(t, map[string]string{
 		"closed/2026/08/25/flat.md":             closedPlanComplete,
@@ -361,16 +382,17 @@ func TestVerificationClarityUnprovenOnlyPasses(t *testing.T) {
 
 func TestDeadLinks(t *testing.T) {
 	workDir := buildWorkDir(t, map[string]string{
-		"BACKLOG.md":         "see [plan](active/TASK-001.md) and [gone](active/missing.md)\n",
-		"active/TASK-001.md": "```\n[example in fence](nowhere.md)\n```\n",
+		"BACKLOG.md":              "see [plan](active/TASK-001.md) and [gone](active/missing.md)\n",
+		"active/TASK-001.md":      "```\n[example in fence](nowhere.md)\n```\n",
+		"active/abcd1234/plan.md": "[nested](active/missing-nested.md)\n",
 	})
 	source := &WorkSource{Exists: fileExists, ToRepoRelative: func(_, p string) string { return p }, ReadDir: os.ReadDir, ReadFile: os.ReadFile}
 	result := source.CheckDeadLinks(workDir)
-	if result.Scanned != 2 {
-		t.Fatalf("scanned = %d, want 2", result.Scanned)
+	if result.Scanned != 3 {
+		t.Fatalf("scanned = %d, want 3", result.Scanned)
 	}
-	if len(result.Broken) != 1 || result.Broken[0].Link != "active/missing.md" {
-		t.Fatalf("broken = %+v, want only active/missing.md (fenced link ignored)", result.Broken)
+	if len(result.Broken) != 2 || result.Broken[0].Link != "active/missing.md" || result.Broken[1].Link != "active/missing-nested.md" {
+		t.Fatalf("broken = %+v, want flat and nested links (fenced link ignored)", result.Broken)
 	}
 	if result.Status != StatusFail {
 		t.Errorf("status = %s, want FAIL", result.Status)

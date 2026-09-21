@@ -60,7 +60,8 @@ type EmbedService struct {
 }
 
 // NewEmbedServiceWithFactory injects model construction at the composition
-// the application service independent of infrastructure packages.
+// point. The current service still opens the SQLite adapter directly; moving
+// that adapter to bootstrap is a separate composition-boundary cleanup.
 func NewEmbedServiceWithFactory(dbPath string, newEmbedder func(string, string) (embeddings.Embedder, error)) *EmbedService {
 	return &EmbedService{dbPath: dbPath, newEmbedder: newEmbedder}
 }

@@ -175,6 +175,55 @@ func TestRunChecksumMismatchReportsFailedStep(t *testing.T) {
 	}
 }
 
+func TestRunRejectsSymlinkedHomeDirectoryBeforeDownloading(t *testing.T) {
+
+	home := t.TempDir()
+	outside := t.TempDir()
+	if err := os.Symlink(outside, filepath.Join(home, ".hawp")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	registry := appprovision.Registry{
+		RuntimeAssetErr: os.ErrInvalid,
+		ModelAssets: []domainprovision.Asset{{
+			Name: "model.onnx", URL: "http://invalid/model.onnx", SHA256: hashHex([]byte("model")), DestName: "model.onnx",
+		}},
+	}
+	result := appprovision.Run(download.NewHTTPFetcher(), home, registry)
+	if len(result.Steps) != 1 || result.Steps[0].Status != "failed" {
+		t.Fatalf("steps = %+v, want one failed layout step", result.Steps)
+	}
+	if _, err := os.Stat(filepath.Join(outside, "models")); !os.IsNotExist(err) {
+		t.Fatalf("provisioning touched symlink target: %v", err)
+	}
+}
+
+func TestRunRejectsSymlinkedManifest(t *testing.T) {
+
+	home := t.TempDir()
+	hawpRoot := filepath.Join(home, ".hawp")
+	if err := os.MkdirAll(hawpRoot, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	outside := t.TempDir()
+	externalManifest := filepath.Join(outside, "manifest.json")
+	if err := os.WriteFile(externalManifest, []byte(`{"keep":true}`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(externalManifest, filepath.Join(hawpRoot, "manifest.json")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	result := appprovision.Run(download.NewHTTPFetcher(), home, appprovision.Registry{RuntimeAssetErr: os.ErrInvalid})
+	if len(result.Steps) != 1 || result.Steps[0].Status != "failed" {
+		t.Fatalf("steps = %+v, want one failed layout step", result.Steps)
+	}
+	content, err := os.ReadFile(externalManifest)
+	if err != nil || string(content) != `{"keep":true}` {
+		t.Fatalf("external manifest changed: %q, %v", content, err)
+	}
+}
+
 func TestResultStringReportsFailuresAndSuccesses(t *testing.T) {
 	result := appprovision.Result{Steps: []appprovision.Step{
 		{Name: "a", Status: "downloaded", Path: "/x/a"},

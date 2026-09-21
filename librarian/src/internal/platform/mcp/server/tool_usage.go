@@ -2,11 +2,12 @@ package mcp
 
 import (
 	"encoding/json"
+	"os"
 
+	appusage "github.com/sentzunhat/hawp/librarian/src/internal/application/usage"
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/usage"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	usageinfra "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/usage"
-	"os"
 )
 
 func usageToolDef() map[string]any {
@@ -46,21 +47,17 @@ func toolUsage(args json.RawMessage) rpcResponse {
 		return text("Usage logging is disabled. Run `hawp usage enable` to start recording MCP calls.")
 	}
 
-	store, err := usageinfra.Open(h.UsageDB)
-	if err != nil {
-		return toolErr("cannot open usage DB: " + err.Error())
-	}
-	defer store.Close()
+	service := appusage.NewService(usageinfra.Open)
 
 	if a.Report {
-		rep, err := store.GetReport()
+		rep, err := service.GetReport(h.UsageDB)
 		if err != nil {
 			return toolErr("GetReport: " + err.Error())
 		}
 		return text(usage.FormatReport(rep))
 	}
 
-	totals, err := store.GetTotals()
+	totals, err := service.GetTotals(h.UsageDB)
 	if err != nil {
 		return toolErr("GetTotals: " + err.Error())
 	}

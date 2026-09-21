@@ -20,11 +20,19 @@ build:
 
 install: build
 	@set -e; \
+	if [ -L ../../.hawp ] || [ -L ../../.hawp/bin ] || [ -L ../../.hawp/bin/$(BINARY) ] || { [ -e ../../.hawp/bin/$(BINARY) ] && [ ! -f ../../.hawp/bin/$(BINARY) ]; }; then \
+		echo "refusing symlinked or non-regular .hawp/bin or executable" >&2; \
+		exit 1; \
+	fi; \
 	mkdir -p ../../.hawp/bin; \
 	tmp=$$(mktemp "../../.hawp/bin/.hawp-install.XXXXXX"); \
 	trap 'rm -f "$$tmp"' EXIT; \
 	cp $(BIN_DIR)/$(BINARY) "$$tmp"; \
 	chmod 755 "$$tmp"; \
+	if [ -L ../../.hawp ] || [ -L ../../.hawp/bin ] || [ -L ../../.hawp/bin/$(BINARY) ] || { [ -e ../../.hawp/bin/$(BINARY) ] && [ ! -f ../../.hawp/bin/$(BINARY) ]; }; then \
+		echo "refusing symlinked or non-regular .hawp/bin or executable" >&2; \
+		exit 1; \
+	fi; \
 	mv -f "$$tmp" ../../.hawp/bin/$(BINARY)
 
 test:

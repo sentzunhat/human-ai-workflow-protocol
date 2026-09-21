@@ -2,10 +2,11 @@ package newcmd
 
 import (
 	"fmt"
+	"path/filepath"
+
 	appuuid "github.com/sentzunhat/hawp/librarian/src/internal/application/uuidgen"
 	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work/intake"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
-	"path/filepath"
 )
 
 // Run scaffolds a work item. Investigation and planning remain human/agent

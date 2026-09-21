@@ -17,14 +17,18 @@ import (
 // Unlike ExtractMember, this pulls out the whole tree (used for the kit +
 // providers bundle, not a single named file).
 func ExtractAll(archivePath, destDir string) error {
-	if err := os.MkdirAll(destDir, 0o755); err != nil {
-		return err
-	}
 	root, err := filepath.Abs(destDir)
 	if err != nil {
 		return fmt.Errorf("resolve extraction root: %w", err)
 	}
-	if err := filesystem.RejectSymlinkAncestors(root, root); err != nil {
+	parent := filepath.Dir(root)
+	if err := filesystem.RejectSymlinkAncestors(parent, root); err != nil {
+		return fmt.Errorf("refusing symlinked extraction root: %w", err)
+	}
+	if err := os.MkdirAll(root, 0o755); err != nil {
+		return err
+	}
+	if err := filesystem.RejectSymlinkAncestors(parent, root); err != nil {
 		return fmt.Errorf("refusing symlinked extraction root: %w", err)
 	}
 
@@ -66,15 +70,35 @@ func ExtractAll(archivePath, destDir string) error {
 			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 				return err
 			}
-			out, err := os.OpenFile(target, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o644)
+			if err := filesystem.RejectSymlinksInPath(target); err != nil {
+				return fmt.Errorf("unsafe extraction destination: %w", err)
+			}
+			tmp, err := os.CreateTemp(filepath.Dir(target), ".extract-all-*")
 			if err != nil {
 				return err
 			}
-			if _, err := io.Copy(out, tr); err != nil {
-				out.Close()
+			tmpPath := tmp.Name()
+			defer os.Remove(tmpPath)
+			if err := tmp.Chmod(0o644); err != nil {
+				tmp.Close()
 				return err
 			}
-			out.Close()
+			if _, err := io.Copy(tmp, tr); err != nil {
+				tmp.Close()
+				return err
+			}
+			if err := tmp.Close(); err != nil {
+				return err
+			}
+			// Recheck immediately before rename. Rename replaces a final
+			// symlink or hard link rather than following it, so extraction
+			// cannot truncate an unrelated file at the destination.
+			if err := filesystem.RejectSymlinkAncestors(root, target); err != nil {
+				return fmt.Errorf("refusing symlinked archive target %q: %w", header.Name, err)
+			}
+			if err := os.Rename(tmpPath, target); err != nil {
+				return err
+			}
 		}
 	}
 }

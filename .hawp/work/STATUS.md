@@ -2,7 +2,7 @@
 
 Local checkpoint: 2026-09-10. The [backlog](BACKLOG.md) owns lifecycle status.
 
-## Active
+## Closed After This Checkpoint (2026-09-12)
 
 - [a3df8a9c](closed/2026/09/12/a3df8a9c/plan.md): request-to-intake reshaping. Existing-tool
   worker guidance and an internal draft contract are implemented; adapter

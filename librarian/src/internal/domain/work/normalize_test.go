@@ -4,26 +4,31 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // defaultWorkSource for domain/work tests.
 var defaultWorkSource = &WorkSource{
-	Exists:         fileExists,
-	ToRepoRelative: func(_, p string) string { return p },
-	CollectFiles:   collectFiles,
-	ReadDir:        os.ReadDir,
-	ReadFile:       os.ReadFile,
-	WriteFile:      os.WriteFile,
-	MkdirAll:       os.MkdirAll,
-	MkdirTemp:      os.MkdirTemp,
-	Rename:         os.Rename,
-	Remove:         os.Remove,
-	RemoveAll:      os.RemoveAll,
-	Stat:           os.Stat,
-	Lstat:          os.Lstat,
-	EvalSymlinks:   filepath.EvalSymlinks,
+	Exists:                 fileExists,
+	ToRepoRelative:         func(_, p string) string { return p },
+	CollectFiles:           collectFiles,
+	ReadDir:                os.ReadDir,
+	ReadFile:               os.ReadFile,
+	WriteFile:              os.WriteFile,
+	AtomicWriteFile:        filesystem.AtomicWriteFileAtPath,
+	MkdirAll:               os.MkdirAll,
+	MkdirTemp:              os.MkdirTemp,
+	Rename:                 os.Rename,
+	Remove:                 os.Remove,
+	RemoveAll:              os.RemoveAll,
+	Stat:                   os.Stat,
+	Lstat:                  os.Lstat,
+	EvalSymlinks:           filepath.EvalSymlinks,
+	RejectSymlinkAncestors: filesystem.RejectSymlinkAncestors,
 }
 
 // collectFiles returns all regular files under dir, recursively.
@@ -332,6 +337,50 @@ func TestApplyClosedRecordNormalization(t *testing.T) {
 	}
 }
 
+func TestApplyClosedRecordNormalizationRejectsSymlinkedRecord(t *testing.T) {
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/closed/2026/07/01/TASK-020.md": "# closed record without sections\n",
+	})
+	path := filepath.Join(root, ".hawp/work/closed/2026/07/01/TASK-020.md")
+	outside := filepath.Join(root, "outside.md")
+	if err := os.WriteFile(outside, []byte("# outside\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, path); err != nil {
+		t.Skipf("symlink capability unavailable (enable Windows Developer Mode or SeCreateSymbolicLinkPrivilege): %v", err)
+	}
+	if _, err := defaultWorkSource.ApplyClosedRecordNormalization(root); err == nil {
+		t.Fatal("expected symlinked closed record to be rejected")
+	}
+	content, err := os.ReadFile(outside)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(content) != "# outside\n" {
+		t.Fatalf("outside record was changed: %q", content)
+	}
+}
+
+func TestApplyWorkItemFolderMigrationRejectsSymlinkedScope(t *testing.T) {
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/BACKLOG.md": cleanBacklogHeader + backlogFooter,
+	})
+	outside := filepath.Join(root, "outside-active")
+	if err := os.Mkdir(outside, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	active := filepath.Join(root, ".hawp/work/active")
+	if err := os.Symlink(outside, active); err != nil {
+		t.Skipf("symlink capability unavailable (enable Windows Developer Mode or SeCreateSymbolicLinkPrivilege): %v", err)
+	}
+	if _, err := defaultWorkSource.ApplyWorkItemFolderMigration(root); err == nil {
+		t.Fatal("expected symlinked active root to be rejected")
+	}
+}
+
 func TestApplyCompletedActiveRowCleanupRemovesDoneRowsPointingToClosedPlans(t *testing.T) {
 	root := buildRepoFixture(t, map[string]string{
 		".hawp/work/BACKLOG.md": cleanBacklogHeader +
@@ -342,7 +391,7 @@ func TestApplyCompletedActiveRowCleanupRemovesDoneRowsPointingToClosedPlans(t *t
 		".hawp/work/active/049.md":            "# active\n",
 		".hawp/work/closed/2026/09/01/048.md": closedPlanComplete,
 	})
-	source := &WorkSource{Exists: fileExists, ToRepoRelative: func(_, p string) string { return p }, ReadDir: os.ReadDir, ReadFile: os.ReadFile, Stat: os.Stat, Lstat: os.Lstat, EvalSymlinks: filepath.EvalSymlinks, WriteFile: os.WriteFile}
+	source := &WorkSource{Exists: fileExists, ToRepoRelative: func(_, p string) string { return p }, ReadDir: os.ReadDir, ReadFile: os.ReadFile, Stat: os.Stat, Lstat: os.Lstat, EvalSymlinks: filepath.EvalSymlinks, WriteFile: os.WriteFile, AtomicWriteFile: filesystem.AtomicWriteFileAtPath}
 	result, err := source.ApplyCompletedActiveRowCleanup(root)
 	if err != nil {
 		t.Fatal(err)
@@ -369,13 +418,88 @@ func TestApplyCompletedActiveRowCleanupRemovesDoneRowsPointingToClosedPlans(t *t
 	}
 }
 
+func TestApplyCompletedActiveRowCleanupReplacesHardLinkedBacklog(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("hard-link behavior is not reliable on Windows")
+	}
+	backlog := cleanBacklogHeader +
+		"| 048 | task | done stale | done | [plan](closed/2026/09/01/048.md) | 2026-09-01 |\n" + backlogFooter +
+		"| 048 | task | done stale | 2026-09-01 | [plan](closed/2026/09/01/048.md) |\n"
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/BACKLOG.md":               backlog,
+		".hawp/work/closed/2026/09/01/048.md": closedPlanComplete,
+	})
+	outside := filepath.Join(root, "backlog-external.md")
+	backlogPath := filepath.Join(root, ".hawp/work/BACKLOG.md")
+	if err := os.Rename(backlogPath, outside); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Link(outside, backlogPath); err != nil {
+		t.Skipf("hard links unavailable: %v", err)
+	}
+
+	if _, err := defaultWorkSource.ApplyCompletedActiveRowCleanup(root); err != nil {
+		t.Fatal(err)
+	}
+	unchanged, err := os.ReadFile(outside)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(unchanged) != backlog {
+		t.Fatalf("external hard-link target changed: %q", unchanged)
+	}
+	replaced, err := os.ReadFile(backlogPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(replaced), "| 048 | task | done stale | done |") {
+		t.Fatal("atomic replacement did not remove the stale active row")
+	}
+}
+
+func TestApplyClosedRecordNormalizationReplacesHardLinkedRecord(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("hard-link behavior is not reliable on Windows")
+	}
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/closed/2026/07/01/TASK-020.md": "# closed record without sections\n",
+	})
+	recordPath := filepath.Join(root, ".hawp/work/closed/2026/07/01/TASK-020.md")
+	outside := filepath.Join(root, "record-external.md")
+	original := []byte("# closed record without sections\n")
+	if err := os.Rename(recordPath, outside); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Link(outside, recordPath); err != nil {
+		t.Skipf("hard links unavailable: %v", err)
+	}
+
+	if _, err := defaultWorkSource.ApplyClosedRecordNormalization(root); err != nil {
+		t.Fatal(err)
+	}
+	unchanged, err := os.ReadFile(outside)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(unchanged) != string(original) {
+		t.Fatalf("external hard-link target changed: %q", unchanged)
+	}
+	replaced, err := os.ReadFile(recordPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(replaced), "**Backlog ID:** TASK-020") {
+		t.Fatal("atomic replacement did not normalize the closed record")
+	}
+}
+
 func TestApplyCompletedActiveRowCleanupRejectsTraversalAndSymlinkedBacklog(t *testing.T) {
 	root := buildRepoFixture(t, map[string]string{
 		".hawp/work/BACKLOG.md": cleanBacklogHeader +
 			"| 048 | task | traversal | done | [plan](closed/../active/048/plan.md) | 2026-09-01 |\n" + backlogFooter,
 		".hawp/work/active/048/plan.md": "# active\n",
 	})
-	source := &WorkSource{Exists: fileExists, ToRepoRelative: func(_, p string) string { return p }, ReadDir: os.ReadDir, ReadFile: os.ReadFile, Stat: os.Stat, Lstat: os.Lstat, EvalSymlinks: filepath.EvalSymlinks, WriteFile: os.WriteFile}
+	source := &WorkSource{Exists: fileExists, ToRepoRelative: func(_, p string) string { return p }, ReadDir: os.ReadDir, ReadFile: os.ReadFile, Stat: os.Stat, Lstat: os.Lstat, EvalSymlinks: filepath.EvalSymlinks, WriteFile: os.WriteFile, AtomicWriteFile: filesystem.AtomicWriteFileAtPath}
 	result, err := source.ApplyCompletedActiveRowCleanup(root)
 	if err != nil {
 		t.Fatal(err)

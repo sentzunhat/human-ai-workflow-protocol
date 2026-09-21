@@ -9,11 +9,11 @@ import (
 func TestDefaultConfig(t *testing.T) {
 	cfg := DefaultConfig()
 
-	if cfg.Embeddings.Engine != "onnx" {
-		t.Errorf("default embeddings backend should be onnx, got %s", cfg.Embeddings.Engine)
+	if cfg.Embeddings.Engine != "ollama" {
+		t.Errorf("default embeddings backend should be ollama, got %s", cfg.Embeddings.Engine)
 	}
-	if cfg.Embeddings.Model != "bge-base-en-v1.5" {
-		t.Errorf("default embeddings model should be bge-base-en-v1.5, got %s", cfg.Embeddings.Model)
+	if cfg.Embeddings.Model != "nomic-embed-text" {
+		t.Errorf("default embeddings model should be nomic-embed-text, got %s", cfg.Embeddings.Model)
 	}
 
 	// LLM defaults to Ollama, not ONNX: llm.SupportedModels is empty (no ONNX
@@ -181,7 +181,7 @@ func TestMergeConfig(t *testing.T) {
 	override := ContextConfig{
 		Embeddings: EmbeddingsConfig{
 			Engine: "openai",
-			Model:   "text-embedding-3-large",
+			Model:  "text-embedding-3-large",
 		},
 		LLM: LLMConfig{
 			Engine: "anthropic",

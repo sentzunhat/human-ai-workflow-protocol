@@ -63,12 +63,15 @@ func vscodeServerEntry(repoRoot string) map[string]any {
 // Continue prints a manual config block because its working config is the
 // user-scoped ~/.continue/config.yaml file.
 // WriteProviderConfigs validates and writes provider configs for each named provider.
-// It expands shorthand names (e.g. "all") before writing. Callers that have already
-// validated and expanded the list should call writeProviderConfigs directly to avoid
-// the redundant expansion.
+// It expands shorthand names (e.g. "all") and preflights every prerequisite and
+// selected configuration before writing. Callers that have already preflighted and
+// expanded the list should call writeProviderConfigs directly.
 func WriteProviderConfigs(repoRoot string, providers []string) error {
 	expanded, err := expandConfigProviders(providers)
 	if err != nil {
+		return err
+	}
+	if err := preflightProviderConfigs(repoRoot, expanded); err != nil {
 		return err
 	}
 	return writeProviderConfigs(repoRoot, expanded)
@@ -177,12 +180,9 @@ func ensureGitignoreEntry(repoRoot, entry string) error {
 	if err := filesystem.RejectSymlinkAncestors(repoRoot, path); err != nil {
 		return err
 	}
-	if info, err := os.Lstat(path); err == nil {
-		if !info.Mode().IsRegular() {
-			return fmt.Errorf(".gitignore is not a regular file; refusing to write")
-		}
-	} else if !os.IsNotExist(err) {
-		return err
+	perm, err := managedFilePerm(path, 0o644)
+	if err != nil {
+		return fmt.Errorf(".gitignore: %w", err)
 	}
 	data, err := os.ReadFile(path)
 	if os.IsNotExist(err) {
@@ -200,5 +200,24 @@ func ensureGitignoreEntry(repoRoot, entry string) error {
 		content += "\n"
 	}
 	content += entry + "\n"
-	return os.WriteFile(path, []byte(content), 0o644)
+	return filesystem.AtomicWriteFile(repoRoot, path, []byte(content), perm)
+}
+
+// managedFilePerm validates an existing managed destination before a write and
+// preserves its permissions when the atomic replacement swaps the directory
+// entry. Replacing the entry, rather than truncating the existing inode, also
+// prevents a hard-linked destination from redirecting the write into another
+// file.
+func managedFilePerm(path string, defaultPerm os.FileMode) (os.FileMode, error) {
+	info, err := os.Lstat(path)
+	if os.IsNotExist(err) {
+		return defaultPerm, nil
+	}
+	if err != nil {
+		return 0, err
+	}
+	if !info.Mode().IsRegular() {
+		return 0, fmt.Errorf("%s is not a regular file; refusing to write", path)
+	}
+	return info.Mode().Perm(), nil
 }

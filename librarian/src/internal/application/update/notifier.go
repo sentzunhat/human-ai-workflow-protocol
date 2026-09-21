@@ -66,6 +66,9 @@ func SetAutoUpdate(enabled bool) error {
 	if !ok {
 		return fmt.Errorf("could not resolve home directory")
 	}
+	if err := filesystem.RejectSymlinksInPath(h.UpdateConfigFile); err != nil {
+		return err
+	}
 	if err := os.MkdirAll(h.Config, 0755); err != nil {
 		return err
 	}
@@ -73,7 +76,7 @@ func SetAutoUpdate(enabled bool) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(h.UpdateConfigFile, data, 0644)
+	return filesystem.AtomicWriteFile(h.Root, h.UpdateConfigFile, data, 0644)
 }
 
 func loadCache() *updateCache {
@@ -97,6 +100,9 @@ func saveCache(c *updateCache) {
 	if !ok {
 		return
 	}
+	if err := filesystem.RejectSymlinksInPath(h.UpdateCacheFile); err != nil {
+		return
+	}
 	if err := os.MkdirAll(h.Cache, 0755); err != nil {
 		return
 	}
@@ -104,7 +110,7 @@ func saveCache(c *updateCache) {
 	if err != nil {
 		return
 	}
-	_ = os.WriteFile(h.UpdateCacheFile, data, 0644)
+	_ = filesystem.AtomicWriteFile(h.Root, h.UpdateCacheFile, data, 0644)
 }
 
 // refreshCacheBackground fires a goroutine that hits GitHub releases and

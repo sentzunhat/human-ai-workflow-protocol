@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	appintake "github.com/sentzunhat/hawp/librarian/src/internal/application/work/intake"
+	domainintake "github.com/sentzunhat/hawp/librarian/src/internal/domain/work/intake"
 )
 
 // llmReshaper is the subset of OllamaLLMClient used by OllamaIntakeShaper,
@@ -15,7 +15,7 @@ type llmReshaper interface {
 	Reshape(ctx context.Context, prompt string, maxTokens int) (string, error)
 }
 
-// OllamaIntakeShaper implements application/work/intake.RequestShaper using an
+// OllamaIntakeShaper implements the application intake shaper contract using an
 // Ollama LLM. It sends a HAWP-specific structured-extraction prompt and parses
 // the JSON response into a DraftProposal.
 type OllamaIntakeShaper struct {
@@ -32,24 +32,24 @@ func NewOllamaIntakeShaper(client *OllamaLLMClient, maxTokens int) *OllamaIntake
 	return &OllamaIntakeShaper{client: client, maxTokens: maxTokens}
 }
 
-// Shape satisfies appintake.RequestShaper.
-func (s *OllamaIntakeShaper) Shape(ctx context.Context, req appintake.DraftRequest) (appintake.DraftProposal, error) {
+// Shape satisfies the intake shaper contract with domain-owned data types.
+func (s *OllamaIntakeShaper) Shape(ctx context.Context, req domainintake.DraftRequest) (domainintake.DraftProposal, error) {
 	prompt := buildIntakePrompt(req)
 
 	raw, err := s.client.Reshape(ctx, prompt, s.maxTokens)
 	if err != nil {
-		return appintake.DraftProposal{}, fmt.Errorf("ollama reshape: %w", err)
+		return domainintake.DraftProposal{}, fmt.Errorf("ollama reshape: %w", err)
 	}
 
 	proposal, err := parseProposal(raw)
 	if err != nil {
-		return appintake.DraftProposal{}, err
+		return domainintake.DraftProposal{}, err
 	}
 	return proposal, nil
 }
 
 // buildIntakePrompt assembles the HAWP intake extraction prompt.
-func buildIntakePrompt(req appintake.DraftRequest) string {
+func buildIntakePrompt(req domainintake.DraftRequest) string {
 	var b strings.Builder
 	b.WriteString("You are a HAWP work intake assistant. Given a user request, extract the following fields and respond in JSON only.\n\n")
 	b.WriteString("Fields:\n")
@@ -74,14 +74,14 @@ func buildIntakePrompt(req appintake.DraftRequest) string {
 }
 
 // parseProposal extracts the JSON block from raw LLM output and unmarshals it.
-func parseProposal(raw string) (appintake.DraftProposal, error) {
+func parseProposal(raw string) (domainintake.DraftProposal, error) {
 	start := strings.Index(raw, "{")
 	if start < 0 {
-		return appintake.DraftProposal{}, fmt.Errorf("no JSON object found in LLM response")
+		return domainintake.DraftProposal{}, fmt.Errorf("no JSON object found in LLM response")
 	}
 	end := strings.LastIndex(raw, "}")
 	if end < start {
-		return appintake.DraftProposal{}, fmt.Errorf("malformed JSON in LLM response: no closing brace")
+		return domainintake.DraftProposal{}, fmt.Errorf("malformed JSON in LLM response: no closing brace")
 	}
 	jsonStr := raw[start : end+1]
 
@@ -92,7 +92,7 @@ func parseProposal(raw string) (appintake.DraftProposal, error) {
 		Checkpoint  json.RawMessage `json:"checkpoint"`
 	}
 	if err := json.Unmarshal([]byte(jsonStr), &fields); err != nil {
-		return appintake.DraftProposal{}, fmt.Errorf("unmarshal LLM JSON: %w", err)
+		return domainintake.DraftProposal{}, fmt.Errorf("unmarshal LLM JSON: %w", err)
 	}
 
 	mission := jsonFieldText(fields.Mission)
@@ -101,16 +101,16 @@ func parseProposal(raw string) (appintake.DraftProposal, error) {
 	checkpoint := jsonFieldText(fields.Checkpoint)
 
 	if strings.TrimSpace(mission) == "" {
-		return appintake.DraftProposal{}, fmt.Errorf("LLM returned blank mission")
+		return domainintake.DraftProposal{}, fmt.Errorf("LLM returned blank mission")
 	}
 	if strings.TrimSpace(constraints) == "" {
-		return appintake.DraftProposal{}, fmt.Errorf("LLM returned blank constraints")
+		return domainintake.DraftProposal{}, fmt.Errorf("LLM returned blank constraints")
 	}
 	if strings.TrimSpace(output) == "" {
-		return appintake.DraftProposal{}, fmt.Errorf("LLM returned blank output")
+		return domainintake.DraftProposal{}, fmt.Errorf("LLM returned blank output")
 	}
 
-	return appintake.DraftProposal{
+	return domainintake.DraftProposal{
 		Mission:     mission,
 		Constraints: constraints,
 		Output:      output,

@@ -1,6 +1,6 @@
 # HAWP MCP Worker Guides
 
-Scope: v0.0.24 branch behavior, verified 2026-09-06. This does not claim
+Scope: v0.0.24 branch behavior, verified 2026-09-24. This does not claim
 v0.0.24 is published or that every provider has passed a live connection test.
 
 - [Agent installation instructions](install-agent.md)
@@ -24,8 +24,9 @@ backlog, inspect dirty state, and confirm the installed executable version:
 ```
 
 The current native filename is `hawp` (`hawp.exe` on Windows).
-Install/update sources now target this native filename. Existing legacy files
-may remain for compatibility and are not removed by this migration. The core
+Install/update sources now target this native filename. The v0.0.24
+native-binary/config migration is implemented; existing legacy files may remain
+for compatibility and are intentionally not removed. The core
 source launcher is retired; releases supply the native binary separately from
 the kit/provider bundle. Use a binary built for the host;
 the checked-in maintainer binary is not a universal executable.
@@ -60,7 +61,8 @@ text while updating launch values and adding missing defaults. Unsupported
 layouts require manual merge; there is no force-overwrite flag.
 JSON and Codex validation occur before any selected config is
 written, but later filesystem write failures are not an all-or-nothing transaction.
-Continue and GitHub still print advice only. Exit 0 is not client connection proof.
+Continue prints a user-config block; GitHub writes repo-local `.vscode/mcp.json`.
+Exit 0 is not client connection proof.
 Both `configure` and `init` now share the preserving Codex merge; `init` still
 performs provisioning and kit sync. See the Codex guide for supported layouts.
 

@@ -118,7 +118,8 @@ func normalizeClosedRecord(content, filePath string) (string, []string) {
 func (w *WorkSource) ApplyClosedRecordNormalization(repoRoot string) (ApplyResult, error) {
 	return normalization.ApplyClosedRecordNormalization(repoRoot, normalization.ClosedSource{
 		ScanSource: normalization.ScanSource{ReadDir: w.ReadDir, ReadFile: w.ReadFile, Stat: w.Stat},
-		MkdirAll:   w.MkdirAll, Rename: w.Rename, WriteFile: w.WriteFile,
+		MkdirAll:   w.MkdirAll, Rename: w.Rename, AtomicWriteFile: w.AtomicWriteFile,
+		RejectSymlinkAncestors: w.RejectSymlinkAncestors,
 	})
 }
 

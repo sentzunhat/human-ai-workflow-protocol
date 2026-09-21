@@ -31,11 +31,11 @@ func TestGetChunkVector(t *testing.T) {
 
 	// Insert a chunk
 	chunk := Chunk{
-		DocumentID:   docID,
-		ChunkIdx:     0,
-		Text:         "sample text",
+		DocumentID:    docID,
+		ChunkIdx:      0,
+		Text:          "sample text",
 		FolderContext: nil,
-		MetadataJSON: nil,
+		MetadataJSON:  nil,
 	}
 	if err := db.InsertChunk(chunk); err != nil {
 		t.Fatalf("InsertChunk() error = %v", err)
@@ -117,11 +117,11 @@ func TestGetAllChunkVectors(t *testing.T) {
 
 	for i, vec := range vectors {
 		chunk := Chunk{
-			DocumentID:   docID,
-			ChunkIdx:     i,
-			Text:         "sample",
+			DocumentID:    docID,
+			ChunkIdx:      i,
+			Text:          "sample",
 			FolderContext: nil,
-			MetadataJSON: nil,
+			MetadataJSON:  nil,
 		}
 		if err := db.InsertChunk(chunk); err != nil {
 			t.Fatalf("InsertChunk() error = %v", err)
@@ -180,11 +180,11 @@ func TestIntegrationEmbedding(t *testing.T) {
 	docID, _ := db.InsertDocument("kit", "guide", "/test/doc.md", "start-here")
 	for i := 0; i < 5; i++ {
 		chunk := Chunk{
-			DocumentID:   docID,
-			ChunkIdx:     i,
-			Text:         "sample text for embedding",
+			DocumentID:    docID,
+			ChunkIdx:      i,
+			Text:          "sample text for embedding",
 			FolderContext: nil,
-			MetadataJSON: nil,
+			MetadataJSON:  nil,
 		}
 		db.InsertChunk(chunk)
 	}

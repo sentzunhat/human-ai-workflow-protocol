@@ -74,12 +74,9 @@ func mergeCodexTOML(data []byte, root string) ([]byte, error) {
 }
 
 func writeCodexTOML(path, root string) error {
-	info, err := os.Lstat(path)
-	if err != nil && !os.IsNotExist(err) {
-		return err
-	}
-	if err == nil && !info.Mode().IsRegular() {
-		return fmt.Errorf("refusing non-regular Codex configuration")
+	perm, err := managedFilePerm(path, 0o644)
+	if err != nil {
+		return fmt.Errorf("Codex configuration: %w", err)
 	}
 	data, err := os.ReadFile(path)
 	if err != nil && !os.IsNotExist(err) {
@@ -99,5 +96,5 @@ func writeCodexTOML(path, root string) error {
 	if err := os.MkdirAll(destDir, 0o755); err != nil {
 		return err
 	}
-	return os.WriteFile(path, out, 0o644)
+	return filesystem.AtomicWriteFile(root, path, out, perm)
 }

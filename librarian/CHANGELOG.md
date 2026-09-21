@@ -47,6 +47,10 @@ token savings with Ollama).
 
 ### Changed
 
+- Make Ollama the built-in default for both embeddings (`nomic-embed-text`) and
+  LLM reshaping (`mistral`), based on the local benchmarked setup. Keep ONNX
+  embeddings documented as an explicit offline fallback with a valid
+  `context.json` example.
 - Duplicate normalization preserves all copies and artifacts and adds reciprocal
   links when a working record has exactly one archived counterpart. Ambiguous
   matches are reported for review. No duplicate files or folders are deleted.

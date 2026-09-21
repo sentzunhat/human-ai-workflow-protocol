@@ -45,6 +45,7 @@ func TestProviderConfigWrittenAfterProvisionFailure(t *testing.T) {
 
 	// Despite provision failure, provider config write must succeed.
 	repoRoot := t.TempDir()
+	writeMCPPrerequisites(t, repoRoot)
 	if err := appmcp.WriteProviderConfigs(repoRoot, []string{"codex"}); err != nil {
 		t.Fatalf("WriteProviderConfigs failed after provision failure: %v", err)
 	}
@@ -73,6 +74,7 @@ func TestProviderConfigWrittenAfterProvisionFailure_AllProviders(t *testing.T) {
 	}
 
 	repoRoot := t.TempDir()
+	writeMCPPrerequisites(t, repoRoot)
 	if err := appmcp.WriteProviderConfigs(repoRoot, []string{"claude", "cursor", "codex"}); err != nil {
 		t.Fatalf("WriteProviderConfigs failed: %v", err)
 	}
@@ -92,6 +94,21 @@ func TestProviderConfigWrittenAfterProvisionFailure_AllProviders(t *testing.T) {
 		}
 		if !strings.Contains(string(data), want.text) {
 			t.Errorf("%s missing expected content %q:\n%s", want.path, want.text, data)
+		}
+	}
+}
+
+func writeMCPPrerequisites(t *testing.T, repoRoot string) {
+	t.Helper()
+	for _, path := range []string{
+		filepath.Join(repoRoot, ".hawp", "bin", "hawp"),
+		filepath.Join(repoRoot, ".hawp", "work", "BACKLOG.md"),
+	} {
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte("fixture"), 0o755); err != nil {
+			t.Fatal(err)
 		}
 	}
 }

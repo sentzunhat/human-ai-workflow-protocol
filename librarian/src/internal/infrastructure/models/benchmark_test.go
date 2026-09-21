@@ -3,7 +3,8 @@
 package models_test
 
 // Comprehensive benchmarks for all embedding and LLM backends.
-// Run with: go test -tags benchmark -run BenchmarkAll -v ./internal/domain/ -timeout 1200s
+// Run pipeline checks with: go test -tags benchmark -run '^TestBenchmarkAll' -v ./internal/infrastructure/models/ -timeout 1200s
+// Run benchmarks with: go test -tags benchmark -run '^$' -bench '^BenchmarkAll' -v ./internal/infrastructure/models/ -timeout 1200s
 //
 // Tests both ONNX and Ollama backends with multiple models.
 

@@ -1,7 +1,5 @@
 package cli
 
-import ()
-
 func helpText() string {
 	return `hawp
 

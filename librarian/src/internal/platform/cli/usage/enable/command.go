@@ -20,7 +20,9 @@ func Run(args []string) error {
 	h := filesystem.ResolveHawpHome(home)
 	cfg := usageinfra.LoadConfig(h.UsageConfigFile)
 	cfg.Enabled = true
-	cfg.LogBodies = opts.logBodies
+	if opts.logBodiesSet {
+		cfg.LogBodies = opts.logBodies
+	}
 	if err := usageinfra.SaveConfig(h.UsageConfigFile, cfg); err != nil {
 		return err
 	}

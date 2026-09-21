@@ -3,6 +3,8 @@ package intake
 import (
 	"strings"
 	"testing"
+
+	worktable "github.com/sentzunhat/hawp/librarian/src/internal/domain/work/table"
 )
 
 func TestSlugify(t *testing.T) {
@@ -22,6 +24,17 @@ func TestSlugify(t *testing.T) {
 		if got != tt.want {
 			t.Errorf("Slugify(%q) = %q, want %q", tt.title, got, tt.want)
 		}
+	}
+}
+
+func TestValidateTitle(t *testing.T) {
+	for _, title := range []string{"", " \t", "line\nbreak", "line\rbreak", "tab\tbreak"} {
+		if err := ValidateTitle(title); err == nil {
+			t.Errorf("accepted invalid title %q", title)
+		}
+	}
+	if err := ValidateTitle("Fix pipe | safely"); err != nil {
+		t.Fatalf("rejected valid Markdown title: %v", err)
 	}
 }
 
@@ -74,6 +87,36 @@ func TestNewItemInputBacklogRow(t *testing.T) {
 	cols := strings.Count(row, "|")
 	if cols != 9 { // 9 pipes = 8 columns
 		t.Errorf("BacklogRow() has %d pipes, want 9 (8 columns): %q", cols, row)
+	}
+}
+
+func TestNewItemInputBacklogRowEscapesPipeTitle(t *testing.T) {
+	item := NewItemInput{
+		UUID:  "abcd1234-5678-90ab-cdef-1234567890ab",
+		Type:  "bug",
+		Title: `Keep | title \\ safe`,
+		Slug:  "keep-title-safe",
+	}
+	row := item.BacklogRow("2026-09-23")
+	if !strings.Contains(row, `Keep \| title \\\\ safe`) {
+		t.Fatalf("BacklogRow() = %q, missing escaped title", row)
+	}
+	if got := strings.Count(row, "|"); got != 10 {
+		t.Fatalf("BacklogRow() has %d pipes, want 10 including escaped title pipe", got)
+	}
+}
+
+func TestNewItemInputBacklogRowRoundTripsAmpersandTitle(t *testing.T) {
+	item := NewItemInput{
+		UUID:  "abcd1234-5678-90ab-cdef-1234567890ab",
+		Type:  "bug",
+		Title: "A & B",
+		Slug:  "a-b",
+	}
+	row := item.BacklogRow("2026-09-23")
+	cells := worktable.Cells(row)
+	if len(cells) != 8 || cells[3] != item.Title {
+		t.Fatalf("BacklogRow() round trip = %#v, want title %q", cells, item.Title)
 	}
 }
 

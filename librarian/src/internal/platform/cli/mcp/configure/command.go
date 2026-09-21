@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 	appmcp "github.com/sentzunhat/hawp/librarian/src/internal/platform/mcp/configure"
 )
@@ -62,6 +63,9 @@ func resolveConfigureRoot(root, cwd string, explicit bool) (string, error) {
 		root = filepath.Join(cwd, root)
 	}
 	root = filepath.Clean(root)
+	if err := filesystem.RejectSymlinkPathAncestors(root); err != nil {
+		return "", fmt.Errorf("--repo-root: %w", err)
+	}
 	info, err := os.Stat(root)
 	if err != nil {
 		return "", fmt.Errorf("--repo-root: %w", err)

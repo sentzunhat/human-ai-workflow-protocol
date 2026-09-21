@@ -58,3 +58,19 @@ func TestCheckRootAbsolutePaths(t *testing.T) {
 		t.Fatalf("root-absolute link should resolve from repo root: %+v", result.Failures)
 	}
 }
+
+func TestCheckSkipsSymlinkedRootMarkdown(t *testing.T) {
+	root := t.TempDir()
+	external := filepath.Join(t.TempDir(), "README.md")
+	if err := os.WriteFile(external, []byte("[broken](missing.md)\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(external, filepath.Join(root, "README.md")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	result := applinks.Check(root)
+	if result.FilesChecked != 0 || len(result.Failures) != 0 {
+		t.Fatalf("symlinked root Markdown was discovered: %+v", result)
+	}
+}

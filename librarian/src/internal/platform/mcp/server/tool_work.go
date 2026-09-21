@@ -121,8 +121,8 @@ func toolWorkIntake(args json.RawMessage, repoRoot string) rpcResponse {
 		Backend   string `json:"backend"`
 		Model     string `json:"model"`
 		URL       string `json:"url"`
-		Limit     int    `json:"limit"`
-		MaxTokens int    `json:"max_tokens"`
+		Limit     *int   `json:"limit"`
+		MaxTokens *int   `json:"max_tokens"`
 	}
 	if err := json.Unmarshal(args, &a); err != nil {
 		return toolErr("invalid args: " + err.Error())
@@ -136,18 +136,26 @@ func toolWorkIntake(args json.RawMessage, repoRoot string) rpcResponse {
 	if a.Backend != "ollama" && a.Backend != "onnx" {
 		return toolErr(`backend must be "ollama" or "onnx"`)
 	}
-	if a.Limit <= 0 {
-		a.Limit = 10
-	} else if a.Limit > 500 {
+	limit := 10
+	if a.Limit != nil {
+		limit = *a.Limit
+	}
+	if limit <= 0 {
+		return toolErr("limit must be positive")
+	} else if limit > 500 {
 		return toolErr("limit must be 500 or less")
 	}
-	if a.MaxTokens <= 0 {
-		a.MaxTokens = 2000
-	} else if a.MaxTokens > 32000 {
+	maxTokens := 2000
+	if a.MaxTokens != nil {
+		maxTokens = *a.MaxTokens
+	}
+	if maxTokens <= 0 {
+		return toolErr("max_tokens must be positive")
+	} else if maxTokens > 32000 {
 		return toolErr("max_tokens must be 32000 or less")
 	}
 
-	response, err := runWorkIntake(context.Background(), repoRoot, a.Input, a.Limit, a.MaxTokens, func() (appwork.RequestShaper, func(), error) {
+	response, err := runWorkIntake(context.Background(), repoRoot, a.Input, limit, maxTokens, func() (appwork.RequestShaper, func(), error) {
 		return newMCPReshapeShaper(a.Backend, a.URL, a.Model)
 	})
 	if err != nil {

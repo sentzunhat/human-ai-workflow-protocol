@@ -1,16 +1,36 @@
 // Package usage provides application-layer use cases for usage-log queries.
-// Each function opens the store, performs one operation, and closes the store,
-// returning only domain types to the caller.
 package usage
 
 import (
+	"fmt"
+
 	domainusage "github.com/sentzunhat/hawp/librarian/src/internal/domain/usage"
-	usageinfra "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/usage"
 )
 
+// StoreOpener is supplied by the platform composition root. Application code
+// depends on the domain store port and does not select a persistence adapter.
+type StoreOpener func(path string) (domainusage.Store, error)
+
+// Service contains the usage-log use cases backed by an injected store opener.
+type Service struct {
+	openStore StoreOpener
+}
+
+// NewService constructs usage use cases with a platform-provided store opener.
+func NewService(openStore StoreOpener) Service {
+	return Service{openStore: openStore}
+}
+
+func (s Service) open(path string) (domainusage.Store, error) {
+	if s.openStore == nil {
+		return nil, fmt.Errorf("usage store opener is not configured")
+	}
+	return s.openStore(path)
+}
+
 // RecentLog returns the n most recent usage log entries from the store at dbPath.
-func RecentLog(dbPath string, n int) ([]domainusage.Entry, error) {
-	store, err := usageinfra.Open(dbPath)
+func (s Service) RecentLog(dbPath string, n int) ([]domainusage.Entry, error) {
+	store, err := s.open(dbPath)
 	if err != nil {
 		return nil, err
 	}
@@ -19,8 +39,8 @@ func RecentLog(dbPath string, n int) ([]domainusage.Entry, error) {
 }
 
 // GetReport returns a full usage report from the store at dbPath.
-func GetReport(dbPath string) (domainusage.Report, error) {
-	store, err := usageinfra.Open(dbPath)
+func (s Service) GetReport(dbPath string) (domainusage.Report, error) {
+	store, err := s.open(dbPath)
 	if err != nil {
 		return domainusage.Report{}, err
 	}
@@ -29,8 +49,8 @@ func GetReport(dbPath string) (domainusage.Report, error) {
 }
 
 // ClearLog deletes all entries from the store at dbPath.
-func ClearLog(dbPath string) error {
-	store, err := usageinfra.Open(dbPath)
+func (s Service) ClearLog(dbPath string) error {
+	store, err := s.open(dbPath)
 	if err != nil {
 		return err
 	}
@@ -39,8 +59,8 @@ func ClearLog(dbPath string) error {
 }
 
 // GetTotals returns aggregate totals from the store at dbPath.
-func GetTotals(dbPath string) (domainusage.Totals, error) {
-	store, err := usageinfra.Open(dbPath)
+func (s Service) GetTotals(dbPath string) (domainusage.Totals, error) {
+	store, err := s.open(dbPath)
 	if err != nil {
 		return domainusage.Totals{}, err
 	}

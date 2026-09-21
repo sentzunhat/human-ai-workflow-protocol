@@ -9,6 +9,20 @@ import (
 	"github.com/sentzunhat/hawp/librarian/src/internal/application/work/doc"
 )
 
+func TestCreateWorkDocRejectsSymlinkedHAWPAncestor(t *testing.T) {
+	repoRoot := t.TempDir()
+	outside := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(outside, "work"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(repoRoot, ".hawp")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	if _, err := doc.CreateWorkDoc("status", "safe title", filepath.Join(repoRoot, ".hawp", "work"), ""); err == nil {
+		t.Fatal("expected symlinked .hawp ancestor to be rejected")
+	}
+}
+
 func TestCreateWorkDoc_PathShape(t *testing.T) {
 	workDir := t.TempDir()
 

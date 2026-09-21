@@ -85,7 +85,7 @@ func ApplyCompletedActiveRowCleanup(repoRoot string, source ActiveSource) (Apply
 		}
 		kept = append(kept, line)
 	}
-	if err := source.WriteFile(backlogPath, []byte(strings.Join(kept, "\n")), 0o644); err != nil {
+	if err := source.AtomicWriteFile(backlogPath, []byte(strings.Join(kept, "\n")), 0o644); err != nil {
 		return result, err
 	}
 	result.ChangedFiles = append(result.ChangedFiles, source.ToRepoRelative(repoRoot, backlogPath))

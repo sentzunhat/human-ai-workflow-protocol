@@ -14,16 +14,17 @@ import (
 // The normalization package owns the migration workflow while the parent
 // package supplies the concrete filesystem operations.
 type MigrationIO struct {
-	CanonicalFolderID func(content, fallback string) string
-	CollectFiles      func(dir string, skipReadme bool) []string
-	ReadDir           func(path string) ([]fs.DirEntry, error)
-	ReadFile          func(path string) ([]byte, error)
-	WriteFile         func(path string, data []byte, perm fs.FileMode) error
-	MkdirAll          func(path string, perm fs.FileMode) error
-	Rename            func(oldPath, newPath string) error
-	Remove            func(path string) error
-	Stat              func(path string) (fs.FileInfo, error)
-	ToRepoRelative    func(repoRoot, absolutePath string) string
+	CanonicalFolderID      func(content, fallback string) string
+	CollectFiles           func(dir string, skipReadme bool) []string
+	ReadDir                func(path string) ([]fs.DirEntry, error)
+	ReadFile               func(path string) ([]byte, error)
+	AtomicWriteFile        func(path string, data []byte, perm fs.FileMode) error
+	MkdirAll               func(path string, perm fs.FileMode) error
+	Rename                 func(oldPath, newPath string) error
+	Remove                 func(path string) error
+	Stat                   func(path string) (fs.FileInfo, error)
+	RejectSymlinkAncestors func(root, target string) error
+	ToRepoRelative         func(repoRoot, absolutePath string) string
 }
 
 var filesStemRe = regexp.MustCompile(`(?i)^(.*)-files$`)
@@ -40,7 +41,7 @@ func moveMarkdownFile(io MigrationIO, oldPath, newPath string, transform func(st
 	if err := io.MkdirAll(filepath.Dir(newPath), 0o755); err != nil {
 		return err
 	}
-	if err := io.WriteFile(newPath, []byte(next), 0o644); err != nil {
+	if err := io.AtomicWriteFile(newPath, []byte(next), 0o644); err != nil {
 		return err
 	}
 	return io.Remove(oldPath)
@@ -100,7 +101,7 @@ func applyDirRename(io MigrationIO, dirPath, targetDir, workRoot string, touched
 			updated = NormalizeMovedFilesContent(updated, planRel, oldFile, newFile)
 		}
 
-		if err := io.WriteFile(newFile, []byte(updated), 0o644); err != nil {
+		if err := io.AtomicWriteFile(newFile, []byte(updated), 0o644); err != nil {
 			return err
 		}
 		touched[newFile] = struct{}{}
@@ -208,7 +209,7 @@ func rewriteBacklogPlanLinks(io MigrationIO, backlogPath string, movedPlans []Mo
 	if updated == content {
 		return nil
 	}
-	if err := io.WriteFile(backlogPath, []byte(updated), 0o644); err != nil {
+	if err := io.AtomicWriteFile(backlogPath, []byte(updated), 0o644); err != nil {
 		return err
 	}
 	touched[backlogPath] = struct{}{}
@@ -220,11 +221,17 @@ func rewriteBacklogPlanLinks(io MigrationIO, backlogPath string, movedPlans []Mo
 func ApplyWorkItemFolderMigration(repoRoot string, io MigrationIO) (ApplyResult, error) {
 	result := ApplyResult{}
 	workRoot := filepath.Join(repoRoot, ".hawp", "work")
+	if err := io.RejectSymlinkAncestors(repoRoot, workRoot); err != nil {
+		return result, fmt.Errorf("refusing symlinked work root: %w", err)
+	}
 	touched := map[string]struct{}{}
 	var movedPlans []MovedPlan
 
 	for _, scope := range []string{"active", "parked"} {
 		scopeRoot := filepath.Join(workRoot, scope)
+		if err := io.RejectSymlinkAncestors(workRoot, scopeRoot); err != nil {
+			return result, fmt.Errorf("refusing symlinked %s work root: %w", scope, err)
+		}
 		entries, err := io.ReadDir(scopeRoot)
 		if err != nil {
 			continue
@@ -286,6 +293,9 @@ func ApplyWorkItemFolderMigration(repoRoot string, io MigrationIO) (ApplyResult,
 	}
 
 	backlogPath := filepath.Join(workRoot, "BACKLOG.md")
+	if err := io.RejectSymlinkAncestors(workRoot, backlogPath); err != nil {
+		return result, fmt.Errorf("refusing symlinked backlog path: %w", err)
+	}
 	if err := rewriteBacklogPlanLinks(io, backlogPath, movedPlans, touched); err != nil {
 		return result, err
 	}

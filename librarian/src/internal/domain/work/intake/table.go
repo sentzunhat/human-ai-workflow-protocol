@@ -87,5 +87,5 @@ func isTableSeparator(line string, width int) bool {
 }
 
 func intakeTableText(value string) string {
-	return strings.NewReplacer("&", "&amp;", "|", "&#124;", "\r\n", "<br>", "\n", "<br>", "\r", "<br>").Replace(value)
+	return escapeTableCell(value)
 }

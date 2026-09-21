@@ -3,7 +3,7 @@
 package models_test
 
 // Real integration tests against live backends. Run with:
-//   go test -tags integration -run Integration -v ./internal/domain/ -timeout 120s
+//   go test -tags integration -run Integration -v ./internal/infrastructure/models/ -timeout 120s
 //
 // Requires: Ollama running at localhost:11434 with models pulled.
 

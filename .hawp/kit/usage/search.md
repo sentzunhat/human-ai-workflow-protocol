@@ -96,33 +96,14 @@ Paths are relative to the repo root. Directories are walked recursively for `.md
 
 When using Claude Code with the HAWP MCP server (`hawp mcp`), the `hawp_search` tool provides structured results with precise line positions and context windows — suitable for automated code navigation and documentation lookup.
 
-Run `hawp init --provider <name>` to write the correct config file for your agent:
-
-| Agent | Config file written | Command |
-|-------|--------------------|---------|
-| Claude Code | `.mcp.json` | `hawp init --provider claude` |
-| Cursor | `.cursor/mcp.json` | `hawp init --provider cursor` |
-| Codex | `.codex/config.toml` | `hawp init --provider codex` |
-
-**Codex: project trust is required.** Codex only loads project-scoped MCP config
-(`.codex/config.toml`) for projects it considers trusted. If `codex mcp list` does not
-show `hawp` after writing the config, trust the project in Codex settings and start a
-fresh task or session. The desktop UI does not hot-reload MCP changes mid-session.
-Verify with the CLI: `codex mcp list` and `codex mcp get hawp`.
-
-Codex currently expects absolute `command` and `cwd` paths in project-scoped MCP
-config. Run `hawp init --provider codex` on each machine instead of copying
-another machine's `.codex/config.toml` verbatim.
-
-For Claude Code, the config is:
-
-```json
-{
-  "mcpServers": {
-    "hawp": { "command": ".hawp/bin/hawp", "args": ["mcp"] }
-  }
-}
-```
+Use `hawp mcp configure --provider <name>` for config-only setup, or
+`hawp init --provider <name>` when provisioning and kit sync are also wanted.
+File-backed integrations are Claude Code (`.mcp.json`), Cursor
+(`.cursor/mcp.json`), Codex (`.codex/config.toml`), and GitHub/Copilot
+(`.vscode/mcp.json`); Continue prints a manual user-config block. Generated
+file-backed configs use the native executable and an explicit repository root.
+Follow the [provider MCP setup guides](mcp/README.md) rather than copying a
+static relative launcher between machines or providers.
 
 ### Raw results mode (default)
 
@@ -183,7 +164,8 @@ Response:
 
 `max_tokens` defaults to 2000. Use context mode when you want the search result to slot directly into a system prompt or retrieval step without post-processing.
 
-Other MCP tools: `hawp_work_new` (create work item), `hawp_work_validate` (validate kit + work integrity).
+Other MCP tools: `hawp_usage`, `hawp_work_intake`, `hawp_work_new`,
+`hawp_work_validate`, `hawp_work_doc`, and `hawp_work_reshape`.
 
 ## Typical agent workflow
 
@@ -192,7 +174,7 @@ Other MCP tools: `hawp_work_new` (create work item), `hawp_work_validate` (valid
 hawp search index && hawp search embed --backend ollama
 
 # During work
-hawp search "backlog alignment rules" --hybrid --context --max-tokens 6000
+hawp search "backlog alignment rules" --context --max-tokens 6000
 ```
 
 The index is idempotent — re-running after content changes upserts new chunks. Vectors persist across sessions.

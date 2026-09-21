@@ -67,7 +67,7 @@ func checkDestinations(root string, p plan) error {
 // Generated review artifacts must not modify the inventoried source tree or
 // follow a symlink. An existing artifact is replaced only on an explicit flag.
 func writeArtifact(root, name string, data []byte) error {
-	root, err := filepath.EvalSymlinks(root)
+	root, err := filepath.Abs(root)
 	if err != nil {
 		return err
 	}
@@ -75,11 +75,9 @@ func writeArtifact(root, name string, data []byte) error {
 	if err != nil {
 		return err
 	}
-	parent, err := filepath.EvalSymlinks(filepath.Dir(full))
-	if err != nil {
+	if err := rejectSymlinkAncestors(root, full); err != nil {
 		return err
 	}
-	full = filepath.Join(parent, filepath.Base(full))
 	rel, err := filepath.Rel(filepath.Join(root, sourceRoot), full)
 	if err != nil {
 		return err
@@ -95,11 +93,25 @@ func writeArtifact(root, name string, data []byte) error {
 		if !info.Mode().IsRegular() {
 			return fmt.Errorf("non-regular artifact: %s", name)
 		}
-		// Unlink before writing so a hard-linked artifact cannot redirect the
-		// write to its paired source inode; WriteFile truncates in place.
-		if err := os.Remove(full); err != nil {
-			return fmt.Errorf("remove existing artifact: %w", err)
+	}
+	// Replace through a temporary sibling so an existing hard-linked artifact
+	// is detached by the rename and an interrupted write preserves the prior
+	// reviewed snapshot.
+	return replaceFile(full, data, 0o644)
+}
+
+func rejectSymlinkAncestors(root, target string) error {
+	for current := target; ; current = filepath.Dir(current) {
+		info, err := os.Lstat(current)
+		if err == nil {
+			if info.Mode()&os.ModeSymlink != 0 {
+				return fmt.Errorf("symlink artifact path: %s", current)
+			}
+		} else if !os.IsNotExist(err) {
+			return err
+		}
+		if current == root || current == filepath.Dir(current) {
+			return nil
 		}
 	}
-	return os.WriteFile(full, data, 0o644)
 }

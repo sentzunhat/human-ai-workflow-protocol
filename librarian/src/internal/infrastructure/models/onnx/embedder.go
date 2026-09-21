@@ -8,6 +8,7 @@ import (
 	"sync/atomic"
 
 	"github.com/knights-analytics/hugot"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // ONNXEmbedder performs embedding via ONNX Runtime (local, fast, private).
@@ -91,11 +92,14 @@ func NewONNXEmbedder(model string) (*ONNXEmbedder, error) {
 	}
 
 	modelsDir := filepath.Join(home, ".hawp", "models", "embedding")
-	if err := os.MkdirAll(modelsDir, 0755); err != nil {
-		return nil, fmt.Errorf("create models directory: %w", err)
+	if err := prepareModelDirectory(modelsDir); err != nil {
+		return nil, err
 	}
 
 	modelPath := filepath.Join(modelsDir, model)
+	if err := filesystem.RejectSymlinkPathAncestors(modelPath); err != nil {
+		return nil, fmt.Errorf("unsafe model path: %w", err)
+	}
 
 	if _, err := os.Stat(modelPath); os.IsNotExist(err) {
 		opts := hugot.NewDownloadOptions()
@@ -105,6 +109,9 @@ func NewONNXEmbedder(model string) (*ONNXEmbedder, error) {
 		if err != nil {
 			return nil, fmt.Errorf("download model %s from %s: %w", model, info.HFRepo, err)
 		}
+	}
+	if err := filesystem.RejectSymlinkPathAncestors(modelPath); err != nil {
+		return nil, fmt.Errorf("unsafe model path: %w", err)
 	}
 
 	ctx := context.Background()
@@ -119,6 +126,19 @@ func NewONNXEmbedder(model string) (*ONNXEmbedder, error) {
 		modelPath: modelPath,
 		session:   session,
 	}, nil
+}
+
+func prepareModelDirectory(path string) error {
+	if err := filesystem.RejectSymlinkPathAncestors(path); err != nil {
+		return fmt.Errorf("unsafe model directory: %w", err)
+	}
+	if err := os.MkdirAll(path, 0755); err != nil {
+		return fmt.Errorf("create models directory: %w", err)
+	}
+	if err := filesystem.RejectSymlinkPathAncestors(path); err != nil {
+		return fmt.Errorf("unsafe model directory: %w", err)
+	}
+	return nil
 }
 
 // Embed returns the embedding vector for a single text.

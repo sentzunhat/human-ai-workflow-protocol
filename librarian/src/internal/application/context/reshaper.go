@@ -44,7 +44,7 @@ type Concept struct {
 //	    MaxTokens:         512,
 //	    TopK:              5,
 //	}
-//	reshaper, _ := NewContextReshaper(config)
+//	reshaper, _ := NewContextReshaper(config, embedderFactory, llmFactory)
 type ReshapingConfig struct {
 	EmbeddingsBackend string  // "onnx" or "ollama"
 	EmbeddingsModel   string  // Model name (e.g., "all-MiniLM-L6-v2")
@@ -77,7 +77,7 @@ type ContextReshaper struct {
 //	    LLMBackend:        "ollama",
 //	    LLMModel:          "mistral",
 //	}
-//	reshaper, err := NewContextReshaper(config)
+//	reshaper, err := NewContextReshaper(config, embedderFactory, llmFactory)
 //	if err != nil {
 //	    log.Fatalf("Failed to create reshaper: %v", err)
 //	}

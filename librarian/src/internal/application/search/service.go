@@ -15,6 +15,7 @@ import (
 	embeddings "github.com/sentzunhat/hawp/librarian/src/internal/domain/providers/embeddings"
 	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
+	inframodels "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models"
 	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
 )
 
@@ -27,8 +28,7 @@ type projectResolver interface {
 type defaultProjectResolver struct{}
 
 func (defaultProjectResolver) ResolveSearchIndexPath(repoRoot string) (string, error) {
-	project := filesystem.ResolveHawpProject(repoRoot)
-	return project.GetSearchIndexPath(), nil
+	return filesystem.ResolveSafeSearchIndexPath(repoRoot)
 }
 
 type Service struct {
@@ -90,7 +90,7 @@ func NewServiceWithEmbedder(resolver projectResolver, open func(path string) (do
 }
 
 func DefaultService() Service {
-	return NewService(nil, nil)
+	return NewServiceWithEmbedder(nil, nil, inframodels.NewEmbedder)
 }
 
 func (s Service) Execute(repoRoot string, opts QueryOptions) (QueryExecution, error) {
@@ -155,9 +155,18 @@ func (s Service) Execute(repoRoot string, opts QueryOptions) (QueryExecution, er
 // sqlite.IndexDB.GetEmbeddingMetadata) when vectors exist. Returns at most
 // limit results, already ranked.
 func Query(repoRoot, query string, limit int) ([]domainsearch.Result, error) {
-	return QueryWithEmbedder(repoRoot, query, limit, nil)
+	execution, err := DefaultService().Execute(repoRoot, QueryOptions{
+		Query: query,
+		Limit: limit,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return RowsToResults(execution.Rows, execution.HasVectors), nil
 }
 
+// QueryWithEmbedder is Query with an explicitly supplied embedder factory.
+// Passing nil disables semantic/hybrid ranking and keeps results lexical-only.
 func QueryWithEmbedder(repoRoot, query string, limit int, embedder EmbedderFactory) ([]domainsearch.Result, error) {
 	execution, err := NewServiceWithEmbedder(nil, nil, embedder).Execute(repoRoot, QueryOptions{
 		Query: query,

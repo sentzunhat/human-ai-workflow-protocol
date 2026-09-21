@@ -3,7 +3,6 @@ package usage
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 
 	appusage "github.com/sentzunhat/hawp/librarian/src/internal/application/usage"
@@ -36,7 +35,7 @@ func RunLog() error {
 	if err != nil {
 		return err
 	}
-	entries, err := appusage.RecentLog(h.UsageDB, 20)
+	entries, err := appService().RecentLog(h.UsageDB, 20)
 	if err != nil {
 		return fmt.Errorf("usage db: %w", err)
 	}
@@ -64,17 +63,14 @@ func RunReport(args []string) error {
 	if err != nil {
 		return err
 	}
-	rep, err := appusage.GetReport(h.UsageDB)
+	rep, err := appService().GetReport(h.UsageDB)
 	if err != nil {
 		return fmt.Errorf("usage db: %w", err)
 	}
 	out := domainusage.FormatReport(rep)
 	fmt.Print(out)
 	if exportPath != "" {
-		if err := os.MkdirAll(filepath.Dir(exportPath), 0o755); err != nil {
-			return fmt.Errorf("create export dir: %w", err)
-		}
-		if err := os.WriteFile(exportPath, []byte(out), 0o644); err != nil {
+		if err := filesystem.AtomicWriteFileAtPath(exportPath, []byte(out), 0o644); err != nil {
 			return fmt.Errorf("write report: %w", err)
 		}
 		fmt.Printf("\nReport written to %s\n", exportPath)
@@ -94,7 +90,7 @@ func RunClear() error {
 		fmt.Println("Cancelled.")
 		return nil
 	}
-	if err := appusage.ClearLog(h.UsageDB); err != nil {
+	if err := appService().ClearLog(h.UsageDB); err != nil {
 		return fmt.Errorf("usage db: %w", err)
 	}
 	fmt.Println("Usage log cleared.")
@@ -111,12 +107,18 @@ func RunTotals() error {
 		fmt.Println("Usage logging is disabled. Run `hawp usage enable` to start recording calls.")
 		return nil
 	}
-	totals, err := appusage.GetTotals(h.UsageDB)
+	totals, err := appService().GetTotals(h.UsageDB)
 	if err != nil {
 		return fmt.Errorf("usage db: %w", err)
 	}
 	fmt.Print(domainusage.FormatTotals(totals))
 	return nil
+}
+
+// appService composes the usage use cases with the default SQLite adapter at
+// the platform boundary.
+func appService() appusage.Service {
+	return appusage.NewService(usageinfra.Open)
 }
 
 func home() (filesystem.HawpHome, error) {

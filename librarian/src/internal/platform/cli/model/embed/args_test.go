@@ -18,6 +18,7 @@ func TestParseEmbedArgs(t *testing.T) {
 		{name: "missing value", args: []string{"hello", "--model"}, wantErr: true},
 		{name: "unknown flag", args: []string{"hello", "--unknown"}, wantErr: true},
 		{name: "interspersed", args: []string{"first", "--model", "org/repo", "second", "--onnx-file", "model.onnx"}, texts: []string{"first", "second"}, model: "org/repo", onnx: "model.onnx"},
+		{name: "multiple options", args: []string{"first", "--model=org/repo", "second", "--onnx-file=model.onnx", "third"}, texts: []string{"first", "second", "third"}, model: "org/repo", onnx: "model.onnx"},
 		{name: "equals", args: []string{"--model=org/repo", "hello"}, texts: []string{"hello"}, model: "org/repo"},
 		{name: "literal flags", args: []string{"--", "--model", "literal"}, texts: []string{"--model", "literal"}},
 		{name: "terminator after option", args: []string{"--model", "org/repo", "--", "first", "--literal"}, texts: []string{"first", "--literal"}, model: "org/repo"},

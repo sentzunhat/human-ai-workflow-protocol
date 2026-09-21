@@ -5,7 +5,10 @@ import (
 	"strings"
 )
 
-var linkRe = regexp.MustCompile(`\[([^\]]*)\]\(([^)]+)\)`)
+var (
+	linkRe   = regexp.MustCompile(`\[([^\]]*)\]\(([^)]+)\)`)
+	schemeRe = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9+.-]*:`)
+)
 
 // Link is one [text](href) occurrence with its byte offset in the content.
 type Link struct {
@@ -31,7 +34,7 @@ func IsLocalHref(href string) bool {
 	if href == "" {
 		return false
 	}
-	if strings.HasPrefix(href, "http") || strings.HasPrefix(href, "/") || strings.HasPrefix(href, "#") {
+	if strings.HasPrefix(href, "/") || strings.HasPrefix(href, "#") || schemeRe.MatchString(href) {
 		return false
 	}
 	return true

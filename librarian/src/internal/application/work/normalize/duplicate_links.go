@@ -2,13 +2,13 @@ package work
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
 	domainwork "github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/normalization"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 	reposwork "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/work"
 )
@@ -27,6 +27,9 @@ func ApplyDuplicateLinks(repoRoot string) (domainwork.ApplyResult, error) {
 func linkDuplicatePlans(repoRoot string, apply bool) (domainwork.ApplyResult, error) {
 	result := domainwork.ApplyResult{}
 	workRoot := filepath.Join(repoRoot, ".hawp", "work")
+	if err := filesystem.RejectSymlinksInTree(repoRoot, workRoot); err != nil {
+		return result, fmt.Errorf("unsafe work tree: %w", err)
+	}
 	backlog, err := reposwork.ReadBacklog(filepath.Join(workRoot, "BACKLOG.md"))
 	if err != nil {
 		return result, err
@@ -64,7 +67,7 @@ func linkDuplicatePlans(repoRoot string, apply bool) (domainwork.ApplyResult, er
 		archive := archives[0]
 		regular := true
 		for _, path := range []string{file.Path, archive} {
-			info, err := os.Lstat(path)
+			info, err := defaultWorkSource.Lstat(path)
 			if err != nil {
 				return result, err
 			}
@@ -79,7 +82,7 @@ func linkDuplicatePlans(repoRoot string, apply bool) (domainwork.ApplyResult, er
 		for _, pair := range [][2]string{{file.Path, archive}, {archive, file.Path}} {
 			content, ok := edits[pair[0]]
 			if !ok {
-				raw, err := os.ReadFile(pair[0])
+				raw, err := defaultWorkSource.ReadFile(pair[0])
 				if err != nil {
 					return result, err
 				}
@@ -103,40 +106,17 @@ func linkDuplicatePlans(repoRoot string, apply bool) (domainwork.ApplyResult, er
 	sort.Strings(paths)
 	for _, path := range paths {
 		if apply {
-			info, err := os.Stat(path)
+			info, err := defaultWorkSource.Stat(path)
 			if err != nil {
 				return result, err
 			}
-			if err := writeFileAtomic(path, []byte(edits[path]), info.Mode().Perm()); err != nil {
+			if err := filesystem.AtomicWriteFile(repoRoot, path, []byte(edits[path]), info.Mode().Perm()); err != nil {
 				return result, err
 			}
 		}
 		result.ChangedFiles = append(result.ChangedFiles, repo.ToRepoRelative(repoRoot, path))
 	}
 	return result, nil
-}
-
-// writeFileAtomic writes data to path via a temp file in the same directory
-// followed by a rename, so an interrupted write never leaves a partial file.
-func writeFileAtomic(path string, data []byte, perm os.FileMode) error {
-	dir := filepath.Dir(path)
-	tmp, err := os.CreateTemp(dir, ".hawp-link-*")
-	if err != nil {
-		return fmt.Errorf("create temp: %w", err)
-	}
-	tmpName := tmp.Name()
-	defer os.Remove(tmpName) // no-op after successful rename
-	if _, err := tmp.Write(data); err != nil {
-		tmp.Close()
-		return fmt.Errorf("write temp: %w", err)
-	}
-	if err := tmp.Close(); err != nil {
-		return fmt.Errorf("close temp: %w", err)
-	}
-	if err := os.Chmod(tmpName, perm); err != nil {
-		return fmt.Errorf("chmod temp: %w", err)
-	}
-	return os.Rename(tmpName, path)
 }
 
 func addRelatedRecordLink(content, link string) string {

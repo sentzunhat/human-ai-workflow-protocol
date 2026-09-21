@@ -145,9 +145,6 @@ func TestExtractAllRejectsAbsoluteMember(t *testing.T) {
 }
 
 func TestExtractAllRejectsSymlinkAncestor(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("symlink permissions are not reliable on Windows")
-	}
 
 	root := t.TempDir()
 	dest := filepath.Join(root, "extracted")
@@ -168,5 +165,58 @@ func TestExtractAllRejectsSymlinkAncestor(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(outside, "escaped.txt")); !os.IsNotExist(err) {
 		t.Fatalf("symlink target was created: %v", err)
+	}
+}
+
+func TestExtractAllRejectsSymlinkedDestinationParent(t *testing.T) {
+
+	root := t.TempDir()
+	outside := filepath.Join(root, "outside")
+	if err := os.Mkdir(outside, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	parent := filepath.Join(root, "parent")
+	if err := os.Symlink(outside, parent); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	archivePath := buildTarGz(t, map[string]string{"safe.txt": "must not write"})
+	if err := ExtractAll(archivePath, filepath.Join(parent, "extracted")); err == nil {
+		t.Fatal("expected symlinked destination parent to be rejected")
+	}
+	if _, err := os.Stat(filepath.Join(outside, "extracted", "safe.txt")); !os.IsNotExist(err) {
+		t.Fatalf("symlink target was written: %v", err)
+	}
+}
+
+func TestExtractAllReplacesHardLinkedDestinationWithoutTruncatingTarget(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("hard-link behavior is not reliable on Windows")
+	}
+
+	root := t.TempDir()
+	dest := filepath.Join(root, "extracted")
+	if err := os.MkdirAll(dest, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	outside := filepath.Join(root, "outside.txt")
+	if err := os.WriteFile(outside, []byte("preserve me"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	linked := filepath.Join(dest, "safe.txt")
+	if err := os.Link(outside, linked); err != nil {
+		t.Skipf("hard links unavailable: %v", err)
+	}
+
+	archivePath := buildTarGz(t, map[string]string{"safe.txt": "new content"})
+	if err := ExtractAll(archivePath, dest); err != nil {
+		t.Fatal(err)
+	}
+
+	if got, err := os.ReadFile(outside); err != nil || string(got) != "preserve me" {
+		t.Fatalf("hard-link target changed: content=%q err=%v", got, err)
+	}
+	if got, err := os.ReadFile(linked); err != nil || string(got) != "new content" {
+		t.Fatalf("extracted destination = %q, err %v", got, err)
 	}
 }

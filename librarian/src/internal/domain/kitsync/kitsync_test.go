@@ -136,7 +136,10 @@ func TestDetectProvidersFindsPatternMarkedFiles(t *testing.T) {
 		".claude/rules/hawp-core.md": "# core\n",
 		".claude/rules/other.md":     "# non-hawp file, should not itself trigger detection\n",
 	})
-	detected := DetectProviders(fc, repoRoot, manifest)
+	detected, err := DetectProviders(fc, repoRoot, manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(detected) != 1 || detected[0] != "claude" {
 		t.Fatalf("detected = %v, want [claude]", detected)
 	}
@@ -152,9 +155,41 @@ func TestDetectProvidersIgnoresUnrelatedGithubFolder(t *testing.T) {
 	repoRoot := writeTree(t, map[string]string{
 		".github/workflows/ci.yml": "name: CI\n",
 	})
-	detected := DetectProviders(fc, repoRoot, manifest)
+	detected, err := DetectProviders(fc, repoRoot, manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if len(detected) != 0 {
 		t.Fatalf("detected = %v, want none (github has no pattern-marked rule)", detected)
+	}
+}
+
+func TestDetectProvidersRejectsSymlinkedDestinationAncestor(t *testing.T) {
+	manifest := parseSample(t)
+	repoRoot := t.TempDir()
+	external := writeTree(t, map[string]string{
+		"rules/hawp-core.md": "# outside\n",
+	})
+	if err := os.Symlink(external, filepath.Join(repoRoot, ".claude")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	if _, err := DetectProviders(fc, repoRoot, manifest); err == nil {
+		t.Fatal("expected symlinked provider destination ancestry to be rejected")
+	}
+}
+
+func TestDetectProvidersRejectsEscapingManifestDestination(t *testing.T) {
+	manifest := &Manifest{Providers: map[string]Provider{
+		"bad": {
+			InstallsTo: []InstallRule{{
+				Dest:    "../outside",
+				Pattern: "hawp-*.md",
+			}},
+		},
+	}}
+	if _, err := DetectProviders(fc, t.TempDir(), manifest); err == nil {
+		t.Fatal("expected escaping provider detection destination to be rejected")
 	}
 }
 

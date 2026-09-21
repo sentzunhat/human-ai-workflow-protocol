@@ -73,6 +73,31 @@ func writeFiles(dir string, files []*file) error {
 	return nil
 }
 
+func replaceFile(path string, data []byte, mode fs.FileMode) error {
+	dir := filepath.Dir(path)
+	tmp, err := os.CreateTemp(dir, ".hawp-source-layout-*")
+	if err != nil {
+		return err
+	}
+	tmpPath := tmp.Name()
+	defer os.Remove(tmpPath)
+	if err := tmp.Chmod(mode); err != nil {
+		tmp.Close()
+		return err
+	}
+	if _, err := tmp.Write(data); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	if err := rejectSymlinkAncestors(dir, path); err != nil {
+		return err
+	}
+	return os.Rename(tmpPath, path)
+}
+
 // Candidate builds run outside the checkout before the first source mutation.
 // No tests execute here; both ordinary and opt-in test files must compile.
 func verify(files []*file) error {
@@ -144,7 +169,7 @@ func apply(root string, p plan, files []*file) (err error) {
 			}
 			for _, f := range touched {
 				p := filepath.Join(base, f.Source)
-				if e := os.WriteFile(p, f.before, fs.FileMode(f.Mode)); e != nil {
+				if e := replaceFile(p, f.before, fs.FileMode(f.Mode)); e != nil {
 					fmt.Fprintln(os.Stderr, "rollback restore:", e)
 				}
 			}
@@ -176,7 +201,7 @@ func apply(root string, p plan, files []*file) (err error) {
 			}
 		} else {
 			touched = append(touched, f)
-			if err = os.WriteFile(dest, f.after, fs.FileMode(f.Mode)); err != nil {
+			if err = replaceFile(dest, f.after, fs.FileMode(f.Mode)); err != nil {
 				return err
 			}
 		}

@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	appusage "github.com/sentzunhat/hawp/librarian/src/internal/application/usage"
 	domainusage "github.com/sentzunhat/hawp/librarian/src/internal/domain/usage"
 	usageinfra "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/usage"
-	appusage "github.com/sentzunhat/hawp/librarian/src/internal/application/usage"
 )
 
 // seed writes one entry into a temp store so queries return non-empty results.
@@ -21,6 +21,8 @@ func seed(t *testing.T, dbPath string) {
 		t.Fatal(err)
 	}
 }
+
+func service() appusage.Service { return appusage.NewService(usageinfra.Open) }
 
 func TestRecentLog(t *testing.T) {
 	cases := []struct {
@@ -51,7 +53,7 @@ func TestRecentLog(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			entries, err := appusage.RecentLog(tc.dbPath(t), tc.n)
+			entries, err := service().RecentLog(tc.dbPath(t), tc.n)
 			if tc.wantErr {
 				if err == nil {
 					t.Fatal("expected error, got nil")
@@ -93,7 +95,7 @@ func TestGetReport(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			rep, err := appusage.GetReport(tc.dbPath(t))
+			rep, err := service().GetReport(tc.dbPath(t))
 			if tc.wantErr {
 				if err == nil {
 					t.Fatal("expected error, got nil")
@@ -129,7 +131,7 @@ func TestClearLog(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			dbPath := tc.dbPath(t)
-			err := appusage.ClearLog(dbPath)
+			err := service().ClearLog(dbPath)
 			if tc.wantErr {
 				if err == nil {
 					t.Fatal("expected error, got nil")
@@ -140,7 +142,7 @@ func TestClearLog(t *testing.T) {
 				t.Fatalf("unexpected error: %v", err)
 			}
 			// verify store is empty after clear
-			entries, err := appusage.RecentLog(dbPath, 10)
+			entries, err := service().RecentLog(dbPath, 10)
 			if err != nil {
 				t.Fatalf("RecentLog after clear: %v", err)
 			}
@@ -176,7 +178,7 @@ func TestGetTotals(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			totals, err := appusage.GetTotals(tc.dbPath(t))
+			totals, err := service().GetTotals(tc.dbPath(t))
 			if tc.wantErr {
 				if err == nil {
 					t.Fatal("expected error, got nil")

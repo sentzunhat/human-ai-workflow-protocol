@@ -1,14 +1,15 @@
 package kit
 
 import (
-	"github.com/sentzunhat/hawp/librarian/src/internal/platform/cli/kit/normalize"
-	"github.com/sentzunhat/hawp/librarian/src/internal/platform/cli/kit/validate"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/platform/cli/kit/normalize"
+	"github.com/sentzunhat/hawp/librarian/src/internal/platform/cli/kit/validate"
 )
 
 func TestMutationBoundaryArgs(t *testing.T) {

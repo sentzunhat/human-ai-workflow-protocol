@@ -30,16 +30,19 @@ Current status:
 ## CLI ownership
 
 `internal/platform/cli/run.go` routes commands. Feature handlers live in
-`*_commands.go`; `index_corpus.go` owns corpus walking and `help.go` owns help
-text. They remain private members of the same CLI package, using the existing
+subpackages under `internal/platform/cli/`; index corpus walking lives in
+`index/ingest/corpus.go`, and `help.go` owns help text. They use the existing
 application services and infrastructure adapters. Public command tests live
 under `tests/platform/cli`; tests of private helpers remain beside the package.
 
 Search repository contracts live in `internal/domain/search`; SQLite implements
 the `Index` port, and the search application service accepts an injected opener.
-Default adapter wiring remains in the application constructor. Provider ports
-exist for embeddings and LLMs, but their implementations still share domain
-packages; full provider/composition separation is ongoing audit work.
+The search service retains a default adapter constructor as a transitional
+convenience. Usage-log use cases instead accept an injected store opener, with
+CLI and MCP entry points composing the SQLite adapter at the platform edge.
+Provider ports exist for embeddings and LLMs, but their implementations still
+share domain packages; full provider/composition separation is ongoing audit
+work.
 
 Search keeps its query-first syntax: `hawp search "multi-word query" --limit=5`.
 Its standard-library flag parser accepts separate or equals-form values and

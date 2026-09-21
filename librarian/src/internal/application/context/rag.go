@@ -71,7 +71,7 @@ type DefaultRAGPipeline struct {
 //	    LLMBackend:        "ollama",
 //	    LLMModel:          "mistral",
 //	}
-//	pipeline, err := NewDefaultRAGPipeline(config, repoRoot)
+//	pipeline, err := NewDefaultRAGPipeline(config, repoRoot, embedderFactory, llmFactory)
 //	if err != nil {
 //	    log.Fatalf("Failed to create pipeline: %v", err)
 //	}

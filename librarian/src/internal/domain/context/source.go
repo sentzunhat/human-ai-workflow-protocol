@@ -17,10 +17,10 @@ type BacklogParser interface {
 // ContextSource bundles every data operation EnrichKit and EnrichWork need
 // from the environment without leaking infrastructure concerns into domain.
 //
-// A thin application-layer adapter (see application/index/context-source.go)
+// A thin application-layer adapter (currently in application/index/build-service.go)
 // implements this interface by delegating to the real file-system / markdown
 // / repo-root packages.
 type ContextSource struct {
-	FileLister   FileLister
+	FileLister    FileLister
 	BacklogParser BacklogParser
 }

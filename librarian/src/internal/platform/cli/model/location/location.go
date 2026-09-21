@@ -1,8 +1,9 @@
 package location
 
 import (
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	"os"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // Root resolves ~/.hawp/models, matching internal/domain/provision's
@@ -12,5 +13,13 @@ func Root() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filesystem.ResolveHawpHome(home).Models, nil
+	return rootForHome(home)
+}
+
+func rootForHome(home string) (string, error) {
+	models := filesystem.ResolveHawpHome(home).Models
+	if err := filesystem.RejectSymlinksInPath(models); err != nil {
+		return "", err
+	}
+	return models, nil
 }

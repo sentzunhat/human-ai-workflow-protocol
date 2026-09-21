@@ -3,9 +3,10 @@ package validation
 
 import (
 	"fmt"
+	"io/fs"
+
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/identity"
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/model"
-	"io/fs"
 )
 
 // Source supplies filesystem observations without binding validation policy

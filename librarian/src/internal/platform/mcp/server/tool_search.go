@@ -3,15 +3,15 @@ package mcp
 import (
 	"encoding/json"
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	appcontext "github.com/sentzunhat/hawp/librarian/src/internal/application/context"
 	appcontext_layout1 "github.com/sentzunhat/hawp/librarian/src/internal/application/context/dedup"
 	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
 	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
-	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	inframodels "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models"
+	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
 )
 
 const contextRadius = 40 // lines above/below source line for context window
@@ -48,39 +48,50 @@ func searchToolDef() map[string]any {
 func toolSearch(args json.RawMessage, repoRoot string) rpcResponse {
 	var a struct {
 		Query     string `json:"query"`
-		Limit     int    `json:"limit"`
+		Limit     *int   `json:"limit"`
 		Context   bool   `json:"context"`
-		MaxTokens int    `json:"max_tokens"`
+		MaxTokens *int   `json:"max_tokens"`
 	}
 	if err := json.Unmarshal(args, &a); err != nil {
 		return toolErr("invalid args: " + err.Error())
 	}
-	if a.Query == "" {
+	if strings.TrimSpace(a.Query) == "" {
 		return toolErr("query is required")
 	}
-	if a.Limit <= 0 {
-		a.Limit = 5
-	} else if a.Limit > 500 {
+	limit := 5
+	if a.Limit != nil {
+		limit = *a.Limit
+	}
+	if limit <= 0 {
+		return toolErr("limit must be positive")
+	} else if limit > 500 {
 		return toolErr("limit must be 500 or less")
 	}
-	if a.MaxTokens <= 0 {
-		a.MaxTokens = 2000
-	} else if a.MaxTokens > 32000 {
+	maxTokens := 2000
+	if a.MaxTokens != nil {
+		maxTokens = *a.MaxTokens
+	}
+	if maxTokens <= 0 {
+		return toolErr("max_tokens must be positive")
+	} else if maxTokens > 32000 {
 		return toolErr("max_tokens must be 32000 or less")
 	}
 
 	if a.Context {
-		return toolSearchContext(a.Query, a.Limit, a.MaxTokens, repoRoot)
+		return toolSearchContext(a.Query, limit, maxTokens, repoRoot)
 	}
 
-	dbPath := filepath.Join(repoRoot, ".hawp", "db", "index.sqlite")
+	dbPath, err := filesystem.ResolveSafeSearchIndexPath(repoRoot)
+	if err != nil {
+		return toolErr("search index path is unsafe: " + err.Error())
+	}
 	db, err := sqlite.Open(dbPath)
 	if err != nil {
 		return toolErr(fmt.Sprintf("index not found at %s; run `hawp search index` first", dbPath))
 	}
 	defer db.Close()
 
-	rows, err := db.QueryChunksLexical(a.Query, a.Limit*3)
+	rows, err := db.QueryChunksLexical(a.Query, limit*3)
 	if err != nil {
 		return toolErr("search failed: " + err.Error())
 	}
@@ -90,9 +101,9 @@ func toolSearch(args json.RawMessage, repoRoot string) rpcResponse {
 
 	hasVectors, _ := db.HasVectors()
 	if hasVectors {
-		rows = appsearch.HybridRankWithEmbedder(rows, a.Query, db, a.Limit, 0, inframodels.NewEmbedder)
-	} else if len(rows) > a.Limit {
-		rows = rows[:a.Limit]
+		rows = appsearch.HybridRankWithEmbedder(rows, a.Query, db, limit, 0, inframodels.NewEmbedder)
+	} else if len(rows) > limit {
+		rows = rows[:limit]
 	}
 
 	results := make([]SearchResult, 0, len(rows))

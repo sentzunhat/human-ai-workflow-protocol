@@ -19,10 +19,10 @@ type Source struct {
 // ActiveSource supplies the filesystem operations needed by active-row cleanup.
 type ActiveSource struct {
 	ScanSource
-	ToRepoRelative func(repoRoot, absolutePath string) string
-	EvalSymlinks   func(path string) (string, error)
-	Lstat          func(path string) (fs.FileInfo, error)
-	WriteFile      func(path string, data []byte, perm fs.FileMode) error
+	ToRepoRelative  func(repoRoot, absolutePath string) string
+	EvalSymlinks    func(path string) (string, error)
+	Lstat           func(path string) (fs.FileInfo, error)
+	AtomicWriteFile func(path string, data []byte, perm fs.FileMode) error
 }
 
 const legacyClosedCutoff = "2026-05-10"

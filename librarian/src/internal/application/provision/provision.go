@@ -62,12 +62,21 @@ func Run(fetcher download.Fetcher, home string, registry Registry) Result {
 	result := Result{Home: hawpHome}
 
 	for _, dir := range hawpHome.Dirs() {
+		if err := filesystem.RejectSymlinksInPath(dir); err != nil {
+			result.Steps = append(result.Steps, Step{Name: "layout:" + dir, Status: "failed", Err: err})
+			return result
+		}
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			result.Steps = append(result.Steps, Step{Name: "layout:" + dir, Status: "failed", Err: err})
 			return result
 		}
 	}
 
+	manifestPath := filepath.Join(hawpHome.Root, "manifest.json")
+	if err := filesystem.RejectSymlinksInPath(manifestPath); err != nil {
+		result.Steps = append(result.Steps, Step{Name: "manifest", Status: "failed", Err: err})
+		return result
+	}
 	manifest, err := domainprovision.LoadManifest(hawpHome.Root, os.ReadFile)
 	if err != nil {
 		result.Steps = append(result.Steps, Step{Name: "manifest", Status: "failed", Err: err})
@@ -87,7 +96,9 @@ func Run(fetcher download.Fetcher, home string, registry Registry) Result {
 	manifest.RuntimeVersion = registry.RuntimeVersion
 	manifest.ModelName = registry.ModelName
 	manifest.ModelVersion = registry.ModelVersion
-	if err := manifest.Save(hawpHome.Root, os.WriteFile); err != nil {
+	if err := manifest.Save(hawpHome.Root, func(path string, data []byte, perm os.FileMode) error {
+		return filesystem.AtomicWriteFile(hawpHome.Root, path, data, perm)
+	}); err != nil {
 		result.Steps = append(result.Steps, Step{Name: "manifest", Status: "failed", Err: err})
 	}
 

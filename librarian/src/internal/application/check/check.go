@@ -11,6 +11,7 @@ import (
 	applinks "github.com/sentzunhat/hawp/librarian/src/internal/application/links"
 	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work/validation"
 	domainwork "github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // Run executes all three validations against repoRoot and returns the exit
@@ -22,24 +23,35 @@ func Run(out, errOut io.Writer, repoRoot string) int {
 	failed := 0
 
 	fmt.Fprintln(out, "[1/3] kit validate")
-	kitResult := appkit.Validate(filepath.Join(repoRoot, ".hawp", "kit"))
-	if appkit.Render(out, errOut, kitResult) != 0 {
+	kitPath := filepath.Join(repoRoot, ".hawp", "kit")
+	if err := filesystem.RejectSymlinksInTree(repoRoot, kitPath); err != nil {
+		fmt.Fprintf(errOut, "kit validate error: unsafe validation path %s: %v\n", kitPath, err)
 		failed++
+	} else {
+		kitResult := appkit.Validate(kitPath)
+		if appkit.Render(out, errOut, kitResult) != 0 {
+			failed++
+		}
 	}
 	fmt.Fprintln(out)
 
 	fmt.Fprintln(out, "[2/3] work validate")
 	workDir := filepath.Join(repoRoot, ".hawp", "work")
-	report, err := appwork.Validate(workDir)
-	if err != nil {
-		fmt.Fprintf(errOut, "work validate error: %v\n", err)
+	if err := filesystem.RejectSymlinksInTree(repoRoot, workDir); err != nil {
+		fmt.Fprintf(errOut, "work validate error: unsafe validation path %s: %v\n", workDir, err)
 		failed++
 	} else {
-		fmt.Fprintf(out, "  Result: VALIDATION %s (%d issues, %d warnings)\n",
-			report.Overall, report.Failed, report.Warnings)
-		if report.Overall == domainwork.StatusFail {
-			fmt.Fprintln(errOut, "  Run `hawp work validate` for the detailed report.")
+		report, err := appwork.Validate(workDir)
+		if err != nil {
+			fmt.Fprintf(errOut, "work validate error: %v\n", err)
 			failed++
+		} else {
+			fmt.Fprintf(out, "  Result: VALIDATION %s (%d issues, %d warnings)\n",
+				report.Overall, report.Failed, report.Warnings)
+			if report.Overall == domainwork.StatusFail {
+				fmt.Fprintln(errOut, "  Run `hawp work validate` for the detailed report.")
+				failed++
+			}
 		}
 	}
 	fmt.Fprintln(out)

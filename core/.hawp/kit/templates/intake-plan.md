@@ -126,15 +126,15 @@ _What was actually implemented. Include scope changes, trade-offs made during ex
 **Direct evidence required for each claim.** Evidence can be:
 
 - Inline if <50 words (e.g., "file confirmed at `path/to/file`")
-- Linked to `../evidence/YYYY/MM/DD/<ID>-<claim>.md` if larger (screenshots, output logs, test results)
+- Linked to `.hawp/work/evidence/YYYY/MM/DD/<ID>/evidence.md` if larger (screenshots, output logs, test results)
 - Marked explicitly if unproven: "NOT YET VERIFIED — requires live environment"
 - Path-sensitive claims must cite exact repo-relative file paths from repository root
 
 Format:
 
 ```
-- [x] Claim 1: **Evidence:** inline or link to ../evidence/YYYY/MM/DD/<ID>-claim1.md
-- [x] Claim 2: **Evidence:** inline or link to ../evidence/YYYY/MM/DD/<ID>-claim2.md
+- [x] Claim 1: **Evidence:** inline or link to .hawp/work/evidence/YYYY/MM/DD/<ID>/evidence.md#claim-1
+- [x] Claim 2: **Evidence:** inline or link to .hawp/work/evidence/YYYY/MM/DD/<ID>/evidence.md#claim-2
 - [ ] Claim 3 — NOT YET VERIFIED (reason)
 ```
 
@@ -146,7 +146,7 @@ Format:
 
 - [ ] Outcome section filled (what was actually implemented)
 - [ ] Verification section filled (all checks listed, each with direct evidence or "unproven" tag)
-- [ ] All evidence files referenced exist in `../evidence/YYYY/MM/DD/` or are noted as inline
+- [ ] All evidence files referenced exist in `.hawp/work/evidence/YYYY/MM/DD/<ID>/` or are noted as inline
 - [ ] Plan file will be moved to `../closed/YYYY/MM/DD/<ID>/plan.md`
 - [ ] BACKLOG.md row moved from Active to Recently Closed (or marked done)
 - [ ] Status report written (optional: only if non-trivial OR if something remains unproven OR if a decision/pattern emerged)

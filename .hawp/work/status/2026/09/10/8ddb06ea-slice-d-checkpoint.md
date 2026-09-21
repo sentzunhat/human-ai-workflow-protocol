@@ -1,7 +1,7 @@
 # Checkpoint: 8ddb06ea Slice D Complete
 
-**Date:** 2026-09-10  
-**Branch:** `feature/v0.0.24-work-folder-normalization`  
+**Date:** 2026-09-10
+**Branch:** `feature/v0.0.24-work-folder-normalization`
 **UUID:** `8ddb06ea-0d10-454a-8e7e-96ab2e7eb7a8`
 
 ## Current Status
@@ -38,7 +38,7 @@ Slices B, C, D all implemented and verified against `go build ./...`. Slices E (
 
 ### Slice E — domain/kit/normalize.go (next)
 
-**File:** `librarian/src/internal/domain/kit/normalize.go`  
+**File:** `librarian/src/internal/domain/kit/normalize.go`
 **Operations to extract:**
 
 - Line 81: `os.ReadFile(file)` in `PlanFileRenames()` — inject Reader
@@ -54,7 +54,7 @@ Slices B, C, D all implemented and verified against `go build ./...`. Slices E (
 
 ### Slice F — domain/kitsync/apply.go (largest)
 
-**File:** `librarian/src/internal/domain/kitsync/apply.go`  
+**File:** `librarian/src/internal/domain/kitsync/apply.go`
 **Note:** Already has a `FileCopier` interface defined in `filecopier.go`. All filesystem ops use `fc.*` methods. The question is whether the FileCopier implementation currently uses os.\* directly and needs to be extracted, or if this slice is already effectively done.
 
 **Current state:** Looking at apply.go, all operations (Stat, MkdirAll, ReadDir, Open, CreateTemp, Rename, Remove) go through `fc` parameter — the FileCopier interface. This appears to already follow the injection pattern. Verify that `infrastructure/repositories/kitsync/filecopy.go` exists and implements this interface with os.\* calls.

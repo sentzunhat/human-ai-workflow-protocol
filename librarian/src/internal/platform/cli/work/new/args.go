@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"strings"
+
+	domainwork "github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
 )
 
 var validItemTypes = []string{
@@ -37,8 +39,8 @@ func parseNewArgs(args []string) (newOptions, error) {
 	if flags.NArg() != 0 {
 		return newOptions{}, fmt.Errorf("unexpected work new argument %q", flags.Arg(0))
 	}
-	if strings.TrimSpace(opts.title) == "" {
-		return newOptions{}, fmt.Errorf("title must not be empty")
+	if err := domainwork.ValidateTitle(opts.title); err != nil {
+		return newOptions{}, err
 	}
 
 	valid := false

@@ -172,6 +172,21 @@ func TestGetEmbedModelPath(t *testing.T) {
 	}
 }
 
+func TestPrepareModelDirectoryRejectsSymlinkedAncestor(t *testing.T) {
+	parent := t.TempDir()
+	modelsTarget := filepath.Join(parent, "models")
+	if err := os.MkdirAll(modelsTarget, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	link := filepath.Join(t.TempDir(), "linked-model-parent")
+	if err := os.Symlink(parent, link); err != nil {
+		t.Skipf("symlink capability unavailable (enable Windows Developer Mode or SeCreateSymbolicLinkPrivilege): %v", err)
+	}
+	if err := prepareModelDirectory(filepath.Join(link, "models", "embedding")); err == nil {
+		t.Fatal("prepareModelDirectory accepted a symlinked ancestor")
+	}
+}
+
 func TestEmbedSingleText(t *testing.T) {
 	skipWithoutModel(t, "all-MiniLM-L6-v2")
 	embedder, err := NewONNXEmbedder("all-MiniLM-L6-v2")
