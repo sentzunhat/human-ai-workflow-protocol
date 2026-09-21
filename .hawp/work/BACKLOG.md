@@ -41,6 +41,13 @@ elicitation/guidance work from `c8d9e1cb`.
 | `c8d9e1cb` | feature | Interactive MCP intake refinement with structured results (`v0.0.24` subset, remainder `v0.0.25`) | `plan-ready` | Codex | [plan](active/c8d9e1cb/plan.md) | 2026-09-13 |
 | `2eea565c` | improvement | MCP capability catalog for HAWP resources and prompts (`v0.0.25`) | `plan-ready` | Codex | [plan](active/2eea565c/plan.md) | 2026-09-13 |
 | `429e075e` | improvement | Remote MCP transport and authorization readiness audit (`v0.0.25`) | `plan-ready` | Codex | [plan](active/429e075e/plan.md) | 2026-09-13 |
+| `0c8d6391` | bug | Constrain project search index paths to the repository root | `plan-ready` | Codex | [plan](active/0c8d6391/plan.md) | 2026-09-20 |
+| `225708ae` | bug | Reject external Markdown symlinks during corpus indexing and export | `plan-ready` | Codex | [plan](active/225708ae/plan.md) | 2026-09-20 |
+| `cd4691d7` | bug | Reject symlink ancestors in kitsync repository writes | `plan-ready` | Codex | [plan](active/cd4691d7/plan.md) | 2026-09-20 |
+| `a1014eef` | bug | Reject path traversal in install/update backlog reconciliation | `plan-ready` | Claude | [plan](active/a1014eef/plan.md) | 2026-09-20 |
+| `a406816d` | bug | Reject symlinked `.hawp` root in install/update shell scripts | `plan-ready` | Claude | [plan](active/a406816d/plan.md) | 2026-09-20 |
+| `be327af5` | bug | Reject symlinked `.gitignore` in MCP provider configuration | `plan-ready` | Claude | [plan](active/be327af5/plan.md) | 2026-09-20 |
+| `984f038a` | bug | Reject Markdown symlinks in `links clean --apply` | `plan-ready` | Claude | [plan](active/984f038a/plan.md) | 2026-09-20 |
 
 ## Blocked / Parked
 
@@ -65,6 +72,9 @@ Limited to the last 5–10 items.
 
 | ID                            | Type        | Title                                                                   | Closed     | Detail                                                        |
 | ----------------------------- | ----------- | ----------------------------------------------------------------------- | ---------- | ------------------------------------------------------------- |
+| `887ac089`                    | bug         | Fix model pull trailing `--onnx-file` parsing                          | 2026-09-20 | [plan](closed/2026/09/20/887ac089/plan.md)                   |
+| `c5a48d9a`                    | bug         | Harden tar kit-bundle extraction against path traversal                 | 2026-09-20 | [plan](closed/2026/09/20/c5a48d9a/plan.md)                   |
+| `b30f7a9b`                    | bug         | Validate kitsync manifest paths stay within repository and bundle roots  | 2026-09-20 | [plan](closed/2026/09/20/b30f7a9b/plan.md)                   |
 | `24edc80c`                    | fix         | Wrap SQLite "no such table" as IndexNotFoundError in search infra       | 2026-09-16 | [plan](closed/2026/09/16/24edc80c/plan.md)                    |
 | `a818b914`                    | fix         | Fix non-atomic writes in ApplyDuplicateLinks plan files                 | 2026-09-16 | [plan](closed/2026/09/16/a818b914/plan.md)                    |
 | `f6f2818f`                    | fix         | Document TOCTOU in writeMCPJSON between Lstat and WriteFile             | 2026-09-16 | [plan](closed/2026/09/16/f6f2818f/plan.md)                    |

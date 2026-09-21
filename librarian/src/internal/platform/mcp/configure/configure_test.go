@@ -108,3 +108,22 @@ func TestConfigureMigratesCustomCodexPolicy(t *testing.T) {
 		t.Fatal("changed permissions", err)
 	}
 }
+
+func TestEnsureGitignoreEntryRejectsSymlink(t *testing.T) {
+	root := t.TempDir()
+	external := filepath.Join(t.TempDir(), "external-gitignore")
+	if err := os.WriteFile(external, []byte("keep\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(external, filepath.Join(root, ".gitignore")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	if err := ensureGitignoreEntry(root, ".mcp.json"); err == nil {
+		t.Fatal("expected symlinked .gitignore to be rejected")
+	}
+	content, err := os.ReadFile(external)
+	if err != nil || string(content) != "keep\n" {
+		t.Fatalf("external gitignore was modified: %v %q", err, content)
+	}
+}

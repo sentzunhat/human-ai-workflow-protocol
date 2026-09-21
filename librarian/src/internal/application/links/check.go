@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 )
@@ -26,7 +27,7 @@ var roots = []string{".hawp", "docs", "README.md"}
 // live tree. They are reference snapshots, not live docs, so link checking
 // is skipped there.
 var skipDirs = map[string]struct{}{
-	".hawp/.spaces":      {},
+	".hawp/.spaces":       {},
 	".hawp/work/closed":   {},
 	".hawp/work/evidence": {},
 	".hawp/work/notes":    {},
@@ -143,7 +144,7 @@ func collectAll(repoRoot, dir string) []string {
 		full := filepath.Join(dir, entry.Name())
 		if entry.IsDir() {
 			files = append(files, collectAll(repoRoot, full)...)
-		} else if strings.EqualFold(filepath.Ext(entry.Name()), ".md") {
+		} else if entry.Type().IsRegular() && strings.EqualFold(filepath.Ext(entry.Name()), ".md") {
 			files = append(files, full)
 		}
 	}
@@ -262,6 +263,14 @@ func Clean(repoRoot string, apply bool) (CleanResult, error) {
 
 	result := CleanResult{FilesChecked: checked.FilesChecked, Applied: apply}
 	for file, details := range byFile {
+		if err := filesystem.RejectSymlinkAncestors(repoRoot, file); err != nil {
+			return result, err
+		}
+		if info, err := os.Lstat(file); err != nil {
+			return result, fmt.Errorf("stat %s: %w", file, err)
+		} else if !info.Mode().IsRegular() {
+			return result, fmt.Errorf("refusing to write non-regular Markdown file %s", file)
+		}
 		raw, err := os.ReadFile(file)
 		if err != nil {
 			return result, fmt.Errorf("read %s: %w", file, err)

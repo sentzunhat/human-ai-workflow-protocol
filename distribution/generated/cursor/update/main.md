@@ -276,6 +276,16 @@ else
   echo "Source mode: remote archive"
 fi
 
+reject_hawp_symlinks() {
+  [ -d ".hawp" ] || return 0
+  link_path="$(find .hawp -type l -print -quit 2>/dev/null || true)"
+  if [ -n "$link_path" ]; then
+    echo "Error: refusing to follow symlink inside .hawp: $link_path"
+    exit 1
+  fi
+}
+reject_hawp_symlinks
+
 if [ ! -d ".hawp" ]; then
   echo "Preflight: .hawp/ not found in this repository."
   echo "Run the matching install guide first, then rerun this update guide."
@@ -339,6 +349,12 @@ reconcile_closed_plans_from_backlog() {
     closed_path="${closed_path%%#*}"
 
     if [ -n "$closed_path" ]; then
+      case "/$closed_path/" in
+        */../*|*/./*)
+          echo "  skipped unsafe closed-plan path: $link_path"
+          continue
+          ;;
+      esac
       plan_name="$(basename "$closed_path")"
       src=".hawp/work/active/$plan_name"
       dest=".hawp/work/$closed_path"

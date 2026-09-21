@@ -12,3 +12,20 @@ func TestExtractLinksAndPathRules(t *testing.T) {
 		t.Fatal("Markdown link rules returned unexpected results")
 	}
 }
+
+func TestBlankFencesPreservesByteOffsetsForUnicodeContent(t *testing.T) {
+	content := "```\n日本語\n```\n[live](plan.md)"
+	masked := BlankFences(content)
+	links := ExtractLinks(masked)
+	if len(links) != 1 {
+		t.Fatalf("ExtractLinks() = %#v, want one link", links)
+	}
+
+	wantOffset := len("```\n日本語\n```\n")
+	if links[0].Offset != wantOffset {
+		t.Fatalf("link offset = %d, want %d", links[0].Offset, wantOffset)
+	}
+	if got := content[links[0].Offset:]; got != "[live](plan.md)" {
+		t.Fatalf("original content at link offset = %q, want original link", got)
+	}
+}

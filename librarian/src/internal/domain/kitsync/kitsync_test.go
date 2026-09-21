@@ -6,10 +6,16 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // testFileCopier implements FileCopier using real os calls for tests.
 type testFileCopier struct{}
+
+func (testFileCopier) RejectSymlinkAncestors(root, target string) error {
+	return filesystem.RejectSymlinkAncestors(root, target)
+}
 
 func (testFileCopier) MkdirAll(dir string) error { return os.MkdirAll(dir, 0o755) }
 func (testFileCopier) ReadDir(dir string) ([]fs.DirEntry, error) {
@@ -169,6 +175,25 @@ func TestSyncKitCopiesWholeTree(t *testing.T) {
 	content, err := os.ReadFile(filepath.Join(repoRoot, ".hawp", "kit", "usage", "init.md"))
 	if err != nil || string(content) != "# init\n" {
 		t.Fatalf("kit file not synced correctly: %v %q", err, content)
+	}
+}
+
+func TestSyncKitRejectsSymlinkedDestinationAncestor(t *testing.T) {
+	bundleKit := writeTree(t, map[string]string{"start-here.md": "# start\n"})
+	repoRoot := t.TempDir()
+	external := t.TempDir()
+	if err := os.Mkdir(filepath.Join(repoRoot, ".hawp"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(external, filepath.Join(repoRoot, ".hawp", "kit")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	if _, err := SyncKit(fc, bundleKit, repoRoot); err == nil {
+		t.Fatal("expected symlinked kit destination to be rejected")
+	}
+	if _, err := os.Stat(filepath.Join(external, "start-here.md")); !os.IsNotExist(err) {
+		t.Fatalf("external destination was modified: %v", err)
 	}
 }
 

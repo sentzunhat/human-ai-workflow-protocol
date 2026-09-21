@@ -7,6 +7,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // FileCopier handles low-level filesystem operations used by the kitsync engine.
@@ -14,6 +16,10 @@ type FileCopier struct{}
 
 // NewFileCopier creates a new FileCopier backed by os/io calls.
 func NewFileCopier() *FileCopier { return &FileCopier{} }
+
+func (f *FileCopier) RejectSymlinkAncestors(root, target string) error {
+	return filesystem.RejectSymlinkAncestors(root, target)
+}
 
 // MkdirAll calls os.MkdirAll with mode 0o755.
 func (f *FileCopier) MkdirAll(dir string) error { return os.MkdirAll(dir, 0o755) }

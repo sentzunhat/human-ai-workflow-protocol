@@ -1,7 +1,6 @@
 package ingest
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -56,7 +55,7 @@ func TestWorkCorpusLifecycle(t *testing.T) {
 	}
 }
 
-func TestCorpusReadFailuresAbort(t *testing.T) {
+func TestCorpusWalkersSkipBrokenSymlinks(t *testing.T) {
 	for _, kind := range []string{"kit", "work", "custom"} {
 		t.Run(kind, func(t *testing.T) {
 			dir := t.TempDir()
@@ -73,12 +72,43 @@ func TestCorpusReadFailuresAbort(t *testing.T) {
 			case "custom":
 				err = walkCustomPath(dir, "docs", corpus)
 			}
-			if !errors.Is(err, os.ErrNotExist) {
-				t.Fatalf("expected preserved read error, got %v", err)
+			if err != nil {
+				t.Fatalf("expected broken symlink to be skipped, got %v", err)
 			}
 			if len(corpus.Documents) != 0 {
 				t.Fatal("unreadable document indexed")
 			}
 		})
+	}
+}
+
+func TestBuildCorpusRejectsPathsOutsideRepository(t *testing.T) {
+	root := t.TempDir()
+	for _, configuredPath := range []string{"../outside.md", "/tmp/outside.md", "nested/../../outside.md"} {
+		t.Run(configuredPath, func(t *testing.T) {
+			if _, err := buildCorpusFromRepo(root, []string{configuredPath}); err == nil {
+				t.Fatalf("buildCorpusFromRepo(%q) unexpectedly succeeded", configuredPath)
+			}
+		})
+	}
+}
+
+func TestCorpusWalkersSkipSymlinkedMarkdown(t *testing.T) {
+	root := t.TempDir()
+	outside := filepath.Join(t.TempDir(), "outside.md")
+	if err := os.WriteFile(outside, []byte("external"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	link := filepath.Join(root, "linked.md")
+	if err := os.Symlink(outside, link); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	corpus, err := buildCorpusFromRepo(root, []string{"."})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(corpus.Documents) != 0 {
+		t.Fatalf("symlinked document indexed: %+v", corpus.Documents)
 	}
 }

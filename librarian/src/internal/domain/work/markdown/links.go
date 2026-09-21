@@ -21,9 +21,9 @@ var (
 
 func BlankFences(content string) string {
 	return fenceRe.ReplaceAllStringFunc(content, func(m string) string {
-		out := []rune(m)
-		for i, r := range out {
-			if r != '\n' {
+		out := []byte(m)
+		for i, b := range out {
+			if b != '\n' {
 				out[i] = ' '
 			}
 		}

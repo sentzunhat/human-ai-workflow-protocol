@@ -174,6 +174,16 @@ func writeProviderConfigs(repoRoot string, providers []string) error {
 // comments and unrelated rules are preserved.
 func ensureGitignoreEntry(repoRoot, entry string) error {
 	path := filepath.Join(repoRoot, ".gitignore")
+	if err := filesystem.RejectSymlinkAncestors(repoRoot, path); err != nil {
+		return err
+	}
+	if info, err := os.Lstat(path); err == nil {
+		if !info.Mode().IsRegular() {
+			return fmt.Errorf(".gitignore is not a regular file; refusing to write")
+		}
+	} else if !os.IsNotExist(err) {
+		return err
+	}
 	data, err := os.ReadFile(path)
 	if os.IsNotExist(err) {
 		data = nil

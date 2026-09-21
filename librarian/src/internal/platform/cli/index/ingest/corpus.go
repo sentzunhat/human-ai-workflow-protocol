@@ -16,7 +16,10 @@ func buildCorpusFromRepo(repoRoot string, paths []string) (*appindex.EnrichedCor
 	corpus := &appindex.EnrichedCorpus{}
 
 	for _, p := range paths {
-		abs := filepath.Join(repoRoot, filepath.FromSlash(p))
+		abs, err := resolveRepoPath(repoRoot, p)
+		if err != nil {
+			return nil, err
+		}
 		switch filepath.ToSlash(p) {
 		case ".hawp/kit":
 			if err := walkKitFiles(abs, corpus); err != nil {
@@ -36,9 +39,26 @@ func buildCorpusFromRepo(repoRoot string, paths []string) (*appindex.EnrichedCor
 	return corpus, nil
 }
 
+func resolveRepoPath(repoRoot, configuredPath string) (string, error) {
+	path := filepath.FromSlash(configuredPath)
+	if path == "" || filepath.IsAbs(path) {
+		return "", fmt.Errorf("configured index path %q must be a non-empty relative path", configuredPath)
+	}
+
+	abs := filepath.Join(repoRoot, path)
+	rel, err := filepath.Rel(repoRoot, abs)
+	if err != nil {
+		return "", fmt.Errorf("resolve configured index path %q: %w", configuredPath, err)
+	}
+	if rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("configured index path %q escapes repository root", configuredPath)
+	}
+	return abs, nil
+}
+
 func walkKitFiles(kitPath string, corpus *appindex.EnrichedCorpus) error {
 	return filepath.Walk(kitPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() || filepath.Ext(path) != ".md" {
+		if err != nil || info.IsDir() || !info.Mode().IsRegular() || filepath.Ext(path) != ".md" {
 			return err
 		}
 
@@ -65,7 +85,7 @@ func walkKitFiles(kitPath string, corpus *appindex.EnrichedCorpus) error {
 
 func walkWorkFiles(workPath string, corpus *appindex.EnrichedCorpus) error {
 	return filepath.Walk(workPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil || info.IsDir() || filepath.Ext(path) != ".md" {
+		if err != nil || info.IsDir() || !info.Mode().IsRegular() || filepath.Ext(path) != ".md" {
 			return err
 		}
 
@@ -111,7 +131,7 @@ func walkWorkFiles(workPath string, corpus *appindex.EnrichedCorpus) error {
 // walkCustomPath walks a user-configured path (file or directory) and adds any
 // .md files to the corpus under the "custom" category.
 func walkCustomPath(abs, configuredPath string, corpus *appindex.EnrichedCorpus) error {
-	info, err := os.Stat(abs)
+	info, err := os.Lstat(abs)
 	if os.IsNotExist(err) {
 		fmt.Printf("warning: configured index path not found, skipping: %s\n", configuredPath)
 		return nil
@@ -122,7 +142,7 @@ func walkCustomPath(abs, configuredPath string, corpus *appindex.EnrichedCorpus)
 
 	if !info.IsDir() {
 		// Single file — index it directly if it's a .md file.
-		if filepath.Ext(abs) != ".md" {
+		if !info.Mode().IsRegular() || filepath.Ext(abs) != ".md" {
 			return nil
 		}
 		content, err := os.ReadFile(abs)
@@ -141,7 +161,7 @@ func walkCustomPath(abs, configuredPath string, corpus *appindex.EnrichedCorpus)
 	}
 
 	return filepath.Walk(abs, func(path string, fi os.FileInfo, err error) error {
-		if err != nil || fi.IsDir() || filepath.Ext(path) != ".md" {
+		if err != nil || fi.IsDir() || !fi.Mode().IsRegular() || filepath.Ext(path) != ".md" {
 			return err
 		}
 		content, err := os.ReadFile(path)

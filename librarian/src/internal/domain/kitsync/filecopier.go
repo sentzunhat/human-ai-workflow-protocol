@@ -10,6 +10,8 @@ import (
 // infrastructure/repositories/kitsync/filecopy.go supplies the concrete
 // implementation and its test double.
 type FileCopier interface {
+	// RejectSymlinkAncestors rejects symlinked components from root through target.
+	RejectSymlinkAncestors(root, target string) error
 	// MkdirAll creates a directory including parents (mode 0o755).
 	MkdirAll(dir string) error
 	// ReadDir lists directory entries.
