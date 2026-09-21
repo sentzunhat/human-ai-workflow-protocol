@@ -17,12 +17,6 @@ func parseEmbedArgs(args []string) (embedOptions, error) {
 	var texts []string
 	opts := embedOptions{}
 
-	flags := flag.NewFlagSet("embed", flag.ContinueOnError)
-	flags.SetOutput(io.Discard)
-	flags.StringVar(&opts.modelRepo, "model", "", "Hugging Face model repo (org/repo)")
-	flags.StringVar(&opts.onnxFile, "onnx-file", "", "path to ONNX file in repo")
-	flags.Bool("no-update-check", false, "suppress update notice")
-
 	// Parse each option with its value, allowing text between options.
 	for len(args) > 0 {
 		if args[0] == "--" {
@@ -36,13 +30,18 @@ func parseEmbedArgs(args []string) (embedOptions, error) {
 		}
 		count := 1
 		name, _, hasValue := strings.Cut(strings.TrimLeft(args[0], "-"), "=")
-		if option := flags.Lookup(name); option != nil && !hasValue {
+		iter := flag.NewFlagSet("embed", flag.ContinueOnError)
+		iter.SetOutput(io.Discard)
+		iter.StringVar(&opts.modelRepo, "model", opts.modelRepo, "Hugging Face model repo (org/repo)")
+		iter.StringVar(&opts.onnxFile, "onnx-file", opts.onnxFile, "path to ONNX file in repo")
+		iter.Bool("no-update-check", false, "suppress update notice")
+		if option := iter.Lookup(name); option != nil && !hasValue {
 			boolean, ok := option.Value.(interface{ IsBoolFlag() bool })
 			if (!ok || !boolean.IsBoolFlag()) && len(args) > 1 {
 				count = 2
 			}
 		}
-		if err := flags.Parse(args[:count]); err != nil {
+		if err := iter.Parse(args[:count]); err != nil {
 			return embedOptions{}, fmt.Errorf("embed arguments: %w", err)
 		}
 		args = args[count:]

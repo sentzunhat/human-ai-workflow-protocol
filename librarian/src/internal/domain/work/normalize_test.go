@@ -4,26 +4,30 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // defaultWorkSource for domain/work tests.
 var defaultWorkSource = &WorkSource{
-	Exists:         fileExists,
-	ToRepoRelative: func(_, p string) string { return p },
-	CollectFiles:   collectFiles,
-	ReadDir:        os.ReadDir,
-	ReadFile:       os.ReadFile,
-	WriteFile:      os.WriteFile,
-	MkdirAll:       os.MkdirAll,
-	MkdirTemp:      os.MkdirTemp,
-	Rename:         os.Rename,
-	Remove:         os.Remove,
-	RemoveAll:      os.RemoveAll,
-	Stat:           os.Stat,
-	Lstat:          os.Lstat,
-	EvalSymlinks:   filepath.EvalSymlinks,
+	Exists:                 fileExists,
+	ToRepoRelative:         func(_, p string) string { return p },
+	CollectFiles:           collectFiles,
+	ReadDir:                os.ReadDir,
+	ReadFile:               os.ReadFile,
+	WriteFile:              os.WriteFile,
+	MkdirAll:               os.MkdirAll,
+	MkdirTemp:              os.MkdirTemp,
+	Rename:                 os.Rename,
+	Remove:                 os.Remove,
+	RemoveAll:              os.RemoveAll,
+	Stat:                   os.Stat,
+	Lstat:                  os.Lstat,
+	EvalSymlinks:           filepath.EvalSymlinks,
+	RejectSymlinkAncestors: filesystem.RejectSymlinkAncestors,
 }
 
 // collectFiles returns all regular files under dir, recursively.
@@ -329,6 +333,56 @@ func TestApplyClosedRecordNormalization(t *testing.T) {
 	}
 	if len(again.ChangedFiles) != 0 {
 		t.Errorf("second apply changed files: %v", again.ChangedFiles)
+	}
+}
+
+func TestApplyClosedRecordNormalizationRejectsSymlinkedRecord(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink permissions are not reliable on Windows")
+	}
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/closed/2026/07/01/TASK-020.md": "# closed record without sections\n",
+	})
+	path := filepath.Join(root, ".hawp/work/closed/2026/07/01/TASK-020.md")
+	outside := filepath.Join(root, "outside.md")
+	if err := os.WriteFile(outside, []byte("# outside\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(path); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, path); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	if _, err := defaultWorkSource.ApplyClosedRecordNormalization(root); err == nil {
+		t.Fatal("expected symlinked closed record to be rejected")
+	}
+	content, err := os.ReadFile(outside)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(content) != "# outside\n" {
+		t.Fatalf("outside record was changed: %q", content)
+	}
+}
+
+func TestApplyWorkItemFolderMigrationRejectsSymlinkedScope(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink permissions are not reliable on Windows")
+	}
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/BACKLOG.md": cleanBacklogHeader + backlogFooter,
+	})
+	outside := filepath.Join(root, "outside-active")
+	if err := os.Mkdir(outside, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	active := filepath.Join(root, ".hawp/work/active")
+	if err := os.Symlink(outside, active); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	if _, err := defaultWorkSource.ApplyWorkItemFolderMigration(root); err == nil {
+		t.Fatal("expected symlinked active root to be rejected")
 	}
 }
 

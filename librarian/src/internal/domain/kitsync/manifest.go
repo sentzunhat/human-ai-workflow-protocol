@@ -38,6 +38,7 @@ type Manifest struct {
 //   - "refresh": always overwrite from the provider pack
 //   - "seed-if-missing": write only when the destination is absent
 //   - "skip": never touch the destination on update
+//
 // Missing Update defaults to "refresh" for ordinary synced content.
 func (r InstallRule) UpdateMode() string {
 	switch r.Update {

@@ -3,10 +3,11 @@ package searchembed
 import (
 	"context"
 	"fmt"
-	"path/filepath"
+	"os"
 
 	indexapp "github.com/sentzunhat/hawp/librarian/src/internal/application/index"
 	"github.com/sentzunhat/hawp/librarian/src/internal/bootstrap"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
 )
@@ -23,13 +24,22 @@ func Run(args []string, cwd string) error {
 		return nil
 	}
 
-	dbPath := filepath.Join(root, ".hawp", "db", "index.sqlite")
+	dbPath, err := filesystem.ResolveSafeSearchIndexPath(root)
+	if err != nil {
+		return err
+	}
 
-	// Check if DB exists
+	if _, err := os.Stat(dbPath); err != nil {
+		if os.IsNotExist(err) {
+			fmt.Printf("Index not found at %s. Run `hawp search index` first.\n", dbPath)
+			return nil
+		}
+		return fmt.Errorf("check search index %s: %w", dbPath, err)
+	}
+
 	db, err := sqlite.Open(dbPath)
 	if err != nil {
-		fmt.Printf("Index not found at %s. Run `hawp search index` first.\n", dbPath)
-		return nil
+		return fmt.Errorf("open search index %s: %w", dbPath, err)
 	}
 
 	// Check how many chunks need embedding

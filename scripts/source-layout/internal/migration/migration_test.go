@@ -222,6 +222,17 @@ func TestArtifactCannotWriteSourceOrFollowSymlink(t *testing.T) {
 	if err := writeArtifact(root, link, []byte("bad")); err == nil {
 		t.Fatal("artifact followed symlink")
 	}
+	outside := t.TempDir()
+	redirect := filepath.Join(root, "review-link")
+	if err := os.Symlink(outside, redirect); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeArtifact(root, filepath.Join(redirect, "plan.json"), []byte("bad")); err == nil {
+		t.Fatal("artifact followed a symlinked parent")
+	}
+	if _, err := os.Stat(filepath.Join(outside, "plan.json")); !os.IsNotExist(err) {
+		t.Fatalf("artifact escaped through symlinked parent: %v", err)
+	}
 	requireState(t, root, p, "ready")
 }
 

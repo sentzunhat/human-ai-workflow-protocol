@@ -9,30 +9,32 @@ import (
 	"strings"
 	"time"
 
-	work_layout1 "github.com/sentzunhat/hawp/librarian/src/internal/application/work/validation"
+	workvalidation "github.com/sentzunhat/hawp/librarian/src/internal/application/work/validation"
 
 	domainwork "github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/normalization"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	inframarkdown "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 )
 
 // defaultWorkSource is the infrastructure adapter injected at the application layer.
 var defaultWorkSource = &domainwork.WorkSource{
-	Exists:         repo.Exists,
-	ToRepoRelative: repo.ToRepoRelative,
-	CollectFiles:   inframarkdown.CollectFiles,
-	ReadDir:        os.ReadDir,
-	ReadFile:       os.ReadFile,
-	WriteFile:      os.WriteFile,
-	MkdirAll:       os.MkdirAll,
-	MkdirTemp:      os.MkdirTemp,
-	Rename:         os.Rename,
-	Remove:         os.Remove,
-	RemoveAll:      os.RemoveAll,
-	Stat:           os.Stat,
-	Lstat:          os.Lstat,
-	EvalSymlinks:   filepath.EvalSymlinks,
+	Exists:                 repo.Exists,
+	ToRepoRelative:         repo.ToRepoRelative,
+	CollectFiles:           inframarkdown.CollectFiles,
+	ReadDir:                os.ReadDir,
+	ReadFile:               os.ReadFile,
+	WriteFile:              os.WriteFile,
+	MkdirAll:               os.MkdirAll,
+	MkdirTemp:              os.MkdirTemp,
+	Rename:                 os.Rename,
+	Remove:                 os.Remove,
+	RemoveAll:              os.RemoveAll,
+	Stat:                   os.Stat,
+	Lstat:                  os.Lstat,
+	EvalSymlinks:           filepath.EvalSymlinks,
+	RejectSymlinkAncestors: filesystem.RejectSymlinkAncestors,
 }
 
 type migrationPreviewReport struct {
@@ -72,6 +74,10 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 	}
 
 	workRoot := filepath.Join(opts.RepoRoot, ".hawp", "work")
+	if err := filesystem.RejectSymlinksInTree(opts.RepoRoot, workRoot); err != nil {
+		fmt.Fprintf(errOut, "Script error: unsafe work tree: %v\n", err)
+		return 1
+	}
 	backlogPath := filepath.Join(workRoot, "BACKLOG.md")
 	backlogRel := repo.ToRepoRelative(opts.RepoRoot, backlogPath)
 
@@ -307,7 +313,7 @@ func renderMigrationPreviewText(report migrationPreviewReport) string {
 }
 
 func validationSummary(workRoot string) string {
-	report, err := work_layout1.Validate(workRoot)
+	report, err := workvalidation.Validate(workRoot)
 	if err != nil {
 		return "Validation warning: could not parse BACKLOG.md for workflow validation."
 	}

@@ -59,13 +59,13 @@ func Check(repoRoot string) Result {
 	var files []string
 	for _, root := range roots {
 		full := filepath.Join(repoRoot, root)
-		info, err := os.Stat(full)
+		info, err := os.Lstat(full)
 		if err != nil {
 			continue
 		}
 		if info.IsDir() {
 			files = append(files, collectAll(repoRoot, full)...)
-		} else if strings.HasSuffix(full, ".md") {
+		} else if info.Mode().IsRegular() && strings.EqualFold(filepath.Ext(full), ".md") {
 			files = append(files, full)
 		}
 	}

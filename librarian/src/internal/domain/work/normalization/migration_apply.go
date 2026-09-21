@@ -14,16 +14,17 @@ import (
 // The normalization package owns the migration workflow while the parent
 // package supplies the concrete filesystem operations.
 type MigrationIO struct {
-	CanonicalFolderID func(content, fallback string) string
-	CollectFiles      func(dir string, skipReadme bool) []string
-	ReadDir           func(path string) ([]fs.DirEntry, error)
-	ReadFile          func(path string) ([]byte, error)
-	WriteFile         func(path string, data []byte, perm fs.FileMode) error
-	MkdirAll          func(path string, perm fs.FileMode) error
-	Rename            func(oldPath, newPath string) error
-	Remove            func(path string) error
-	Stat              func(path string) (fs.FileInfo, error)
-	ToRepoRelative    func(repoRoot, absolutePath string) string
+	CanonicalFolderID      func(content, fallback string) string
+	CollectFiles           func(dir string, skipReadme bool) []string
+	ReadDir                func(path string) ([]fs.DirEntry, error)
+	ReadFile               func(path string) ([]byte, error)
+	WriteFile              func(path string, data []byte, perm fs.FileMode) error
+	MkdirAll               func(path string, perm fs.FileMode) error
+	Rename                 func(oldPath, newPath string) error
+	Remove                 func(path string) error
+	Stat                   func(path string) (fs.FileInfo, error)
+	RejectSymlinkAncestors func(root, target string) error
+	ToRepoRelative         func(repoRoot, absolutePath string) string
 }
 
 var filesStemRe = regexp.MustCompile(`(?i)^(.*)-files$`)
@@ -220,11 +221,17 @@ func rewriteBacklogPlanLinks(io MigrationIO, backlogPath string, movedPlans []Mo
 func ApplyWorkItemFolderMigration(repoRoot string, io MigrationIO) (ApplyResult, error) {
 	result := ApplyResult{}
 	workRoot := filepath.Join(repoRoot, ".hawp", "work")
+	if err := io.RejectSymlinkAncestors(repoRoot, workRoot); err != nil {
+		return result, fmt.Errorf("refusing symlinked work root: %w", err)
+	}
 	touched := map[string]struct{}{}
 	var movedPlans []MovedPlan
 
 	for _, scope := range []string{"active", "parked"} {
 		scopeRoot := filepath.Join(workRoot, scope)
+		if err := io.RejectSymlinkAncestors(workRoot, scopeRoot); err != nil {
+			return result, fmt.Errorf("refusing symlinked %s work root: %w", scope, err)
+		}
 		entries, err := io.ReadDir(scopeRoot)
 		if err != nil {
 			continue
@@ -286,6 +293,9 @@ func ApplyWorkItemFolderMigration(repoRoot string, io MigrationIO) (ApplyResult,
 	}
 
 	backlogPath := filepath.Join(workRoot, "BACKLOG.md")
+	if err := io.RejectSymlinkAncestors(workRoot, backlogPath); err != nil {
+		return result, fmt.Errorf("refusing symlinked backlog path: %w", err)
+	}
 	if err := rewriteBacklogPlanLinks(io, backlogPath, movedPlans, touched); err != nil {
 		return result, err
 	}

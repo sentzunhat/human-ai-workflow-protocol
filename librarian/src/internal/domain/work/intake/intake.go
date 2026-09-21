@@ -3,7 +3,22 @@ package intake
 import (
 	"fmt"
 	"strings"
+	"unicode"
 )
+
+// ValidateTitle accepts a human-readable single-line work title suitable for
+// both Markdown headings and backlog-table cells.
+func ValidateTitle(title string) error {
+	if strings.TrimSpace(title) == "" {
+		return fmt.Errorf("title is required")
+	}
+	for _, r := range title {
+		if unicode.IsControl(r) {
+			return fmt.Errorf("title must not contain control characters")
+		}
+	}
+	return nil
+}
 
 // NewItemInput describes a new work item to scaffold via `hawp work new`.
 // This mechanically shapes the intake step's boilerplate only — per HAWP's
@@ -47,7 +62,11 @@ func (i NewItemInput) PlanRelativePath() string {
 // | UUID | Legacy ID | Type | Title | Status | Owner | Plan File | Updated |
 func (i NewItemInput) BacklogRow(date string) string {
 	return fmt.Sprintf("| `%s` | — | %s | %s | inbox | unassigned | [plan](active/%s) | %s |",
-		i.shortUUID(), i.Type, i.Title, i.PlanDirName()+"/"+i.PlanFileName(), date)
+		i.shortUUID(), i.Type, escapeTableCell(i.Title), i.PlanDirName()+"/"+i.PlanFileName(), date)
+}
+
+func escapeTableCell(value string) string {
+	return strings.NewReplacer("&", "&amp;", "\\", "\\\\", "|", "\\|", "\r\n", "<br>", "\n", "<br>", "\r", "<br>").Replace(value)
 }
 
 // PlanFileContent renders the intake investigation template shape

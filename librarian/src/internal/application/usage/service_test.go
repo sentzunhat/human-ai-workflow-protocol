@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	appusage "github.com/sentzunhat/hawp/librarian/src/internal/application/usage"
 	domainusage "github.com/sentzunhat/hawp/librarian/src/internal/domain/usage"
 	usageinfra "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/usage"
-	appusage "github.com/sentzunhat/hawp/librarian/src/internal/application/usage"
 )
 
 // seed writes one entry into a temp store so queries return non-empty results.

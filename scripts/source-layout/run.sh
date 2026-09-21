@@ -15,4 +15,21 @@ if [[ "$repo_root" != "$expected_root" ]]; then
   exit 1
 fi
 
-exec go -C "$script_dir" run ./cmd/source-layout "$@" --root "$repo_root"
+# Keep the enforced root after caller flags so it wins over a caller-supplied
+# --root, but before the caller's -- terminator so Go's flag parser still sees
+# it as a flag. Arguments after -- remain positional and are rejected by the
+# source-layout command as intended.
+forwarded=()
+root_injected=false
+for arg in "$@"; do
+  if [[ "$arg" == "--" && "$root_injected" == false ]]; then
+    forwarded+=(--root "$repo_root")
+    root_injected=true
+  fi
+  forwarded+=("$arg")
+done
+if [[ "$root_injected" == false ]]; then
+  forwarded+=(--root "$repo_root")
+fi
+
+exec go -C "$script_dir" run ./cmd/source-layout "${forwarded[@]}"

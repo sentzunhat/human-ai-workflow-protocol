@@ -181,7 +181,7 @@ func TestMergeConfig(t *testing.T) {
 	override := ContextConfig{
 		Embeddings: EmbeddingsConfig{
 			Engine: "openai",
-			Model:   "text-embedding-3-large",
+			Model:  "text-embedding-3-large",
 		},
 		LLM: LLMConfig{
 			Engine: "anthropic",

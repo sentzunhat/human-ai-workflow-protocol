@@ -3,6 +3,7 @@ package mcp
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -74,6 +75,27 @@ func TestConfigurePreservesRemoteCodexBeforeOtherWrites(t *testing.T) {
 	}
 }
 
+func TestConfigurePreflightsGitHubBeforeOtherWrites(t *testing.T) {
+	root := configureFixture(t)
+	path := filepath.Join(root, ".vscode", "mcp.json")
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, []byte(`{"servers":{"hawp":{"type":"sse"}}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := Configure(root, []string{"claude", "github"}); err == nil {
+		t.Fatal("accepted non-stdio GitHub/Copilot configuration")
+	}
+	if _, err := os.Stat(filepath.Join(root, ".mcp.json")); !os.IsNotExist(err) {
+		t.Fatalf("Claude configuration was written before GitHub preflight: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(root, ".gitignore")); !os.IsNotExist(err) {
+		t.Fatalf("gitignore was written before GitHub preflight: %v", err)
+	}
+}
+
 func TestConfigureMissingBinaryAndInvalidSelection(t *testing.T) {
 	for _, providers := range [][]string{nil, {"codxe"}, {"claude"}} {
 		root := t.TempDir()
@@ -84,6 +106,57 @@ func TestConfigureMissingBinaryAndInvalidSelection(t *testing.T) {
 		if err != nil || len(entries) != 0 {
 			t.Fatal("wrote configuration", err)
 		}
+	}
+}
+
+func TestConfigureRejectsSymlinkedPrerequisites(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink permissions are not reliable on Windows")
+	}
+	for _, prerequisite := range []string{"binary", "backlog", "hawp root"} {
+		t.Run(prerequisite, func(t *testing.T) {
+			root := configureFixture(t)
+			path := hawpBinaryPath(root)
+			if prerequisite == "backlog" {
+				path = filepath.Join(root, ".hawp", "work", "BACKLOG.md")
+			}
+			external := filepath.Join(t.TempDir(), "external")
+			if err := os.WriteFile(external, []byte("external"), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			if prerequisite == "hawp root" {
+				externalRoot := t.TempDir()
+				for _, rel := range []string{"bin/hawp", "work/BACKLOG.md"} {
+					candidate := filepath.Join(externalRoot, rel)
+					if err := os.MkdirAll(filepath.Dir(candidate), 0o755); err != nil {
+						t.Fatal(err)
+					}
+					if err := os.WriteFile(candidate, []byte("external"), 0o755); err != nil {
+						t.Fatal(err)
+					}
+				}
+				if err := os.RemoveAll(filepath.Join(root, ".hawp")); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Symlink(externalRoot, filepath.Join(root, ".hawp")); err != nil {
+					t.Skipf("symlinks unavailable: %v", err)
+				}
+			} else {
+				if err := os.Remove(path); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.Symlink(external, path); err != nil {
+					t.Skipf("symlinks unavailable: %v", err)
+				}
+			}
+
+			if err := Configure(root, []string{"claude"}); err == nil {
+				t.Fatal("accepted symlinked prerequisite")
+			}
+			if _, err := os.Lstat(filepath.Join(root, ".mcp.json")); !os.IsNotExist(err) {
+				t.Fatalf("configuration was written despite rejected prerequisite: %v", err)
+			}
+		})
 	}
 }
 
@@ -125,5 +198,73 @@ func TestEnsureGitignoreEntryRejectsSymlink(t *testing.T) {
 	content, err := os.ReadFile(external)
 	if err != nil || string(content) != "keep\n" {
 		t.Fatalf("external gitignore was modified: %v %q", err, content)
+	}
+}
+
+func TestManagedWritesReplaceHardLinks(t *testing.T) {
+	for _, tt := range []struct {
+		name    string
+		write   func(root, path string) error
+		path    string
+		initial []byte
+		want    string
+	}{
+		{
+			name: "mcp json",
+			write: func(root, path string) error {
+				return writeMCPJSON(path, claudeServerEntry(root))
+			},
+			path:    ".mcp.json",
+			initial: []byte("{}\n"),
+			want:    `"hawp"`,
+		},
+		{
+			name:    "codex toml",
+			write:   func(root, path string) error { return writeCodexTOML(path, root) },
+			path:    filepath.Join(".codex", "config.toml"),
+			initial: []byte("[model]\nname = \"keep\"\n"),
+			want:    "[mcp_servers.hawp]",
+		},
+		{
+			name:    "gitignore",
+			write:   func(root, path string) error { return ensureGitignoreEntry(root, ".mcp.json") },
+			path:    ".gitignore",
+			initial: []byte("keep\n"),
+			want:    ".mcp.json",
+		},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			root := t.TempDir()
+			path := filepath.Join(root, tt.path)
+			if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			shared := filepath.Join(t.TempDir(), "shared")
+			original := tt.initial
+			if err := os.WriteFile(shared, original, 0o600); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Link(shared, path); err != nil {
+				t.Skipf("hard links unavailable: %v", err)
+			}
+
+			if err := tt.write(root, path); err != nil {
+				t.Fatal(err)
+			}
+			gotExternal, err := os.ReadFile(shared)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(gotExternal) != string(original) {
+				t.Fatalf("hard-linked source was modified: %q", gotExternal)
+			}
+			gotManaged, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !strings.Contains(string(gotManaged), tt.want) {
+				t.Fatalf("managed destination was not replaced: %q", gotManaged)
+			}
+		})
 	}
 }

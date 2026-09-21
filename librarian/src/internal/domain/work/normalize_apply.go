@@ -119,6 +119,7 @@ func (w *WorkSource) ApplyClosedRecordNormalization(repoRoot string) (ApplyResul
 	return normalization.ApplyClosedRecordNormalization(repoRoot, normalization.ClosedSource{
 		ScanSource: normalization.ScanSource{ReadDir: w.ReadDir, ReadFile: w.ReadFile, Stat: w.Stat},
 		MkdirAll:   w.MkdirAll, Rename: w.Rename, WriteFile: w.WriteFile,
+		RejectSymlinkAncestors: w.RejectSymlinkAncestors,
 	})
 }
 

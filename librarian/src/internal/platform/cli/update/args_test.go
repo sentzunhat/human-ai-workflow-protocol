@@ -55,11 +55,11 @@ func TestParseUpdateSyncArgsInvalid(t *testing.T) {
 
 func TestParseUpdateFullArgsValid(t *testing.T) {
 	cases := []struct {
-		name          string
-		args          []string
-		wantProvs     []string
-		wantNoProvs   bool
-		wantNoUpdate  bool
+		name         string
+		args         []string
+		wantProvs    []string
+		wantNoProvs  bool
+		wantNoUpdate bool
 	}{
 		{name: "no args — defaults", args: nil, wantProvs: nil, wantNoProvs: false, wantNoUpdate: false},
 		{name: "single provider", args: []string{"--provider", "claude"}, wantProvs: []string{"claude"}, wantNoProvs: false, wantNoUpdate: false},

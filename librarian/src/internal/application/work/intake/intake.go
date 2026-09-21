@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/sentzunhat/hawp/librarian/src/internal/application/uuidgen"
@@ -41,8 +40,8 @@ var validTypes = map[string]bool{
 // fill-in. This command exists so that job doesn't also include hand-typing
 // a backlog table row and a file skeleton.
 func NewItem(workDir, itemType, title, inputText string) (*NewItemResult, error) {
-	if strings.TrimSpace(title) == "" {
-		return nil, fmt.Errorf("title is required")
+	if err := domainwork.ValidateTitle(title); err != nil {
+		return nil, err
 	}
 	if itemType == "" {
 		itemType = "task"
@@ -69,6 +68,9 @@ func NewItem(workDir, itemType, title, inputText string) (*NewItemResult, error)
 	date := time.Now().Format("2006-01-02")
 
 	backlogPath := filepath.Join(workDir, "BACKLOG.md")
+	if err := filesystem.RejectSymlinkedWorkRoot(workDir); err != nil {
+		return nil, err
+	}
 	if err := filesystem.RejectSymlinkAncestors(workDir, backlogPath); err != nil {
 		return nil, fmt.Errorf("backlog path: %w", err)
 	}
@@ -100,14 +102,14 @@ func NewItem(workDir, itemType, title, inputText string) (*NewItemResult, error)
 	if err := os.MkdirAll(planDir, 0o755); err != nil {
 		return nil, fmt.Errorf("create active item directory: %w", err)
 	}
-	if err := os.WriteFile(planPath, []byte(item.PlanFileContent(inputText, date)), 0o644); err != nil {
+	if err := filesystem.AtomicWriteFile(workDir, planPath, []byte(item.PlanFileContent(inputText, date)), 0o644); err != nil {
 		return nil, fmt.Errorf("write plan file: %w", err)
 	}
 	// Write the plan file before the backlog row: if the process dies
 	// between the two writes, an orphaned plan file with no backlog row is
 	// safer to notice and clean up than a backlog row pointing at a file
 	// that doesn't exist.
-	if err := os.WriteFile(backlogPath, []byte(updatedBacklog), 0644); err != nil {
+	if err := filesystem.AtomicWriteFile(workDir, backlogPath, []byte(updatedBacklog), 0o644); err != nil {
 		return nil, fmt.Errorf("write BACKLOG.md: %w", err)
 	}
 

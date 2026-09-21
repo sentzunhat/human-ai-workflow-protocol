@@ -3,15 +3,15 @@ package mcp
 import (
 	"encoding/json"
 	"fmt"
-	"path/filepath"
 	"strings"
 
 	appcontext "github.com/sentzunhat/hawp/librarian/src/internal/application/context"
 	appcontext_layout1 "github.com/sentzunhat/hawp/librarian/src/internal/application/context/dedup"
 	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
 	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
-	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	inframodels "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models"
+	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
 )
 
 const contextRadius = 40 // lines above/below source line for context window
@@ -73,7 +73,10 @@ func toolSearch(args json.RawMessage, repoRoot string) rpcResponse {
 		return toolSearchContext(a.Query, a.Limit, a.MaxTokens, repoRoot)
 	}
 
-	dbPath := filepath.Join(repoRoot, ".hawp", "db", "index.sqlite")
+	dbPath, err := filesystem.ResolveSafeSearchIndexPath(repoRoot)
+	if err != nil {
+		return toolErr("search index path is unsafe: " + err.Error())
+	}
 	db, err := sqlite.Open(dbPath)
 	if err != nil {
 		return toolErr(fmt.Sprintf("index not found at %s; run `hawp search index` first", dbPath))

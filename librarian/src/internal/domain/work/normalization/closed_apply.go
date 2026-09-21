@@ -1,6 +1,7 @@
 package normalization
 
 import (
+	"fmt"
 	"io/fs"
 	"path/filepath"
 	"regexp"
@@ -11,9 +12,10 @@ import (
 // closed records. The application layer owns the concrete implementation.
 type ClosedSource struct {
 	ScanSource
-	MkdirAll  func(path string, perm fs.FileMode) error
-	Rename    func(oldPath, newPath string) error
-	WriteFile func(path string, data []byte, perm fs.FileMode) error
+	MkdirAll               func(path string, perm fs.FileMode) error
+	Rename                 func(oldPath, newPath string) error
+	WriteFile              func(path string, data []byte, perm fs.FileMode) error
+	RejectSymlinkAncestors func(root, target string) error
 }
 
 var closedFileDatePrefixRe = regexp.MustCompile(`^(\d{4})-(\d{2})-(\d{2})-`)
@@ -39,6 +41,10 @@ func reconcileClosedRecordPath(repoRoot, absolutePath string, source ClosedSourc
 	if target == absolutePath {
 		return absolutePath, false, nil
 	}
+	closedRoot := filepath.Join(repoRoot, ".hawp", "work", "closed")
+	if err := source.RejectSymlinkAncestors(closedRoot, target); err != nil {
+		return absolutePath, false, err
+	}
 	if err := source.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 		return absolutePath, false, err
 	}
@@ -56,12 +62,21 @@ func reconcileClosedRecordPath(repoRoot, absolutePath string, source ClosedSourc
 func ApplyClosedRecordNormalization(repoRoot string, source ClosedSource) (ApplyResult, error) {
 	result := ApplyResult{}
 	closedRoot := filepath.Join(repoRoot, ".hawp", "work", "closed")
+	if err := source.RejectSymlinkAncestors(repoRoot, closedRoot); err != nil {
+		return result, fmt.Errorf("refusing symlinked closed work root: %w", err)
+	}
 	touched := map[string]struct{}{}
 
 	for _, absolutePath := range WalkPlanMarkdown(closedRoot, source.ScanSource) {
+		if err := source.RejectSymlinkAncestors(closedRoot, absolutePath); err != nil {
+			return result, fmt.Errorf("refusing symlinked closed record: %w", err)
+		}
 		currentPath, moved, err := reconcileClosedRecordPath(repoRoot, absolutePath, source)
 		if err != nil {
 			return result, err
+		}
+		if err := source.RejectSymlinkAncestors(closedRoot, currentPath); err != nil {
+			return result, fmt.Errorf("refusing symlinked closed record: %w", err)
 		}
 		if moved {
 			touched[currentPath] = struct{}{}

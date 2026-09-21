@@ -29,7 +29,7 @@ type Embedder interface {
 // reference embeddings.DefaultModel do not need to import infrastructure.
 const DefaultModel = "bge-base-en-v1.5"
 
-// EmbeddingResult holds a text and its embedding vector.
+// EmbeddingResult holds text and its embedding vector.
 type EmbeddingResult struct {
 	Text      string
 	Embedding []float32

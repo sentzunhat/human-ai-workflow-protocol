@@ -12,6 +12,7 @@ import (
 	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
 	appintake "github.com/sentzunhat/hawp/librarian/src/internal/application/work/intake"
 	domainsearch "github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	inframodels "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
@@ -34,7 +35,10 @@ func Run(args []string, cwd string) error {
 		return runReshapeBenchmark(opts.reshapeBackend, opts.reshapeURL, opts.reshapeModel, opts.exportPath)
 	}
 
-	dbPath := filepath.Join(root, ".hawp", "db", "index.sqlite")
+	dbPath, err := filesystem.ResolveSafeSearchIndexPath(root)
+	if err != nil {
+		return err
+	}
 	db, err := sqlite.Open(dbPath)
 	if err != nil {
 		fmt.Printf("Index not found at %s. Run `hawp search index` first.\n", dbPath)
@@ -755,4 +759,3 @@ func formatDownstreamReport(results []downstreamBenchResult, backend, model stri
 	fmt.Fprintln(&sb, "_v0.1.0 gate: ≥20% average savings across succeeded queries._")
 	return sb.String()
 }
-

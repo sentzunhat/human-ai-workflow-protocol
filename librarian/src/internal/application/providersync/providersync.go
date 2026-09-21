@@ -1,11 +1,13 @@
 package providersync
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	domainprovidersync "github.com/sentzunhat/hawp/librarian/src/internal/domain/providersync"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 type MaterializeResult struct {
@@ -26,6 +28,9 @@ func Materialize(repoRoot string) (MaterializeResult, error) {
 
 	result := MaterializeResult{}
 	for _, output := range outputs {
+		if err := validateOutputPath(repoRoot, output.OutputPath); err != nil {
+			return result, err
+		}
 		if err := os.MkdirAll(filepath.Dir(output.OutputPath), 0o755); err != nil {
 			return result, err
 		}
@@ -40,13 +45,30 @@ func Materialize(repoRoot string) (MaterializeResult, error) {
 			return result, err
 		}
 
-		if err := os.WriteFile(output.OutputPath, []byte(output.Content), 0o644); err != nil {
+		if err := filesystem.AtomicWriteFile(repoRoot, output.OutputPath, []byte(output.Content), 0o644); err != nil {
 			return result, err
 		}
 		result.Updated = append(result.Updated, output.OutputPath)
 	}
 
 	return result, nil
+}
+
+func validateOutputPath(repoRoot, outputPath string) error {
+	if err := filesystem.RejectSymlinkAncestors(repoRoot, outputPath); err != nil {
+		return fmt.Errorf("refusing provider materialization path %s: %w", outputPath, err)
+	}
+	info, err := os.Lstat(outputPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("stat provider materialization path %s: %w", outputPath, err)
+	}
+	if !info.Mode().IsRegular() {
+		return fmt.Errorf("refusing non-regular provider materialization path %s", outputPath)
+	}
+	return nil
 }
 
 func Validate(repoRoot string) (ValidateResult, error) {

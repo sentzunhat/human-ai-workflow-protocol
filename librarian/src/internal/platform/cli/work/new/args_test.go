@@ -40,3 +40,11 @@ func TestParseNewArgsRejectsInvalidInput(t *testing.T) {
 		}
 	}
 }
+
+func TestParseNewArgsRejectsControlCharactersInTitle(t *testing.T) {
+	for _, title := range []string{"line\nbreak", "line\rbreak", "tab\tbreak"} {
+		if _, err := parseNewArgs([]string{title}); err == nil {
+			t.Errorf("accepted title with control character %q", title)
+		}
+	}
+}

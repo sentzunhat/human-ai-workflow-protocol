@@ -1,10 +1,11 @@
 package normalizecmd
 
 import (
+	"os"
+
 	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work/normalize"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 	"github.com/sentzunhat/hawp/librarian/src/internal/platform/exitcode"
-	"os"
 )
 
 // Run normalizes a work tree resolved from cwd when not explicit.

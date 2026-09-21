@@ -33,9 +33,9 @@ func TestNormalizeFileName(t *testing.T) {
 }
 
 var normalizeTestSource = &KitSource{
-	FileLister:   func(kitPath string, skipReadme bool) []string { return markdown.CollectFiles(kitPath, skipReadme) },
-	BlankFences:  markdown.BlankFences,
-	Exists:       repo.Exists,
+	FileLister:     func(kitPath string, skipReadme bool) []string { return markdown.CollectFiles(kitPath, skipReadme) },
+	BlankFences:    markdown.BlankFences,
+	Exists:         repo.Exists,
 	ToRepoRelative: repo.ToRepoRelative,
 }
 
@@ -81,6 +81,44 @@ func TestPlanAndApplyNormalization(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(kitPath, "usage", "bad-name.md")); err != nil {
 		t.Error("renamed file missing")
+	}
+}
+
+func TestPlanAndApplyNormalizationPreservesUnicodeFenceOffsets(t *testing.T) {
+	kitPath := t.TempDir()
+	mustWrite := func(rel, content string) {
+		full := filepath.Join(kitPath, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(full), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(full, []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	mustWrite("usage/Bad Name.md", "# doc\n")
+	mustWrite("start-here.md", "```\n日本語\n```\nSee [guide](usage/Bad Name.md).\n")
+
+	renames := PlanFileRenames(kitPath, os.ReadDir)
+	if len(renames) != 1 {
+		t.Fatalf("renames = %+v, want one rename", renames)
+	}
+	updates := normalizeTestSource.PlanLinkUpdates(kitPath, map[string]string{renames[0].From: renames[0].To}, os.ReadFile)
+	if len(updates) != 1 || updates[0].From != "usage/Bad Name.md" || updates[0].To != "usage/bad-name.md" {
+		t.Fatalf("updates = %+v, want one link rewrite", updates)
+	}
+	if _, _, err := ApplyRenames(renames, os.Stat, os.Rename); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ApplyLinkUpdates(updates, os.ReadFile, os.WriteFile); err != nil {
+		t.Fatal(err)
+	}
+	content, err := os.ReadFile(filepath.Join(kitPath, "start-here.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "```\n日本語\n```\nSee [guide](usage/bad-name.md).\n"
+	if string(content) != want {
+		t.Fatalf("normalized content = %q, want %q", content, want)
 	}
 }
 

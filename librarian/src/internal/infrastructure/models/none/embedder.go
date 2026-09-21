@@ -21,7 +21,7 @@ func (n *NullEmbedder) EmbedBatch(_ context.Context, texts []string) ([][]float3
 	return out, nil
 }
 
-func (n *NullEmbedder) Dimension() int    { return 0 }
-func (n *NullEmbedder) Backend() string   { return "none" }
-func (n *NullEmbedder) Model() string     { return "none" }
-func (n *NullEmbedder) Close() error      { return nil }
+func (n *NullEmbedder) Dimension() int  { return 0 }
+func (n *NullEmbedder) Backend() string { return "none" }
+func (n *NullEmbedder) Model() string   { return "none" }
+func (n *NullEmbedder) Close() error    { return nil }

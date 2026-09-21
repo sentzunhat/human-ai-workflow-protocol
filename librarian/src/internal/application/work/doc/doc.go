@@ -46,6 +46,9 @@ func CreateWorkDoc(docType, title, workDir, workItemID string) (*Result, error) 
 	if strings.TrimSpace(title) == "" {
 		return nil, fmt.Errorf("title is required")
 	}
+	if err := filesystem.RejectSymlinkedWorkRoot(workDir); err != nil {
+		return nil, err
+	}
 
 	// Resolve the folder ID: use the provided work item ID (normalised to its
 	// short form when a full UUID is given) or generate a fresh short UUID.
@@ -96,7 +99,7 @@ func CreateWorkDoc(docType, title, workDir, workItemID string) (*Result, error) 
 			FilePath: filePath,
 		}, nil
 	}
-	if err := os.WriteFile(filePath, []byte(template(fullUUID, docType, title, date)), 0o644); err != nil {
+	if err := filesystem.AtomicWriteFile(workDir, filePath, []byte(template(fullUUID, docType, title, date)), 0o644); err != nil {
 		return nil, fmt.Errorf("write doc file: %w", err)
 	}
 

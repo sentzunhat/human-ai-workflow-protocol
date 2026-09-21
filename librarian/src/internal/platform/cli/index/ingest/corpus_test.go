@@ -1,11 +1,14 @@
 package ingest
 
 import (
+	"database/sql"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	appindex "github.com/sentzunhat/hawp/librarian/src/internal/application/index"
+	_ "modernc.org/sqlite"
 )
 
 func TestWorkCorpusLifecycle(t *testing.T) {
@@ -93,6 +96,39 @@ func TestBuildCorpusRejectsPathsOutsideRepository(t *testing.T) {
 	}
 }
 
+func TestBuildCorpusRejectsSymlinkedConfiguredPaths(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink permissions are not reliable on Windows")
+	}
+
+	for _, configuredPath := range []string{"docs-link", "docs-link/subdir", "linked.md"} {
+		t.Run(configuredPath, func(t *testing.T) {
+			root := t.TempDir()
+			outside := t.TempDir()
+			if err := os.MkdirAll(filepath.Join(outside, "subdir"), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(filepath.Join(outside, "outside.md"), []byte("external"), 0o644); err != nil {
+				t.Fatal(err)
+			}
+
+			linkTarget := outside
+			linkPath := filepath.Join(root, "docs-link")
+			if configuredPath == "linked.md" {
+				linkTarget = filepath.Join(outside, "outside.md")
+				linkPath = filepath.Join(root, "linked.md")
+			}
+			if err := os.Symlink(linkTarget, linkPath); err != nil {
+				t.Skipf("symlinks unavailable: %v", err)
+			}
+
+			if _, err := buildCorpusFromRepo(root, []string{configuredPath}); err == nil {
+				t.Fatalf("buildCorpusFromRepo(%q) accepted symlinked path", configuredPath)
+			}
+		})
+	}
+}
+
 func TestCorpusWalkersSkipSymlinkedMarkdown(t *testing.T) {
 	root := t.TempDir()
 	outside := filepath.Join(t.TempDir(), "outside.md")
@@ -110,5 +146,61 @@ func TestCorpusWalkersSkipSymlinkedMarkdown(t *testing.T) {
 	}
 	if len(corpus.Documents) != 0 {
 		t.Fatalf("symlinked document indexed: %+v", corpus.Documents)
+	}
+}
+
+func TestWorkCorpusPersistsCanonicalUUIDMetadata(t *testing.T) {
+	root := t.TempDir()
+	for rel, content := range map[string]string{
+		".hawp/work/active/abcdef12/plan.md":             "# active plan",
+		".hawp/work/closed/2026/09/21/12345678/plan.md":  "# closed plan",
+		".hawp/work/active/not-a-work-id/legacy-plan.md": "# legacy plan",
+	} {
+		path := filepath.Join(root, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	corpus, err := buildCorpusFromRepo(root, []string{".hawp/work"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := appindex.NewIngestService(filepath.Join(root, ".hawp", "db", "index.sqlite")).Execute(corpus); err != nil {
+		t.Fatal(err)
+	}
+
+	db, err := sql.Open("sqlite", filepath.Join(root, ".hawp", "db", "index.sqlite"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	rows, err := db.Query(`SELECT work_uuid, status FROM documents_metadata ORDER BY work_uuid`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer rows.Close()
+	var got []string
+	for rows.Next() {
+		var uuid, status string
+		if err := rows.Scan(&uuid, &status); err != nil {
+			t.Fatal(err)
+		}
+		got = append(got, uuid+":"+status)
+	}
+	if err := rows.Err(); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"12345678:closed", "abcdef12:active"}
+	if len(got) != len(want) {
+		t.Fatalf("metadata rows = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("metadata rows = %v, want %v", got, want)
+		}
 	}
 }

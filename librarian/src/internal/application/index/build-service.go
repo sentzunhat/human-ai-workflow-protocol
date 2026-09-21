@@ -10,6 +10,7 @@ import (
 	domaincontext "github.com/sentzunhat/hawp/librarian/src/internal/domain/context"
 	domainindex "github.com/sentzunhat/hawp/librarian/src/internal/domain/index"
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
 )
 
@@ -35,7 +36,11 @@ func (service BuildService) Execute(scope domainindex.DocumentScope) (BuildResul
 	src := newContextSource()
 
 	if scope == domainindex.ScopeAll || scope == domainindex.ScopeKit {
-		docs, err := domaincontext.EnrichKit(service.RepoRoot, filepath.Join(service.RepoRoot, ".hawp", "kit"), os.ReadFile, src.toContextSource())
+		kitRoot := filepath.Join(service.RepoRoot, ".hawp", "kit")
+		if err := filesystem.RejectSymlinksInTree(service.RepoRoot, kitRoot); err != nil {
+			return BuildResult{}, fmt.Errorf("unsafe kit corpus root: %w", err)
+		}
+		docs, err := domaincontext.EnrichKit(service.RepoRoot, kitRoot, os.ReadFile, src.toContextSource())
 		if err != nil {
 			return BuildResult{}, fmt.Errorf("kit enrichment: %w", err)
 		}
@@ -43,7 +48,11 @@ func (service BuildService) Execute(scope domainindex.DocumentScope) (BuildResul
 	}
 
 	if scope == domainindex.ScopeAll || scope == domainindex.ScopeWork {
-		docs, err := domaincontext.EnrichWork(service.RepoRoot, filepath.Join(service.RepoRoot, ".hawp", "work"), os.ReadFile, src.toContextSource())
+		workRoot := filepath.Join(service.RepoRoot, ".hawp", "work")
+		if err := filesystem.RejectSymlinksInTree(service.RepoRoot, workRoot); err != nil {
+			return BuildResult{}, fmt.Errorf("unsafe work corpus root: %w", err)
+		}
+		docs, err := domaincontext.EnrichWork(service.RepoRoot, workRoot, os.ReadFile, src.toContextSource())
 		if err != nil {
 			return BuildResult{}, fmt.Errorf("work enrichment: %w", err)
 		}

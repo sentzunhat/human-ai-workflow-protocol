@@ -40,16 +40,17 @@ func (w *WorkSource) ApplyWorkItemFolderMigration(repoRoot string) (ApplyResult,
 
 func migrationIO(w *WorkSource) normalization.MigrationIO {
 	return normalization.MigrationIO{
-		CanonicalFolderID: canonicalFolderID,
-		CollectFiles:      w.CollectFiles,
-		ReadDir:           w.ReadDir,
-		ReadFile:          w.ReadFile,
-		WriteFile:         w.WriteFile,
-		MkdirAll:          w.MkdirAll,
-		Rename:            w.Rename,
-		Remove:            w.Remove,
-		Stat:              w.Stat,
-		ToRepoRelative:    w.ToRepoRelative,
+		CanonicalFolderID:      canonicalFolderID,
+		CollectFiles:           w.CollectFiles,
+		ReadDir:                w.ReadDir,
+		ReadFile:               w.ReadFile,
+		WriteFile:              w.WriteFile,
+		MkdirAll:               w.MkdirAll,
+		Rename:                 w.Rename,
+		Remove:                 w.Remove,
+		Stat:                   w.Stat,
+		RejectSymlinkAncestors: w.RejectSymlinkAncestors,
+		ToRepoRelative:         w.ToRepoRelative,
 	}
 }
 

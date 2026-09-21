@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // Preserve unrelated settings as raw JSON, including large numeric values.
@@ -96,13 +98,9 @@ func writeServerJSON(path string, entry map[string]any, rootKey string) error {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err
 	}
-	// Reject symlinks and non-regular files to prevent redirected writes.
-	// Note: there is a TOCTOU window between this Lstat and the WriteFile
-	// below. For a local single-user tool this is acceptable; a cross-platform
-	// atomic alternative (O_NOFOLLOW) would require syscall-level flags not
-	// available in the standard os package.
-	if fi, err := os.Lstat(path); err == nil && !fi.Mode().IsRegular() {
-		return fmt.Errorf("refusing to write %s: not a regular file", path)
+	perm, err := managedFilePerm(path, 0o644)
+	if err != nil {
+		return err
 	}
-	return os.WriteFile(path, out, 0o644)
+	return filesystem.AtomicWriteFile(filepath.Dir(path), path, out, perm)
 }

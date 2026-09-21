@@ -41,13 +41,6 @@ elicitation/guidance work from `c8d9e1cb`.
 | `c8d9e1cb` | feature | Interactive MCP intake refinement with structured results (`v0.0.24` subset, remainder `v0.0.25`) | `plan-ready` | Codex | [plan](active/c8d9e1cb/plan.md) | 2026-09-13 |
 | `2eea565c` | improvement | MCP capability catalog for HAWP resources and prompts (`v0.0.25`) | `plan-ready` | Codex | [plan](active/2eea565c/plan.md) | 2026-09-13 |
 | `429e075e` | improvement | Remote MCP transport and authorization readiness audit (`v0.0.25`) | `plan-ready` | Codex | [plan](active/429e075e/plan.md) | 2026-09-13 |
-| `0c8d6391` | bug | Constrain project search index paths to the repository root | `plan-ready` | Codex | [plan](active/0c8d6391/plan.md) | 2026-09-20 |
-| `225708ae` | bug | Reject external Markdown symlinks during corpus indexing and export | `plan-ready` | Codex | [plan](active/225708ae/plan.md) | 2026-09-20 |
-| `cd4691d7` | bug | Reject symlink ancestors in kitsync repository writes | `plan-ready` | Codex | [plan](active/cd4691d7/plan.md) | 2026-09-20 |
-| `a1014eef` | bug | Reject path traversal in install/update backlog reconciliation | `plan-ready` | Claude | [plan](active/a1014eef/plan.md) | 2026-09-20 |
-| `a406816d` | bug | Reject symlinked `.hawp` root in install/update shell scripts | `plan-ready` | Claude | [plan](active/a406816d/plan.md) | 2026-09-20 |
-| `be327af5` | bug | Reject symlinked `.gitignore` in MCP provider configuration | `plan-ready` | Claude | [plan](active/be327af5/plan.md) | 2026-09-20 |
-| `984f038a` | bug | Reject Markdown symlinks in `links clean --apply` | `plan-ready` | Claude | [plan](active/984f038a/plan.md) | 2026-09-20 |
 
 ## Blocked / Parked
 
@@ -72,22 +65,16 @@ Limited to the last 5–10 items.
 
 | ID                            | Type        | Title                                                                   | Closed     | Detail                                                        |
 | ----------------------------- | ----------- | ----------------------------------------------------------------------- | ---------- | ------------------------------------------------------------- |
-| `887ac089`                    | bug         | Fix model pull trailing `--onnx-file` parsing                          | 2026-09-20 | [plan](closed/2026/09/20/887ac089/plan.md)                   |
-| `c5a48d9a`                    | bug         | Harden tar kit-bundle extraction against path traversal                 | 2026-09-20 | [plan](closed/2026/09/20/c5a48d9a/plan.md)                   |
-| `b30f7a9b`                    | bug         | Validate kitsync manifest paths stay within repository and bundle roots  | 2026-09-20 | [plan](closed/2026/09/20/b30f7a9b/plan.md)                   |
-| `24edc80c`                    | fix         | Wrap SQLite "no such table" as IndexNotFoundError in search infra       | 2026-09-16 | [plan](closed/2026/09/16/24edc80c/plan.md)                    |
-| `a818b914`                    | fix         | Fix non-atomic writes in ApplyDuplicateLinks plan files                 | 2026-09-16 | [plan](closed/2026/09/16/a818b914/plan.md)                    |
-| `f6f2818f`                    | fix         | Document TOCTOU in writeMCPJSON between Lstat and WriteFile             | 2026-09-16 | [plan](closed/2026/09/16/f6f2818f/plan.md)                    |
-| `e61573f6`                    | fix         | Remove double expandConfigProviders call in Configure()                 | 2026-09-16 | [plan](closed/2026/09/16/e61573f6/plan.md)                    |
-| `8c695bc5`                    | fix         | Improve WriteProviderConfigs partial-failure error message              | 2026-09-16 | [plan](closed/2026/09/16/8c695bc5/plan.md)                    |
-| `4d6d8d2e`                    | fix         | Deduplicate idSet in duplicate_links.go                                 | 2026-09-16 | [plan](closed/2026/09/16/4d6d8d2e/plan.md)                    |
-| `cd5c215b`                    | fix         | **[High]** doc: quote YAML front-matter title (newline injection)       | 2026-09-15 | [plan](closed/2026/09/15/cd5c215b/plan.md)                    |
-| `025de149`                    | fix         | **[High]** intake: symlink guard for BACKLOG.md and active plan dir     | 2026-09-15 | [plan](closed/2026/09/15/025de149/plan.md)                    |
-| `29b18cef`                    | fix         | **[High]** source-layout verify: write candidate tree under sourceRoot  | 2026-09-15 | [plan](closed/2026/09/15/29b18cef/plan.md)                    |
-| `cop-path-traversal`          | fix         | **[High]** Security: path traversal in work doc folderID                | 2026-09-14 | [plan](closed/2026/09/14/cop-path-traversal/plan.md)          |
-| `620ba34c`                    | infrastructure | Split domain work into cohesive subpackages                    | 2026-09-19 | [plan](closed/2026/09/19/620ba34c/plan.md)                    |
-| `9c660e32`                    | infrastructure | Remove filesystem operations from domain work                  | 2026-09-19 | [plan](closed/2026/09/19/9c660e32/plan.md)                    |
-| `a8797f44`                   | feature        | `hawp_work_intake` compound search + reshape                    | 2026-09-19 | [plan](closed/2026/09/19/a8797f44/plan.md)                    |
+| `f5b2c7d1` | fix | Reject symlinked work trees before normalization traversal | 2026-09-25 | [plan](closed/2026/09/25/f5b2c7d1/plan.md) |
+| `a406816d` | bug | Reject symlinked `.hawp` root in install/update shell scripts | 2026-09-25 | [plan](closed/2026/09/25/a406816d/plan.md) |
+| `73bd501c` | fix | Apply MCP configuration preflight before public wrapper writes | 2026-09-25 | [plan](closed/2026/09/25/73bd501c/plan.md) |
+| `2da1adfc` | fix | Guard index corpus roots before build traversal | 2026-09-25 | [plan](closed/2026/09/25/2da1adfc/plan.md) |
+| `d48e1035` | fix | Guard provider materializer output paths | 2026-09-25 | [plan](closed/2026/09/25/d48e1035/plan.md) |
+| `cd4691d7` | bug | Reject symlink ancestors in kitsync repository writes | 2026-09-25 | [plan](closed/2026/09/25/cd4691d7/plan.md) |
+| `984f038a` | bug | Reject Markdown symlinks in `links clean --apply` | 2026-09-25 | [plan](closed/2026/09/25/984f038a/plan.md) |
+| `c3371bf5` | fix | Fix missing SQLite index preflight | 2026-09-25 | [plan](closed/2026/09/25/c3371bf5/plan.md) |
+| `2c588680` | fix | Fix quality workflow all-zero base SHA handling | 2026-09-25 | [plan](closed/2026/09/25/2c588680/plan.md) |
+| `84892d9d` | fix | Make fenced-code masking byte-length preserving | 2026-09-25 | [plan](closed/2026/09/25/84892d9d/plan.md) |
 ---
 
 ## Archive

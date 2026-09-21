@@ -25,8 +25,8 @@ func TestFileCopierCopyTree(t *testing.T) {
 	fc := NewFileCopier()
 
 	files := map[string]string{
-		"src/a.txt": "alpha",
-		"src/b.txt": "beta",
+		"src/a.txt":     "alpha",
+		"src/b.txt":     "beta",
 		"src/sub/c.txt": "gamma",
 	}
 	srcRoot := writeTree(t, files)

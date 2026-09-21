@@ -17,14 +17,18 @@ import (
 // Unlike ExtractMember, this pulls out the whole tree (used for the kit +
 // providers bundle, not a single named file).
 func ExtractAll(archivePath, destDir string) error {
-	if err := os.MkdirAll(destDir, 0o755); err != nil {
-		return err
-	}
 	root, err := filepath.Abs(destDir)
 	if err != nil {
 		return fmt.Errorf("resolve extraction root: %w", err)
 	}
-	if err := filesystem.RejectSymlinkAncestors(root, root); err != nil {
+	parent := filepath.Dir(root)
+	if err := filesystem.RejectSymlinkAncestors(parent, root); err != nil {
+		return fmt.Errorf("refusing symlinked extraction root: %w", err)
+	}
+	if err := os.MkdirAll(root, 0o755); err != nil {
+		return err
+	}
+	if err := filesystem.RejectSymlinkAncestors(parent, root); err != nil {
 		return fmt.Errorf("refusing symlinked extraction root: %w", err)
 	}
 

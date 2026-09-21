@@ -329,6 +329,10 @@ else
 fi
 
 reject_hawp_symlinks() {
+  if [ -L ".hawp" ]; then
+    echo "Error: refusing to follow symlinked .hawp root"
+    exit 1
+  fi
   [ -d ".hawp" ] || return 0
   link_path="$(find .hawp -type l -print -quit 2>/dev/null || true)"
   if [ -n "$link_path" ]; then
@@ -363,23 +367,66 @@ reconcile_closed_plans_from_backlog() {
   backlog=".hawp/work/BACKLOG.md"
   [ -f "$backlog" ] || return 0
 
-  awk -F'|' '
+  awk '
     function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
-    /^## Done/        { section="done";   next }
-    /^## Active/      { section="active"; next }
-    /^## /            { section="";       next }
+    function clear_headers( key) { for (key in headers) delete headers[key]; have_headers = 0 }
+    function split_cells(line, cells,    i, ch, cell, escaped, count) {
+      line = trim(line)
+      if (substr(line, 1, 1) != "|" || substr(line, length(line), 1) != "|") return 0
+      cell = ""; escaped = 0; count = 0
+      for (i = 2; i < length(line); i++) {
+        ch = substr(line, i, 1)
+        if (escaped) {
+          cell = cell ((ch == "\\" || ch == "|") ? ch : "\\" ch)
+          escaped = 0
+        } else if (ch == "\\") {
+          escaped = 1
+        } else if (ch == "|") {
+          cells[++count] = trim(cell); cell = ""
+        } else {
+          cell = cell ch
+        }
+      }
+      if (escaped) cell = cell "\\"
+      cells[++count] = trim(cell)
+      return count
+    }
+    function value(name) { return (tolower(name) in headers) ? fields[headers[tolower(name)]] : "" }
+    function without_code_span(s) {
+      s = trim(s)
+      if (substr(s, 1, 1) == "`" && substr(s, length(s), 1) == "`") return substr(s, 2, length(s) - 2)
+      return s
+    }
+    /^## (Recently Closed|Done)/ { section="done"; clear_headers(); next }
+    /^## Active/                 { section="active"; clear_headers(); next }
+    /^## /                       { section=""; clear_headers(); next }
     section != "" && /^\|/ {
-      id   = trim($2)
-      col5 = trim($5)
-      col6 = trim($6)
+      for (field in fields) delete fields[field]
+      count = split_cells($0, fields)
+      if (count == 0) next
+      if (!have_headers) {
+        if (fields[1] ~ /^-+$/) next
+        for (column = 1; column <= count; column++) headers[tolower(fields[column])] = column
+        have_headers = 1
+        next
+      }
+      if (fields[1] ~ /^-+$/) next
+      id = without_code_span(value("uuid"))
+      if (id == "" || id == "-" || id == "—") id = without_code_span(value("id"))
+      if (id == "" || id == "-" || id == "—") id = without_code_span(value("legacy id"))
+      if (id == "" || id == "-" || id == "—") id = without_code_span(value("#"))
       if (id == "" || id ~ /^-+$/ || id == "ID") next
       if (section == "done") {
-        closed = col5
-        plan   = col6
+        closed = without_code_span(value("closed"))
+        if (closed == "") closed = without_code_span(value("updated"))
+        plan = value("detail")
+        if (plan == "") plan = value("plan file")
       } else {
-        if (col5 !~ /^(done|wont-fix)$/ && col5 !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) next
-        closed = (col5 ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) ? col5 : ""
-        plan   = col6
+        status = without_code_span(value("status"))
+        if (status !~ /^(done|wont-fix)$/ && status !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) next
+        closed = (status ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) ? status : ""
+        plan = value("plan file")
+        if (plan == "") plan = value("detail")
       }
       link = ""
       if (match(plan, /\(([^)]+)\)/)) {
@@ -387,9 +434,9 @@ reconcile_closed_plans_from_backlog() {
       } else {
         link = plan
       }
-      print id "\t" closed "\t" link
+      print id "\034" closed "\034" link
     }
-  ' "$backlog" | while IFS=$'\t' read -r id closed link_path; do
+  ' "$backlog" | while IFS=$'\034' read -r id closed link_path; do
     [ -n "$id" ] || continue
 
     closed_path=""
@@ -408,7 +455,12 @@ reconcile_closed_plans_from_backlog() {
           ;;
       esac
       plan_name="$(basename "$closed_path")"
-      src=".hawp/work/active/$plan_name"
+      plan_dir="$(basename "$(dirname "$closed_path")")"
+      if [ "$plan_name" = "plan.md" ] && [ "$plan_dir" != "." ]; then
+        src=".hawp/work/active/$plan_dir/plan.md"
+      else
+        src=".hawp/work/active/$plan_name"
+      fi
       dest=".hawp/work/$closed_path"
       if [ -f "$src" ] && [ ! -e "$dest" ]; then
         mkdir -p "$(dirname "$dest")"

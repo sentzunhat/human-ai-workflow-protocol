@@ -1,6 +1,7 @@
 package usage
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -73,5 +74,45 @@ func TestConfigRoundTrip(t *testing.T) {
 	}
 	if got := LoadConfig(path); got != want {
 		t.Fatalf("config = %+v, want %+v", got, want)
+	}
+}
+
+func TestSaveConfigRejectsSymlinkedDirectory(t *testing.T) {
+	root := t.TempDir()
+	outside := t.TempDir()
+	link := filepath.Join(root, "config")
+	if err := os.Symlink(outside, link); err != nil {
+		t.Fatal(err)
+	}
+
+	path := filepath.Join(link, "usage.json")
+	if err := SaveConfig(path, domainusage.Config{Enabled: true}); err == nil {
+		t.Fatal("SaveConfig followed a symlinked config directory")
+	}
+	if _, err := os.Stat(filepath.Join(outside, "usage.json")); !os.IsNotExist(err) {
+		t.Fatalf("outside config was created: %v", err)
+	}
+}
+
+func TestSaveConfigRejectsSymlinkedFile(t *testing.T) {
+	root := t.TempDir()
+	outside := filepath.Join(t.TempDir(), "outside.json")
+	if err := os.WriteFile(outside, []byte("original"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(root, "usage.json")
+	if err := os.Symlink(outside, path); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := SaveConfig(path, domainusage.Config{Enabled: true}); err == nil {
+		t.Fatal("SaveConfig followed a symlinked config file")
+	}
+	got, err := os.ReadFile(outside)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "original" {
+		t.Fatalf("outside config changed to %q", got)
 	}
 }

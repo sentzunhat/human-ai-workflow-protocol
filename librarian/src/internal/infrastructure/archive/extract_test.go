@@ -170,3 +170,27 @@ func TestExtractAllRejectsSymlinkAncestor(t *testing.T) {
 		t.Fatalf("symlink target was created: %v", err)
 	}
 }
+
+func TestExtractAllRejectsSymlinkedDestinationParent(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink permissions are not reliable on Windows")
+	}
+
+	root := t.TempDir()
+	outside := filepath.Join(root, "outside")
+	if err := os.Mkdir(outside, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	parent := filepath.Join(root, "parent")
+	if err := os.Symlink(outside, parent); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	archivePath := buildTarGz(t, map[string]string{"safe.txt": "must not write"})
+	if err := ExtractAll(archivePath, filepath.Join(parent, "extracted")); err == nil {
+		t.Fatal("expected symlinked destination parent to be rejected")
+	}
+	if _, err := os.Stat(filepath.Join(outside, "extracted", "safe.txt")); !os.IsNotExist(err) {
+		t.Fatalf("symlink target was written: %v", err)
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"path/filepath"
+	"strings"
 )
 
 func parseValidateArgs(args []string) (string, error) {
@@ -30,7 +31,11 @@ func parseValidateArgs(args []string) (string, error) {
 		return "", fmt.Errorf("--work-root and --hawp-root are mutually exclusive")
 	}
 	if len(roots) == 1 {
-		if workRoot == "" && hawpRoot == "" {
+		root := workRoot
+		if roots[0] == "hawp-root" {
+			root = hawpRoot
+		}
+		if strings.TrimSpace(root) == "" {
 			return "", fmt.Errorf("--%s requires a non-empty path", roots[0])
 		}
 		if roots[0] == "hawp-root" {

@@ -1,8 +1,9 @@
 package location
 
 import (
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	"os"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // Root resolves ~/.hawp/models, matching internal/domain/provision's

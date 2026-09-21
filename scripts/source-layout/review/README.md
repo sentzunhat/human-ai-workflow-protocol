@@ -1,8 +1,8 @@
 # Review snapshot status
 
 `preview.md` and `plan.json` are the previously checked 39-move snapshot.
-They were relocated, not regenerated. The current mapping also proposes context
-configuration/deduplication subfolders and carries the later work-normalization
+They were relocated, not regenerated. The current mapping also proposes a
+deduplication subfolder and carries the later work-normalization
 alignment note; the saved plan predates that revision and is deliberately
 rejected by the current apply gate.
 

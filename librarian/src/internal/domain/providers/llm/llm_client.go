@@ -32,5 +32,3 @@ Reshape this technical context for optimal readability by:
 5. Improving clarity where needed
 
 Keep the total output under {maxTokens} tokens. Preserve all critical information.`
-
-

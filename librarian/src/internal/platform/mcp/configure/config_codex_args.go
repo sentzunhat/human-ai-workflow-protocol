@@ -25,6 +25,12 @@ func codexLaunchArgs(raw any, root string) ([]any, error) {
 	if args[0] != "mcp" {
 		return nil, fmt.Errorf("custom HAWP invocation requires manual merge")
 	}
+	// Keep the managed repository root before all user-supplied options. This
+	// avoids changing the meaning of user arguments that use a separator and
+	// makes the generated invocation's ownership boundary explicit.
+	if len(args) == 1 {
+		return append(args, "--repo-root", root), nil
+	}
 	found := false
 	for i := 1; i < len(args); i++ {
 		arg := args[i].(string)
@@ -51,7 +57,7 @@ func codexLaunchArgs(raw any, root string) ([]any, error) {
 		}
 	}
 	if !found {
-		args = append(args, "--repo-root", root)
+		args = append([]any{"mcp", "--repo-root", root}, args[1:]...)
 	}
 	return args, nil
 }

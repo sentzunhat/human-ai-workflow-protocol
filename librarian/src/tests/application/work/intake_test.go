@@ -3,10 +3,12 @@ package work_test
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
 	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work/intake"
+	worktable "github.com/sentzunhat/hawp/librarian/src/internal/domain/work/table"
 	reposwork "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/work"
 )
 
@@ -92,6 +94,27 @@ func TestNewItemRequiresTitle(t *testing.T) {
 	}
 }
 
+func TestNewItemRejectsSymlinkedHAWPAncestor(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink permissions are not reliable on Windows")
+	}
+	repoRoot := t.TempDir()
+	outside := t.TempDir()
+	workDir := filepath.Join(outside, "work")
+	if err := os.MkdirAll(workDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(workDir, "BACKLOG.md"), []byte(sampleBacklog), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(repoRoot, ".hawp")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	if _, err := appwork.NewItem(filepath.Join(repoRoot, ".hawp", "work"), "task", "safe title", ""); err == nil {
+		t.Fatal("expected symlinked .hawp ancestor to be rejected")
+	}
+}
+
 func TestNewItemDefaultsTypeToTask(t *testing.T) {
 	workDir := setupWorkDir(t)
 	result, err := appwork.NewItem(workDir, "", "Untyped item", "")
@@ -151,7 +174,7 @@ func TestNewItemRespectsBacklogColumns(t *testing.T) {
 			if err := os.WriteFile(path, []byte(original), 0o644); err != nil {
 				t.Fatal(err)
 			}
-			result, err := appwork.NewItem(dir, "bug", "Fix pipe | and\nnewline", "")
+			result, err := appwork.NewItem(dir, "bug", "Fix pipe | safely", "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -163,7 +186,7 @@ func TestNewItemRespectsBacklogColumns(t *testing.T) {
 				t.Fatalf("expected one active row, got %+v", backlog.Active)
 			}
 			row := backlog.Active[0]
-			if row.ID != result.UUID[:8] || row.Status != "inbox" || row.Title != "Fix pipe &#124; and<br>newline" {
+			if row.ID != result.UUID[:8] || row.Status != "inbox" || row.Title != "Fix pipe | safely" {
 				t.Fatalf("shifted or malformed row: %+v", row)
 			}
 			if strings.Contains(header, "Plan File") || strings.Contains(header, "Detail") {
@@ -183,7 +206,7 @@ func TestNewItemRespectsBacklogColumns(t *testing.T) {
 				t.Fatal("row inserted after trailing prose")
 			}
 			for _, line := range strings.Split(text, "\n") {
-				if strings.Contains(line, result.UUID[:8]) && strings.Count(line, "|") != len(columns)+1 {
+				if strings.Contains(line, result.UUID[:8]) && len(worktable.Cells(line)) != len(columns) {
 					t.Fatalf("wrong table width: %s", line)
 				}
 			}

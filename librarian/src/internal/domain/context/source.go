@@ -21,6 +21,6 @@ type BacklogParser interface {
 // implements this interface by delegating to the real file-system / markdown
 // / repo-root packages.
 type ContextSource struct {
-	FileLister   FileLister
+	FileLister    FileLister
 	BacklogParser BacklogParser
 }

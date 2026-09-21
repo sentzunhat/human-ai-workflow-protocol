@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	appindex "github.com/sentzunhat/hawp/librarian/src/internal/application/index"
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/identity"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // buildCorpusFromRepo walks each configured path and builds an enriched corpus.
@@ -52,6 +54,9 @@ func resolveRepoPath(repoRoot, configuredPath string) (string, error) {
 	}
 	if rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
 		return "", fmt.Errorf("configured index path %q escapes repository root", configuredPath)
+	}
+	if err := filesystem.RejectSymlinkAncestors(repoRoot, abs); err != nil {
+		return "", fmt.Errorf("configured index path %q is not safely contained in repository root: %w", configuredPath, err)
 	}
 	return abs, nil
 }
@@ -107,11 +112,18 @@ func walkWorkFiles(workPath string, corpus *appindex.EnrichedCorpus) error {
 		parts := strings.Split(rel, string(filepath.Separator))
 		folderRole := "work"
 		var status *string
+		var workUUID *string
 		if len(parts) > 1 {
 			folderRole = "work/" + parts[0]
 			switch parts[0] {
-			case "active", "parked", "closed":
+			case "active", "parked":
 				status = strPtr(parts[0])
+				workUUID = canonicalWorkUUID(parts[1])
+			case "closed":
+				status = strPtr(parts[0])
+				if len(parts) > 4 {
+					workUUID = canonicalWorkUUID(parts[4])
+				}
 			}
 		}
 
@@ -122,6 +134,7 @@ func walkWorkFiles(workPath string, corpus *appindex.EnrichedCorpus) error {
 			FolderRole: folderRole,
 			Content:    string(content),
 			Status:     status,
+			WorkUUID:   workUUID,
 			Metadata:   map[string]interface{}{"file": filepath.Base(path)},
 		})
 		return nil
@@ -183,6 +196,17 @@ func walkCustomPath(abs, configuredPath string, corpus *appindex.EnrichedCorpus)
 		})
 		return nil
 	})
+}
+
+func canonicalWorkUUID(value string) *string {
+	if short := identity.ExtractShortUUID(value); short != "" {
+		return &short
+	}
+	if identity.IsFullUUID(value) {
+		full := strings.ToLower(value)
+		return &full
+	}
+	return nil
 }
 
 func strPtr(s string) *string {

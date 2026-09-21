@@ -1,7 +1,7 @@
 # v0.1.0 Token-Reduction Gate
 
-**Date:** 2026-09-11  
-**Status:** decided (updated 2026-09-11 — reshape gate split into two metrics)  
+**Date:** 2026-09-11
+**Status:** decided (updated 2026-09-11 — reshape gate split into two metrics)
 **Owner:** beltrd
 
 ## Decision
@@ -11,7 +11,7 @@
 > **≥ 20% average token reduction** on the 10-query standard benchmark suite,
 > measured using the `(len(text)+3)/4` token estimator.
 
-**Status: PASSED** — 23% average (23521 raw → 18029 shaped).  
+**Status: PASSED** — 23% average (23521 raw → 18029 shaped).
 Evidence: `benchmark/runs/2026-09-11-search-token-savings.md`
 
 ---

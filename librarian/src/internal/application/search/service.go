@@ -27,8 +27,7 @@ type projectResolver interface {
 type defaultProjectResolver struct{}
 
 func (defaultProjectResolver) ResolveSearchIndexPath(repoRoot string) (string, error) {
-	project := filesystem.ResolveHawpProject(repoRoot)
-	return project.GetSearchIndexPath(), nil
+	return filesystem.ResolveSafeSearchIndexPath(repoRoot)
 }
 
 type Service struct {

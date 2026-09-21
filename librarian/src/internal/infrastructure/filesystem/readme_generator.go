@@ -14,11 +14,11 @@ func GenerateREADMEs(home, projectRoot string) error {
 
 	// Home folder READMEs
 	homeReadmes := map[string]string{
-		filepath.Join(hawpHome.Root, "README.md"):             homeRootReadme(),
-		filepath.Join(hawpHome.Models, "README.md"):           modelsRootReadme(),
-		filepath.Join(hawpHome.ModelsEmbedding, "README.md"):  embeddingModelsReadme(),
-		filepath.Join(hawpHome.ModelsLLM, "README.md"):        llmModelsReadme(),
-		filepath.Join(hawpHome.Config, "README.md"):           configReadme(),
+		filepath.Join(hawpHome.Root, "README.md"):            homeRootReadme(),
+		filepath.Join(hawpHome.Models, "README.md"):          modelsRootReadme(),
+		filepath.Join(hawpHome.ModelsEmbedding, "README.md"): embeddingModelsReadme(),
+		filepath.Join(hawpHome.ModelsLLM, "README.md"):       llmModelsReadme(),
+		filepath.Join(hawpHome.Config, "README.md"):          configReadme(),
 	}
 
 	for path, content := range homeReadmes {

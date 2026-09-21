@@ -29,3 +29,20 @@ func TestBlankFencesPreservesByteOffsetsForUnicodeContent(t *testing.T) {
 		t.Fatalf("original content at link offset = %q, want original link", got)
 	}
 }
+
+func TestIsLocalHrefRejectsURISchemes(t *testing.T) {
+	for _, href := range []string{
+		"mailto:hello@example.test",
+		"tel:+12045550123",
+		"data:text/plain,hello",
+		"ftp://example.test/file",
+		"file:///tmp/example.md",
+	} {
+		if IsLocalHref(href) {
+			t.Errorf("IsLocalHref(%q) = true, want false", href)
+		}
+	}
+	if !IsLocalHref("plans/item.md#verification") {
+		t.Fatal("relative markdown path should remain local")
+	}
+}

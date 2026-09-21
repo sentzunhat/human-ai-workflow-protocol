@@ -38,7 +38,7 @@ func TestCodexMigrationPreservesCustomSettingsAndComments(t *testing.T) {
 	if !reflect.DeepEqual(server["enabled_tools"], []any{"hawp_search", "hawp_usage", "hawp_work_intake", "hawp_work_new", "hawp_work_validate", "hawp_work_doc", "hawp_work_reshape"}) {
 		t.Fatalf("Codex tool allowlist was not upgraded: %s", out)
 	}
-	if !reflect.DeepEqual(server["args"], []any{"mcp", "--no-update-check", "--repo-root", root}) {
+	if !reflect.DeepEqual(server["args"], []any{"mcp", "--repo-root", root, "--no-update-check"}) {
 		t.Fatalf("lost args: %s", out)
 	}
 	again, err := mergeCodexTOML(out, root)
@@ -83,5 +83,16 @@ func TestCodexMigrationExistingRootAndEmptyTable(t *testing.T) {
 		if err != nil || !bytes.Equal(out, again) {
 			t.Fatalf("not idempotent: %s, %v", out, err)
 		}
+	}
+}
+
+func TestCodexLaunchArgsInjectRootBeforeUserOptions(t *testing.T) {
+	got, err := codexLaunchArgs([]any{"mcp", "--no-update-check"}, "/repo")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []any{"mcp", "--repo-root", "/repo", "--no-update-check"}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("codexLaunchArgs() = %#v, want %#v", got, want)
 	}
 }

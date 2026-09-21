@@ -65,6 +65,19 @@ func (p *HawpProject) GetSearchIndexPath() string {
 	return filepath.Join(p.DB, "index.sqlite")
 }
 
+// ResolveSafeSearchIndexPath returns the repository-local SQLite index path
+// after verifying that every existing path component from projectRoot to the
+// database is a real path rather than a symlink. Missing runtime directories
+// are allowed so first-use indexing can create them safely.
+func ResolveSafeSearchIndexPath(projectRoot string) (string, error) {
+	project := ResolveHawpProject(projectRoot)
+	indexPath := project.GetSearchIndexPath()
+	if err := RejectSymlinkAncestors(projectRoot, indexPath); err != nil {
+		return "", fmt.Errorf("search index path: %w", err)
+	}
+	return indexPath, nil
+}
+
 // GetEmbeddingsCachePath returns the path to the project embeddings cache.
 func (p *HawpProject) GetEmbeddingsCachePath() string {
 	return filepath.Join(p.DB, "embeddings")

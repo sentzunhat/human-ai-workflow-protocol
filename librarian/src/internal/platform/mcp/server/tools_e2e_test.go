@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -161,6 +162,34 @@ func TestToolSearchNoIndex(t *testing.T) {
 	res := resp.Result.(toolResult)
 	if !res.IsError {
 		t.Error("expected IsError=true when no index exists")
+	}
+}
+
+func TestToolSearchRejectsSymlinkedDatabaseAncestor(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink permissions are not reliable on Windows")
+	}
+
+	root := t.TempDir()
+	outside := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(root, ".hawp"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(root, ".hawp", "db")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	args, _ := json.Marshal(map[string]any{"query": "anything"})
+	resp := toolSearch(args, root)
+	res := resp.Result.(toolResult)
+	if !res.IsError {
+		t.Fatal("expected symlinked database ancestor to be rejected")
+	}
+	if len(res.Content) == 0 || !strings.Contains(res.Content[0].Text, "unsafe") {
+		t.Fatalf("expected unsafe index-path error, got %#v", res.Content)
+	}
+	if _, err := os.Stat(filepath.Join(outside, "index.sqlite")); !os.IsNotExist(err) {
+		t.Fatalf("search created database through symlink: %v", err)
 	}
 }
 
