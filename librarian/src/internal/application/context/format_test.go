@@ -3,9 +3,22 @@ package context
 import (
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
 )
+
+func TestTruncateToTokensPreservesUTF8(t *testing.T) {
+	text := strings.Repeat("界", 20)
+	got := truncateToTokens(text, 10)
+
+	if !utf8.ValidString(got) {
+		t.Fatalf("truncateToTokens returned invalid UTF-8: %q", got)
+	}
+	if got == text || !strings.HasSuffix(got, "...") {
+		t.Fatalf("truncateToTokens(%q) = %q, want truncated output", text, got)
+	}
+}
 
 func TestFormatAsMarkdown(t *testing.T) {
 	results := []search.Result{

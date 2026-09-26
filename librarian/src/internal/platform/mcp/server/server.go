@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -18,7 +19,7 @@ type rpcRequest struct {
 
 type rpcResponse struct {
 	JSONRPC string           `json:"jsonrpc"`
-	ID      *json.RawMessage `json:"id,omitempty"`
+	ID      *json.RawMessage `json:"id"`
 	Result  any              `json:"result,omitempty"`
 	Error   *rpcError        `json:"error,omitempty"`
 }
@@ -32,17 +33,46 @@ type rpcError struct {
 // stdout until stdin closes. repoRoot is the HAWP project directory used
 // by all tool handlers.
 func Serve(repoRoot, version string) error {
-	scanner := bufio.NewScanner(os.Stdin)
+	return serve(os.Stdin, os.Stdout, repoRoot, version)
+}
+
+func serve(in io.Reader, out io.Writer, repoRoot, version string) error {
+	scanner := bufio.NewScanner(in)
 	scanner.Buffer(make([]byte, 1024*1024), 1024*1024)
-	enc := json.NewEncoder(os.Stdout)
+	enc := json.NewEncoder(out)
 
 	for scanner.Scan() {
 		line := scanner.Bytes()
 		if len(line) == 0 {
 			continue
 		}
+		if !json.Valid(line) {
+			if err := enc.Encode(rpcResponse{
+				JSONRPC: "2.0",
+				Error:   &rpcError{Code: -32700, Message: "parse error"},
+			}); err != nil {
+				return err
+			}
+			continue
+		}
 		var req rpcRequest
 		if err := json.Unmarshal(line, &req); err != nil {
+			if err := enc.Encode(rpcResponse{
+				JSONRPC: "2.0",
+				Error:   &rpcError{Code: -32600, Message: "invalid request"},
+			}); err != nil {
+				return err
+			}
+			continue
+		}
+		if req.JSONRPC != "2.0" || req.Method == "" {
+			if err := enc.Encode(rpcResponse{
+				JSONRPC: "2.0",
+				ID:      req.ID,
+				Error:   &rpcError{Code: -32600, Message: "invalid request"},
+			}); err != nil {
+				return err
+			}
 			continue
 		}
 		// Notifications carry no ID — no response.
@@ -52,7 +82,9 @@ func Serve(repoRoot, version string) error {
 		resp := dispatch(req, repoRoot, version)
 		resp.JSONRPC = "2.0"
 		resp.ID = req.ID
-		_ = enc.Encode(resp)
+		if err := enc.Encode(resp); err != nil {
+			return err
+		}
 	}
 	return scanner.Err()
 }
