@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 
 	domainupdate "github.com/sentzunhat/hawp/librarian/src/internal/domain/update"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/download"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/githubrelease"
+	download "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/clients/download"
+	githubrelease "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/clients/githubrelease"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/selfreplace"
 )
 

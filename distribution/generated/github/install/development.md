@@ -280,6 +280,8 @@ Do not use `development` branch for production unless you are actively testing.
 
 Run this from the root of your target repository. No edits are required; branch and provider are already configured in the command. Each run fetches the latest commit from that branch.
 
+Downloadable script artifact: `github/install/development.sh`.
+
 ```bash
 set -euo pipefail
 
@@ -328,6 +330,20 @@ else
   echo "Source mode: remote archive"
 fi
 
+reject_hawp_symlinks() {
+  if [ -L ".hawp" ]; then
+    echo "Error: refusing to follow symlinked .hawp root"
+    exit 1
+  fi
+  [ -d ".hawp" ] || return 0
+  link_path="$(find .hawp -type l -print -quit 2>/dev/null || true)"
+  if [ -n "$link_path" ]; then
+    echo "Error: refusing to follow symlink inside .hawp: $link_path"
+    exit 1
+  fi
+}
+reject_hawp_symlinks
+
 if [ -d ".hawp" ]; then
   echo "Preflight: detected existing .hawp/."
   echo "Switching to update-compatible refresh mode for this run."
@@ -353,23 +369,66 @@ reconcile_closed_plans_from_backlog() {
   backlog=".hawp/work/BACKLOG.md"
   [ -f "$backlog" ] || return 0
 
-  awk -F'|' '
+  awk '
     function trim(s) { gsub(/^[[:space:]]+|[[:space:]]+$/, "", s); return s }
-    /^## Done/        { section="done";   next }
-    /^## Active/      { section="active"; next }
-    /^## /            { section="";       next }
+    function clear_headers( key) { for (key in headers) delete headers[key]; have_headers = 0 }
+    function split_cells(line, cells,    i, ch, cell, escaped, count) {
+      line = trim(line)
+      if (substr(line, 1, 1) != "|" || substr(line, length(line), 1) != "|") return 0
+      cell = ""; escaped = 0; count = 0
+      for (i = 2; i < length(line); i++) {
+        ch = substr(line, i, 1)
+        if (escaped) {
+          cell = cell ((ch == "\\" || ch == "|") ? ch : "\\" ch)
+          escaped = 0
+        } else if (ch == "\\") {
+          escaped = 1
+        } else if (ch == "|") {
+          cells[++count] = trim(cell); cell = ""
+        } else {
+          cell = cell ch
+        }
+      }
+      if (escaped) cell = cell "\\"
+      cells[++count] = trim(cell)
+      return count
+    }
+    function value(name) { return (tolower(name) in headers) ? fields[headers[tolower(name)]] : "" }
+    function without_code_span(s) {
+      s = trim(s)
+      if (substr(s, 1, 1) == "`" && substr(s, length(s), 1) == "`") return substr(s, 2, length(s) - 2)
+      return s
+    }
+    /^## (Recently Closed|Done)/ { section="done"; clear_headers(); next }
+    /^## Active/                 { section="active"; clear_headers(); next }
+    /^## /                       { section=""; clear_headers(); next }
     section != "" && /^\|/ {
-      id   = trim($2)
-      col5 = trim($5)
-      col6 = trim($6)
+      for (field in fields) delete fields[field]
+      count = split_cells($0, fields)
+      if (count == 0) next
+      if (!have_headers) {
+        if (fields[1] ~ /^-+$/) next
+        for (column = 1; column <= count; column++) headers[tolower(fields[column])] = column
+        have_headers = 1
+        next
+      }
+      if (fields[1] ~ /^-+$/) next
+      id = without_code_span(value("uuid"))
+      if (id == "" || id == "-" || id == "—") id = without_code_span(value("id"))
+      if (id == "" || id == "-" || id == "—") id = without_code_span(value("legacy id"))
+      if (id == "" || id == "-" || id == "—") id = without_code_span(value("#"))
       if (id == "" || id ~ /^-+$/ || id == "ID") next
       if (section == "done") {
-        closed = col5
-        plan   = col6
+        closed = without_code_span(value("closed"))
+        if (closed == "") closed = without_code_span(value("updated"))
+        plan = value("detail")
+        if (plan == "") plan = value("plan file")
       } else {
-        if (col5 !~ /^(done|wont-fix)$/ && col5 !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) next
-        closed = (col5 ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) ? col5 : ""
-        plan   = col6
+        status = without_code_span(value("status"))
+        if (status !~ /^(done|wont-fix)$/ && status !~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) next
+        closed = (status ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/) ? status : ""
+        plan = value("plan file")
+        if (plan == "") plan = value("detail")
       }
       link = ""
       if (match(plan, /\(([^)]+)\)/)) {
@@ -377,9 +436,9 @@ reconcile_closed_plans_from_backlog() {
       } else {
         link = plan
       }
-      print id "\t" closed "\t" link
+      print id "\034" closed "\034" link
     }
-  ' "$backlog" | while IFS=$'\t' read -r id closed link_path; do
+  ' "$backlog" | while IFS=$'\034' read -r id closed link_path; do
     [ -n "$id" ] || continue
 
     closed_path=""
@@ -391,8 +450,19 @@ reconcile_closed_plans_from_backlog() {
     closed_path="${closed_path%%#*}"
 
     if [ -n "$closed_path" ]; then
+      case "/$closed_path/" in
+        */../*|*/./*)
+          echo "  skipped unsafe closed-plan path: $link_path"
+          continue
+          ;;
+      esac
       plan_name="$(basename "$closed_path")"
-      src=".hawp/work/active/$plan_name"
+      plan_dir="$(basename "$(dirname "$closed_path")")"
+      if [ "$plan_name" = "plan.md" ] && [ "$plan_dir" != "." ]; then
+        src=".hawp/work/active/$plan_dir/plan.md"
+      else
+        src=".hawp/work/active/$plan_name"
+      fi
       dest=".hawp/work/$closed_path"
       if [ -f "$src" ] && [ ! -e "$dest" ]; then
         mkdir -p "$(dirname "$dest")"
@@ -496,9 +566,10 @@ cp -R "$SRC/.hawp/kit/references" .hawp/kit/
 cp -R "$SRC/.hawp/kit/standards"  .hawp/kit/
 
 # --- 4b. Install hawp CLI binary (platform-detected from GitHub release) ---
-install_hawp_binary() {
+install_hawp_binary() (
+  set -eo pipefail
   local _os _arch _asset _ext _dest _url _checksum_url _expected _actual
-  local _tag
+  local _tag _tmpdir
 
   _os="$(uname -s | tr '[:upper:]' '[:lower:]')"
   _arch="$(uname -m)"
@@ -524,7 +595,7 @@ install_hawp_binary() {
   esac
 
   _asset="hawp-${_os}-${_arch}${_ext}"
-  _dest=".hawp/bin/hawp-bin${_ext}"
+  _dest=".hawp/bin/hawp${_ext}"
 
   # Resolve latest release tag from GitHub API.
   _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" 2>/dev/null \
@@ -536,8 +607,12 @@ install_hawp_binary() {
   fi
 
   if [ -z "$_tag" ]; then
-    echo "hawp install: could not resolve latest release tag — skipping binary install."
-    return 0
+    if [ -f "$_dest" ]; then
+      echo "hawp install: could not resolve latest release tag — installed binary preserved."
+      return 0
+    fi
+    echo "hawp install: could not resolve latest release tag — cannot install binary." >&2
+    return 1
   fi
 
   _url="https://github.com/${OWNER}/${REPO}/releases/download/${_tag}/${_asset}"
@@ -545,47 +620,42 @@ install_hawp_binary() {
 
   echo "hawp binary: ${_asset} (release ${_tag})"
   mkdir -p .hawp/bin
-  curl -fsSL -o "${_dest}.tmp" "$_url" || {
-    echo "hawp install: download failed — skipping binary install."
-    return 0
+  _tmpdir="$(mktemp -d ".hawp/bin/.hawp-download.XXXXXX")"
+  trap "$(printf 'rm -rf -- %q' "$_tmpdir")" EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+  curl -fsSL --proto '=https' --proto-redir '=https' -o "$_tmpdir/binary" "$_url" || {
+    echo "hawp install: binary download failed; installed binary preserved."
+    return 1
   }
-
-  # Verify SHA256 when checksums.txt is available
-  if curl -fsSL -o /tmp/hawp-checksums.txt "$_checksum_url" 2>/dev/null; then
-    _expected="$(grep " ${_asset}$" /tmp/hawp-checksums.txt | awk '{print $1}')"
-    if [ -n "$_expected" ]; then
-      if command -v sha256sum >/dev/null 2>&1; then
-        _actual="$(sha256sum "${_dest}.tmp" | awk '{print $1}')"
-      elif command -v shasum >/dev/null 2>&1; then
-        _actual="$(shasum -a 256 "${_dest}.tmp" | awk '{print $1}')"
-      else
-        _actual=""
-      fi
-      if [ -n "$_actual" ] && [ "$_actual" != "$_expected" ]; then
-        echo "hawp install: SHA256 mismatch — aborting binary install."
-        rm -f "${_dest}.tmp"
-        return 1
-      fi
-      [ -n "$_actual" ] && echo "hawp binary: SHA256 verified."
-    fi
-    rm -f /tmp/hawp-checksums.txt
+  curl -fsSL --proto '=https' --proto-redir '=https' -o "$_tmpdir/checksums" "$_checksum_url" || {
+    echo "hawp install: checksums unavailable; installed binary preserved."
+    return 1
+  }
+  _expected="$(awk -v asset="$_asset" '$2 == asset || $2 == "*" asset { print $1 }' "$_tmpdir/checksums")"
+  if [[ ! "$_expected" =~ ^[[:xdigit:]]{64}$ ]]; then
+    echo "hawp install: expected exactly one valid SHA256 entry for $_asset."
+    return 1
   fi
-
-  mv "${_dest}.tmp" "$_dest"
-  chmod +x "$_dest"
-
-  # Install the shell wrapper at .hawp/bin/hawp so it delegates to hawp-bin.
-  if [ -f "$SRC/.hawp/bin/hawp" ]; then
-    cp "$SRC/.hawp/bin/hawp" .hawp/bin/hawp
-    chmod +x .hawp/bin/hawp
+  _expected="$(printf '%s' "$_expected" | tr '[:upper:]' '[:lower:]')"
+  if command -v sha256sum >/dev/null 2>&1; then
+    _actual="$(sha256sum "$_tmpdir/binary" | awk '{print $1}')"
+  elif command -v shasum >/dev/null 2>&1; then
+    _actual="$(shasum -a 256 "$_tmpdir/binary" | awk '{print $1}')"
+  else
+    echo "hawp install: a SHA256 utility is required."
+    return 1
   fi
-  if [ -f "$SRC/.hawp/bin/hawp-mcp" ]; then
-    cp "$SRC/.hawp/bin/hawp-mcp" .hawp/bin/hawp-mcp
-    chmod +x .hawp/bin/hawp-mcp
+  if [ "$_actual" != "$_expected" ]; then
+    echo "hawp install: SHA256 mismatch; installed binary preserved."
+    return 1
   fi
+  echo "hawp binary: SHA256 verified."
+  chmod 755 "$_tmpdir/binary"
+  mv -f "$_tmpdir/binary" "$_dest"
 
   echo "hawp binary: installed to ${_dest}"
-}
+)
 install_hawp_binary
 
 rm -rf .hawp/templates .hawp/patterns .hawp/reviews .hawp/examples .hawp/types .hawp/usage
@@ -640,7 +710,7 @@ if [ -n "$TMP_DIR" ] && [ -d "$TMP_DIR" ]; then
 fi
 
 echo "HAWP install complete (provider: ${PROVIDER})."
-echo "Refreshed: .hawp/LICENSE, .hawp/kit/**, .hawp/bin/hawp (platform binary)"
+echo "Refreshed: .hawp/LICENSE, .hawp/kit/**, .hawp/bin/hawp (native executable)"
 echo "Preserved: .hawp/work/** (no-overwrite)"
 echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .hawp/work/active/ when eligible (see 'reconciled (link):' and 'reconciled (id-fallback):' lines above)"
 ```
@@ -655,6 +725,10 @@ This file is generated. Do not edit it directly.
 Generated output file:
 
 - `distribution/generated/github/install/development.md`
+
+Generated shell script:
+
+- `distribution/generated/github/install/development.sh`
 
 Provider: `github` · Operation: `install` · Branch: `development`
 

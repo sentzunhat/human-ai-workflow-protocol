@@ -3,8 +3,11 @@ package kit
 import (
 	"fmt"
 	"io"
+	"os"
 
 	domainkit "github.com/sentzunhat/hawp/librarian/src/internal/domain/kit"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/markdown"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 )
 
@@ -13,6 +16,13 @@ type NormalizeOptions struct {
 	KitPath  string
 	RepoRoot string
 	Apply    bool
+}
+
+var defaultKitSource = &domainkit.KitSource{
+	FileLister:     func(kitPath string, skipReadme bool) []string { return markdown.CollectFiles(kitPath, skipReadme) },
+	BlankFences:    markdown.BlankFences,
+	Exists:         repo.Exists,
+	ToRepoRelative: repo.ToRepoRelative,
 }
 
 // Normalize plans (and in apply mode performs) kit file renames and link
@@ -27,12 +37,19 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 	}
 	fmt.Fprintf(out, "mode: %s\n\n", mode)
 
-	renames := domainkit.PlanFileRenames(opts.KitPath)
+	if opts.Apply {
+		if err := filesystem.RejectSymlinksInTree(opts.RepoRoot, opts.KitPath); err != nil {
+			fmt.Fprintf(errOut, "kit normalize error: unsafe kit path: %v\n", err)
+			return 1
+		}
+	}
+
+	renames := domainkit.PlanFileRenames(opts.KitPath, os.ReadDir)
 	renameMap := make(map[string]string, len(renames))
 	for _, rename := range renames {
 		renameMap[rename.From] = rename.To
 	}
-	linkUpdates := domainkit.PlanLinkUpdates(opts.KitPath, renameMap)
+	linkUpdates := defaultKitSource.PlanLinkUpdates(opts.KitPath, renameMap, os.ReadFile)
 
 	if !opts.Apply {
 		if len(renames) == 0 && len(linkUpdates) == 0 {
@@ -62,7 +79,16 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 		return 1
 	}
 
-	conflictFrom, conflictTo, err := domainkit.ApplyRenames(renames)
+	safeRename := func(from, to string) error {
+		if err := filesystem.RejectSymlinkAncestors(opts.RepoRoot, from); err != nil {
+			return fmt.Errorf("unsafe rename source %s: %w", from, err)
+		}
+		if err := filesystem.RejectSymlinkAncestors(opts.RepoRoot, to); err != nil {
+			return fmt.Errorf("unsafe rename target %s: %w", to, err)
+		}
+		return os.Rename(from, to)
+	}
+	conflictFrom, conflictTo, err := domainkit.ApplyRenames(renames, os.Stat, safeRename)
 	if err != nil {
 		fmt.Fprintf(errOut, "kit normalize error: %v\n", err)
 		return 1
@@ -74,7 +100,16 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 		return 1
 	}
 
-	changedFiles, err := domainkit.ApplyLinkUpdates(linkUpdates)
+	safeReadFile := func(path string) ([]byte, error) {
+		if err := filesystem.RejectSymlinkAncestors(opts.RepoRoot, path); err != nil {
+			return nil, err
+		}
+		return os.ReadFile(path)
+	}
+	safeWriteFile := func(path string, data []byte, perm os.FileMode) error {
+		return filesystem.AtomicWriteFile(opts.RepoRoot, path, data, perm)
+	}
+	changedFiles, err := domainkit.ApplyLinkUpdates(linkUpdates, safeReadFile, safeWriteFile)
 	if err != nil {
 		fmt.Fprintf(errOut, "kit normalize error: %v\n", err)
 		return 1

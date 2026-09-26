@@ -6,9 +6,12 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/sentzunhat/hawp/librarian/src/internal/domain/embeddings"
-	"github.com/sentzunhat/hawp/librarian/src/internal/domain/llm"
+	embeddings "github.com/sentzunhat/hawp/librarian/src/internal/domain/providers/embeddings"
+	llm "github.com/sentzunhat/hawp/librarian/src/internal/domain/providers/llm"
 )
+
+type EmbedderFactory func(backend, model, url string) (embeddings.Embedder, error)
+type LLMFactory func(backend, model, url string) (llm.LLMClient, error)
 
 // ReshapedBlock is the improved version of a ContextBlock after going through the pipeline.
 // It wraps the original context with semantic improvements.
@@ -79,7 +82,7 @@ type ContextReshaper struct {
 //	    log.Fatalf("Failed to create reshaper: %v", err)
 //	}
 //	defer reshaper.Close()
-func NewContextReshaper(config ReshapingConfig) (*ContextReshaper, error) {
+func NewContextReshaper(config ReshapingConfig, newEmbedder EmbedderFactory, newLLM LLMFactory) (*ContextReshaper, error) {
 	if config.TopK == 0 {
 		config.TopK = 5 // Default to 5 key concepts
 	}
@@ -87,16 +90,19 @@ func NewContextReshaper(config ReshapingConfig) (*ContextReshaper, error) {
 		config.MaxTokens = 512 // Default token budget for LLM
 	}
 
-	// Initialize embedder (ONNX or Ollama). EmbeddingsURL is honored only by
-	// backends that use it (Ollama); NewEmbedderWithURL ignores it for ONNX.
-	embedder, err := embeddings.NewEmbedderWithURL(config.EmbeddingsBackend, config.EmbeddingsModel, config.EmbeddingsURL)
+	if newEmbedder == nil || newLLM == nil {
+		return nil, fmt.Errorf("model factories are not configured")
+	}
+
+	// Initialize embedder (ONNX or Ollama). The application owns the config;
+	// bootstrap owns the concrete factory.
+	embedder, err := newEmbedder(config.EmbeddingsBackend, config.EmbeddingsModel, config.EmbeddingsURL)
 	if err != nil {
 		return nil, fmt.Errorf("initialize embedder: %w", err)
 	}
 
-	// Initialize LLM client (Ollama or ONNX scaffolding). LLMURL is honored
-	// only by backends that use it (Ollama).
-	llmClient, err := llm.NewLLMClientWithURL(config.LLMBackend, config.LLMModel, config.LLMURL)
+	// Initialize LLM client (Ollama or ONNX scaffolding).
+	llmClient, err := newLLM(config.LLMBackend, config.LLMModel, config.LLMURL)
 	if err != nil {
 		embedder.Close()
 		return nil, fmt.Errorf("initialize LLM: %w", err)

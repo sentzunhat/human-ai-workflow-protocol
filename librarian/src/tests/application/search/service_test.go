@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
+	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
 )
 
 func TestQueryErrorsWithoutIndex(t *testing.T) {

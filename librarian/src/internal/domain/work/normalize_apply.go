@@ -1,16 +1,17 @@
 package work
 
 import (
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/normalization"
+	"github.com/sentzunhat/hawp/librarian/src/internal/domain/work/validation"
 )
 
 var (
 	legacyIDInPathRe   = regexp.MustCompile(`(?i)(TASK|BUG)-\d+`)
 	closedDateInPathRe = regexp.MustCompile(`/closed/(\d{4})/(\d{2})/(\d{2})/`)
-	fileDatePrefixRe   = regexp.MustCompile(`^(\d{4})-(\d{2})-(\d{2})-`)
 	backlogIDLineRe    = regexp.MustCompile(`(?i)\*\*Backlog ID:\*\*`)
 	h1Re               = regexp.MustCompile(`^#\s+`)
 	multiBlankRe       = regexp.MustCompile(`\n{3,}`)
@@ -18,29 +19,8 @@ var (
 	verifyHeadBodyRe   = regexp.MustCompile(`(?ms)(^##\s+Verification\b[^\n]*\n)(.*?)(?:^##\s+|\z)`)
 )
 
-// ApplyResult summarizes an apply-mode normalization run.
-type ApplyResult struct {
-	ChangedFiles  []string
-	SkippedFiles  []string
-	ResearchQueue []ResearchItem
-}
-
 func inferBacklogIDFromPath(path string) string {
 	return strings.ToUpper(legacyIDInPathRe.FindString(path))
-}
-
-func inferClosedDateFromPath(path string) string {
-	if m := closedDateInPathRe.FindStringSubmatch(strings.ReplaceAll(path, "\\", "/")); m != nil {
-		return m[1] + "-" + m[2] + "-" + m[3]
-	}
-	return ""
-}
-
-func inferFileDatePrefix(path string) string {
-	if m := fileDatePrefixRe.FindStringSubmatch(filepath.Base(path)); m != nil {
-		return m[1] + "-" + m[2] + "-" + m[3]
-	}
-	return ""
 }
 
 func ensureBlankLine(content string) string {
@@ -131,96 +111,23 @@ func ensureEvidenceFollowUp(content string) (string, []string) {
 
 // normalizeClosedRecord scaffolds missing sections and evidence follow-ups.
 func normalizeClosedRecord(content, filePath string) (string, []string) {
-	updated := content
-	if id := inferBacklogIDFromPath(filePath); id != "" {
-		updated = insertBacklogID(updated, id)
-	}
-	updated = appendSection(updated, "Outcome", "_Legacy normalization scaffold added._")
-	updated = appendSection(updated, "Verification", "_Legacy normalization scaffold added._")
-	updated = appendSection(updated, "Close Checklist", "- [ ] Legacy normalization scaffold added.")
-	return ensureEvidenceFollowUp(updated)
-}
-
-// reconcileClosedRecordPath moves date-prefixed files into the matching
-// closed/YYYY/MM/DD/ folder when they live elsewhere.
-func reconcileClosedRecordPath(repoRoot, absolutePath string) (string, bool, error) {
-	fileDate := inferFileDatePrefix(absolutePath)
-	if fileDate == "" || inferClosedDateFromPath(absolutePath) == fileDate {
-		return absolutePath, false, nil
-	}
-	parts := strings.SplitN(fileDate, "-", 3)
-	target := filepath.Join(repoRoot, ".hawp", "work", "closed", parts[0], parts[1], parts[2], filepath.Base(absolutePath))
-	if target == absolutePath {
-		return absolutePath, false, nil
-	}
-	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
-		return absolutePath, false, err
-	}
-	if _, err := os.Stat(target); err == nil {
-		return absolutePath, false, nil
-	}
-	if err := os.Rename(absolutePath, target); err != nil {
-		return absolutePath, false, err
-	}
-	return target, true, nil
+	return normalization.NormalizeClosedRecord(content, filePath)
 }
 
 // ApplyClosedRecordNormalization normalizes every closed record in place.
-func ApplyClosedRecordNormalization(repoRoot string) (ApplyResult, error) {
-	result := ApplyResult{}
-	closedRoot := filepath.Join(repoRoot, ".hawp", "work", "closed")
-	touched := map[string]struct{}{}
-
-	for _, absolutePath := range walkPlanMarkdown(closedRoot) {
-		currentPath, moved, err := reconcileClosedRecordPath(repoRoot, absolutePath)
-		if err != nil {
-			return result, err
-		}
-		if moved {
-			touched[currentPath] = struct{}{}
-		}
-
-		raw, err := os.ReadFile(currentPath)
-		if err != nil {
-			return result, err
-		}
-		current := string(raw)
-		next, addedClaims := normalizeClosedRecord(current, currentPath)
-
-		if next == current {
-			if !backlogIDLineRe.MatchString(current) && inferBacklogIDFromPath(absolutePath) == "" {
-				result.SkippedFiles = append(result.SkippedFiles, absolutePath)
-			}
-			continue
-		}
-		if err := os.WriteFile(currentPath, []byte(next), 0o644); err != nil {
-			return result, err
-		}
-		touched[currentPath] = struct{}{}
-
-		for _, claim := range addedClaims {
-			itemID := inferBacklogIDFromPath(currentPath)
-			if itemID == "" {
-				itemID = strings.ToUpper(strings.TrimSuffix(filepath.Base(currentPath), ".md"))
-			}
-			result.ResearchQueue = append(result.ResearchQueue, ResearchItem{
-				ItemID: itemID, Claim: claim, FilePath: currentPath, LineNumber: 0,
-				RecommendedAction: "Gather supporting proof for this verification claim, then replace the original checklist entry with an Evidence: citation or mark it explicitly unproven.",
-			})
-		}
-	}
-
-	for path := range touched {
-		result.ChangedFiles = append(result.ChangedFiles, path)
-	}
-	return result, nil
+func (w *WorkSource) ApplyClosedRecordNormalization(repoRoot string) (ApplyResult, error) {
+	return normalization.ApplyClosedRecordNormalization(repoRoot, normalization.ClosedSource{
+		ScanSource: normalization.ScanSource{ReadDir: w.ReadDir, ReadFile: w.ReadFile, Stat: w.Stat},
+		MkdirAll:   w.MkdirAll, Rename: w.Rename, WriteFile: w.WriteFile,
+		RejectSymlinkAncestors: w.RejectSymlinkAncestors,
+	})
 }
 
 // BuildResearchQueue lists ambiguous verification claims across all closed
 // records for dry-run reporting.
-func BuildResearchQueue(repoRoot string) []ResearchItem {
+func BuildResearchQueue(repoRoot string, source *WorkSource) []ResearchItem {
 	closedRoot := filepath.Join(repoRoot, ".hawp", "work", "closed")
-	clarity := CheckVerificationClarity(walkPlanMarkdown(closedRoot))
+	clarity := validation.CheckVerificationClarity(normalization.WalkPlanMarkdown(closedRoot, normalization.ScanSource{ReadDir: source.ReadDir}), validation.Source{ReadFile: source.ReadFile})
 	items := make([]ResearchItem, 0, len(clarity.Ambiguous))
 	for _, claim := range clarity.Ambiguous {
 		items = append(items, ResearchItem{

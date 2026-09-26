@@ -3,10 +3,13 @@ package work_test
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
-	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work"
+	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work/intake"
+	worktable "github.com/sentzunhat/hawp/librarian/src/internal/domain/work/table"
+	reposwork "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/work"
 )
 
 const sampleBacklog = `# Backlog
@@ -91,6 +94,27 @@ func TestNewItemRequiresTitle(t *testing.T) {
 	}
 }
 
+func TestNewItemRejectsSymlinkedHAWPAncestor(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink permissions are not reliable on Windows")
+	}
+	repoRoot := t.TempDir()
+	outside := t.TempDir()
+	workDir := filepath.Join(outside, "work")
+	if err := os.MkdirAll(workDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(workDir, "BACKLOG.md"), []byte(sampleBacklog), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(repoRoot, ".hawp")); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	if _, err := appwork.NewItem(filepath.Join(repoRoot, ".hawp", "work"), "task", "safe title", ""); err == nil {
+		t.Fatal("expected symlinked .hawp ancestor to be rejected")
+	}
+}
+
 func TestNewItemDefaultsTypeToTask(t *testing.T) {
 	workDir := setupWorkDir(t)
 	result, err := appwork.NewItem(workDir, "", "Untyped item", "")
@@ -130,5 +154,91 @@ func TestNewItemFailsOnMissingBacklog(t *testing.T) {
 	_, err := appwork.NewItem(dir, "task", "Some item", "")
 	if err == nil {
 		t.Error("NewItem should fail when BACKLOG.md doesn't exist")
+	}
+}
+
+func TestNewItemRespectsBacklogColumns(t *testing.T) {
+	for _, header := range []string{
+		"UUID | Type | Title | Status | Owner | Plan File | Updated",
+		"UUID | Legacy ID | Type | Title | Status | Owner | Plan File | Updated",
+		"Title | Status | ID | Detail | Type | Priority",
+		"# | Status | Title | Plan File | Next action",
+		"ID | Title | Status",
+	} {
+		t.Run(header, func(t *testing.T) {
+			dir := t.TempDir()
+			columns := strings.Split(header, " | ")
+			separator := "|" + strings.Repeat(" --- |", len(columns))
+			original := "# Backlog\n\n## Active Work\n\n| " + header + " |\n" + separator + "\n\nKeep this note.\n\n## Blocked / Parked\n"
+			path := filepath.Join(dir, "BACKLOG.md")
+			if err := os.WriteFile(path, []byte(original), 0o644); err != nil {
+				t.Fatal(err)
+			}
+			result, err := appwork.NewItem(dir, "bug", "Fix pipe | safely", "")
+			if err != nil {
+				t.Fatal(err)
+			}
+			backlog, err := reposwork.ReadBacklog(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(backlog.Active) != 1 {
+				t.Fatalf("expected one active row, got %+v", backlog.Active)
+			}
+			row := backlog.Active[0]
+			if row.ID != result.UUID[:8] || row.Status != "inbox" || row.Title != "Fix pipe | safely" {
+				t.Fatalf("shifted or malformed row: %+v", row)
+			}
+			if strings.Contains(header, "Plan File") || strings.Contains(header, "Detail") {
+				if !strings.Contains(row.Detail, "active/"+result.UUID[:8]+"/plan.md") {
+					t.Fatalf("missing plan link: %+v", row)
+				}
+			}
+			if _, err := os.Stat(result.PlanFilePath); err != nil {
+				t.Fatalf("missing UUID plan: %v", err)
+			}
+			data, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			text := string(data)
+			if strings.Index(text, result.UUID[:8]) > strings.Index(text, "Keep this note.") {
+				t.Fatal("row inserted after trailing prose")
+			}
+			for _, line := range strings.Split(text, "\n") {
+				if strings.Contains(line, result.UUID[:8]) && len(worktable.Cells(line)) != len(columns) {
+					t.Fatalf("wrong table width: %s", line)
+				}
+			}
+		})
+	}
+}
+
+func TestNewItemInvalidTableDoesNotWrite(t *testing.T) {
+	for _, table := range []string{
+		"",
+		"| UUID | Title |\n| --- | --- |\n",
+		"| UUID | Title | Status | Plan File |\n",
+		"| UUID | Title | Status | Status | Plan File |\n| --- | --- | --- | --- | --- |\n",
+	} {
+		dir := t.TempDir()
+		path := filepath.Join(dir, "BACKLOG.md")
+		original := "# Backlog\n\n## Active Work\n\n" + table
+		if err := os.WriteFile(path, []byte(original), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := appwork.NewItem(dir, "task", "Example", ""); err == nil {
+			t.Fatalf("accepted invalid table: %q", table)
+		}
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if string(data) != original {
+			t.Fatal("backlog changed on refusal")
+		}
+		if _, err := os.Stat(filepath.Join(dir, "active")); !os.IsNotExist(err) {
+			t.Fatalf("created artifacts on refusal: %v", err)
+		}
 	}
 }

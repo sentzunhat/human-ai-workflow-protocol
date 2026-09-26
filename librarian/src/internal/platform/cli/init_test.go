@@ -7,10 +7,10 @@ import (
 	"strings"
 	"testing"
 
-	domainprovision "github.com/sentzunhat/hawp/librarian/src/internal/domain/provision"
 	appprovision "github.com/sentzunhat/hawp/librarian/src/internal/application/provision"
-	appmcp "github.com/sentzunhat/hawp/librarian/src/internal/platform/mcp"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/download"
+	domainprovision "github.com/sentzunhat/hawp/librarian/src/internal/domain/provision"
+	download "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/clients/download"
+	appmcp "github.com/sentzunhat/hawp/librarian/src/internal/platform/mcp/configure"
 )
 
 // TestProviderConfigWrittenAfterProvisionFailure is a regression test for the
@@ -32,7 +32,7 @@ func TestProviderConfigWrittenAfterProvisionFailure(t *testing.T) {
 			{
 				Name:     "bad_model",
 				URL:      "http://localhost:1/nonexistent", // unreachable
-				SHA256:   strings.Repeat("0", 64),         // wrong checksum
+				SHA256:   strings.Repeat("0", 64),          // wrong checksum
 				Size:     100,
 				DestName: "bad/model.bin",
 			},
@@ -45,6 +45,7 @@ func TestProviderConfigWrittenAfterProvisionFailure(t *testing.T) {
 
 	// Despite provision failure, provider config write must succeed.
 	repoRoot := t.TempDir()
+	writeMCPPrerequisites(t, repoRoot)
 	if err := appmcp.WriteProviderConfigs(repoRoot, []string{"codex"}); err != nil {
 		t.Fatalf("WriteProviderConfigs failed after provision failure: %v", err)
 	}
@@ -73,6 +74,7 @@ func TestProviderConfigWrittenAfterProvisionFailure_AllProviders(t *testing.T) {
 	}
 
 	repoRoot := t.TempDir()
+	writeMCPPrerequisites(t, repoRoot)
 	if err := appmcp.WriteProviderConfigs(repoRoot, []string{"claude", "cursor", "codex"}); err != nil {
 		t.Fatalf("WriteProviderConfigs failed: %v", err)
 	}
@@ -92,6 +94,21 @@ func TestProviderConfigWrittenAfterProvisionFailure_AllProviders(t *testing.T) {
 		}
 		if !strings.Contains(string(data), want.text) {
 			t.Errorf("%s missing expected content %q:\n%s", want.path, want.text, data)
+		}
+	}
+}
+
+func writeMCPPrerequisites(t *testing.T, repoRoot string) {
+	t.Helper()
+	for _, path := range []string{
+		filepath.Join(repoRoot, ".hawp", "bin", "hawp"),
+		filepath.Join(repoRoot, ".hawp", "work", "BACKLOG.md"),
+	} {
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte("fixture"), 0o755); err != nil {
+			t.Fatal(err)
 		}
 	}
 }

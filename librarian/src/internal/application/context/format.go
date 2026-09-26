@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
 )
@@ -231,8 +232,13 @@ func truncateToTokens(text string, maxTokens int) string {
 		return text
 	}
 
-	// Truncate at character boundary
-	truncated := text[:maxChars]
+	// The token estimate is byte-based, but output must still end on a valid
+	// UTF-8 boundary.
+	end := maxChars
+	for end > 0 && !utf8.RuneStart(text[end]) {
+		end--
+	}
+	truncated := text[:end]
 
 	// Try to truncate at word boundary for better readability
 	if lastSpace := strings.LastIndex(truncated, " "); lastSpace > maxChars/2 {

@@ -6,6 +6,8 @@ import (
 	"strings"
 
 	domaindistribution "github.com/sentzunhat/hawp/librarian/src/internal/domain/distribution"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
+	infradistribution "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/distribution"
 )
 
 type BuildResult struct {
@@ -21,13 +23,16 @@ type ValidateResult struct {
 }
 
 func Build(repoRoot string) (BuildResult, error) {
-	outputs, err := domaindistribution.ComputeExpectedOutputs(repoRoot)
+	outputs, err := infradistribution.ComputeExpectedOutputs(repoRoot)
 	if err != nil {
 		return BuildResult{}, err
 	}
 
 	result := BuildResult{}
 	for _, output := range outputs {
+		if err := filesystem.RejectSymlinksInPath(output.OutputPath); err != nil {
+			return result, err
+		}
 		if err := os.MkdirAll(filepath.Dir(output.OutputPath), 0o755); err != nil {
 			return result, err
 		}
@@ -42,7 +47,7 @@ func Build(repoRoot string) (BuildResult, error) {
 			return result, err
 		}
 
-		if err := os.WriteFile(output.OutputPath, []byte(output.Content), 0o644); err != nil {
+		if err := filesystem.AtomicWriteFile(repoRoot, output.OutputPath, []byte(output.Content), 0o644); err != nil {
 			return result, err
 		}
 		result.Updated = append(result.Updated, output.OutputPath)
@@ -52,12 +57,12 @@ func Build(repoRoot string) (BuildResult, error) {
 }
 
 func Validate(repoRoot string) (ValidateResult, error) {
-	outputs, err := domaindistribution.ComputeExpectedOutputs(repoRoot)
+	outputs, err := infradistribution.ComputeExpectedOutputs(repoRoot)
 	if err != nil {
 		return ValidateResult{}, err
 	}
 
-	leaks, err := domaindistribution.FindDownstreamPathLeaks(repoRoot)
+	leaks, err := infradistribution.FindDownstreamPathLeaks(repoRoot)
 	if err != nil {
 		return ValidateResult{}, err
 	}

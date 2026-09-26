@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -72,6 +73,104 @@ func TestExecuteScopeFiltering(t *testing.T) {
 	}
 	if len(all.Documents) != len(kitOnly.Documents)+len(workOnly.Documents) {
 		t.Errorf("scope all documents = %d, want sum of kit+work", len(all.Documents))
+	}
+}
+
+func TestExecuteRejectsSymlinkedCorpusRoot(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink permissions are not reliable on Windows")
+	}
+	root := buildFixtureRepo(t)
+	external := t.TempDir()
+	if err := os.WriteFile(filepath.Join(external, "outside.md"), []byte("# outside\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	kitRoot := filepath.Join(root, ".hawp", "kit")
+	if err := os.RemoveAll(kitRoot); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(external, kitRoot); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	_, err := NewBuildService(root).Execute(domainindex.ScopeKit)
+	if err == nil {
+		t.Fatal("index build accepted a symlinked kit corpus root")
+	}
+	if !strings.Contains(err.Error(), "unsafe kit corpus root") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestExecuteRejectsSymlinkedCorpusDescendants(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink permissions are not reliable on Windows")
+	}
+
+	newExternalFile := func(t *testing.T, contents string) string {
+		t.Helper()
+		path := filepath.Join(t.TempDir(), "outside.md")
+		if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		return path
+	}
+
+	tests := []struct {
+		name    string
+		scope   domainindex.DocumentScope
+		link    string
+		target  func(t *testing.T) string
+		message string
+	}{
+		{
+			name:    "nested kit markdown file",
+			scope:   domainindex.ScopeKit,
+			link:    ".hawp/kit/usage/outside.md",
+			target:  func(t *testing.T) string { return newExternalFile(t, "# external kit\n") },
+			message: "unsafe kit corpus root",
+		},
+		{
+			name:    "work backlog",
+			scope:   domainindex.ScopeWork,
+			link:    ".hawp/work/BACKLOG.md",
+			target:  func(t *testing.T) string { return newExternalFile(t, "# external backlog\n") },
+			message: "unsafe work corpus root",
+		},
+		{
+			name:  "work role directory",
+			scope: domainindex.ScopeWork,
+			link:  ".hawp/work/active",
+			target: func(t *testing.T) string {
+				dir := t.TempDir()
+				if err := os.WriteFile(filepath.Join(dir, "outside.md"), []byte("# external work\n"), 0o644); err != nil {
+					t.Fatal(err)
+				}
+				return dir
+			},
+			message: "unsafe work corpus root",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			root := buildFixtureRepo(t)
+			link := filepath.Join(root, filepath.FromSlash(test.link))
+			if err := os.RemoveAll(link); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Symlink(test.target(t), link); err != nil {
+				t.Skipf("symlinks unavailable: %v", err)
+			}
+
+			_, err := NewBuildService(root).Execute(test.scope)
+			if err == nil {
+				t.Fatal("index build accepted a symlinked corpus descendant")
+			}
+			if !strings.Contains(err.Error(), test.message) {
+				t.Fatalf("unexpected error: %v", err)
+			}
+		})
 	}
 }
 
