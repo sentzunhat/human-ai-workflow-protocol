@@ -35,6 +35,9 @@ func (p *HawpProject) EnsureRuntimeFolders() (bool, error) {
 	dirs := []string{p.DB, p.Config}
 	created := false
 	for _, dir := range dirs {
+		if err := RejectSymlinksInPath(dir); err != nil {
+			return false, fmt.Errorf("unsafe runtime directory %s: %w", dir, err)
+		}
 		if _, err := os.Stat(dir); err == nil {
 			continue
 		}

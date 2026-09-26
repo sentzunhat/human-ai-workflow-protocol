@@ -92,3 +92,22 @@ func TestResolveSafeSearchIndexPathRejectsSymlinkedRuntimeAncestors(t *testing.T
 		})
 	}
 }
+
+func TestEnsureRuntimeFoldersRejectsSymlinkedRuntimeDirectory(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("symlink permissions are not reliable on Windows")
+	}
+
+	root := t.TempDir()
+	outside := t.TempDir()
+	projectRoot := infrafs.ResolveHawpProject(root)
+	if err := os.MkdirAll(projectRoot.Root, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, projectRoot.DB); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	if _, err := projectRoot.EnsureRuntimeFolders(); err == nil {
+		t.Fatal("expected symlinked runtime directory to be rejected")
+	}
+}

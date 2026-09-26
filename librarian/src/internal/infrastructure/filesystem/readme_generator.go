@@ -11,6 +11,12 @@ import (
 func GenerateREADMEs(home, projectRoot string) error {
 	hawpHome := ResolveHawpHome(home)
 	hawpProj := ResolveHawpProject(projectRoot)
+	if err := RejectSymlinksInPath(hawpHome.Root); err != nil {
+		return err
+	}
+	if err := RejectSymlinksInPath(hawpProj.Root); err != nil {
+		return err
+	}
 
 	// Home folder READMEs
 	homeReadmes := map[string]string{
@@ -45,9 +51,14 @@ func GenerateREADMEs(home, projectRoot string) error {
 
 // createReadmeIfNotExists creates a README file only if it doesn't already exist.
 func createReadmeIfNotExists(path, content string) error {
+	if err := RejectSymlinksInPath(path); err != nil {
+		return err
+	}
 	// Check if file exists
-	if _, err := os.Stat(path); err == nil {
+	if _, err := os.Lstat(path); err == nil {
 		return nil // File already exists, don't overwrite
+	} else if !os.IsNotExist(err) {
+		return err
 	}
 
 	// Create directory if needed
@@ -56,8 +67,11 @@ func createReadmeIfNotExists(path, content string) error {
 		return err
 	}
 
-	// Write file
-	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+	if err := RejectSymlinksInPath(path); err != nil {
+		return err
+	}
+	root := filepath.VolumeName(path) + string(os.PathSeparator)
+	if err := AtomicWriteFile(root, path, []byte(content), 0644); err != nil {
 		return fmt.Errorf("failed to write %s: %w", path, err)
 	}
 

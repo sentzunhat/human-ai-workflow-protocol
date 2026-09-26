@@ -62,6 +62,10 @@ func Run(fetcher download.Fetcher, home string, registry Registry) Result {
 	result := Result{Home: hawpHome}
 
 	for _, dir := range hawpHome.Dirs() {
+		if err := filesystem.RejectSymlinksInPath(dir); err != nil {
+			result.Steps = append(result.Steps, Step{Name: "layout:" + dir, Status: "failed", Err: err})
+			return result
+		}
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			result.Steps = append(result.Steps, Step{Name: "layout:" + dir, Status: "failed", Err: err})
 			return result

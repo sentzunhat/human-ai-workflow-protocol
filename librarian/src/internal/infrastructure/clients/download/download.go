@@ -12,6 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // Fetcher retrieves a URL's body. Swappable in tests so no real network
@@ -64,6 +66,9 @@ func (e *ErrChecksumMismatch) Error() string {
 // alongside destPath, then atomically renames into place. On mismatch the
 // temp file is removed and no partial content ever lands at destPath.
 func VerifiedFile(fetcher Fetcher, url, expectedSHA256, destPath string) error {
+	if err := filesystem.RejectSymlinksInPath(destPath); err != nil {
+		return fmt.Errorf("unsafe download destination: %w", err)
+	}
 	if err := os.MkdirAll(filepath.Dir(destPath), 0o755); err != nil {
 		return err
 	}
@@ -95,6 +100,9 @@ func VerifiedFile(fetcher Fetcher, url, expectedSHA256, destPath string) error {
 		return &ErrChecksumMismatch{URL: url, Expected: expectedSHA256, Actual: actual}
 	}
 
+	if err := filesystem.RejectSymlinksInPath(destPath); err != nil {
+		return fmt.Errorf("unsafe download destination: %w", err)
+	}
 	return os.Rename(tempPath, destPath)
 }
 
