@@ -30,7 +30,7 @@ This artifact is intentionally public-safe. It removes personal details, private
 ## After
 
 - The current protocol should be treated as a durable workflow preference and an archival/status pattern.
-- For future checkpoints, the workflow is: review existing context first, reconstruct the material change, preserve strategic continuation state, update compact memory, then archive a detailed public-safe checkpoint in the most relevant repository when appropriate.
+- For future checkpoints, the workflow is: review existing context first, reconstruct the material change, preserve strategic continuation state, keep memory compact, then archive a detailed public-safe checkpoint in the most relevant repository when appropriate.
 - Repository-backed archival must search for the most directly associated repository before falling back to an infrastructure archive.
 - Older conversations must preserve both the original event date and the later archive date.
 - Public/open-source artifacts must omit personal details and private project context.
@@ -44,9 +44,9 @@ This artifact is intentionally public-safe. It removes personal details, private
 
 ## Completed
 
-- Existing protocol memory was updated/merged with the more complete archival rules.
 - Existing HAWP checkpoint file was updated in place.
 - The checkpoint was kept public-safe and stripped of personal/private project details.
+- A shorter durable preference existed before this archive; the expanded memory update was not confirmed during this pass and should be re-saved separately if persistent memory is required.
 
 ## Unresolved
 
@@ -54,6 +54,7 @@ This artifact is intentionally public-safe. It removes personal details, private
 - If generalized, whether it should live under `.hawp/kit/templates/`, `core/.hawp/kit/templates/`, usage guidance, or another documentation location.
 - Whether repository write actions should always require a separate approval gate, or whether an explicit checkpoint archival instruction is enough for documentation-only commits.
 - Whether fallback archive behavior should reference a specific infrastructure repository or remain configurable by project/user.
+- Whether the expanded protocol should be re-saved into compact memory in a fresh session.
 
 ## Strategic impact
 
@@ -66,8 +67,9 @@ For HAWP, this remains adjacent to the protocol rather than part of the protocol
 Current state:
 
 - A public-safe checkpoint exists at this path.
-- The durable workflow preference has been merged into memory.
+- The expanded protocol has been archived in GitHub.
 - The protocol is useful as a status/checkpoint pattern but has not been promoted into a formal HAWP template.
+- Persistent memory for the expanded protocol was not confirmed in this pass.
 
 Next milestone:
 
@@ -78,6 +80,7 @@ Next actions:
 1. Review whether the protocol belongs in HAWP usage guidance or remains a private/user-specific workflow.
 2. If generalized, create a sanitized template with no user-specific repository names, private project names, or personal context.
 3. Add examples that show event date vs archive date, memory delta vs full archive, and repository discovery vs fallback behavior.
+4. Re-save the compact expanded memory preference in a fresh session if durable memory persistence is still desired.
 
 Blockers:
 
