@@ -1,10 +1,10 @@
 # Restore coordination and harness guidance to the canonical kit
 
-**UUID:** `a91cfdbe-5a15-4475-b588-ea82d3bec588`  
-**Type:** improvement  
-**Status:** done  
-**Opened:** 2026-09-30  
-**Closed:** 2026-09-30  
+**UUID:** `a91cfdbe-5a15-4475-b588-ea82d3bec588`
+**Type:** improvement
+**Status:** done
+**Opened:** 2026-09-30
+**Closed:** 2026-09-30
 **Risk level:** low (documentation only)
 
 ## Input
