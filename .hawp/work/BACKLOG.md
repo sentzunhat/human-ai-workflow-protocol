@@ -65,6 +65,7 @@ Limited to the last 5–10 items.
 
 | ID                            | Type        | Title                                                                   | Closed     | Detail                                                        |
 | ----------------------------- | ----------- | ----------------------------------------------------------------------- | ---------- | ------------------------------------------------------------- |
+| `a91cfdbe` | improvement | Restore coordination and harness guidance to the canonical kit | 2026-09-30 | [plan](closed/2026/09/30/a91cfdbe-5a15-4475-b588-ea82d3bec588/plan.md) |
 | `c9e2225a` | bug | Close root ancestry gaps across MCP and filesystem guards | 2026-09-29 | [plan](closed/2026/09/29/c9e2225a/plan.md) |
 | `0fdd9893` | bug | Fix PR 41 context and SQLite review findings | 2026-09-29 | [plan](closed/2026/09/29/0fdd9893/plan.md) |
 | `f5b2c7d1` | fix | Reject symlinked work trees before normalization traversal | 2026-09-25 | [plan](closed/2026/09/25/f5b2c7d1/plan.md) |
@@ -74,7 +75,6 @@ Limited to the last 5–10 items.
 | `d48e1035` | fix | Guard provider materializer output paths | 2026-09-25 | [plan](closed/2026/09/25/d48e1035/plan.md) |
 | `cd4691d7` | bug | Reject symlink ancestors in kitsync repository writes | 2026-09-25 | [plan](closed/2026/09/25/cd4691d7/plan.md) |
 | `984f038a` | bug | Reject Markdown symlinks in `links clean --apply` | 2026-09-25 | [plan](closed/2026/09/25/984f038a/plan.md) |
-| `c3371bf5` | fix | Fix missing SQLite index preflight | 2026-09-25 | [plan](closed/2026/09/25/c3371bf5/plan.md) |
 ---
 
 ## Archive

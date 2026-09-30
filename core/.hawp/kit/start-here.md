@@ -101,11 +101,18 @@ Provider setup and reusable worker instructions:
 
 ### Workflow Guides (Recommended Order)
 
-1. **[usage/init.md](usage/init.md)** — one-time setup for a new project
-2. **[usage/intake-workflow.md](usage/intake-workflow.md)** — intake loop for structured bug/task handling (investigation task first, then plan, for every item)
-3. **[usage/status-report.md](usage/status-report.md)** — context handoff and session continuity
-4. **[usage/workflow-loop.md](usage/workflow-loop.md)** — multi-iteration work across sessions (instruction-based; autonomous or gated; review/approve/retry without CLI)
-5. **[usage/search.md](usage/search.md)** — index and search kit/work documents via CLI or MCP (`hawp_search` tool)
+1. **[usage/hawp-first-workflow.md](usage/hawp-first-workflow.md)** — use HAWP search and existing work records to gather context before acting
+2. **[usage/init.md](usage/init.md)** — one-time setup for a new project
+3. **[usage/intake-workflow.md](usage/intake-workflow.md)** — intake loop for structured bug/task handling (investigation task first, then plan, for every item)
+4. **[usage/status-report.md](usage/status-report.md)** — context handoff and session continuity
+5. **[usage/workflow-loop.md](usage/workflow-loop.md)** — multi-iteration work across sessions (instruction-based; autonomous or gated; review/approve/retry without CLI)
+6. **[usage/search.md](usage/search.md)** — index and search kit/work documents via CLI or MCP (`hawp_search` tool)
+
+### Coordination And Implementation Checks
+
+- **[usage/parallel-agent-worktrees.md](usage/parallel-agent-worktrees.md)** — ownership, base selection, and safe worktree integration for independent slices
+- **[usage/manager-branch.md](usage/manager-branch.md)** — optional separation of HAWP coordination from a product integration branch
+- **[usage/harness-guide.md](usage/harness-guide.md)** — choose the right slice, provider, or CLI/MCP verification guide
 
 ### Templates by Task Type
 
@@ -133,6 +140,7 @@ Provider setup and reusable worker instructions:
 **Agent instructions (optional):**
 
 - [instructions/clean-code-and-structure.md](instructions/clean-code-and-structure.md) — touch-only cleanup and justified splits
+- [instructions/typescript-conventions.md](instructions/typescript-conventions.md) — scoped TypeScript/Node.js import and script guidance
 
 ### Standards map (what to open first)
 
