@@ -20,7 +20,15 @@ curl() {
     esac
   done
   case "$url" in
-    */releases/latest) printf '{"tag_name":"v0.0.24"}\n';;
+    */releases\?per_page=1)
+      if [ "$HAWP_TEST_MODE" = release-list-fail ]; then return 22; fi
+      printf '[{"tag_name":"v0.0.24"}]\n';;
+    */releases/latest)
+      if [ "$HAWP_TEST_MODE" = release-list-fail ]; then
+        printf '{"tag_name":"v0.0.24"}\n'
+      else
+        printf '{"tag_name":"v0.0.22"}\n'
+      fi;;
     */checksums.txt)
       case "$HAWP_TEST_MODE" in
         checksums-fail) return 22;;
@@ -30,7 +38,7 @@ curl() {
         mismatch) printf '%064d hawp-linux-amd64\n' 0 > "$dest";;
         *) printf '%s hawp-linux-amd64\n' "$HAWP_TEST_SHA" > "$dest";;
       esac;;
-    */hawp-linux-amd64)
+    */releases/download/v0.0.24/hawp-linux-amd64)
       if [ "$HAWP_TEST_MODE" = binary-fail ]; then printf 'partial' > "$dest"; return 22; fi
       if [ "$HAWP_TEST_MODE" = interrupt ]; then kill -TERM "$BASHPID"; return 143; fi
       cp payload "$dest";;

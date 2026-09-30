@@ -6,11 +6,12 @@ All notable changes to this project are documented here.
 
 The entries below are the canonical workflow-facing history for the Go librarian and HAWP workflow.
 
-## [0.0.24] - 2026-09-13
+## [0.0.24] - 2026-09-30
 
-LLM intake shaping, `hawp_work_intake` compound MCP tool, `hawp work doc`
-subcommands, CLI source restructure, and v0.1.0 gate passage (95% downstream
-token savings with Ollama).
+Ollama-first intake and search, a fuller MCP and work-document workflow,
+provider setup improvements, safer filesystem writes, and restored coordination
+guides. The v0.1.0 local benchmark gates passed, including 95% downstream token
+savings with Ollama on the successful queries measured below.
 
 ### Added
 
@@ -47,6 +48,14 @@ token savings with Ollama).
 
 ### Changed
 
+- **Release-supplied CLI** — install and update guides select the host platform's
+  executable from the latest published release and verify its SHA256 checksum.
+  `.hawp/bin/hawp` is now local install output, not a tracked source binary.
+- **Coordination and harness guidance** — restore HAWP-first workflow, parallel
+  worktree, manager-branch, and slice/provider/tool harness guides in the
+  canonical kit; restore the MCP intake example and portable TypeScript rules.
+- **PR checks** — run the quality and generated-distribution pull-request checks
+  without duplicate `development` push checks.
 - Make Ollama the built-in default for both embeddings (`nomic-embed-text`) and
   LLM reshaping (`mistral`), based on the local benchmarked setup. Keep ONNX
   embeddings documented as an explicit offline fallback with a valid
@@ -54,6 +63,14 @@ token savings with Ollama).
 - Duplicate normalization preserves all copies and artifacts and adds reciprocal
   links when a working record has exactly one archived counterpart. Ambiguous
   matches are reported for review. No duplicate files or folders are deleted.
+
+### Fixed
+
+- Guard archive extraction and repository writes against unsafe symlinks and
+  hard links; stage binary and file replacements with an atomic rename.
+- Preserve UTF-8 when truncating search context and validate MCP JSON-RPC
+  request IDs and structured intake responses at their public boundaries.
+- Check SQLite database sidecars before opening an index or usage database.
 
 ### CLI audit continuation
 
@@ -89,9 +106,10 @@ token savings with Ollama).
   competing roots, unknown flags, and missing path values.
 - Install the native binary to `.hawp/bin/hawp` (the canonical path) so
   `make install` and CI share the same destination as distribution scripts and
-  MCP config generation. The shell launcher is superseded; `hawp-bin` is
-  preserved as a legacy compatibility binary. The unused core source launcher
-  is retired; installers preserve existing legacy binaries and MCP wrappers.
+  MCP config generation. The shell launcher is superseded; existing downstream
+  `hawp-bin` files remain untouched for compatibility. The unused core source
+  launcher is retired; installers preserve existing legacy binaries and MCP
+  wrappers.
 
 - Move all CLI command families into nested `cli/<family>/<operation>/` packages:
   work, kit, links, search, index, model, mcp, usage, update, init, distribution,
@@ -128,8 +146,7 @@ Work-folder normalization, README positioning, and older-repo cleanup hygiene.
 - **README positioning** — the repository README now leads with HAWP as an open,
   project-owned workflow layer for multi-agent development while keeping
   benchmark claims tied to local evidence.
-- **Patch version** — the local version constant is advanced to `0.0.24` for
-  the next patch release lane.
+- **Patch version** — the local version constant is `0.0.24` for this release.
 
 ## [0.0.23] - 2026-08-30
 

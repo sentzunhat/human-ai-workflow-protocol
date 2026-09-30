@@ -575,12 +575,13 @@ update_hawp_binary() (
   _asset="hawp-${_os}-${_arch}${_ext}"
   _dest=".hawp/bin/hawp${_ext}"
 
-  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" 2>/dev/null \
+  # The releases list includes prereleases; /latest only includes stable releases.
+  _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases?per_page=1" 2>/dev/null \
     | awk -F'"' '/"tag_name"/ { print $4; exit }' || true)"
   if [ -z "$_tag" ]; then
-    _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases?per_page=1" 2>/dev/null \
+    _tag="$(curl -fsSL "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" 2>/dev/null \
       | awk -F'"' '/"tag_name"/ { print $4; exit }' || true)"
-    [ -n "$_tag" ] && echo "hawp update: /releases/latest unavailable; using releases list fallback."
+    [ -n "$_tag" ] && echo "hawp update: releases list unavailable; using latest stable release fallback."
   fi
 
   if [ -z "$_tag" ]; then

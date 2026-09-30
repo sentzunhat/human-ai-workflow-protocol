@@ -65,6 +65,7 @@ Limited to the last 5–10 items.
 
 | ID                            | Type        | Title                                                                   | Closed     | Detail                                                        |
 | ----------------------------- | ----------- | ----------------------------------------------------------------------- | ---------- | ------------------------------------------------------------- |
+| `d605db54` | release | Prepare v0.0.24 release without a tracked binary | 2026-09-30 | [plan](closed/2026/09/30/d605db54/plan.md) |
 | `a91cfdbe` | improvement | Restore coordination and harness guidance to the canonical kit | 2026-09-30 | [plan](closed/2026/09/30/a91cfdbe-5a15-4475-b588-ea82d3bec588/plan.md) |
 | `c9e2225a` | bug | Close root ancestry gaps across MCP and filesystem guards | 2026-09-29 | [plan](closed/2026/09/29/c9e2225a/plan.md) |
 | `0fdd9893` | bug | Fix PR 41 context and SQLite review findings | 2026-09-29 | [plan](closed/2026/09/29/0fdd9893/plan.md) |

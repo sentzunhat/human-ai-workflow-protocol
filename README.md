@@ -146,6 +146,10 @@ Each guide is a single copy-paste block. Safe to re-run. Never overwrites `.hawp
 
 Development channel guides: [distribution/generated/README.md](distribution/generated/README.md)
 
+The install and update guides download the latest published binary for the
+host platform, verify its release checksum, and place it at `.hawp/bin/hawp`
+(`hawp.exe` on Windows). The source checkout keeps this binary local.
+
 ```bash
 # Build the local search index
 hawp search index

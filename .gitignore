@@ -17,6 +17,7 @@ librarian/coverage/
 librarian/.tsx-cache/
 librarian/.turbo/
 librarian/src/bin/
+.hawp/bin/
 
 # Portable private/local markers (any file in the repo)
 *.local.md

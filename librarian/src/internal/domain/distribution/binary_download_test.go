@@ -19,7 +19,7 @@ func TestBinaryDownloadPreservesInstalledFilesOnFailure(t *testing.T) {
 	}
 	for _, mode := range []string{"install", "update"} {
 		for _, layout := range []string{"fresh", "legacy"} {
-			for _, scenario := range []string{"success", "binary-fail", "checksums-fail", "missing-entry", "duplicate-entry", "malformed-entry", "mismatch", "no-hash", "hash-fail", "interrupt"} {
+			for _, scenario := range []string{"success", "release-list-fail", "binary-fail", "checksums-fail", "missing-entry", "duplicate-entry", "malformed-entry", "mismatch", "no-hash", "hash-fail", "interrupt"} {
 				t.Run(mode+"/"+layout+"/"+scenario, func(t *testing.T) {
 					root := t.TempDir()
 					binDir := filepath.Join(root, ".hawp/bin")
@@ -41,7 +41,7 @@ func TestBinaryDownloadPreservesInstalledFilesOnFailure(t *testing.T) {
 					}
 					checksum := fmt.Sprintf("%x", sha256.Sum256(payload))
 					runs := 1
-					if scenario == "success" {
+					if scenario == "success" || scenario == "release-list-fail" {
 						runs = 2
 						expected["hawp"] = string(payload)
 					}
@@ -57,7 +57,7 @@ func TestBinaryDownloadPreservesInstalledFilesOnFailure(t *testing.T) {
 								t.Fatalf("%s changed incorrectly: %q %v", name, data, err)
 							}
 						}
-						if scenario == "success" {
+						if scenario == "success" || scenario == "release-list-fail" {
 							info, err := os.Stat(filepath.Join(binDir, "hawp"))
 							if err != nil {
 								t.Fatal(err)
@@ -90,7 +90,7 @@ func runBinaryDownload(t *testing.T, root, mode, scenario, checksum string) {
 	if ctx.Err() != nil {
 		t.Fatal("download test timed out")
 	}
-	if (err == nil) != (scenario == "success") {
+	if (err == nil) != (scenario == "success" || scenario == "release-list-fail") {
 		t.Fatalf("unexpected outcome: %v\n%s", err, output)
 	}
 }
