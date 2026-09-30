@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -75,6 +76,98 @@ func TestExecuteScopeFiltering(t *testing.T) {
 	}
 }
 
+func TestExecuteRejectsSymlinkedCorpusRoot(t *testing.T) {
+	root := buildFixtureRepo(t)
+	external := t.TempDir()
+	if err := os.WriteFile(filepath.Join(external, "outside.md"), []byte("# outside\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	kitRoot := filepath.Join(root, ".hawp", "kit")
+	if err := os.RemoveAll(kitRoot); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(external, kitRoot); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	_, err := NewBuildService(root).Execute(domainindex.ScopeKit)
+	if err == nil {
+		t.Fatal("index build accepted a symlinked kit corpus root")
+	}
+	if !strings.Contains(err.Error(), "unsafe kit corpus root") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestExecuteRejectsSymlinkedCorpusDescendants(t *testing.T) {
+
+	newExternalFile := func(t *testing.T, contents string) string {
+		t.Helper()
+		path := filepath.Join(t.TempDir(), "outside.md")
+		if err := os.WriteFile(path, []byte(contents), 0o644); err != nil {
+			t.Fatal(err)
+		}
+		return path
+	}
+
+	tests := []struct {
+		name    string
+		scope   domainindex.DocumentScope
+		link    string
+		target  func(t *testing.T) string
+		message string
+	}{
+		{
+			name:    "nested kit markdown file",
+			scope:   domainindex.ScopeKit,
+			link:    ".hawp/kit/usage/outside.md",
+			target:  func(t *testing.T) string { return newExternalFile(t, "# external kit\n") },
+			message: "unsafe kit corpus root",
+		},
+		{
+			name:    "work backlog",
+			scope:   domainindex.ScopeWork,
+			link:    ".hawp/work/BACKLOG.md",
+			target:  func(t *testing.T) string { return newExternalFile(t, "# external backlog\n") },
+			message: "unsafe work corpus root",
+		},
+		{
+			name:  "work role directory",
+			scope: domainindex.ScopeWork,
+			link:  ".hawp/work/active",
+			target: func(t *testing.T) string {
+				dir := t.TempDir()
+				if err := os.WriteFile(filepath.Join(dir, "outside.md"), []byte("# external work\n"), 0o644); err != nil {
+					t.Fatal(err)
+				}
+				return dir
+			},
+			message: "unsafe work corpus root",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			root := buildFixtureRepo(t)
+			link := filepath.Join(root, filepath.FromSlash(test.link))
+			if err := os.RemoveAll(link); err != nil {
+				t.Fatal(err)
+			}
+			if err := os.Symlink(test.target(t), link); err != nil {
+				t.Skipf("symlinks unavailable: %v", err)
+			}
+
+			_, err := NewBuildService(root).Execute(test.scope)
+			if err == nil {
+				t.Fatal("index build accepted a symlinked corpus descendant")
+			}
+			if !strings.Contains(err.Error(), test.message) {
+				t.Fatalf("unexpected error: %v", err)
+			}
+		})
+	}
+}
+
 func TestStringReportsCountsWithoutDumpingContent(t *testing.T) {
 	root := buildFixtureRepo(t)
 	service := NewBuildService(root)
@@ -118,5 +211,59 @@ func TestExportWritesValidJSON(t *testing.T) {
 	}
 	if len(docs) != len(result.Documents) {
 		t.Errorf("exported %d documents, want %d", len(docs), len(result.Documents))
+	}
+}
+
+func TestExportRejectsSymlinkDestinationWithoutWritingThrough(t *testing.T) {
+	root := buildFixtureRepo(t)
+	result, err := NewBuildService(root).Execute(domainindex.ScopeAll)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	external := filepath.Join(t.TempDir(), "outside.json")
+	if err := os.WriteFile(external, []byte("preserve me\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	destination := filepath.Join(t.TempDir(), "export.json")
+	if err := os.Symlink(external, destination); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+
+	if err := result.Export(destination); err == nil {
+		t.Fatal("export followed a symlink destination")
+	}
+	if got, err := os.ReadFile(external); err != nil || string(got) != "preserve me\n" {
+		t.Fatalf("symlink target changed: content=%q err=%v", got, err)
+	}
+}
+
+func TestExportReplacesHardLinkedDestinationWithoutTruncatingTarget(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("hard-link behavior is not reliable on Windows")
+	}
+	root := buildFixtureRepo(t)
+	result, err := NewBuildService(root).Execute(domainindex.ScopeAll)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	external := filepath.Join(t.TempDir(), "outside.json")
+	if err := os.WriteFile(external, []byte("preserve me\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	destination := filepath.Join(t.TempDir(), "export.json")
+	if err := os.Link(external, destination); err != nil {
+		t.Skipf("hard links unavailable: %v", err)
+	}
+
+	if err := result.Export(destination); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := os.ReadFile(external); err != nil || string(got) != "preserve me\n" {
+		t.Fatalf("hard-link target changed: content=%q err=%v", got, err)
+	}
+	if got, err := os.ReadFile(destination); err != nil || string(got) == "preserve me\n" {
+		t.Fatalf("export destination was not replaced: content=%q err=%v", got, err)
 	}
 }

@@ -12,6 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 )
 
 // ExtractMember opens archivePath (.tgz or .zip, chosen by extension) and
@@ -78,8 +80,15 @@ func extractFromZip(archivePath, memberPath, destPath string) error {
 }
 
 func writeMember(destPath string, r io.Reader) error {
+	if err := filesystem.RejectSymlinksInPath(destPath); err != nil {
+		return fmt.Errorf("unsafe extraction destination: %w", err)
+	}
 	if err := os.MkdirAll(filepath.Dir(destPath), 0o755); err != nil {
 		return err
+	}
+	// Revalidate after directory creation, immediately before temp creation.
+	if err := filesystem.RejectSymlinksInPath(destPath); err != nil {
+		return fmt.Errorf("unsafe extraction destination: %w", err)
 	}
 	temp, err := os.CreateTemp(filepath.Dir(destPath), ".extract-*")
 	if err != nil {
@@ -97,6 +106,9 @@ func writeMember(destPath string, r io.Reader) error {
 	}
 	if err := os.Chmod(tempPath, 0o755); err != nil {
 		return err
+	}
+	if err := filesystem.RejectSymlinksInPath(destPath); err != nil {
+		return fmt.Errorf("unsafe extraction destination: %w", err)
 	}
 	return os.Rename(tempPath, destPath)
 }

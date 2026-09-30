@@ -1,8 +1,9 @@
 package distribution
 
 import (
+	"errors"
 	"fmt"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -10,6 +11,7 @@ import (
 
 type Variant struct {
 	OutputFile      string
+	ScriptFile      string
 	SectionFiles    []string
 	ScriptPartFiles []string
 	Ref             string
@@ -50,27 +52,28 @@ var DownstreamTargetFiles = []string{
 var refLinePattern = regexp.MustCompile(`(^|\n)REF="[^"]*"`)
 var providerLinePattern = regexp.MustCompile(`(^|\n)PROVIDER="[^"]*"`)
 
-func ComputeExpectedOutputs(repoRoot string) ([]BuildResult, error) {
+func ComputeExpectedOutputs(repoRoot string, readFile func(string) ([]byte, error)) ([]BuildResult, error) {
 	sourceRoot := filepath.Join(repoRoot, "distribution")
 	outputRoot := filepath.Join(repoRoot, "distribution", "generated")
 	variants := distributionPlan()
-	outputs := make([]BuildResult, 0, len(variants))
+	outputs := make([]BuildResult, 0, len(variants)*2)
 
 	for _, variant := range variants {
 		sections := make([]string, 0, len(variant.SectionFiles)+2)
 		for _, sectionFile := range variant.SectionFiles {
 			sourcePath := filepath.Join(sourceRoot, filepath.FromSlash(sectionFile))
-			content, err := os.ReadFile(sourcePath)
+			content, err := readFile(sourcePath)
 			if err != nil {
 				return nil, fmt.Errorf("missing source fragment %s: %w", sourcePath, err)
 			}
 			sections = append(sections, normalizeForJoin(string(content)))
 		}
 
-		scriptSection, err := generateScriptSection(repoRoot, variant)
+		scriptBody, err := composeProviderScript(repoRoot, variant, readFile)
 		if err != nil {
 			return nil, err
 		}
+		scriptSection := generateScriptSection(variant, scriptBody)
 		refSection := generateSourceReferenceSection(variant)
 		joined := strings.Join(append(sections, normalizeForJoin(scriptSection), normalizeForJoin(refSection)), "\n\n")
 
@@ -78,18 +81,22 @@ func ComputeExpectedOutputs(repoRoot string) ([]BuildResult, error) {
 			OutputPath: filepath.Join(outputRoot, filepath.FromSlash(variant.OutputFile)),
 			Content:    ensureTrailingNewline(joined),
 		})
+		outputs = append(outputs, BuildResult{
+			OutputPath: filepath.Join(outputRoot, filepath.FromSlash(variant.ScriptFile)),
+			Content:    ensureTrailingNewline(scriptBody),
+		})
 	}
 
 	return outputs, nil
 }
 
-func FindDownstreamPathLeaks(repoRoot string) ([]PathLeak, error) {
+func FindDownstreamPathLeaks(repoRoot string, readFile func(string) ([]byte, error)) ([]PathLeak, error) {
 	var leaks []PathLeak
 	for _, rel := range DownstreamTargetFiles {
 		abs := filepath.Join(repoRoot, filepath.FromSlash(rel))
-		body, err := os.ReadFile(abs)
+		body, err := readFile(abs)
 		if err != nil {
-			if os.IsNotExist(err) {
+			if errors.Is(err, fs.ErrNotExist) {
 				continue
 			}
 			return nil, err
@@ -127,6 +134,7 @@ func distributionPlan() []Variant {
 func providerVariant(provider, operation, ref string) Variant {
 	return Variant{
 		OutputFile: provider + "/" + operation + "/" + ref + ".md",
+		ScriptFile: provider + "/" + operation + "/" + ref + ".sh",
 		SectionFiles: []string{
 			"sources/providers/" + provider + "/preamble-" + operation + ".md",
 			"sources/shared/safety.md",
@@ -148,24 +156,21 @@ func providerVariant(provider, operation, ref string) Variant {
 	}
 }
 
-func generateScriptSection(repoRoot string, variant Variant) (string, error) {
+func generateScriptSection(variant Variant, scriptBody string) string {
 	operation := "Update"
 	if variant.Operation == "install" {
 		operation = "Install"
 	}
-	bashBlock, err := composeProviderScript(repoRoot, variant)
-	if err != nil {
-		return "", err
-	}
 	return "## " + operation + " Command (Copy/Paste)\n\n" +
 		"Run this from the root of your target repository. No edits are required; branch and provider are already configured in the command. Each run fetches the latest commit from that branch.\n\n" +
-		bashBlock, nil
+		"Downloadable script artifact: `" + strings.TrimSuffix(variant.OutputFile, ".md") + ".sh`.\n\n" +
+		"```bash\n" + scriptBody + "\n```"
 }
 
-func composeProviderScript(repoRoot string, variant Variant) (string, error) {
+func composeProviderScript(repoRoot string, variant Variant, readFile func(string) ([]byte, error)) (string, error) {
 	parts := make([]string, 0, len(variant.ScriptPartFiles))
 	for _, part := range variant.ScriptPartFiles {
-		body, err := extractBashBody(filepath.Join(repoRoot, filepath.FromSlash(part)))
+		body, err := extractBashBody(filepath.Join(repoRoot, filepath.FromSlash(part)), readFile)
 		if err != nil {
 			return "", err
 		}
@@ -179,11 +184,11 @@ func composeProviderScript(repoRoot string, variant Variant) (string, error) {
 
 	substituted := refLinePattern.ReplaceAllString(body, "${1}REF=\""+variant.Ref+"\"")
 	substituted = providerLinePattern.ReplaceAllString(substituted, "${1}PROVIDER=\""+variant.Provider+"\"")
-	return "```bash\n" + substituted + "\n```", nil
+	return substituted, nil
 }
 
-func extractBashBody(path string) (string, error) {
-	content, err := os.ReadFile(path)
+func extractBashBody(path string, readFile func(string) ([]byte, error)) (string, error) {
+	content, err := readFile(path)
 	if err != nil {
 		return "", fmt.Errorf("script part not found %s: %w", path, err)
 	}
@@ -217,6 +222,8 @@ func generateSourceReferenceSection(variant Variant) string {
 		"- Local sync: run `hawp distribution sync` after editing `distribution/sources/` or the distribution composition code.\n\n" +
 		"Generated output file:\n\n" +
 		"- `distribution/generated/" + variant.OutputFile + "`\n\n" +
+		"Generated shell script:\n\n" +
+		"- `distribution/generated/" + variant.ScriptFile + "`\n\n" +
 		"Provider: `" + variant.Provider + "` · Operation: `" + variant.Operation + "` · Branch: `" + variant.Ref + "`\n\n" +
 		"Install mapping: `core/providers/." + variant.Provider + "/` -> downstream paths in this guide.\n\n" +
 		"This generated guide is built from:\n\n" +

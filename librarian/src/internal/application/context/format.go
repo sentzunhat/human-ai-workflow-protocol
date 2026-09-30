@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/search"
 )
@@ -225,14 +226,28 @@ func estimateTokens(text string) int {
 
 // truncateToTokens truncates text to approximately the given token count.
 func truncateToTokens(text string, maxTokens int) string {
-	maxChars := maxTokens * 4
-
-	if len(text) <= maxChars {
+	if maxTokens <= 0 {
+		return ""
+	}
+	// Compare against the rounded-up token estimate before multiplying. A
+	// caller can provide any positive int, so maxTokens*4 may overflow even
+	// when the input text itself is small.
+	minimumTokensToFit := len(text) / 4
+	if len(text)%4 != 0 {
+		minimumTokensToFit++
+	}
+	if maxTokens >= minimumTokensToFit {
 		return text
 	}
+	maxChars := maxTokens * 4
 
-	// Truncate at character boundary
-	truncated := text[:maxChars]
+	// The token estimate is byte-based, but output must still end on a valid
+	// UTF-8 boundary.
+	end := maxChars
+	for end > 0 && !utf8.RuneStart(text[end]) {
+		end--
+	}
+	truncated := text[:end]
 
 	// Try to truncate at word boundary for better readability
 	if lastSpace := strings.LastIndex(truncated, " "); lastSpace > maxChars/2 {

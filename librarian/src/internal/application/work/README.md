@@ -4,10 +4,23 @@
 `internal/domain/work` for the actual rule implementations) and
 `hawp work new` (intake scaffolding).
 
-## Exports
+## Use-case APIs
 
 `Validate` / `Render` (validation) · `NewItem` (intake scaffolding) ·
-`Normalize` (work-record drift detection/fixing).
+`Normalize` (work-record drift detection/fixing) · `DraftIntake` (internal draft service).
+
+The source-layout migration preserves these APIs while grouping their owners:
+
+| Flat source file | Nested owner under `internal/application/work/` |
+| --- | --- |
+| `intake.go`, `draft.go`, `draft_test.go` | `intake/` |
+| `validate.go` | `validation/` |
+| `normalize.go` | `normalize/` |
+
+This README stays at the family root as an overview. Callers must import the
+owning child after migration; no parent facade is introduced. The migration tool
+updates those imports, including normalization's call into validation.
+Domain/work rule and filesystem separation remains a distinct semantic task.
 
 ## CLI quick reference
 
@@ -57,3 +70,22 @@ backlog row and file skeleton.
 result, err := work.NewItem(workDir, "bug", "Fix the reshape flag", "the --llm-reshape flag is broken")
 // result.PlanFilePath, result.BacklogPath
 ```
+
+## Intake drafts (internal API)
+
+`DraftIntake(ctx, request, shaper)` proposes a reviewable HAWP shape through an
+injected `RequestShaper`. The service preserves nonblank caller-supplied input
+and context byte-for-byte; absent/whitespace context becomes an explicit unknown
+label. The shaper can propose only mission, constraints, output, and checkpoint.
+The first three must be nonblank; checkpoint is optional.
+
+The draft carries no UUID, owner, status, or approval. Validation establishes
+field completeness, not truth or preservation of every implied requirement in
+the generated fields. Provider errors and cancellation return no partial draft.
+The use case does not access storage or call `NewItem`; an adapter's own side
+effects and output fidelity must be reviewed separately.
+
+There is no default shaper, model dependency, CLI command, or MCP reshape tool.
+Current tests inject deterministic proposals. A real adapter requires separate
+fidelity/error tests before client wiring. The existing work-new workflow stays
+unchanged; creating a work record is a separate action after draft review.

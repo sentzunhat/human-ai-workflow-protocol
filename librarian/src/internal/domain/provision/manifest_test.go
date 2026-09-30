@@ -1,9 +1,12 @@
 package provision
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestLoadManifestMissingFileReturnsEmpty(t *testing.T) {
-	manifest, err := LoadManifest(t.TempDir())
+	manifest, err := LoadManifest(t.TempDir(), os.ReadFile)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -14,15 +17,15 @@ func TestLoadManifestMissingFileReturnsEmpty(t *testing.T) {
 
 func TestManifestSaveAndLoadRoundTrip(t *testing.T) {
 	root := t.TempDir()
-	manifest, _ := LoadManifest(root)
+	manifest, _ := LoadManifest(root, os.ReadFile)
 	manifest.RuntimeVersion = "1.27.1"
 	manifest.Assets["onnxruntime"] = AssetRecord{SHA256: "abc123", Size: 42, InstalledAt: "2026-07-20T00:00:00Z"}
 
-	if err := manifest.Save(root); err != nil {
+	if err := manifest.Save(root, os.WriteFile); err != nil {
 		t.Fatal(err)
 	}
 
-	reloaded, err := LoadManifest(root)
+	reloaded, err := LoadManifest(root, os.ReadFile)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -11,14 +11,20 @@ import (
 func GenerateREADMEs(home, projectRoot string) error {
 	hawpHome := ResolveHawpHome(home)
 	hawpProj := ResolveHawpProject(projectRoot)
+	if err := RejectSymlinksInPath(hawpHome.Root); err != nil {
+		return err
+	}
+	if err := RejectSymlinksInPath(hawpProj.Root); err != nil {
+		return err
+	}
 
 	// Home folder READMEs
 	homeReadmes := map[string]string{
-		filepath.Join(hawpHome.Root, "README.md"):             homeRootReadme(),
-		filepath.Join(hawpHome.Models, "README.md"):           modelsRootReadme(),
-		filepath.Join(hawpHome.ModelsEmbedding, "README.md"):  embeddingModelsReadme(),
-		filepath.Join(hawpHome.ModelsLLM, "README.md"):        llmModelsReadme(),
-		filepath.Join(hawpHome.Config, "README.md"):           configReadme(),
+		filepath.Join(hawpHome.Root, "README.md"):            homeRootReadme(),
+		filepath.Join(hawpHome.Models, "README.md"):          modelsRootReadme(),
+		filepath.Join(hawpHome.ModelsEmbedding, "README.md"): embeddingModelsReadme(),
+		filepath.Join(hawpHome.ModelsLLM, "README.md"):       llmModelsReadme(),
+		filepath.Join(hawpHome.Config, "README.md"):          configReadme(),
 	}
 
 	for path, content := range homeReadmes {
@@ -45,9 +51,14 @@ func GenerateREADMEs(home, projectRoot string) error {
 
 // createReadmeIfNotExists creates a README file only if it doesn't already exist.
 func createReadmeIfNotExists(path, content string) error {
+	if err := RejectSymlinksInPath(path); err != nil {
+		return err
+	}
 	// Check if file exists
-	if _, err := os.Stat(path); err == nil {
+	if _, err := os.Lstat(path); err == nil {
 		return nil // File already exists, don't overwrite
+	} else if !os.IsNotExist(err) {
+		return err
 	}
 
 	// Create directory if needed
@@ -56,8 +67,11 @@ func createReadmeIfNotExists(path, content string) error {
 		return err
 	}
 
-	// Write file
-	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+	if err := RejectSymlinksInPath(path); err != nil {
+		return err
+	}
+	root := filepath.VolumeName(path) + string(os.PathSeparator)
+	if err := AtomicWriteFile(root, path, []byte(content), 0644); err != nil {
 		return fmt.Errorf("failed to write %s: %w", path, err)
 	}
 
@@ -110,8 +124,9 @@ Embedding and LLM models, auto-downloaded on first use.
 
 ## About Models
 
-Models are only downloaded when actually used. Default is ONNX (local execution):
-- No internet required after download
+Models are only downloaded or contacted when actually used. Default is Ollama
+for both embeddings and LLM reshaping:
+- Ollama must be running locally (normally at http://localhost:11434)
 - No API costs
 - Private (never sends data to external servers)
 
@@ -126,8 +141,9 @@ Models that convert text to numerical vectors for semantic search.
 
 ## Supported Models
 
-- bge-base-en-v1.5 (default) - 768-dim, best quality (95%+ MTEB)
-- all-MiniLM-L6-v2 - 384-dim, lighter, good fallback (90% MTEB)
+- nomic-embed-text (default with Ollama) - 768-dim, benchmarked high-quality local embeddings
+- bge-base-en-v1.5 (ONNX fallback) - 768-dim, local/offline embeddings
+- all-MiniLM-L6-v2 (ONNX fallback) - 384-dim, lighter offline option
 
 ## Usage
 
@@ -137,8 +153,8 @@ To use a specific model, set HAWP_EMBEDDINGS_MODEL environment variable.
 
 ## For v0.0.3+
 
-Additional backends will be available:
-- Ollama - Local embedding server
+Additional backends:
+- Ollama - Local embedding server (default)
 - OpenAI - text-embedding-3-small/large
 - Anthropic - Coming when API available
 `
@@ -172,7 +188,8 @@ Additional backends available:
 func configReadme() string {
 	return `# Global Config (~/.hawp/config/)
 
-Default configuration shared across all HAWP projects.
+Default configuration shared across all HAWP projects. The built-in default is
+Ollama embeddings (nomic-embed-text) plus Ollama reshaping (mistral).
 
 ## Setup
 
@@ -184,15 +201,21 @@ Config priority (highest to lowest):
 1. CLI flags
 2. Project config (.hawp/config/context.json)
 3. Home config (~/.hawp/config/context.json)
-4. Built-in defaults: ONNX + BGE
+4. Built-in defaults: Ollama + nomic-embed-text + mistral
 
 ## Environment Variables
 
 Override via env vars (HAWP_*):
-- HAWP_EMBEDDINGS_BACKEND=openai
-- HAWP_LLM_BACKEND=anthropic
+- HAWP_EMBEDDINGS_BACKEND=ollama
+- HAWP_EMBEDDINGS_MODEL=nomic-embed-text
+- HAWP_LLM_BACKEND=ollama
+- HAWP_LLM_MODEL=mistral
+- HAWP_OLLAMA_URL=http://localhost:11434
 - HAWP_OPENAI_API_KEY=sk-...
 - HAWP_ANTHROPIC_API_KEY=sk-ant-...
+
+For an offline embedding fallback, use HAWP_EMBEDDINGS_BACKEND=onnx and
+HAWP_EMBEDDINGS_MODEL=bge-base-en-v1.5.
 `
 }
 

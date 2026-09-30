@@ -13,8 +13,8 @@ import (
 
 	appupdate "github.com/sentzunhat/hawp/librarian/src/internal/application/update"
 	domainupdate "github.com/sentzunhat/hawp/librarian/src/internal/domain/update"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/download"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/githubrelease"
+	download "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/clients/download"
+	githubrelease "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/clients/githubrelease"
 )
 
 func hashHex(b []byte) string {
