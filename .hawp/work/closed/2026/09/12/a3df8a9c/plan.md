@@ -93,6 +93,8 @@ and `hawp_work_validate` were called through MCP against the confirmed repo.
 Validation passes kit/work/links with zero issues/warnings. This is agent-authored
 shaping, not proof of an automated reshape implementation or model fidelity.
 
+## Implementation Checklist
+
 - [x] Investigate current tools and distinguish search-context shaping
 - [x] Preserve the original request and capture the confirmed intent
 - [x] Document and exercise the existing worker workflow

@@ -105,29 +105,48 @@ Current backlog status after `v0.0.23`:
 
 ## Verification
 
-- [x] `go run ./cmd/hawp work validate` — pass, 0 issues, 0 warnings
-- [x] `go run ./cmd/hawp kit validate` — pass, 0 issues
+The linked September 2 status report records these historical results. It is a
+contemporaneous report, not retained terminal output; the exact temporary-copy
+file counts below are only recorded in this plan.
+
+- [x] `go run ./cmd/hawp work validate` — pass, 0 issues, 0 warnings.
+      Evidence: `.hawp/work/status/2026/09/02/v0-0-23-pr39-cleanup-checkpoint.md`,
+      "What Was Directly Verified."
+- [x] `go run ./cmd/hawp kit validate` — pass, 0 issues.
+      Evidence: same September 2 status report, "What Was Directly Verified."
 - [x] Post-README rerun: `go run ./cmd/hawp work validate` — pass, 0
-      issues, 0 warnings
-- [x] Post-README rerun: `go run ./cmd/hawp kit validate` — pass, 0 issues
+      issues, 0 warnings. Evidence: same September 2 status report.
+- [x] Post-README rerun: `go run ./cmd/hawp kit validate` — pass, 0 issues.
+      Evidence: same September 2 status report.
 - [x] Focused tests after validator guardrail:
-      `go test ./internal/domain/work ./internal/application/work` — pass
+      `go test ./internal/domain/work ./internal/application/work` — pass.
+      Retrospectively unproven: no retained output for this exact focused run.
 - [x] Current-repo validation after UUID folder move:
-      `go run ./cmd/hawp work validate` — pass, 0 issues, 0 warnings
+      `go run ./cmd/hawp work validate` — pass, 0 issues, 0 warnings.
+      Evidence: September 2 status report records the UUID folder move and
+      passing work validation; exact sequencing is not independently logged.
 - [x] `mochila-archive-viewer` read-only validation:
       `go run ./cmd/hawp work validate --hawp-root /path/to/projects/mochila-archive-viewer/.hawp`
       — fail as expected for pre-migration issues: active rows `048`, `050`,
       `051`, `052`, and `053` still listed active while their plans are closed;
       the corresponding closed plans lack modern Outcome/Verification/Close
-      Checklist sections.
-- [x] Full Go suite: `go test ./...` — pass.
+      Checklist sections. Evidence: September 2 status report records this
+      read-only downstream validation and its pre-migration issues.
+- [x] Full Go suite: `go test ./...` — pass. Evidence: September 2 status report.
 - [x] Checked-in binary version: `./.hawp/bin/hawp version` — `0.0.24`.
+      Evidence: September 2 status report. This describes the historical
+      checkout; the binary is no longer tracked.
 - [x] Mochila temp-copy apply proof:
       default normalize changed 6 files, folder migration changed 11 files,
-      final validation passed with 0 issues and 0 warnings.
+      final validation passed with 0 issues and 0 warnings. Evidence: September
+      2 status report confirms temporary-copy apply and final validation;
+      exact file counts are retrospectively unproven without retained output.
 - [x] Tekit temp-copy apply proof:
       default normalize changed 194 files, folder migration changed 35 files,
-      final validation passed with 0 issues and 2 tolerated warnings.
+      final validation passed with 0 issues and 2 tolerated warnings. Evidence:
+      September 2 status report confirms temporary-copy apply and final
+      validation; exact file counts are retrospectively unproven without
+      retained output.
 
 ## 2026-09-07 progress report and sequencing
 

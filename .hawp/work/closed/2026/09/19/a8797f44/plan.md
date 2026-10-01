@@ -120,21 +120,29 @@ Medium: requires wiring the search index (needs a live SQLite index) and Ollama 
 
 - [x] Unit/integration coverage verifies `ready_for_work_new`,
   `needs_user_input`, `blocked_missing_index`, and `blocked_reshape_failed`
-  responses.
+  responses. Evidence: `librarian/src/internal/platform/mcp/server/tools_e2e_test.go`
+  contains the four `TestToolWorkIntake*` state tests.
 - [x] Tool discovery smoke confirms `hawp_work_intake` appears in MCP
-  `tools/list`.
+  `tools/list`. Evidence: `TestToolDefsIncludesWorkIntake` in the same test file
+  checks tool registration; the historical live smoke output was not retained.
 - [x] Live MCP/Ollama smoke confirms `needs_user_input` response when the index
-  has no matching chunks.
+  has no matching chunks. Retrospectively unproven: no live output retained.
 - [x] Live MCP/Ollama smoke confirms reshape failures are reported as structured
-  blocked states instead of confident drafts.
-- [x] `go test ./...` passes from `librarian/src`.
-- [x] `go vet ./...` passes from `librarian/src`.
+  blocked states instead of confident drafts. Retrospectively unproven: no live
+  output retained; the blocked-state test above covers the contract.
+- [x] `go test ./...` passes from `librarian/src`. Retrospectively unproven for
+  this plan: no command output retained with this result.
+- [x] `go vet ./...` passes from `librarian/src`. Retrospectively unproven for
+  this plan: no command output retained with this result.
 - [x] Live MCP stdio smoke returns valid initialization and an honest
   `needs_user_input` response when the current repository index has no match.
+  Retrospectively unproven: no stdio transcript retained.
 - [x] Ready-state behavior is proven by repository-backed integration coverage;
   a real local model producing a ready draft remains unproven in this checkout.
 - [x] `hawp work validate` and `hawp check` pass with the current repository
   state; historical clarity warnings remain explicitly reported where present.
+  Retrospectively unproven for this plan: no command output retained with this
+  result.
 
 ## Outcome
 
