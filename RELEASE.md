@@ -39,6 +39,11 @@ Preferred path: merge the prepared release branch to `main`. The
 `tag-on-merge.yml` workflow reads `version.go` and dispatches `release.yml`
 unless that plain tag already exists.
 Do not create the `0.0.24` tag before merging to `main`.
+The release workflow builds the standard platform binaries, prepares the kit
+bundle and checksums, and extracts release notes before it creates the tag.
+If publication fails after tagging, rerun that release workflow run: it accepts
+an existing tag only when it points to the same commit. A later `main` push
+with the same version does not dispatch another release.
 
 Manual path:
 
