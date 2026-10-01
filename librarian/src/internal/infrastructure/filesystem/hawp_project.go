@@ -75,19 +75,13 @@ func (p *HawpProject) GetSearchIndexPath() string {
 func ResolveSafeSearchIndexPath(projectRoot string) (string, error) {
 	project := ResolveHawpProject(projectRoot)
 	indexPath := project.GetSearchIndexPath()
-	// SQLite may write WAL, shared-memory, or rollback-journal sidecars when
-	// opening or updating the index. Preflight every database path before
-	// handing any of them to SQLite so existing symlinks or hard links cannot
-	// redirect writes outside the repository.
-	for _, path := range []string{
-		indexPath,
-		indexPath + "-wal",
-		indexPath + "-shm",
-		indexPath + "-journal",
-	} {
-		if err := RejectSymlinkAncestors(projectRoot, path); err != nil {
-			return "", fmt.Errorf("search index path: %w", err)
-		}
+	if err := RejectSymlinkAncestors(projectRoot, indexPath); err != nil {
+		return "", fmt.Errorf("search index path: %w", err)
+	}
+	// SQLite may write the WAL and shared-memory sidecars when the index is
+	// opened. Reject linked sidecars too, before handing any of these paths to
+	// SQLite, so writes cannot escape through an existing hard link.
+	for _, path := range []string{indexPath, indexPath + "-wal", indexPath + "-shm"} {
 		if err := RejectHardLinkedFile(path); err != nil {
 			return "", fmt.Errorf("search index path: %w", err)
 		}

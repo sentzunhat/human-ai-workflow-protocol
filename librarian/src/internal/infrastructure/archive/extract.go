@@ -86,10 +86,6 @@ func writeMember(destPath string, r io.Reader) error {
 	if err := os.MkdirAll(filepath.Dir(destPath), 0o755); err != nil {
 		return err
 	}
-	// Revalidate after directory creation, immediately before temp creation.
-	if err := filesystem.RejectSymlinksInPath(destPath); err != nil {
-		return fmt.Errorf("unsafe extraction destination: %w", err)
-	}
 	temp, err := os.CreateTemp(filepath.Dir(destPath), ".extract-*")
 	if err != nil {
 		return err

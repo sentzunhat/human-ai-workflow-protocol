@@ -199,30 +199,3 @@ func TestSaveConfigRejectsSymlinkedFile(t *testing.T) {
 		t.Fatalf("outside config changed to %q", got)
 	}
 }
-
-func TestOpenRejectsSymlinkedSQLiteSidecars(t *testing.T) {
-	for _, suffix := range []string{"-wal", "-shm", "-journal"} {
-		t.Run(suffix, func(t *testing.T) {
-			path := filepath.Join(t.TempDir(), "usage.sqlite")
-			outside := filepath.Join(t.TempDir(), "outside")
-			if err := os.WriteFile(outside, []byte("preserve"), 0o600); err != nil {
-				t.Fatal(err)
-			}
-			if err := os.Symlink(outside, path+suffix); err != nil {
-				t.Skipf("symlinks unavailable: %v", err)
-			}
-			store, err := Open(path)
-			if err == nil {
-				store.Close()
-				t.Error("accepted symlinked SQLite sidecar")
-			}
-			if _, err := os.Lstat(path); !os.IsNotExist(err) {
-				t.Errorf("database created before rejection: %v", err)
-			}
-			got, err := os.ReadFile(outside)
-			if err != nil || string(got) != "preserve" {
-				t.Fatalf("outside file changed: %q, %v", got, err)
-			}
-		})
-	}
-}

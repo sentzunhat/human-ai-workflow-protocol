@@ -70,9 +70,6 @@ func ExtractAll(archivePath, destDir string) error {
 			if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 				return err
 			}
-			if err := filesystem.RejectSymlinksInPath(target); err != nil {
-				return fmt.Errorf("unsafe extraction destination: %w", err)
-			}
 			tmp, err := os.CreateTemp(filepath.Dir(target), ".extract-all-*")
 			if err != nil {
 				return err

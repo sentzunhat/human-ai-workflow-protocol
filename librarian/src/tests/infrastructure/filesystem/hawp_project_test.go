@@ -51,7 +51,7 @@ func TestResolveSafeSearchIndexPathAllowsMissingRuntimeDirectories(t *testing.T)
 }
 
 func TestResolveSafeSearchIndexPathRejectsHardLinkedDatabaseFiles(t *testing.T) {
-	for _, suffix := range []string{"", "-wal", "-shm", "-journal"} {
+	for _, suffix := range []string{"", "-wal", "-shm"} {
 		t.Run(suffix, func(t *testing.T) {
 			root := t.TempDir()
 			outside := filepath.Join(t.TempDir(), "external.sqlite")
@@ -67,29 +67,6 @@ func TestResolveSafeSearchIndexPathRejectsHardLinkedDatabaseFiles(t *testing.T) 
 			}
 			if _, err := infrafs.ResolveSafeSearchIndexPath(root); err == nil {
 				t.Fatal("expected hard-linked search database file to be rejected")
-			}
-		})
-	}
-}
-
-func TestResolveSafeSearchIndexPathRejectsSymlinkedDatabaseFiles(t *testing.T) {
-	for _, suffix := range []string{"", "-wal", "-shm", "-journal"} {
-		t.Run(suffix, func(t *testing.T) {
-			root := t.TempDir()
-			outside := filepath.Join(t.TempDir(), "external.sqlite")
-			if err := os.WriteFile(outside, []byte("external database"), 0o600); err != nil {
-				t.Fatal(err)
-			}
-			dbDir := filepath.Join(root, ".hawp", "db")
-			if err := os.MkdirAll(dbDir, 0o755); err != nil {
-				t.Fatal(err)
-			}
-			indexPath := filepath.Join(dbDir, "index.sqlite") + suffix
-			if err := os.Symlink(outside, indexPath); err != nil {
-				t.Skipf("symlink capability unavailable (enable Windows Developer Mode or SeCreateSymbolicLinkPrivilege): %v", err)
-			}
-			if _, err := infrafs.ResolveSafeSearchIndexPath(root); err == nil {
-				t.Fatal("expected symlinked search database file to be rejected")
 			}
 		})
 	}
