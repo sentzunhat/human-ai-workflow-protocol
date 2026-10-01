@@ -13,11 +13,13 @@ Edits to provider overlay rules: change `core/providers/shared/behaviors/` (mate
 ```text
 generated/
 └── <provider>/
-    ├── install/main.md | install/development.md
-    └── update/main.md  | update/development.md
+    ├── install/main.md | install/main.sh
+    ├── install/development.md | install/development.sh
+    ├── update/main.md | update/main.sh
+    └── update/development.md | update/development.sh
 ```
 
-Each guide embeds `PROVIDER=<name>` and `REF=main|development` in the bash block. Scripts install `.hawp/kit/**` plus **only that provider's overlay** from `core/providers/.<provider>/`.
+Each guide embeds `PROVIDER=<name>` and `REF=main|development` in the bash block. The sibling `.sh` file contains the same generated script without Markdown, for review-first download and explicit execution. Scripts install `.hawp/kit/**` plus **only that provider's overlay** from `core/providers/.<provider>/`.
 
 ## Claude Code
 

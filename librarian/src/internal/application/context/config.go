@@ -59,15 +59,19 @@ type SecurityConfig struct {
 }
 
 // DefaultConfig returns the built-in default configuration.
-// Uses: ONNX embeddings (bge-base-en-v1.5, local/offline) + Ollama LLM (mistral).
+// Uses Ollama for both embeddings and LLM reshaping: nomic-embed-text for
+// embeddings and mistral for reshaping. Ollama is the preferred default after
+// the repository's local benchmark; ONNX remains available as an explicit
+// offline fallback through project config, environment variables, or CLI
+// backend selection.
 // ONNX LLM is blocked on hugot's CGO ORT backend (see llm.ErrGenerativeRequiresORT)
 // — defaulting LLM.Backend to "onnx" would make every reshape fail out of the
 // box, so the default LLM backend is "ollama" until that infra ships.
 func DefaultConfig() ContextConfig {
 	return ContextConfig{
 		Embeddings: EmbeddingsConfig{
-			Engine: "onnx",
-			Model:  "bge-base-en-v1.5",
+			Engine: "ollama",
+			Model:  "nomic-embed-text",
 		},
 		LLM: LLMConfig{
 			Engine:      "ollama",

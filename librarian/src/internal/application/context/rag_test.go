@@ -4,6 +4,8 @@ import (
 	"context"
 	"strings"
 	"testing"
+
+	inframodels "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models"
 )
 
 func TestNewDefaultRAGPipeline(t *testing.T) {
@@ -16,7 +18,7 @@ func TestNewDefaultRAGPipeline(t *testing.T) {
 		TopK:              5,
 	}
 
-	pipeline, err := NewDefaultRAGPipeline(config, t.TempDir())
+	pipeline, err := NewDefaultRAGPipeline(config, t.TempDir(), inframodels.NewEmbedderWithURL, inframodels.NewLLMClientWithURL)
 	if err != nil {
 		// Ollama might not be running - skip this test
 		if strings.Contains(err.Error(), "Ollama") || strings.Contains(err.Error(), "connect") {
@@ -44,7 +46,7 @@ func TestRAGPipelineRetrieveNoIndex(t *testing.T) {
 		LLMModel:          "mistral",
 	}
 
-	pipeline, err := NewDefaultRAGPipeline(config, t.TempDir())
+	pipeline, err := NewDefaultRAGPipeline(config, t.TempDir(), inframodels.NewEmbedderWithURL, inframodels.NewLLMClientWithURL)
 	if err != nil {
 		if strings.Contains(err.Error(), "Ollama") || strings.Contains(err.Error(), "connect") {
 			t.Skipf("Skipping: Ollama required for test")
@@ -70,7 +72,7 @@ func TestRAGPipelineReshapeWithValidBlock(t *testing.T) {
 		TopK:              3,
 	}
 
-	pipeline, err := NewDefaultRAGPipeline(config, t.TempDir())
+	pipeline, err := NewDefaultRAGPipeline(config, t.TempDir(), inframodels.NewEmbedderWithURL, inframodels.NewLLMClientWithURL)
 	if err != nil {
 		if strings.Contains(err.Error(), "Ollama") || strings.Contains(err.Error(), "connect") {
 			t.Skipf("Skipping: Ollama required for test")
@@ -147,7 +149,7 @@ func TestRAGPipelineReshapeEmptyBlock(t *testing.T) {
 		LLMModel:          "mistral",
 	}
 
-	pipeline, err := NewDefaultRAGPipeline(config, t.TempDir())
+	pipeline, err := NewDefaultRAGPipeline(config, t.TempDir(), inframodels.NewEmbedderWithURL, inframodels.NewLLMClientWithURL)
 	if err != nil {
 		if strings.Contains(err.Error(), "Ollama") || strings.Contains(err.Error(), "connect") {
 			t.Skipf("Skipping: Ollama required for test")
@@ -184,7 +186,7 @@ func TestRAGPipelineOutputStructure(t *testing.T) {
 		TopK:              2,
 	}
 
-	pipeline, err := NewDefaultRAGPipeline(config, t.TempDir())
+	pipeline, err := NewDefaultRAGPipeline(config, t.TempDir(), inframodels.NewEmbedderWithURL, inframodels.NewLLMClientWithURL)
 	if err != nil {
 		if strings.Contains(err.Error(), "Ollama") || strings.Contains(err.Error(), "connect") {
 			t.Skipf("Skipping: Ollama required for test")
@@ -250,7 +252,7 @@ func TestRAGPipelineContextCancellation(t *testing.T) {
 		LLMModel:          "mistral",
 	}
 
-	pipeline, err := NewDefaultRAGPipeline(config, t.TempDir())
+	pipeline, err := NewDefaultRAGPipeline(config, t.TempDir(), inframodels.NewEmbedderWithURL, inframodels.NewLLMClientWithURL)
 	if err != nil {
 		if strings.Contains(err.Error(), "Ollama") || strings.Contains(err.Error(), "connect") {
 			t.Skipf("Skipping: Ollama required for test")

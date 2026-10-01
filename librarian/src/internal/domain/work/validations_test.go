@@ -69,6 +69,25 @@ func TestBacklogConsistencyPassAndFail(t *testing.T) {
 	}
 }
 
+func TestBacklogConsistencyFailsNonCanonicalActiveNewWorkID(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"active/cleanup-docs-work-items-2026-09-02/plan.md": "# plan",
+	})
+	backlog := &Backlog{
+		Active: []BacklogRow{{
+			ID:     "cleanup-docs-work-items-2026-09-02",
+			Detail: "[plan](active/cleanup-docs-work-items-2026-09-02/plan.md)",
+		}},
+	}
+	result := CheckBacklogConsistency(workDir, backlog)
+	if result.Status != StatusFail {
+		t.Fatalf("status = %s, want FAIL", result.Status)
+	}
+	if len(result.NonCanonicalActiveItems) != 1 || result.NonCanonicalActiveItems[0] != "cleanup-docs-work-items-2026-09-02" {
+		t.Fatalf("non-canonical active items = %+v", result.NonCanonicalActiveItems)
+	}
+}
+
 func TestBacklogConsistencyMatchesSlugClosedFolder(t *testing.T) {
 	workDir := buildWorkDir(t, map[string]string{
 		"closed/2026/08/25/manager-branch-kit-pattern/plan.md": closedPlanComplete,
@@ -155,9 +174,8 @@ func TestBacklogConsistencyAcceptsHashColumnAndNumericIDs(t *testing.T) {
 		"closed/2026/07/27/042.md": closedPlanComplete,
 		"parked/040.md":            "# parked",
 	})
-	backlog, err := ParseBacklog(filepath.Join(workDir, "BACKLOG.md"))
-	if err == nil || backlog != nil {
-		t.Fatal("expected missing backlog fixture to fail before explicit parse fixture setup")
+	if _, statErr := os.Stat(filepath.Join(workDir, "BACKLOG.md")); statErr == nil {
+		t.Fatal("expected BACKLOG.md to be absent before explicit parse fixture setup")
 	}
 
 	workDir = buildWorkDir(t, map[string]string{
@@ -186,10 +204,11 @@ func TestBacklogConsistencyAcceptsHashColumnAndNumericIDs(t *testing.T) {
 		"parked/040.md":            "# parked",
 	})
 
-	backlog, err = ParseBacklog(filepath.Join(workDir, "BACKLOG.md"))
-	if err != nil {
-		t.Fatal(err)
+	rawBacklog, readErr := os.ReadFile(filepath.Join(workDir, "BACKLOG.md"))
+	if readErr != nil {
+		t.Fatal(readErr)
 	}
+	backlog := ParseBacklogMarkdown(string(rawBacklog))
 	if len(backlog.Active) != 1 || backlog.Active[0].ID != "049" {
 		t.Fatalf("active rows = %+v, want numeric 049 row", backlog.Active)
 	}
@@ -246,6 +265,27 @@ func TestEvidenceIntegrity(t *testing.T) {
 	escResult := CheckEvidenceIntegrity(escDir, CollectClosedPlanFiles(filepath.Join(escDir, "closed")))
 	if escResult.Total != 0 {
 		t.Errorf("escaping link counted: %+v", escResult)
+	}
+}
+
+func TestEvidenceIntegrityAcceptsUUIDScopedRepoRelativePaths(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"closed/2026/09/22/361fb08e/plan.md": `## Verification
+
+- [x] repo-relative **Evidence:** .hawp/work/evidence/2026/09/22/361fb08e/evidence.md#claim-1
+- [x] template wording **Evidence:** inline or link to .hawp/work/evidence/2026/09/22/361fb08e/evidence.md#claim-2
+- [x] missing **Evidence:** .hawp/work/evidence/2026/09/22/361fb08e/missing.md#claim-3
+`,
+		"evidence/2026/09/22/361fb08e/evidence.md": "# evidence\n",
+	})
+	files := CollectClosedPlanFiles(filepath.Join(workDir, "closed"))
+	result := CheckEvidenceIntegrity(workDir, files)
+	if result.Total != 3 || result.Valid != 2 || len(result.Broken) != 1 {
+		t.Fatalf("repo-relative evidence = %+v, want 3 total / 2 valid / 1 broken", result)
+	}
+	wantBroken := ".hawp/work/evidence/2026/09/22/361fb08e/missing.md#claim-3"
+	if result.Broken[0].Link != wantBroken {
+		t.Fatalf("broken link = %q, want %q", result.Broken[0].Link, wantBroken)
 	}
 }
 
@@ -342,15 +382,17 @@ func TestVerificationClarityUnprovenOnlyPasses(t *testing.T) {
 
 func TestDeadLinks(t *testing.T) {
 	workDir := buildWorkDir(t, map[string]string{
-		"BACKLOG.md":         "see [plan](active/TASK-001.md) and [gone](active/missing.md)\n",
-		"active/TASK-001.md": "```\n[example in fence](nowhere.md)\n```\n",
+		"BACKLOG.md":              "see [plan](active/TASK-001.md) and [gone](active/missing.md)\n",
+		"active/TASK-001.md":      "```\n[example in fence](nowhere.md)\n```\n",
+		"active/abcd1234/plan.md": "[nested](active/missing-nested.md)\n",
 	})
-	result := CheckDeadLinks(workDir)
-	if result.Scanned != 2 {
-		t.Fatalf("scanned = %d, want 2", result.Scanned)
+	source := &WorkSource{Exists: fileExists, ToRepoRelative: func(_, p string) string { return p }, ReadDir: os.ReadDir, ReadFile: os.ReadFile}
+	result := source.CheckDeadLinks(workDir)
+	if result.Scanned != 3 {
+		t.Fatalf("scanned = %d, want 3", result.Scanned)
 	}
-	if len(result.Broken) != 1 || result.Broken[0].Link != "active/missing.md" {
-		t.Fatalf("broken = %+v, want only active/missing.md (fenced link ignored)", result.Broken)
+	if len(result.Broken) != 2 || result.Broken[0].Link != "active/missing.md" || result.Broken[1].Link != "active/missing-nested.md" {
+		t.Fatalf("broken = %+v, want flat and nested links (fenced link ignored)", result.Broken)
 	}
 	if result.Status != StatusFail {
 		t.Errorf("status = %s, want FAIL", result.Status)

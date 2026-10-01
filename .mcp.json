@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "hawp": {
-      "command": ".hawp/bin/hawp",
-      "args": ["mcp"]
-    }
-  }
-}

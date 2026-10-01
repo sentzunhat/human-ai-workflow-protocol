@@ -23,8 +23,10 @@ import (
 	"time"
 
 	appsearch "github.com/sentzunhat/hawp/librarian/src/internal/application/search"
-	"github.com/sentzunhat/hawp/librarian/src/internal/domain/embeddings"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/sqlite"
+	inframodels "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models/ollama"
+	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/models/onnx"
+	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
 )
 
 const (
@@ -86,7 +88,7 @@ func TestEmbedRun1_ONNXSingle(t *testing.T) {
 	t.Logf("Run 1 — ONNX single: embedding one text with %s", onnxModel)
 	start := time.Now()
 
-	embedder, err := embeddings.NewONNXEmbedder(onnxModel)
+	embedder, err := onnx.NewONNXEmbedder(onnxModel)
 	if err != nil {
 		t.Fatalf("NewONNXEmbedder: %v", err)
 	}
@@ -119,7 +121,7 @@ func TestEmbedRun2_OllamaSingle(t *testing.T) {
 	t.Logf("Run 2 — Ollama single: embedding one text with %s", ollamaModel)
 	start := time.Now()
 
-	embedder, err := embeddings.NewOllamaEmbedder(ollamaURL, ollamaModel)
+	embedder, err := ollama.NewOllamaEmbedder(ollamaURL, ollamaModel)
 	if err != nil {
 		t.Fatalf("NewOllamaEmbedder: %v", err)
 	}
@@ -154,7 +156,7 @@ func TestEmbedRun3_ONNXPipeline(t *testing.T) {
 	}
 
 	dbPath := buildTestDB(t)
-	svc := NewEmbedService(dbPath)
+	svc := NewEmbedServiceWithFactory(dbPath, inframodels.NewEmbedder)
 
 	t.Logf("Run 3 — ONNX pipeline: embed → search with %s", onnxModel)
 	embedStart := time.Now()
@@ -182,7 +184,7 @@ func TestEmbedRun3_ONNXPipeline(t *testing.T) {
 	t.Logf("  lexical:   %d result(s)", len(rows))
 
 	searchStart := time.Now()
-	ranked := appsearch.HybridRank(rows, searchQuery, db, 3)
+	ranked := appsearch.HybridRank(rows, searchQuery, db, 3, 0)
 	searchElapsed := time.Since(searchStart)
 	t.Logf("  hybrid:    %d result(s) in %s", len(ranked), searchElapsed.Round(time.Millisecond))
 
@@ -203,7 +205,7 @@ func TestEmbedRun4_OllamaPipeline(t *testing.T) {
 	checkOllama(t)
 
 	dbPath := buildTestDB(t)
-	svc := NewEmbedService(dbPath)
+	svc := NewEmbedServiceWithFactory(dbPath, inframodels.NewEmbedder)
 
 	t.Logf("Run 4 — Ollama pipeline: embed → search with %s", ollamaModel)
 	embedStart := time.Now()
@@ -231,7 +233,7 @@ func TestEmbedRun4_OllamaPipeline(t *testing.T) {
 	t.Logf("  lexical:   %d result(s)", len(rows))
 
 	searchStart := time.Now()
-	ranked := appsearch.HybridRank(rows, searchQuery, db, 3)
+	ranked := appsearch.HybridRank(rows, searchQuery, db, 3, 0)
 	searchElapsed := time.Since(searchStart)
 	t.Logf("  hybrid:    %d result(s) in %s", len(ranked), searchElapsed.Round(time.Millisecond))
 

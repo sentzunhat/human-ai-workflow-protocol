@@ -10,8 +10,9 @@ import (
 )
 
 var (
-	linkRe  = regexp.MustCompile(`\[([^\]]*)\]\(([^)]+)\)`)
-	fenceRe = regexp.MustCompile("(?ms)^```.*?^```")
+	linkRe   = regexp.MustCompile(`\[([^\]]*)\]\(([^)]+)\)`)
+	fenceRe  = regexp.MustCompile("(?ms)^```.*?^```")
+	schemeRe = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9+.-]*:`)
 )
 
 // Link is one [text](href) occurrence with its byte offset in the content.
@@ -51,9 +52,9 @@ func CollectFiles(dir string, skipReadme bool) []string {
 // so links inside them are not scanned, without shifting offsets.
 func BlankFences(content string) string {
 	return fenceRe.ReplaceAllStringFunc(content, func(m string) string {
-		out := []rune(m)
-		for i, r := range out {
-			if r != '\n' {
+		out := []byte(m)
+		for i, b := range out {
+			if b != '\n' {
 				out[i] = ' '
 			}
 		}
@@ -84,7 +85,7 @@ func IsLocalHref(href string) bool {
 	if href == "" {
 		return false
 	}
-	if strings.HasPrefix(href, "http") || strings.HasPrefix(href, "/") || strings.HasPrefix(href, "#") {
+	if strings.HasPrefix(href, "/") || strings.HasPrefix(href, "#") || schemeRe.MatchString(href) {
 		return false
 	}
 	return true

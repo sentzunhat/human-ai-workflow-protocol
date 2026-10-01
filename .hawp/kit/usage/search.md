@@ -73,15 +73,14 @@ hawp search embed         generate and store embedding vectors
 
 When using Claude Code with the HAWP MCP server (`hawp mcp`), the `hawp_search` tool provides structured results with precise line positions and context windows — suitable for automated code navigation and documentation lookup.
 
-Configure MCP in `.mcp.json` at repo root:
-
-```json
-{
-  "mcpServers": {
-    "hawp": { "command": ".hawp/bin/hawp", "args": ["mcp"] }
-  }
-}
-```
+Use `hawp mcp configure --provider <name>` for config-only setup, or
+`hawp init --provider <name>` when provisioning and kit sync are also wanted.
+File-backed integrations are Claude Code (`.mcp.json`), Cursor
+(`.cursor/mcp.json`), Codex (`.codex/config.toml`), and GitHub/Copilot
+(`.vscode/mcp.json`); Continue prints a manual user-config block. Generated
+file-backed configs use the native executable and an explicit repository root.
+Follow the [provider MCP setup guides](mcp/README.md) rather than copying a
+static relative launcher between machines or providers.
 
 Tool input:
 
@@ -124,7 +123,8 @@ Pass `context: true` to receive a single deduplicated, token-capped markdown blo
 - `context` — when `true`, returns a pre-shaped markdown block (Jaccard dedup + greedy token cap applied); default `false`
 - `max_tokens` — token budget for the context block when `context: true`; default `2000`
 
-Other MCP tools: `hawp_work_new` (create work item), `hawp_work_validate` (validate kit + work integrity).
+Other MCP tools: `hawp_usage`, `hawp_work_intake`, `hawp_work_new`,
+`hawp_work_validate`, `hawp_work_doc`, and `hawp_work_reshape`.
 
 ## Typical agent workflow
 

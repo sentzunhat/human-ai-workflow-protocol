@@ -47,8 +47,6 @@ jobs:
       prerelease: ${{ steps.version.outputs.prerelease }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - uses: actions/setup-go@v5
         with:
@@ -69,19 +67,6 @@ jobs:
           else
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Create and push tag (manual dispatch only)
-        if: github.event_name == 'workflow_dispatch'
-        run: |
-          tag="${{ steps.version.outputs.tag }}"
-          if git rev-parse "refs/tags/$tag" >/dev/null 2>&1; then
-            echo "Tag $tag already exists — aborting so it is never silently reused." >&2
-            exit 1
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "$tag" -m "HAWP $tag (via workflow_dispatch)"
-          git push origin "$tag"
 
       - name: Build standard release binaries (all platforms, no ORT)
         working-directory: librarian/src
@@ -158,7 +143,7 @@ jobs:
           Copy lib/ next to the hawp binary, or run:
             sudo cp lib/* /usr/local/lib/ && sudo ldconfig
 
-          Then set llm.backend: "onnx" in ~/.hawp/config/context.json to
+          Then set llm.engine: "onnx" in ~/.hawp/config/context.json to
           use local ONNX LLM reshaping (hawp search --context).
           EOF
           tar -C stage -czf librarian/src/bin/hawp-linux-amd64-ort.tar.gz .
@@ -235,7 +220,7 @@ jobs:
           or install system-wide:
             sudo cp lib/*.dylib /usr/local/lib/
 
-          Then set llm.backend: "onnx" in ~/.hawp/config/context.json to
+          Then set llm.engine: "onnx" in ~/.hawp/config/context.json to
           use local ONNX LLM reshaping (hawp search --context).
           EOF
           tar -C stage -czf librarian/src/bin/hawp-darwin-arm64-ort.tar.gz .
@@ -258,6 +243,8 @@ jobs:
     if: always() && needs.build-std.result == 'success'
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download standard dist artifacts
         uses: actions/download-artifact@v4
@@ -305,10 +292,32 @@ jobs:
             $0 ~ "^## \\[" ver "\\]" { found=1; print; next }
             found && /^## \[/ { exit }
             found { print }
-          ' librarian/src/CHANGELOG.md > /tmp/release-notes.md
+          ' librarian/CHANGELOG.md > /tmp/release-notes.md
           if [ ! -s /tmp/release-notes.md ]; then
-            echo "::error::No librarian/src/CHANGELOG.md section found for version $ver — add one before releasing." >&2
+            echo "::error::No librarian/CHANGELOG.md section found for version $ver — add one before releasing." >&2
             exit 1
+          fi
+
+      - name: Create or verify tag (manual dispatch only)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          RELEASE_TAG: ${{ needs.build-std.outputs.tag }}
+        run: |
+          set -euo pipefail
+          tag="$RELEASE_TAG"
+          if git show-ref --verify --quiet "refs/tags/$tag"; then
+            tagged_commit="$(git rev-parse "refs/tags/$tag^{commit}")"
+            source_commit="$(git rev-parse HEAD)"
+            if [ "$tagged_commit" != "$source_commit" ]; then
+              echo "Tag $tag points to $tagged_commit, not $source_commit — refusing to reuse it." >&2
+              exit 1
+            fi
+            echo "Tag $tag already points to this commit; continuing the release retry."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag -a "$tag" -m "HAWP $tag (via workflow_dispatch)"
+            git push origin "$tag"
           fi
 
       - name: Publish GitHub Release

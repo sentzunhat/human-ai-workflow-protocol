@@ -1,7 +1,7 @@
 # Release Playbook
 
 HAWP releases are cut from `main` with plain semantic-version tags such as
-`0.0.23`. Do not use a `v` prefix.
+`0.0.24`. Do not use a `v` prefix.
 
 The current release workflow is `.github/workflows/release.yml`. It builds the
 standard `hawp` binaries for all six platforms, optional ORT tarballs where
@@ -10,7 +10,7 @@ supported, `hawp-kit-bundle.tar.gz`, and one `checksums.txt` file.
 ## Prepare
 
 1. Update `librarian/src/internal/domain/update/version.go`.
-2. Add a matching section to `librarian/src/CHANGELOG.md`.
+2. Add a matching section to `librarian/CHANGELOG.md`.
 3. Run the local release checks from `librarian/src`.
 
 ```bash
@@ -24,15 +24,26 @@ go run ./cmd/hawp check
 make dist VERSION=<version>
 ```
 
-Commit the version, changelog, generated distribution files, materialized
-provider overlays, and checked-in `.hawp/bin/hawp` wrapper changes that belong
-to the release lane.
+Commit the version, changelog, generated distribution files, and materialized
+provider overlays that belong to the release lane. `.hawp/bin/` is local build
+and install output; no binary is committed to the source repository. For a
+source checkout, `make install VERSION=<version>` builds the host executable at
+`.hawp/bin/hawp`. The generated install and update scripts select the host
+platform's executable from the latest published GitHub release and verify it
+against `checksums.txt` before replacing the local executable. Until `0.0.24`
+is published, those scripts install the latest published version instead.
 
 ## Publish
 
 Preferred path: merge the prepared release branch to `main`. The
 `tag-on-merge.yml` workflow reads `version.go` and dispatches `release.yml`
 unless that plain tag already exists.
+Do not create the `0.0.24` tag before merging to `main`.
+The release workflow builds the standard platform binaries, prepares the kit
+bundle and checksums, and extracts release notes before it creates the tag.
+If publication fails after tagging, rerun that release workflow run: it accepts
+an existing tag only when it points to the same commit. A later `main` push
+with the same version does not dispatch another release.
 
 Manual path:
 

@@ -26,7 +26,7 @@ func TestComputeOutputsRendersEveryTarget(t *testing.T) {
 		}
 	}
 
-	outputs, err := ComputeOutputs(root)
+	outputs, err := ComputeOutputs(root, os.ReadFile)
 	if err != nil {
 		t.Fatal(err)
 	}

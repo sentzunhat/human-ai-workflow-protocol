@@ -149,28 +149,45 @@ reshaper, err := NewContextReshaper(ReshapingConfig{
 
 1. **Environment variables** (HAWP_EMBEDDINGS_BACKEND, etc.)
 2. **~/.hawp/config/context.json**
-3. **Defaults** (ONNX embeddings + Ollama LLM)
+3. **Defaults** (Ollama embeddings + Ollama LLM)
 
 ### Example: ~/.hawp/config/context.json
 
 ```json
 {
   "embeddings": {
-    "backend": "onnx|ollama",
-    "model": "model-name"
+    "engine": "ollama",
+    "model": "nomic-embed-text"
   },
   "llm": {
-    "backend": "ollama|onnx|openai|anthropic",
-    "model": "model-name",
-    "max_tokens": 512,
-    "temperature": 0.7
+    "engine": "ollama",
+    "model": "mistral",
+    "maxTokens": 2000,
+    "temperature": 0.3
   },
-  "reshaping": {
-    "top_k": 5,
-    "timeout_ms": 30000
+  "backends": {
+    "ollama": {
+      "url": "http://localhost:11434"
+    }
   }
 }
 ```
+
+The default above is the recommended local setup. To use ONNX embeddings as
+an offline fallback, change only the embedding block:
+
+```json
+{
+  "embeddings": {
+    "engine": "onnx",
+    "model": "bge-base-en-v1.5"
+  }
+}
+```
+
+ONNX embeddings run without Ollama. ONNX generative reshaping is a separate
+optional path that requires an ORT build and native runtime libraries; it is
+not the default.
 
 ---
 
