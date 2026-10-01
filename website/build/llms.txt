@@ -1,0 +1,40 @@
+# HAWP: Human-AI Workflow Protocol
+
+> Canonical website: https://hawp.online/
+
+HAWP is an open-source, Markdown-first workflow protocol and Go CLI for
+shaping AI agent work before execution. It preserves intent, context,
+constraints, evidence, and handoffs across agents, sessions, and tools.
+
+## What HAWP is
+
+- A small portable shape for `input`, `context`, `mission`, `constraints`, and
+  `output`, with an optional `checkpoint`.
+- A repository-local workflow layer built around human-readable Markdown
+  artifacts.
+- A CLI and optional MCP server for searching and carrying useful project
+  context.
+- Compatible with Claude Code, GitHub Copilot, Codex, Cursor, Continue, and
+  other agent runtimes.
+
+## What HAWP is not
+
+HAWP is not an AI model, agent runtime, orchestration engine, hosted platform,
+or proprietary memory service. It shapes and carries work so another tool can
+execute it.
+
+## Primary sources
+
+- [HAWP README](https://github.com/sentzunhat/human-ai-workflow-protocol/blob/main/README.md): Project overview, protocol shape, installation, and supported agents.
+- [HAWP start guide](https://github.com/sentzunhat/human-ai-workflow-protocol/blob/main/.hawp/kit/start-here.md): The five-field workflow shape and repository usage guidance.
+- [Generated provider guides](https://github.com/sentzunhat/human-ai-workflow-protocol/tree/main/distribution/generated): Installation and update guidance for supported coding agents.
+
+## Optional
+
+- [HAWP website](https://hawp.online/): Human-readable product overview and current release downloads.
+- [HAWP releases](https://github.com/sentzunhat/human-ai-workflow-protocol/releases): Published CLI binaries and release notes.
+- [HAWP discussions](https://github.com/sentzunhat/human-ai-workflow-protocol/discussions): Community questions and project discussion.
+
+Important terms: Human-AI workflow protocol, AI agent workflow, context
+engineering, agent handoffs, Markdown-first workflow, repository-local
+context, MCP, Go CLI, portable work artifacts, and reducing context drift.

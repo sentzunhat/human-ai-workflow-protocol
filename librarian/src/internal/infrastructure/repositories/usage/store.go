@@ -46,9 +46,6 @@ func Open(path string) (domainusage.Store, error) {
 		return nil, fmt.Errorf("unsafe usage DB path: %w", err)
 	}
 	for _, candidate := range []string{path, path + "-wal", path + "-shm", path + "-journal"} {
-		if err := filesystem.RejectSymlinkPathAncestors(candidate); err != nil {
-			return nil, fmt.Errorf("unsafe usage DB path: %w", err)
-		}
 		if err := filesystem.RejectHardLinkedFile(candidate); err != nil {
 			return nil, fmt.Errorf("unsafe usage DB path: %w", err)
 		}

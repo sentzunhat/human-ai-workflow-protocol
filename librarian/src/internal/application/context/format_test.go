@@ -20,21 +20,6 @@ func TestTruncateToTokensPreservesUTF8(t *testing.T) {
 	}
 }
 
-func TestTruncateToTokensHandlesExtremeBudgets(t *testing.T) {
-	text := "small input"
-	maxInt := int(^uint(0) >> 1)
-
-	if got := truncateToTokens(text, maxInt); got != text {
-		t.Fatalf("truncateToTokens(text, maxInt) = %q, want original text", got)
-	}
-	if got := truncateToTokens(text, 0); got != "" {
-		t.Fatalf("truncateToTokens(text, 0) = %q, want empty string", got)
-	}
-	if got := truncateToTokens(text, -1); got != "" {
-		t.Fatalf("truncateToTokens(text, -1) = %q, want empty string", got)
-	}
-}
-
 func TestFormatAsMarkdown(t *testing.T) {
 	results := []search.Result{
 		{

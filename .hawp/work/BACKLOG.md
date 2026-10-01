@@ -77,6 +77,9 @@ Limited to the last 5–10 items.
 | `d48e1035` | fix | Guard provider materializer output paths | 2026-09-25 | [plan](closed/2026/09/25/d48e1035/plan.md) |
 | `cd4691d7` | bug | Reject symlink ancestors in kitsync repository writes | 2026-09-25 | [plan](closed/2026/09/25/cd4691d7/plan.md) |
 | `984f038a` | bug | Reject Markdown symlinks in `links clean --apply` | 2026-09-25 | [plan](closed/2026/09/25/984f038a/plan.md) |
+| `c3371bf5` | fix | Fix missing SQLite index preflight | 2026-09-25 | [plan](closed/2026/09/25/c3371bf5/plan.md) |
+| `2c588680` | fix | Fix quality workflow all-zero base SHA handling | 2026-09-25 | [plan](closed/2026/09/25/2c588680/plan.md) |
+| `84892d9d` | fix | Make fenced-code masking byte-length preserving | 2026-09-25 | [plan](closed/2026/09/25/84892d9d/plan.md) |
 ---
 
 ## Archive
@@ -85,13 +88,6 @@ Limited to the last 5–10 items.
 - Status reports: `status/`
 - Evidence: `evidence/`
 - Decisions: `decisions/`
-
-### Archived Recently-Closed (compacted 2026-09-29)
-
-| ID         | Type | Title                                            | Closed     | Detail                                              |
-| ---------- | ---- | ------------------------------------------------ | ---------- | --------------------------------------------------- |
-| `2c588680` | fix | Fix quality workflow all-zero base SHA handling | 2026-09-25 | [plan](closed/2026/09/25/2c588680/plan.md) |
-| `84892d9d` | fix  | Make fenced-code masking byte-length preserving | 2026-09-25 | [plan](closed/2026/09/25/84892d9d/plan.md) |
 
 ### Archived Recently-Closed (compacted 2026-09-16)
 

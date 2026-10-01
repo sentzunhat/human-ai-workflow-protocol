@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#151112" />
+    <link rel="icon" href="%sveltekit.assets%/favicon.svg" />
+    <link rel="describedby" href="%sveltekit.assets%/llms.txt" />
+    <script>
+      (() => {
+        try {
+          const preference = localStorage.getItem('hawp-theme') || 'system';
+          const dark = preference === 'dark' || (preference === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.dataset.preference = preference;
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+          document.querySelector('meta[name="theme-color"]').content = dark ? '#151112' : '#f5eee8';
+        } catch {
+          const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.dataset.preference = 'system';
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        }
+      })();
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "name": "HAWP: Human-AI Workflow Protocol",
+            "url": "https://hawp.online/",
+            "description": "An open-source, Markdown-first workflow protocol and Go CLI for shaping AI agent work before execution.",
+            "inLanguage": "en",
+            "publisher": {
+              "@type": "Organization",
+              "name": "Sentzunhat",
+              "url": "https://github.com/sentzunhat"
+            }
+          },
+          {
+            "@type": "SoftwareSourceCode",
+            "name": "HAWP: Human-AI Workflow Protocol",
+            "description": "An open-source protocol and CLI for shaping AI agent work before execution, preserving context, reducing drift, and improving handoffs.",
+            "url": "https://hawp.online/",
+            "codeRepository": "https://github.com/sentzunhat/human-ai-workflow-protocol",
+            "license": "https://www.apache.org/licenses/LICENSE-2.0",
+            "programmingLanguage": ["Go", "Markdown"],
+            "keywords": "AI agents, human-AI workflow, context engineering, MCP, Markdown"
+          },
+          {
+            "@type": "WebPage",
+            "name": "HAWP: Human-AI Workflow Protocol for AI Agent Work",
+            "description": "HAWP is an open-source workflow protocol and Go CLI for shaping AI agent work, preserving context, reducing drift, and improving handoffs across tools.",
+            "url": "https://hawp.online/",
+            "isPartOf": { "@type": "WebSite", "url": "https://hawp.online/" },
+            "about": [
+              { "@type": "Thing", "name": "AI agent workflow" },
+              { "@type": "Thing", "name": "Context engineering" },
+              { "@type": "Thing", "name": "Human-AI collaboration" }
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What is HAWP?",
+                "acceptedAnswer": { "@type": "Answer", "text": "HAWP is an open-source Human-AI Workflow Protocol for shaping AI agent work before execution. It carries intent, context, mission, constraints, output, evidence, and handoffs in portable work artifacts." }
+              },
+              {
+                "@type": "Question",
+                "name": "Is HAWP an AI agent framework?",
+                "acceptedAnswer": { "@type": "Answer", "text": "No. HAWP is a workflow protocol and CLI for shaping and carrying work. It does not replace your agent runtime, orchestrator, or model." }
+              },
+              {
+                "@type": "Question",
+                "name": "Does HAWP require a database or cloud service?",
+                "acceptedAnswer": { "@type": "Answer", "text": "No. The work model is Markdown-first and repository-local. Search indexing can be generated locally, so the protocol remains a set of portable files rather than a hosted dependency." }
+              },
+              {
+                "@type": "Question",
+                "name": "Why does HAWP use MCP?",
+                "acceptedAnswer": { "@type": "Answer", "text": "MCP gives connected agents a standard way to search the HAWP kit and work index without forcing the protocol into a specific editor or vendor." }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I use HAWP with more than one coding agent?",
+                "acceptedAnswer": { "@type": "Answer", "text": "Yes. Provider guides in the repository cover Claude Code, GitHub Copilot, Codex, Cursor, and Continue." }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+    %sveltekit.head%
+  </head>
+  <body data-sveltekit-preload-data="hover">
+    <div style="display: contents">%sveltekit.body%</div>
+  </body>
+</html>

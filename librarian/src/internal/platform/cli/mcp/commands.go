@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 
 	domainupdate "github.com/sentzunhat/hawp/librarian/src/internal/domain/update"
-	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repo"
 	"github.com/sentzunhat/hawp/librarian/src/internal/platform/cli/mcp/configure"
 	appmcp "github.com/sentzunhat/hawp/librarian/src/internal/platform/mcp/server"
@@ -52,9 +51,6 @@ func resolveRoot(args []string, cwd string) (string, error) {
 			root = filepath.Join(cwd, root)
 		}
 		root = filepath.Clean(root)
-		if err := filesystem.RejectSymlinkPathAncestors(root); err != nil {
-			return "", fmt.Errorf("--repo-root: %w", err)
-		}
 		info, err := os.Stat(root)
 		if err != nil {
 			return "", fmt.Errorf("--repo-root: %w", err)

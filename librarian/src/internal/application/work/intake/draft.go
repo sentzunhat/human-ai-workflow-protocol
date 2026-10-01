@@ -6,14 +6,22 @@ import (
 	"strings"
 
 	domainwork "github.com/sentzunhat/hawp/librarian/src/internal/domain/work"
-	domainintake "github.com/sentzunhat/hawp/librarian/src/internal/domain/work/intake"
 )
 
-// Keep these aliases at the application boundary for existing callers. The
-// data contract lives in domain/work/intake so infrastructure adapters can
-// depend inward without importing this application package.
-type DraftRequest = domainintake.DraftRequest
-type DraftProposal = domainintake.DraftProposal
+// DraftRequest contains only caller-supplied text. No repository is required.
+type DraftRequest struct {
+	Input   string
+	Context string
+}
+
+// DraftProposal excludes input/context so a shaper cannot replace source text.
+// Unknown constraints or output requirements must be labeled, not invented.
+type DraftProposal struct {
+	Mission     string
+	Constraints string
+	Output      string
+	Checkpoint  string
+}
 
 // RequestShaper proposes intake fields. Implementations must honor cancellation.
 // No default adapter is selected; context summarizers have a different contract.

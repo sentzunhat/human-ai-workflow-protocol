@@ -5,24 +5,6 @@ import (
 	"strings"
 )
 
-// DraftRequest contains only caller-supplied text for shaping a proposed
-// intake. It belongs to the domain contract so model adapters do not depend
-// on the application package.
-type DraftRequest struct {
-	Input   string
-	Context string
-}
-
-// DraftProposal contains only fields proposed by a shaper. It deliberately
-// excludes input and context so adapters cannot replace caller-supplied text.
-// Unknown constraints or output requirements must be labeled, not invented.
-type DraftProposal struct {
-	Mission     string
-	Constraints string
-	Output      string
-	Checkpoint  string
-}
-
 // Draft is a proposed HAWP intake shape, not a work item or approval.
 // Input and Context are supplied by the caller; the other fields need review.
 type Draft struct {

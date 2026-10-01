@@ -79,10 +79,6 @@ func VerifiedFile(fetcher Fetcher, url, expectedSHA256, destPath string) error {
 	}
 	defer body.Close()
 
-	// Revalidate after directory creation and any external fetch callback.
-	if err := filesystem.RejectSymlinksInPath(destPath); err != nil {
-		return fmt.Errorf("unsafe download destination: %w", err)
-	}
 	temp, err := os.CreateTemp(filepath.Dir(destPath), ".download-*")
 	if err != nil {
 		return err

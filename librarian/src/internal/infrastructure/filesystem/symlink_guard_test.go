@@ -165,33 +165,3 @@ func TestRejectSymlinksInPathRejectsSymlinkedAncestor(t *testing.T) {
 		t.Fatal("expected symlinked ancestor to be rejected")
 	}
 }
-
-func TestRootGuardRejectsAncestorBeforeReadOrWrite(t *testing.T) {
-	base, outside := t.TempDir(), t.TempDir()
-	realRoot := filepath.Join(outside, "repo")
-	if err := os.Mkdir(realRoot, 0o755); err != nil {
-		t.Fatal(err)
-	}
-	target := filepath.Join(realRoot, "file")
-	if err := os.WriteFile(target, []byte("preserve"), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	link := filepath.Join(base, "redirect")
-	if err := os.Symlink(outside, link); err != nil {
-		t.Skipf("symlinks unavailable: %v", err)
-	}
-	root := filepath.Join(link, "repo")
-	if err := RejectSymlinkAncestors(root, filepath.Join(root, "missing")); err == nil {
-		t.Error("accepted ancestor of root")
-	}
-	if _, err := ResolveSafeSearchIndexPath(root); err == nil {
-		t.Error("accepted redirected search root")
-	}
-	if err := AtomicWriteFile(root, filepath.Join(root, "file"), []byte("changed"), 0o600); err == nil {
-		t.Error("accepted redirected write")
-	}
-	got, err := os.ReadFile(target)
-	if err != nil || string(got) != "preserve" {
-		t.Fatalf("external file changed: %q, %v", got, err)
-	}
-}

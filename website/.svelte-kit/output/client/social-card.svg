@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#151112"/>
+  <defs>
+    <pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0H0V64" fill="none" stroke="#251d1f" stroke-width="1"/>
+    </pattern>
+    <radialGradient id="glow" cx="1" cy="0">
+      <stop offset="0" stop-color="#7b2633" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#7b2633" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <circle cx="1080" cy="80" r="340" fill="url(#glow)"/>
+  <rect x="76" y="72" width="54" height="54" rx="15" fill="#2a2022" stroke="#5b4448"/>
+  <path d="M103 84l16 15-16 17-16-17z" fill="none" stroke="#e5b9a2" stroke-width="2"/>
+  <path d="M103 94l7 7-7 7-7-7z" fill="#a84553"/>
+  <text x="154" y="111" fill="#f6ece5" font-family="Inter,system-ui,sans-serif" font-size="38" font-weight="700">HAWP</text>
+  <text x="76" y="258" fill="#f6ece5" font-family="Inter,system-ui,sans-serif" font-size="72" font-weight="700" letter-spacing="-3">Shape the work</text>
+  <text x="76" y="338" fill="#e5b9a2" font-family="Inter,system-ui,sans-serif" font-size="72" font-weight="700" letter-spacing="-3">before execution begins.</text>
+  <text x="80" y="429" fill="#c6b4aa" font-family="Inter,system-ui,sans-serif" font-size="26">Human-AI Workflow Protocol</text>
+  <text x="80" y="471" fill="#927f78" font-family="ui-monospace,monospace" font-size="19">Open · Markdown-first · MCP-ready</text>
+  <g transform="translate(1005 330)">
+    <circle r="164" fill="none" stroke="#3a2b2e"/>
+    <circle r="121" fill="none" stroke="#3a2b2e"/>
+    <circle r="79" fill="none" stroke="#3a2b2e" stroke-dasharray="5 7"/>
+    <rect x="-57" y="-57" width="114" height="114" rx="28" fill="#2a2022" stroke="#7b4b54"/>
+    <path d="M0-34L34 0 0 34-34 0z" fill="none" stroke="#c58a6d" stroke-width="2"/>
+    <path d="M0-12L12 0 0 12-12 0z" fill="#a84553"/>
+  </g>
+</svg>

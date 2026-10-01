@@ -195,129 +195,6 @@ Dependencies:
 
 **Next objective:** Choose a durable HAWP prompt/checklist/template location and convert the drafted repository-audit-agent instructions into a maintained reusable artifact.
 
-## Checkpoint 3 — HAWP onboarding link drift and lightweight Markdown link validation
-
-### What changed
-
-#### Before
-
-- HAWP already treated its small core shape and lean-scope guardrail as durable design constraints: improvements should prefer optional patterns, examples, evidence discipline, and workflow guidance rather than schema/runtime expansion.
-- The Guardrail ADR lived in dated work-history storage, while onboarding/usage guidance depended on a path that could drift as work records moved.
-- There was no lightweight repository validation dedicated to catching broken local Markdown links across the main HAWP documentation surfaces.
-- Prior project history already contained documentation-link drift findings, so this was a recurring maintenance risk rather than a new category of problem.
-
-#### During
-
-- The repository `sentzunhat/human-ai-workflow-protocol` was identified as the project-specific public repository.
-- The live Guardrail ADR content was inspected from the dated work-history record and its lean-scope decision was preserved rather than replaced with unrelated new policy.
-- A stable onboarding reference was created at `core/.hawp/kit/usage/GUARDRAIL_ADR.md`.
-- `core/.hawp/kit/usage/init.md` was changed to point to the stable sibling reference instead of sending onboarding readers into date-organized work history.
-- A small Node script was added at `librarian/scripts/check-markdown-links.mjs` to scan local Markdown links under `.hawp`, `docs` when present, and root `README.md`.
-- `librarian/package.json` was changed to expose `npm run check:markdown-links` and include it in the aggregate `npm run validate` flow.
-- Four GitHub write operations returned commit SHAs during the conversation:
-  - `a6065d74df431a8130dd52cab14e4975e85e9a13` — stable Guardrail ADR reference
-  - `34031f1955181203d636ac5429d151b597825ca5` — onboarding Guardrail link update
-  - `b28fc41cd340cd50134cd7a3b4684487ad16a0a6` — Markdown link checker
-  - `137ff0c81a4f011ef816b82a4810b5f00eeeabca` — package-script integration
-- At the end of that implementation turn, GitHub reported no CI statuses for the last returned SHA.
-- During archival, the `dev` ref no longer resolved through the GitHub connector, and commit search did not rediscover those four commit messages/SHAs. Therefore their current reachability from a live branch is **unverified** and must not be treated as durable branch state.
-
-#### After
-
-- The intended fix is well-defined: onboarding should use a stable Guardrail ADR reference, and local Markdown link drift should be caught by a small repository check rather than a documentation platform.
-- The implementation was accepted by GitHub write calls during the conversation, but its current presence on a live branch is unresolved because `dev` no longer resolves and the returned commits are not currently discoverable through commit search.
-- The canonical same-day checkpoint remains on `main`; this entry records the implementation attempt and the verification gap without claiming that the live repository currently contains those changes.
-- No private project names, personal information, or unrelated conversation context are included in this public checkpoint.
-
-### Completed work
-
-- Identified the stale/date-sensitive onboarding reference problem.
-- Inspected the existing Guardrail ADR and preserved its lean-scope intent.
-- Designed and wrote the stable ADR reference, onboarding-link update, lightweight Markdown link checker, and npm validation integration.
-- Captured the exact commit SHAs returned by the GitHub write operations.
-- Re-checked repository state during archival and detected that the earlier `dev` state can no longer be verified.
-
-### Decisions
-
-- Onboarding documentation should link to stable kit/reference paths, not date-based work-history paths.
-- The dated ADR remains historical evidence; the stable onboarding reference is the durable navigation target.
-- Link validation should stay lightweight: local Markdown links in `.hawp`, `docs`, and `README.md` are sufficient scope.
-- Do not build a documentation platform for this concern.
-- Do not claim CI/link validation passed unless it actually runs successfully.
-- Do not assume the earlier `dev` writes remain live merely because the write API returned commit SHAs.
-
-### Strategic impact
-
-- This closes a recurring class of onboarding failure at the design level: stable public references are separated from dated work-history organization.
-- Adding a small link check to normal validation would turn documentation drift from a release-time/manual discovery into an ordinary quality-gate failure.
-- The approach remains consistent with HAWP's guardrail: solve the concrete reliability problem with a small optional/tooling aid rather than expanding the protocol schema or creating documentation infrastructure.
-- The immediate priority is repository-state reconciliation, not additional documentation features.
-
-### Continuation state
-
-Current state:
-
-- Canonical archive branch: `main`.
-- The intended link-drift patch is fully specified in this checkpoint.
-- Earlier GitHub writes targeted `dev` and returned four commit SHAs, but `dev` is currently unresolved through the connector and those commits are not currently rediscovered by commit search.
-- CI success for the patch is not established.
-
-Next milestone:
-
-- Reconcile the intended patch with the repository's current live development branch, then run the Markdown link check and the relevant validation suite successfully.
-
-Next actions:
-
-1. Determine the current development branch/ref replacing or superseding `dev`, if any.
-2. Inspect whether `core/.hawp/kit/usage/GUARDRAIL_ADR.md`, the `init.md` stable link, `librarian/scripts/check-markdown-links.mjs`, and the package scripts already exist on that live branch.
-3. Reapply only missing pieces; do not duplicate files or overwrite newer equivalent work.
-4. Run `npm run check:markdown-links` from `librarian`.
-5. Run the repository's relevant aggregate validation/CI path and record evidence.
-6. Only after successful verification, treat the link-drift fix as completed durable branch state.
-
-Blockers:
-
-- The previously targeted `dev` ref does not currently resolve through GitHub.
-- The four returned implementation commits are not currently discoverable through repository commit search.
-- No successful CI/link-check execution was captured in this conversation.
-
-Unresolved questions:
-
-- Was `dev` deleted, renamed, force-moved, or otherwise superseded after the write operations?
-- Are the four returned commits reachable through another branch/ref even though commit search does not currently surface them?
-- Does a newer branch already contain an equivalent stable Guardrail ADR/link-check implementation?
-
-Dependencies:
-
-- Current GitHub branch topology.
-- Existing HAWP distribution/source synchronization rules if the stable kit file must also be materialized into repo-local/generated copies.
-- Node/npm versions required by `librarian/package.json` for validation.
-
-### Memory delta
-
-- Merge into existing HAWP durable context rather than creating a parallel project memory.
-- Durable addition: on 2026-09-29, HAWP onboarding link drift was addressed conceptually and via GitHub write operations by introducing a stable Guardrail ADR reference and a lightweight local Markdown-link checker integrated with librarian validation.
-- Durable caution: the implementation commits returned by those writes are not currently verified as reachable because the `dev` ref stopped resolving during archival; future work must reconcile live branch state before considering the fix complete.
-- Preserve the existing HAWP lean-scope guardrail and prior v0.0.24/review history; do not duplicate those timelines here.
-- Do not preserve unrelated personal, business, infrastructure, finance, or private-project context in this open-source checkpoint.
-
-### GitHub archival
-
-- Related repository found: Yes
-- Organization: `sentzunhat`
-- Repository: `sentzunhat/human-ai-workflow-protocol`
-- Archive branch: `main`
-- Implementation branch requested earlier: `dev` (currently unresolved through GitHub during archival)
-- Checkpoint file: `.hawp/work/status/2026/09/29/checkpoint-summary.md`
-- Fallback archive: No
-
-### Resume summary
-
-**Resume from:** Reconcile the four intended onboarding/link-check changes against the repository's current live development branch; do not assume the earlier `dev` writes are still reachable.
-
-**Next objective:** Establish a live, verified stable Guardrail ADR link plus lightweight Markdown-link validation, then run and record successful validation evidence.
-
-
 
 ## Checkpoint 3 — CLI-driven iterative participant loop direction
 
@@ -799,3 +676,170 @@ Decisions that should not be revisited without new evidence:
 
 - Resume from PR #41 at `fd703bae367d49350e720dbf651b49ed5cf4da93`; implementation review evidence remains tied to `646529bd`.
 - Next action remains human review/approval and an explicit decision whether to merge PR #41. Resume deferred provider setup only after that gate.
+
+
+## Checkpoint 7 — ctx.rs comparison sharpens the HAWP Librarian boundary
+
+**Event date:** 2026-10-01
+
+**Archive date:** 2026-10-01
+
+### What changed
+
+#### Before
+
+- HAWP already had a mature Go Librarian direction: local indexing/search, bounded context construction, MCP/CLI workflow support, structured work records, evidence discipline, and durable handoffs.
+- The durable design distinction was already that HAWP should preserve structured project/work state rather than depend on chat history as the source of truth.
+- Earlier exploratory discussion had compared HAWP Librarian with ctx.rs and informally described ctx as a local searchable agent-history system, but the technical storage/indexing details had not been reverified against the current ctx.rs implementation.
+- PR #41 had been merged into `development`; the active release lane is now PR #42 from `development` to `main`.
+
+#### During
+
+- ctx.rs was reviewed as an external open-source reference for local coding-agent history retrieval and context recovery.
+- The product-level similarity is strong: both systems aim to recover useful prior context locally and hand focused evidence to later agents or humans.
+- The important product boundary remains:
+  - ctx.rs is primarily a coding-agent history/search system.
+  - HAWP Librarian is a structured work-state/context system whose authority comes from HAWP records, repository state, decisions, evidence, validation, and explicit continuation artifacts.
+- A technical correction was established from current ctx.rs public documentation:
+  - ctx no longer uses SQLite as its core history/search authority.
+  - current lexical/history storage is an immutable Tantivy Core generation.
+  - default lexical retrieval uses BM25.
+  - optional semantic retrieval uses local flat-F32 vector generations rather than sqlite-vec.
+  - SQLite remains present only for bounded product-state usage data and may also exist in provider-owned source histories that ctx reads as inputs.
+- This means earlier conversation wording that treated ctx's main index as SQLite should not be carried forward as current architecture.
+- The HAWP-side architectural conclusion is unchanged: historical conversation retrieval can be useful evidence, but must not silently override current repository or canonical HAWP work state.
+
+#### After
+
+- ctx.rs is now treated as a useful external architectural reference for the “recover prior agent work” portion of the Librarian problem, not as a replacement for HAWP.
+- The durable conceptual split is:
+  - ctx: retrieve historical agent sessions/events and source-linked prior work.
+  - HAWP Librarian: build authoritative project/work context from structured HAWP records plus current repository evidence, with historical retrieval as an optional supporting source.
+- A future integration could treat ctx as one context-source adapter feeding the HAWP Librarian, with retrieved history explicitly labeled as historical evidence that must be reconciled against current state.
+- No implementation change, dependency addition, or ctx integration was made in this conversation.
+
+### Completed work
+
+- Revisited the HAWP Librarian/ctx.rs comparison against the current HAWP repository direction.
+- Corrected the previously stale assumption that ctx's active core search index is SQLite-based.
+- Preserved the stronger HAWP product boundary: structured current work state and evidence remain authoritative; agent-history retrieval is supporting context.
+- Confirmed the current HAWP release topology: v0.0.24 feature work is merged into `development`, and PR #42 is the active `development` → `main` release lane.
+
+### Decisions
+
+- Do not model ctx.rs as a HAWP replacement.
+- Do not copy ctx internals blindly into HAWP; treat ctx as prior art for local agent-history retrieval, indexing, citations, and context recovery.
+- Keep HAWP's canonical source hierarchy explicit: current repository + HAWP records/decisions/evidence outrank historical agent transcripts.
+- Any future ctx integration should preserve provenance and separate:
+  1. current structured truth,
+  2. historical retrieved evidence,
+  3. unresolved or stale claims,
+  4. model-ready continuation context.
+- Do not preserve the earlier “ctx core index = SQLite/sqlite-vec” assumption as current fact.
+
+### Strategic impact
+
+- The comparison validates that local context recovery is a real, independently implemented product category and gives HAWP a concrete reference point for search ergonomics, provenance, and agent-history ingestion.
+- It also clarifies HAWP's differentiation: HAWP can compound retrieval with explicit workflow state, verification, decisions, evidence, constraints, and handoff semantics.
+- The next useful design work is not to duplicate ctx. It is to define a clean context-source interface so HAWP can consume external history retrieval while retaining source authority and freshness rules.
+- This should remain behind the current release gate; no new integration work should disrupt the v0.0.24 release lane.
+
+### Continuation state
+
+Current state:
+
+- Repository: `sentzunhat/human-ai-workflow-protocol`.
+- Active release lane: PR #42, `development` → `main`, open at source head `a13489f394344692b5889fedcd5865a58819553c` when this checkpoint was created.
+- The Go Librarian is already an implemented local search/context/MCP system; ctx.rs is now an external comparison/reference, not the active implementation plan.
+- No ctx dependency, adapter, or integration code exists from this conversation.
+
+Next milestone:
+
+- Complete the v0.0.24 release gate, then decide whether a generic external-history/context-source adapter belongs in the next Librarian roadmap.
+
+Next actions:
+
+1. Keep PR #42/release work isolated from this research checkpoint.
+2. After the release gate, inspect the current Librarian context/search interfaces and identify the narrowest extension point for external historical evidence.
+3. Define source-authority metadata and freshness semantics before writing an adapter.
+4. If pursued, prototype a ctx-backed adapter that returns citations/provenance rather than importing ctx's storage architecture.
+5. Validate that retrieved history cannot override current HAWP work state without explicit reconciliation.
+
+Blockers:
+
+- No implementation blocker; this is design/reference work.
+- Any integration should wait until the current v0.0.24 release lane is complete.
+- ctx.rs architecture may continue to evolve, so future implementation work must reverify its public contract rather than assume current internals are stable.
+
+Unresolved questions:
+
+- Should external coding-agent history be a first-class HAWP context source or remain an optional provider integration?
+- What minimum provenance fields should every external context source return?
+- Should HAWP retrieve ctx event/session IDs on demand or persist only references into HAWP evidence/context packets?
+- How should HAWP score freshness and authority when historical agent context conflicts with current repository evidence?
+
+### Memory delta
+
+- Merge into the existing HAWP/Librarian durable context rather than creating a new project memory.
+- Durable addition: on 2026-10-01, ctx.rs was validated as a close analogue for local agent-history retrieval, while HAWP Librarian remains responsible for authoritative structured work/project context and handoffs.
+- Durable correction: ctx's current core lexical/history index is Tantivy/BM25, with optional flat-F32 semantic vectors; SQLite is not the current core history index.
+- Durable next direction: consider ctx or similar systems as optional external context sources after the v0.0.24 release, with explicit provenance, freshness, and authority separation.
+- Intentionally not duplicated: the broader HAWP origin timeline, previous v0.0.24 filesystem-hardening details, private correspondence, personal information, or unrelated project/business context.
+
+### GitHub archival
+
+- Related repository found: Yes
+- Organization/repository: `sentzunhat/human-ai-workflow-protocol`
+- Source branch: `development`
+- Source head at branch creation: `a13489f394344692b5889fedcd5865a58819553c`
+- Archival branch: `checkpoint/2026-10-01-ctx-librarian`
+- Checkpoint file: `.hawp/work/status/2026/09/29/checkpoint-summary.md`
+- Active release branch modified: No
+- Fallback archive: No
+
+### Resume summary
+
+**Resume from:** HAWP Librarian and ctx.rs now have a clear boundary: ctx-style history retrieval is supporting evidence; HAWP's structured current work state remains authoritative.
+
+**Next objective:** Finish the v0.0.24 release gate, then evaluate a provenance-preserving external context-source adapter rather than duplicating ctx's indexing stack.
+
+## Checkpoint 8 — Release published and Codex kit refreshed
+
+**Event date:** 2026-09-30 to 2026-10-01
+**Archive date:** 2026-10-01
+
+### Before
+
+- Checkpoints 5–6 left PR #41 open against `development`, with checks passing and review threads resolved but a human merge decision pending. Checkpoint 7 later recorded PR #41 merged while PR #42 remained the open `development` → `main` gate.
+- The release lane still carried a tracked host binary and version-led PR framing. The work validator reported ambiguous historical verification checkboxes. Prior kit guidance had omitted the HAWP-first, parallel-worktree, manager-branch, and harness concepts that the project intended to retain.
+- The release policy was to create a tag only after merge to `main`; a later review also established that artifacts must build before tag creation so a build failure cannot leave a premature release tag.
+
+### During — completed work and decisions
+
+- PR [#41](https://github.com/sentzunhat/human-ai-workflow-protocol/pull/41) merged into `development` on 2026-09-30 at `b973be448ed351a477d86fb63cae3540968dcbf5`. The implementation covers Ollama-first local search/reshaping, compound MCP intake and work tools, work-document creation, provider setup, repository safety boundaries, UTF-8 handling, and the Librarian package split. Its detailed review remains in the PR and earlier timeline entries.
+- On `development`, the canonical kit regained the HAWP-first workflow, parallel-agent worktree, optional manager-branch, and slice/provider/tool harness guidance. CI was adjusted to avoid duplicate push and pull-request checks for this promotion.
+- Release preparation removed the tracked host binary. Install/update scripts now select a published platform binary, verify its SHA256 checksum, and replace the local binary. The release workflow builds standard binaries and prepares release materials before creating the tag; a rerun accepts an existing tag only when it points to the checkout commit.
+- Closed-plan verification cleanup at `fee1f22ad902b77e86f2f53015c12723790e08f9` distinguished retained reports or source tests from historical results whose raw output was not kept. The local `hawp work validate --no-update-check` run then reported 0 issues, 0 warnings, and 0 ambiguous items; PR #42's `quality` and `validate-generated` checks passed on that head.
+- PR [#42](https://github.com/sentzunhat/human-ai-workflow-protocol/pull/42) was retitled to summarize local AI search, MCP intake, work records, provider setup, and filesystem hardening without a version in its title. Its description now covers the full implementation, documentation, CI, installer, and publication path.
+- PR #42 merged into `main` on 2026-10-01 at `66bc64be87ca918eace4601dc0a62b7dd6a631c1`. The release workflow [succeeded](https://github.com/sentzunhat/human-ai-workflow-protocol/actions/runs/36881931777); tag `0.0.24` resolves to that merge commit. The [0.0.24 release](https://github.com/sentzunhat/human-ai-workflow-protocol/releases/tag/0.0.24) was published at 15:12 UTC as a prerelease with six standard platform binaries, an optional ORT archive for supported platforms, a kit bundle, and `checksums.txt`.
+- The generated Codex `main` update script was run in this source checkout after the release. Its terminal proof was `Source: sentzunhat/human-ai-workflow-protocol@main`, `Provider: codex`, and `Source mode: remote archive`. It downloaded `hawp-darwin-arm64`, verified SHA256, and installed `.hawp/bin/hawp` reporting `0.0.24`. The local binary digest `4d9547ccb4619384b99e7125f5c5a0ad9b744aa66c90cb1236863f949eb4f92f` matches the published asset digest. The root `.hawp/kit` matches `core/.hawp/kit`; existing `AGENTS.md` and `.hawp/work/**` remained unchanged, and the source checkout was clean after update.
+
+### After — current state and limits
+
+- The release gate is complete: `main`, `development`, and tag `0.0.24` were observed at the PR #42 merge commit. The local source checkout has the checksum-verified released CLI and synchronized kit without tracked update changes.
+- PR #42's merge and release supersede the earlier “awaiting review/tag” statements in checkpoints 5–7 and the 2026-10-01 release-tag retry status report. Those records remain historical, not current blockers.
+- The published assets and one macOS arm64 download were verified. Execution on all other platforms and an update in an independent downstream consumer repository were not verified in this conversation.
+- The active backlog still lists three planned MCP follow-ups (`c8d9e1cb`, `2eea565c`, `429e075e`) and contains pre-release wording about the former feature branch. Reconcile that header against the published release before choosing the next implementation slice. The remainder of `c8d9e1cb` and the two other items remain planned, not completed by this release.
+- The ctx.rs comparison in checkpoint 7 remains a separate post-release design reference. No ctx integration was implemented or selected for the next slice.
+
+### Continuation
+
+- **Latest completed milestone:** PR #42 merged and HAWP librarian `0.0.24` published; Codex kit and checksum-verified CLI refreshed locally.
+- **Next milestone:** Reconcile the stale release-scope wording in `.hawp/work/BACKLOG.md`, review the three active MCP plans against the now-published baseline, and select the next bounded slice. If downstream installation behavior matters for that slice, run a fresh consumer-repository update smoke before claiming it verified.
+- **Blockers:** None for the completed release. New implementation work needs a scope decision among the active plans; no release retry is currently required.
+- **Resume from:** `main` at `66bc64be87ca918eace4601dc0a62b7dd6a631c1`, tag `0.0.24`, the three active backlog plans, and this timeline. Recheck live GitHub state before any later publication or branch claims.
+
+### Memory and archive boundary
+
+- Add only the compact transition “PR #41 and #42 merged → 0.0.24 published → Codex kit/binary refreshed; next reconcile active backlog and choose MCP slice” to memory. The review threads, source architecture, release mechanics, and external-reference discussion remain in this timeline and linked records.
+- This checkpoint contains no private consumer-repository names, personal details, or unrelated project context. It extends the existing public HAWP timeline rather than creating a parallel status document.

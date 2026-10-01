@@ -9,22 +9,14 @@ import (
 	"strings"
 )
 
-// RejectSymlinkAncestors validates the ancestry above root, then walks from
-// root through target, rejecting symlinks in either portion of the path.
-// This prevents MkdirAll or WriteFile from following a planted symlink
-// inside or above the supplied root.
+// RejectSymlinkAncestors walks every directory component of target, starting
+// at root, and returns an error if any component (including root itself) is a
+// symlink. This prevents MkdirAll or WriteFile from following a symlink planted
+// inside an otherwise-trusted directory tree and redirecting writes outside it.
 //
 // root must be an ancestor of target (or equal to it). Components that do not
 // yet exist are skipped — MkdirAll is expected to create them.
 func RejectSymlinkAncestors(root, target string) error {
-	if err := RejectSymlinkPathAncestors(root); err != nil {
-		return err
-	}
-	return rejectSymlinkAncestors(root, target)
-}
-
-// rejectSymlinkAncestors is the bounded walker; callers establish root ancestry.
-func rejectSymlinkAncestors(root, target string) error {
 	// Check root itself first — callers often trust root without verifying it.
 	fi, err := os.Lstat(root)
 	if err != nil {
@@ -143,7 +135,7 @@ func RejectSymlinkPathAncestors(target string) error {
 	if volume != "" {
 		root = volume + string(filepath.Separator)
 	}
-	return rejectSymlinkAncestors(root, abs)
+	return RejectSymlinkAncestors(root, abs)
 }
 
 // AtomicWriteFile writes data through a temporary sibling and atomically

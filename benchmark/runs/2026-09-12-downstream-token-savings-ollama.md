@@ -14,7 +14,7 @@ Backend: **ollama / mistral** | Token estimate: `(len(text)+3)/4` | Date: 2026-0
 | 8 | Plan file structure and fields | 1996 | 73 | +1923 | +96% |
 | 9 | Kit maintenance and validation commands | 1997 | 84 | +1913 | +96% |
 | 10 | Binary update and install flow | 1995 | 87 | +1908 | +96% |
-| — | **TOTAL (9/10 succeeded)** | **16098** | **831** | **+15267** | **+95%** |
+| — | **TOTAL (9/10 succeeded)** | **18096** | **831** | **+17265** | **+95%** |
 
 _Raw tokens = `(len(query) + len(formatted_search_context) + 3) / 4`._
 _This models the downstream LLM call without reshape: request text + retrieved context._
