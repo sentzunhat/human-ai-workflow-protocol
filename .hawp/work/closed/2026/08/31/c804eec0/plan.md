@@ -92,15 +92,15 @@ is strong enough to serve as the release benchmark checkpoint.
 ## Verification
 
 - [x] Source-backed validation is clean. Evidence:
-      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
+      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](../../../../../evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
       records `work validate` and `hawp check` passing
 - [x] Token-savings rerun is recorded with aggregate and per-query results.
       Evidence:
-      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
+      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](../../../../../evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
       shows `22866` raw, `18028` shaped, `4838` saved (`21%`)
 - [x] The remaining sparse negative is explicitly recorded instead of hidden.
       Evidence:
-      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
+      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](../../../../../evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
       notes the `-1` token outlier as negligible
 
 ## Close Checklist

@@ -46,13 +46,13 @@ raw-vs-shaped token savings.
 
 ## Verification
 
-- [x] `.hawp/work/evidence/2026/08/24/search-benchmark-v006.md` records speed. Evidence: [.hawp/work/evidence/2026/08/24/search-benchmark-v006.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/evidence/2026/08/24/search-benchmark-v006.md)
+- [x] `.hawp/work/evidence/2026/08/24/search-benchmark-v006.md` records speed. Evidence: [.hawp/work/evidence/2026/08/24/search-benchmark-v006.md](../../../../../evidence/2026/08/24/search-benchmark-v006.md)
       evidence with query-count, latency, and quality notes
-- [x] `.hawp/work/evidence/2026/08/27/v0019-token-savings-benchmark.md` records token-savings evidence. Evidence: [.hawp/work/evidence/2026/08/27/v0019-token-savings-benchmark.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/evidence/2026/08/27/v0019-token-savings-benchmark.md)
+- [x] `.hawp/work/evidence/2026/08/27/v0019-token-savings-benchmark.md` records token-savings evidence. Evidence: [.hawp/work/evidence/2026/08/27/v0019-token-savings-benchmark.md](../../../../../evidence/2026/08/27/v0019-token-savings-benchmark.md)
       token-savings evidence with per-query and aggregate totals
-- [x] `librarian/src/CHANGELOG.md` entry for `0.0.19` explicitly states the token benchmark closes this gate. Evidence: [CHANGELOG.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/librarian/src/CHANGELOG.md)
+- [x] `librarian/src/CHANGELOG.md` entry for `0.0.19` explicitly states the token benchmark closes this gate. Evidence: [CHANGELOG.md](../../../../../../../librarian/src/CHANGELOG.md)
       `hawp search benchmark --token` closes this gate
-- [x] Evidence includes neutral/negative sparse cases instead of cherry-picking. Evidence: [.hawp/work/evidence/2026/08/27/v0019-token-savings-benchmark.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/evidence/2026/08/27/v0019-token-savings-benchmark.md) includes negative sparse-query rows.
+- [x] Evidence includes neutral/negative sparse cases instead of cherry-picking. Evidence: [.hawp/work/evidence/2026/08/27/v0019-token-savings-benchmark.md](../../../../../evidence/2026/08/27/v0019-token-savings-benchmark.md) includes negative sparse-query rows.
 
 ## Close Checklist
 
