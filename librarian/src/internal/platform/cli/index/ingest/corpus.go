@@ -206,6 +206,9 @@ func canonicalWorkUUID(value string) *string {
 		full := strings.ToLower(value)
 		return &full
 	}
+	if id := identity.ExtractIDFromFilename(value); id != "" {
+		return &id
+	}
 	return nil
 }
 

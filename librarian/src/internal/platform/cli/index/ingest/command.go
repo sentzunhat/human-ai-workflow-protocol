@@ -31,7 +31,16 @@ func Run(cwd string) error {
 		return fmt.Errorf("load search config: %w", err)
 	}
 
-	fmt.Printf("Building enriched document index from: %s\n", strings.Join(searchCfg.Index.Paths, ", "))
+	configSource := "no search.json found; built-in defaults"
+	if hawpHome != "" {
+		if _, err := os.Stat(filepath.Join(hawpHome, "config", "search.json")); err == nil {
+			configSource = "home search.json present"
+		}
+	}
+	if _, err := os.Stat(filepath.Join(root, ".hawp", "config", "search.json")); err == nil {
+		configSource = "project search.json present"
+	}
+	fmt.Printf("Building enriched document index from: %s (%s)\n", strings.Join(searchCfg.Index.Paths, ", "), configSource)
 
 	// Build corpus from actual files
 	corpus, err := buildCorpusFromRepo(root, searchCfg.Index.Paths)
@@ -54,6 +63,6 @@ func Run(cwd string) error {
 
 	fmt.Print(result.String())
 	fmt.Printf("Index ready at: %s\n", dbPath)
-	fmt.Println(`Try: hawp search query "<query>"`)
+	fmt.Println(`Try: hawp search "<query>"`)
 	return nil
 }

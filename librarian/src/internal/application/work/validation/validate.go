@@ -74,6 +74,9 @@ func Render(out io.Writer, workDir string, r *domainwork.Report) int {
 	for _, id := range r.Backlog.ParkedWork.Missing {
 		line("  ✗ parked row without plan file: %s", id)
 	}
+	for _, item := range r.Backlog.MisplacedParked {
+		line("  ! parked row still points into active/: %s", item)
+	}
 	for _, f := range r.Backlog.OrphanedFiles {
 		line("  ✗ orphaned active file: %s", f)
 	}

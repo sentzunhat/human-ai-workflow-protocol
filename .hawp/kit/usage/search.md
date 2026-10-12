@@ -63,13 +63,18 @@ hawp search <query>
   --hybrid-ratio <f>      lexical fraction for hybrid blend, 0.0 to 1.0 (default: 0.3)
   --verbose | -v          print token accounting summary to stderr (chunks, ~tokens, saved via dedup)
 
-hawp search index         ingest configured paths into SQLite (reads .hawp/config/search.json)
+hawp search index         ingest configured paths into SQLite (reads optional .hawp/config/search.json)
 hawp search embed         generate and store embedding vectors
   --backend onnx|ollama   required: embedding backend to use
   --model <name>          override default model for the backend
 ```
 
 ## MCP tool: hawp_search
+
+Without a search config, indexing uses `.hawp/kit` and `.hawp/work`. The command
+prints the effective paths and whether a project or home search config exists.
+To include repository documentation, create
+`.hawp/config/search.json` with `{"index":{"paths":[".hawp/kit",".hawp/work","docs"]}}`.
 
 When using Claude Code with the HAWP MCP server (`hawp mcp`), the `hawp_search` tool provides structured results with precise line positions and context windows — suitable for automated code navigation and documentation lookup.
 

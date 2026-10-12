@@ -73,6 +73,9 @@ func EnrichWork(repoRoot, workRoot string, reader Reader, src ContextSource) ([]
 func buildWorkDocument(repoRoot, file, role string, rows []domainwork.BacklogRow, reader Reader) Document {
 	raw, _ := reader(file)
 	id := resolveID(filepath.Base(file))
+	if filepath.Base(file) == "plan.md" {
+		id = resolveID(filepath.Base(filepath.Dir(file)))
+	}
 	doc := Document{
 		RelPath: repoRootToRel(repoRoot, file),
 		Corpus:  CorpusWork,

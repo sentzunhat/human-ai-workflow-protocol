@@ -44,6 +44,7 @@ type migrationPreviewReport struct {
 	Assessment        string   `json:"assessment"`
 	EstimatedChanges  int      `json:"estimatedChanges"`
 	ChangedFiles      []string `json:"changedFiles"`
+	StatusDrift       []string `json:"statusDrift,omitempty"`
 	Recommendation    string   `json:"recommendation"`
 	ValidationSummary string   `json:"validationSummary,omitempty"`
 }
@@ -85,8 +86,17 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 	}
 	backlogPath := filepath.Join(workRoot, "BACKLOG.md")
 	backlogRel := repo.ToRepoRelative(opts.RepoRoot, backlogPath)
+	statusDrift, err := parkedStatusDrift(backlogPath)
+	if err != nil {
+		fmt.Fprintf(errOut, "Script error: %v\n", err)
+		return 1
+	}
 
 	if opts.Apply {
+		if opts.MigrateFolders && len(statusDrift) > 0 {
+			fmt.Fprintf(errOut, "Error: parked rows still point into active/; review and move these items before folder migration: %s\n", strings.Join(statusDrift, ", "))
+			return 1
+		}
 		if !opts.ForceDirty && repo.HasDirtyWorktree(opts.RepoRoot) {
 			fmt.Fprintln(errOut, "Error: apply mode requires a clean working tree. Re-run with --force-dirty to override.")
 			return 2
@@ -177,11 +187,16 @@ func Normalize(out, errOut io.Writer, opts NormalizeOptions) int {
 			Assessment:       "clean",
 			EstimatedChanges: len(preview.ChangedFiles),
 			ChangedFiles:     preview.ChangedFiles,
+			StatusDrift:      statusDrift,
 			Recommendation:   "No work-item folder changes are needed.",
 		}
 		if len(preview.ChangedFiles) > 0 {
 			report.Assessment = "migration-ready"
 			report.Recommendation = "Review the planned file moves, then run `hawp work normalize --apply --migrate-folders --validate` in a clean worktree."
+		}
+		if len(statusDrift) > 0 {
+			report.Assessment = "review-needed"
+			report.Recommendation = "Review each parked row, move its plan from active/ to parked/ when safe, and update its backlog link before applying folder migration."
 		}
 
 		var rendered string
@@ -305,6 +320,13 @@ func renderMigrationPreviewText(report migrationPreviewReport) string {
 	b.WriteString("Assessment: " + report.Assessment + "\n")
 	b.WriteString(fmt.Sprintf("Estimated changes: %d\n", report.EstimatedChanges))
 	b.WriteString("Recommendation: " + report.Recommendation + "\n\n")
+	if len(report.StatusDrift) > 0 {
+		b.WriteString("Parked status-folder drift (review before apply)\n")
+		for _, item := range report.StatusDrift {
+			b.WriteString("- " + item + "\n")
+		}
+		b.WriteString("\n")
+	}
 	b.WriteString("Planned file changes\n")
 	b.WriteString("--------------------\n")
 	if len(report.ChangedFiles) == 0 {
@@ -315,6 +337,20 @@ func renderMigrationPreviewText(report migrationPreviewReport) string {
 		b.WriteString("- " + path + "\n")
 	}
 	return b.String()
+}
+
+func parkedStatusDrift(backlogPath string) ([]string, error) {
+	backlog, err := normalization.ParseNormalizeBacklog(backlogPath, normalization.ScanSource{ReadFile: os.ReadFile})
+	if err != nil {
+		return nil, err
+	}
+	var drift []string
+	for _, row := range backlog.Rows {
+		if row.Section == normalization.SectionBlocked && strings.HasPrefix(filepath.ToSlash(row.PlanPath), "active/") {
+			drift = append(drift, row.ID+": "+row.PlanPath+" -> parked/"+strings.TrimPrefix(filepath.ToSlash(row.PlanPath), "active/"))
+		}
+	}
+	return drift, nil
 }
 
 func validationSummary(workRoot string) string {

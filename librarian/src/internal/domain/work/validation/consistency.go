@@ -46,6 +46,9 @@ func CheckBacklogConsistency(workDir string, backlog *Backlog, source Source) Ba
 	result.ParkedWork.Total = len(backlog.Parked)
 	for _, row := range backlog.Parked {
 		linkPath := extractLinkPath(row.Detail)
+		if strings.HasPrefix(filepath.ToSlash(linkPath), "active/") {
+			result.MisplacedParked = append(result.MisplacedParked, row.ID+": "+linkPath)
+		}
 		if linkPath == "" {
 			result.ParkedWork.Missing = append(result.ParkedWork.Missing, row.ID)
 			continue
@@ -78,6 +81,8 @@ func CheckBacklogConsistency(workDir string, backlog *Backlog, source Source) Ba
 		len(result.ParkedWork.Missing) > 0 || len(result.OrphanedFiles) > 0 ||
 		len(result.OrphanedParked) > 0 || len(result.NonCanonicalActiveItems) > 0 {
 		result.Status = StatusFail
+	} else if len(result.MisplacedParked) > 0 {
+		result.Status = StatusWarn
 	}
 	return result
 }

@@ -57,6 +57,31 @@ func TestWorkCorpusLifecycle(t *testing.T) {
 	}
 }
 
+func TestWorkCorpusIndexesNumberedPlanMetadata(t *testing.T) {
+	root := t.TempDir()
+	for _, rel := range []string{"active/045/plan.md", "parked/058/plan.md", "closed/2026/09/06/078/plan.md"} {
+		path := filepath.Join(root, ".hawp/work", filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte("# plan"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	corpus, err := buildCorpusFromRepo(root, []string{".hawp/work"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(corpus.Documents) != 3 {
+		t.Fatalf("documents = %d, want 3", len(corpus.Documents))
+	}
+	for _, doc := range corpus.Documents {
+		if doc.WorkUUID == nil {
+			t.Fatalf("missing metadata ID for %s", doc.Path)
+		}
+	}
+}
+
 func TestBuildCorpusRecognizesBuiltInPathsWithTrailingSeparators(t *testing.T) {
 	root := t.TempDir()
 	for rel, content := range map[string]string{

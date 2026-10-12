@@ -15,6 +15,9 @@ var (
 	verificationHeadingRe   = regexp.MustCompile(`(?i)^#{1,6}\s*Verification\b`)
 	closeChecklistHeadingRe = regexp.MustCompile(`(?i)^#{1,6}\s*Close Checklist\b`)
 	pathDateRe              = regexp.MustCompile(`/(\d{4})/(\d{2})/(\d{2})/`)
+	closedItemPathRe        = regexp.MustCompile(`/closed/\d{4}/\d{2}/\d{2}/[^/]+/`)
+	inheritedClosureRe      = regexp.MustCompile(`(?im)^\*\*Inherited closure:\*\*\s*true\s*$`)
+	supportingArtifactRe    = regexp.MustCompile(`(?im)^\*\*Supporting artifact:\*\*\s*true\s*$`)
 )
 
 type closedFileEntry struct {
@@ -53,6 +56,9 @@ func CheckClosedTaskCompleteness(workDir string, source Source) ClosedTaskCheck 
 		}
 
 		class := classifyClosedFile(effectiveName, entry.date, string(content))
+		if filename != "plan.md" && closedItemPathRe.MatchString(filepath.ToSlash(entry.filePath)) {
+			class = classification{"supporting", effectiveName, "non-plan file inside closed item folder"}
+		}
 		date := entry.date
 		if date == "" {
 			date = "unknown"
@@ -94,7 +100,7 @@ func CheckClosedTaskCompleteness(workDir string, source Source) ClosedTaskCheck 
 
 		if len(missing) > 0 {
 			finding.Sections = missing
-			if entry.date == "" || entry.date < LegacyClosedCutoff {
+			if entry.date == "" || entry.date < LegacyClosedCutoff || inheritedClosureRe.MatchString(string(content)) {
 				result.Warnings = append(result.Warnings, finding)
 			} else {
 				result.Failing = append(result.Failing, finding)
@@ -115,6 +121,9 @@ func classifyClosedFile(filename, date, content string) classification {
 	nameLower := strings.ToLower(nameWithoutExt)
 	id := ExtractIDFromFilename(nameWithoutExt)
 	isLegacy := date == "" || date < LegacyClosedCutoff
+	if supportingArtifactRe.MatchString(content) {
+		return classification{"supporting", nameWithoutExt, "explicit supporting artifact marker"}
+	}
 
 	// Shared batch-close record: **Closes:** line names every backlog row it covers
 	if strings.Contains(content, "**Closes:**") {

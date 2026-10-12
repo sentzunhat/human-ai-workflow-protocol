@@ -8,6 +8,8 @@ import (
 )
 
 var separatorRowRe = regexp.MustCompile(`^\|\s*-+`)
+var sectionHeaderRe = regexp.MustCompile(`(?i)^##\s+(active\s+work|blocked\s*/\s*parked|recently\s+closed|done)(?:\s+.*)?$`)
+var headingSpaceRe = regexp.MustCompile(`\s+`)
 
 // ParseBacklogMarkdown parses backlog table content without accessing the
 // filesystem. Callers that already own the input boundary can use this pure
@@ -19,20 +21,24 @@ func ParseBacklogMarkdown(content string) *Backlog {
 	var headerMap map[string]int
 
 	for _, line := range strings.Split(string(content), "\n") {
+		sectionHeading := ""
+		if match := sectionHeaderRe.FindStringSubmatch(strings.TrimSpace(line)); match != nil {
+			sectionHeading = strings.ToLower(headingSpaceRe.ReplaceAllString(match[1], " "))
+		}
 		switch {
-		case strings.Contains(line, "## Active Work"):
+		case sectionHeading == "active work":
 			section, headerMap = "active", nil
 			continue
-		case strings.Contains(line, "## Recently Closed") || strings.Contains(line, "## Done"):
+		case sectionHeading == "recently closed" || sectionHeading == "done":
 			section, headerMap = "closed", nil
 			continue
-		case strings.Contains(line, "## Blocked / Parked"):
+		case strings.HasPrefix(sectionHeading, "blocked"):
 			section, headerMap = "parked", nil
 			continue
 		}
 		// A new level-2 section switches context; deeper subsection headings keep
 		// the current top-level section but reset table headers.
-		if strings.HasPrefix(line, "## ") {
+		if strings.HasPrefix(line, "## ") || strings.HasPrefix(line, "##\t") {
 			section, headerMap = "", nil
 			continue
 		}
@@ -83,6 +89,9 @@ func buildRow(cells []string, headerMap map[string]int) (BacklogRow, bool) {
 	var candidates []string
 	for _, alias := range []string{"legacy id", "id", "uuid", "#"} {
 		value := table.StripCodeSpan(table.Cell(cells, headerMap, alias))
+		if label, _, ok := table.LinkParts(value); ok {
+			value = table.StripCodeSpan(label)
+		}
 		if value != "" && value != "—" && value != "-" {
 			candidates = append(candidates, value)
 		}
@@ -122,11 +131,15 @@ func buildRow(cells []string, headerMap map[string]int) (BacklogRow, bool) {
 		id = rawID
 	}
 
+	detail := table.Cell(cells, headerMap, "plan file", "detail")
+	if _, target, ok := table.LinkParts(table.Cell(cells, headerMap, "id")); ok && detail == "" {
+		detail = "[plan](" + target + ")"
+	}
 	return BacklogRow{
 		ID:     id,
 		Type:   table.Cell(cells, headerMap, "type"),
-		Title:  table.Cell(cells, headerMap, "title"),
+		Title:  table.Cell(cells, headerMap, "title", "work"),
 		Status: table.Cell(cells, headerMap, "status", "reason", "closed"),
-		Detail: table.Cell(cells, headerMap, "plan file", "detail"),
+		Detail: detail,
 	}, true
 }

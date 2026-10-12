@@ -139,6 +139,49 @@ func TestRulesCleanRepo(t *testing.T) {
 	}
 }
 
+func TestRulesAcceptLegacyClosedRowAndHeadingVariants(t *testing.T) {
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/BACKLOG.md": `# Backlog
+## Active Work
+| ID | Type | Title | Status | Plan File |
+| --- | --- | --- | --- | --- |
+## Blocked/parked
+| ID | Type | Title | Detail |
+| --- | --- | --- | --- |
+## Recently closed
+| ID | Work | Closed | Detail | Evidence |
+| --- | --- | --- | --- | --- |
+| [078](closed/2026/10/01/078/plan.md) | Archived work | 2026-10-01 | A prose summary. | [proof](evidence/078.md) |
+`,
+		".hawp/work/active/.keep":                  "",
+		".hawp/work/parked/.keep":                  "",
+		".hawp/work/closed/2026/10/01/078/plan.md": closedPlanComplete,
+	})
+	if ops := detect(t, root); len(ops) != 0 {
+		t.Fatalf("legacy row produced operations: %+v", ops)
+	}
+}
+
+func TestRulesProposeParkedFolderReview(t *testing.T) {
+	root := buildRepoFixture(t, map[string]string{
+		".hawp/work/BACKLOG.md": cleanBacklogHeader + `
+## Blocked / Parked
+| ID | Type | Title | Reason | Detail | Updated |
+| --- | --- | --- | --- | --- | --- |
+| 045 | task | parked | waiting | [plan](active/045/plan.md) | 2026-10-11 |
+## Recently Closed
+| ID | Type | Title | Closed | Detail |
+| --- | --- | --- | --- | --- |
+`,
+		".hawp/work/active/045/plan.md": "# parked plan",
+		".hawp/work/parked/.keep":       "",
+		".hawp/work/closed/.keep":       "",
+	})
+	if ops := detect(t, root); !hasRule(ops, "B8") {
+		t.Fatalf("expected status-folder review operation: %+v", ops)
+	}
+}
+
 func TestRulesAcceptLegacySubsectionsAndPlainPlanPaths(t *testing.T) {
 	root := buildRepoFixture(t, map[string]string{
 		".hawp/work/BACKLOG.md": `# Backlog
