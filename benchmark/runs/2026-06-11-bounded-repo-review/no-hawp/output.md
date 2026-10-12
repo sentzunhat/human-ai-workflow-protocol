@@ -2,7 +2,7 @@
 
 Prompt given to the agent (verbatim, no framing added):
 
-> Repository: /home/beltrd/Desktop/projects/human-ai-workflow-protocol
+> Repository: <user-home>/projects/human-ai-workflow-protocol
 >
 > Take a look at the librarian/ folder and tell me what's wrong with it. What else should we clean up?
 >

@@ -88,15 +88,15 @@ next non-release cleanup slices explicitly separated.
 ## Verification
 
 - [x] The tests-topology checkpoint is verified and bounded. Evidence:
-      [.hawp/work/closed/2026/08/31/0bd32051/plan.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/08/31/0bd32051/plan.md)
+      [.hawp/work/closed/2026/08/31/0bd32051/plan.md](../0bd32051/plan.md)
       records the `14` moved black-box tests and `42` intentionally co-located
       tests
 - [x] The benchmark lane is verified and current. Evidence:
-      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
+      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](../../../../../evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
       shows the rerun, validation pass, and sparse-query results
 - [x] The remaining legacy-UUID work is intentionally deferred instead of mixed
       into the release lane. Evidence:
-      [.hawp/work/parked/89cf7a85/plan.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/parked/89cf7a85/plan.md)
+      [.hawp/work/parked/89cf7a85/plan.md](../../../../../parked/89cf7a85/plan.md)
       defines the safety-first follow-up scope
 
 ## Close Checklist

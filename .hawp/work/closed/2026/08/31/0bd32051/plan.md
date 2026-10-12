@@ -140,14 +140,14 @@ stay beside the code until there is a cleaner seam.
 ## Verification
 
 - [x] The replicated test tree now covers `14` black-box test files under
-      `librarian/src/tests/...`. Evidence: [plan.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/08/31/0bd32051/plan.md)
+      `librarian/src/tests/...`. Evidence: [plan.md](plan.md)
       migration checkpoint lists the moved files
 - [x] The remaining `42` tests intentionally stay co-located under
-      `internal/...`. Evidence: [plan.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/08/31/0bd32051/plan.md)
+      `internal/...`. Evidence: [plan.md](plan.md)
       checkpoint records the retained package-internal and integration-heavy
       areas
 - [x] The mixed topology passed verification after the migration pass. Evidence:
-      [plan.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/closed/2026/08/31/0bd32051/plan.md)
+      [plan.md](plan.md)
       records `go test ./...` and `go run ./cmd/hawp work validate`
 
 ## Close Checklist
