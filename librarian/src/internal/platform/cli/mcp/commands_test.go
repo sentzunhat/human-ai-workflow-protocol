@@ -38,3 +38,19 @@ func TestMCPRootRejectsInvalidInput(t *testing.T) {
 		}
 	}
 }
+
+func TestMCPRootRejectsSymlinkedAncestors(t *testing.T) {
+	base, outside := t.TempDir(), t.TempDir()
+	if err := os.Mkdir(filepath.Join(outside, "repo"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	link := filepath.Join(base, "redirect")
+	if err := os.Symlink(outside, link); err != nil {
+		t.Skipf("symlinks unavailable: %v", err)
+	}
+	for _, candidate := range []string{link, filepath.Join(link, "repo"), filepath.Join("redirect", "repo")} {
+		if _, err := resolveRoot([]string{"--repo-root", candidate}, base); err == nil {
+			t.Errorf("accepted symlinked root %q", candidate)
+		}
+	}
+}
