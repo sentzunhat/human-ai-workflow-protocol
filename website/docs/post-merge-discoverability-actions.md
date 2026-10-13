@@ -107,4 +107,3 @@ from assumption to completion by memory:
 - final GitHub description, homepage, topics, and Community Standards state;
 - Search Console/Bing submission or indexing readback, where available;
 - the +7-day and +14-day comparison tables.
-

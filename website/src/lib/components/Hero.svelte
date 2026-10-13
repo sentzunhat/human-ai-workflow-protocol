@@ -18,6 +18,10 @@
   let visual: HTMLDivElement;
   let connectionPaths = $state<string[]>([]);
   let draggingIndex = $state(-1);
+  let cableWobble = [0, 0, 0, 0, 0];
+  let cableVelocity = [0, 0, 0, 0, 0];
+  let animationFrame = 0;
+  let previousPointer = { x: 0, y: 0 };
 
   function connectionPath(node: NodePosition, index: number): string {
     const dx = node.x - 50;
@@ -25,7 +29,7 @@
     const distance = Math.max(Math.hypot(dx, dy), 1);
     const perpendicularX = -dy / distance;
     const perpendicularY = dx / distance;
-    const sway = [2.4, -2.8, 2.1, -2.1, 2.8][index];
+    const sway = [2.4, -2.8, 2.1, -2.1, 2.8][index] + cableWobble[index];
     const c1x = 50 + dx * 0.34 + perpendicularX * sway;
     const c1y = 50 + dy * 0.34 + perpendicularY * sway;
     const c2x = node.x - dx * 0.34 + perpendicularX * sway;
@@ -37,9 +41,37 @@
     connectionPaths = nodePositions.map(connectionPath);
   }
 
+  function animateCables() {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let moving = draggingIndex >= 0 && !reduceMotion;
+    for (let index = 0; index < cableWobble.length; index += 1) {
+      if (reduceMotion) {
+        cableWobble[index] = 0;
+        cableVelocity[index] = 0;
+        continue;
+      }
+      cableVelocity[index] += -cableWobble[index] * 22 * (1 / 60);
+      cableVelocity[index] *= 0.86;
+      cableWobble[index] += cableVelocity[index] * (1 / 60);
+      if (Math.abs(cableWobble[index]) > 0.015 || Math.abs(cableVelocity[index]) > 0.015) moving = true;
+      else {
+        cableWobble[index] = 0;
+        cableVelocity[index] = 0;
+      }
+    }
+    updateConnections();
+    if (moving) animationFrame = requestAnimationFrame(animateCables);
+    else animationFrame = 0;
+  }
+
+  function requestCableFrame() {
+    if (!animationFrame) animationFrame = requestAnimationFrame(animateCables);
+  }
+
   function startDrag(event: PointerEvent, index: number) {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     draggingIndex = index;
+    previousPointer = { x: event.clientX, y: event.clientY };
     (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
     event.preventDefault();
   }
@@ -49,9 +81,37 @@
     const bounds = visual.getBoundingClientRect();
     const x = Math.max(8, Math.min(92, ((event.clientX - bounds.left) / bounds.width) * 100));
     const y = Math.max(8, Math.min(92, ((event.clientY - bounds.top) / bounds.height) * 100));
+    const deltaX = event.clientX - previousPointer.x;
+    const deltaY = event.clientY - previousPointer.y;
+    const pointerDelta = Math.hypot(deltaX, deltaY);
+    const node = nodePositions[draggingIndex];
+    const side = Math.sign(deltaX * (node.y - 50) - deltaY * (node.x - 50)) || 1;
+    cableVelocity[draggingIndex] = Math.max(-3, Math.min(3, cableVelocity[draggingIndex] + side * Math.min(pointerDelta * 0.075, 2.2)));
+    previousPointer = { x: event.clientX, y: event.clientY };
     nodePositions[draggingIndex].x = x;
     nodePositions[draggingIndex].y = y;
     updateConnections();
+    requestCableFrame();
+  }
+
+  function keyboardMove(event: KeyboardEvent, index: number) {
+    const step = event.shiftKey ? 5 : 2;
+    const movement = {
+      ArrowLeft: [-step, 0],
+      ArrowRight: [step, 0],
+      ArrowUp: [0, -step],
+      ArrowDown: [0, step]
+    } as const;
+    const delta = movement[event.key as keyof typeof movement];
+    if (!delta) return;
+
+    event.preventDefault();
+    const node = nodePositions[index];
+    node.x = Math.max(8, Math.min(92, node.x + delta[0]));
+    node.y = Math.max(8, Math.min(92, node.y + delta[1]));
+    cableVelocity[index] = Math.max(-3, Math.min(3, cableVelocity[index] + (delta[0] - delta[1]) * 0.12));
+    updateConnections();
+    requestCableFrame();
   }
 
   function stopDrag(event: PointerEvent) {
@@ -59,13 +119,17 @@
     const target = event.currentTarget as HTMLElement;
     if (target.hasPointerCapture(event.pointerId)) target.releasePointerCapture(event.pointerId);
     draggingIndex = -1;
+    requestCableFrame();
   }
 
   onMount(() => {
     updateConnections();
     const resizeObserver = new ResizeObserver(updateConnections);
     resizeObserver.observe(visual);
-    return () => resizeObserver.disconnect();
+    return () => {
+      resizeObserver.disconnect();
+      if (animationFrame) cancelAnimationFrame(animationFrame);
+    };
   });
 </script>
 
@@ -108,10 +172,16 @@
       <svg class="connections" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
         {#each connectionPaths as path, index}
           <path class="connector-shadow" d={path} pathLength="1" style={`--connector-delay: ${index * -0.35}s`} />
+          <path class="connector-base" d={path} />
           <path class="connector" d={path} pathLength="1" style={`--connector-delay: ${index * -0.35}s`} />
         {/each}
       </svg>
-      <div class="core"><span>WORK</span></div>
+      <div class="core">
+        <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+          <path d="M50 7 90.9 36.7 75.3 84.8 24.7 84.8 9.1 36.7Z" />
+        </svg>
+        <span>WORK</span>
+      </div>
       {#each nodePositions as node, index}
         <button
           type="button"
@@ -120,11 +190,12 @@
           style={`--node-x: ${node.x}%; --node-y: ${node.y}%; --float-delay: ${index * -0.7}s`}
           aria-describedby="drag-instruction"
           onpointerdown={(event) => startDrag(event, index)}
+          onkeydown={(event) => keyboardMove(event, index)}
         >
           <span class="node-content"><strong>{node.label}</strong>{node.detail}</span>
         </button>
       {/each}
-      <p id="drag-instruction" class="drag-hint">Drag a field to reshape the work packet</p>
+      <p id="drag-instruction" class="drag-hint">Drag a field or focus it and use arrow keys to reshape the work packet</p>
     </div>
   </div>
 </section>

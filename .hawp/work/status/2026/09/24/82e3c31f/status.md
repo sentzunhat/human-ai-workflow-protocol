@@ -84,3 +84,33 @@ Updated the existing repository HAWP v0.0.24 / PR #41 timeline with the material
 The website is the immediate product surface. Complete its two active visual items in order, then diagnose PR #45's failing `quality` check and verify the published workflow, deployment, metadata, and live page before claiming launch. MCP adoption is the next product/workflow slice: start with the existing `c8d9e1cb` plan's no-guessing intake/client guidance, then the `2eea565c` catalog. Keep `429e075e` as a remote-security planning lane and `7394f90c` as coordination work unless a concrete dependency changes that order.
 
 **Resume from:** Inspect the local uncommitted pentagon and cable changes plus their existing plans; get visual acceptance for `96c45719`, finish the interaction and reduced-motion checks for `1607037f`, and update/close each existing work item only after its evidence is complete. Preserve unrelated working-tree changes. Then address PR #45's current `quality` failure and re-read GitHub checks and merge state. No merge or deployment is implied by this checkpoint.
+
+## 2026-10-13 continuation — Analytics, local interaction review, and PR #45 quality diagnosis
+
+### Current State
+
+Website work remains local and uncommitted on `feature/website`. The pentagon and cable items remain `in-progress`, and new feature item `b4300599` tracks dedicated, opt-in GA4 for `hawp.online`.
+
+### Directly Verified
+
+- Signed-in GA4 showed the existing `sentzunhat-corp` property recorded 5 views and 5 active users for the HAWP project page on `sentzunhat.com`, Sep 15–Oct 12, 2026. That is not traffic for `hawp.online`.
+- Created property `Human-AI Workflow Protocol` inside the existing `sentzunhat` Analytics account, using Winnipeg reporting time and CAD. Its `https://hawp.online` stream is ID `16121877274` with measurement ID `G-1FHPSYNPBS`; page views, scrolls, and outbound clicks are enabled.
+- The property stream reported no data received yet and may take up to 48 hours to begin collecting. Website source now loads the Google tag only after explicit opt-in, records allow/decline locally, and retains a settings control.
+- Local desktop and iPhone 16 Pro Max previews showed the pentagon, responsive hero, cable response on pointer drag, and consent UI. Selecting “No thanks” dismissed the prompt; the filtered Network panel showed no `googletagmanager` request. The initial notice overlays some hero artwork until a choice is made.
+- Node 26.10.0 `npm run check` passed with zero errors and warnings; `npm run build` passed. `git diff --check` and HAWP work validation passed after the local whitespace cleanup.
+- PR #45 is open on remote head `a01546a037e39506d76059c6cbdab47fe97d4e51`. Its `build` check passed, `deploy` was skipped, and `quality` failed because `website/docs/post-merge-discoverability-actions.md` had an extra blank line at EOF. That whitespace is corrected locally only; the remote check remains a failure on the unchanged remote head until a later commit updates it.
+
+### What Remains Unproven
+
+- Both `curl` and the signed-in browser failed to load the public `hawp.online` site during this session. Production deployment and current live analytics collection remain unverified.
+- No post-deployment opt-in event has been observed in GA4. The connected GSC Wizard reader is unavailable because its trial ended.
+- Direct touch-device behavior, final owner visual acceptance, and legal/privacy disclosure review remain open.
+
+### Suggested Next Steps
+
+1. Review and accept the pentagon/cable treatment; finish touch and reduced-motion interaction checks.
+2. Commit/push the corrected local website changes only after review, then read PR #45 checks on the new head.
+3. Verify Pages/custom-domain availability; after deployment, opt in on `hawp.online` and confirm the stream in GA4 Realtime.
+4. Keep MCP adoption next: resume `c8d9e1cb`, then `2eea565c`.
+
+No commit, push, merge, or deployment occurred in this continuation.
