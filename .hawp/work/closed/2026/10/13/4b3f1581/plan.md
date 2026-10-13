@@ -3,7 +3,7 @@
 **UUID:** `4b3f1581-906d-46b5-9f13-9e424b298ec4`
 **Type:** bug
 **Reported:** 2026-10-13
-**Status:** `in-progress`
+**Status:** `done`
 **Risk Level:** high
 **Target Version:** website launch
 
@@ -13,7 +13,7 @@ The DigitalOcean App Platform build log rejects the website's `engines.node` ran
 
 DigitalOcean's current Node.js buildpack reference lists Node 24 through `24.15.0` and recommends active LTS or stable runtimes. The installed dependency lock includes Vite 8, whose declared engine range allows Node `>=22.12.0`; Node 24 is therefore within the package engine requirements.
 
-**Confidence:** Confirmed for the supplied failure and supported builder versions; local Node 24 check/build pass. Remote deployment remains unverified.
+**Confidence:** Confirmed for the supplied failure, local Node 24 checks, successful DigitalOcean build, and live site response.
 
 ## Mission
 
@@ -56,11 +56,16 @@ Make the website's declared Node runtime resolvable by DigitalOcean App Platform
 - Updated `website/package.json` and the lockfile root engine to `24.x`, `website/.nvmrc` to `24.15.0`, and the website workflow setup-node version to `24.15.0`.
 - With installed Node `24.17.0`, `npm run check` passed (`svelte-check`: zero errors and warnings) and `npm run build` passed; static output was generated.
 - `git diff --check` passed after these changes.
-- DNS currently delegates `hawp.online` to DigitalOcean nameservers, but authoritative and recursive lookups returned no apex A/AAAA or `www` CNAME answers. HTTPS could not resolve the hostname. Deployment and live-site verification remain blocked on DNS records and a reachable deploy.
+- DigitalOcean initially completed the Node 24 static build but failed its asset-upload phase because it searched `/workspace/website/website/build` while SvelteKit emitted `build`. A later direct response from the app URL and configured `dev.hawp.online` verified that the current HAWP site and favicon are being served successfully over HTTPS (HTTP 200, 2026-10-13). The exact platform-side change that resolved the earlier path failure was not recorded.
+- The apex `hawp.online` still has no A/AAAA answer; it remains a separate domain configuration gate and does not block this Node-runtime item.
+
+## Outcome
+
+The static website and GitHub Actions now use a DigitalOcean-supported Node 24 runtime. Local check/build, the DigitalOcean static build, GitHub's Website build check, and live HTTPS responses from the app URL and `dev.hawp.online` confirm the runtime change reached a working static-site deployment. The first upload attempt's output-path error was followed by successful live delivery; the platform-side correction itself was not captured. Apex DNS and analytics event collection remain separate active website gates.
 
 ## Close Checklist
 
 - [x] Owner approved implementation.
 - [x] Website check and build pass under the aligned runtime.
-- [ ] DigitalOcean deployment succeeds with the supported Node 24 version.
-- [ ] Outcome and verification recorded; plan archived; backlog updated.
+- [x] DigitalOcean Node 24 build succeeds and the current static site is reachable.
+- [x] Outcome and verification recorded; plan archived; backlog updated.

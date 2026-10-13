@@ -57,7 +57,7 @@ Medium because the integration sends visitor data to Google Analytics. The tag m
 - `npm run check` using Node 26.10.0: zero errors and zero warnings.
 - `npm run build` using Node 26.10.0: passed; static output generated.
 - Local desktop preview showed the pentagon, cable layers, and consent controls. No Google Analytics tag was exercised in the local preview to avoid contaminating production reporting with local traffic.
-- Production measurement remains unverified until the site deploys and a visitor opts in. The GSC Wizard Analytics reader is unavailable because its trial ended.
+- Continuation update (2026-10-13): `https://dev.hawp.online/` and its favicon respond over HTTPS with HTTP 200 and serve the current HAWP static site. Production measurement remains unverified until a visitor opts in and the event appears in GA4 Realtime. The GSC Wizard Analytics reader is unavailable because its trial ended.
 
 ## Close Checklist
 

@@ -45,7 +45,6 @@ elicitation/guidance work from `c8d9e1cb`.
 | `96c45719` | improvement | Unify HAWP's pentagon brand mark across the website | `in-progress` | Codex | [plan](active/96c45719/plan.md) | 2026-10-13 |
 | `1607037f` | improvement | Give the homepage protocol cables electric, physics-led motion | `in-progress` | Codex | [plan](active/1607037f/plan.md) | 2026-10-13 |
 | `b4300599` | feature | Add privacy-first Google Analytics to the HAWP website | `in-progress` | Codex | [plan](active/b4300599/plan.md) | 2026-10-13 |
-| `4b3f1581` | bug | Use a Node runtime supported by DigitalOcean website builds | `in-progress` | Codex | [plan](active/4b3f1581/plan.md) | 2026-10-13 |
 
 ## Blocked / Parked
 

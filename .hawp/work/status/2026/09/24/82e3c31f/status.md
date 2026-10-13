@@ -114,3 +114,62 @@ Website work remains local and uncommitted on `feature/website`. The pentagon an
 4. Keep MCP adoption next: resume `c8d9e1cb`, then `2eea565c`.
 
 No commit, push, merge, or deployment occurred in this continuation.
+
+## 2026-10-13 continuation — Node 24 deployment, analytics, and dev-domain verification
+
+### Checkpoint Title
+
+**2026-10-13 — HAWP website deployed to the DigitalOcean app and `dev.hawp.online`; apex and GA4 collection remain open**
+
+### Intent
+
+Continue the existing website timeline after the owner approved Node 24 for the static-site build, requested the deployment be pushed, and supplied the DigitalOcean and custom-domain URLs. This addendum supersedes the earlier same-day local-only and DNS-pending snapshots below.
+
+### Before → During → After
+
+- **Before:** the DigitalOcean buildpack rejected the website's Node 26 engine range. Website visuals, opt-in analytics, and their work plans were local changes. The custom domain had not been proven reachable.
+- **During:** the website engine was set to Node `24.x`; `.nvmrc` and GitHub Actions use `24.15.0`. Local Node `24.17.0` check/build passed. Commit `2d02ab94d2804e6a8d5bdb4eed92af48b087807c` was pushed to `feature/website`. The first DigitalOcean attempt built the static site successfully but failed asset upload while looking for `/workspace/website/website/build` instead of the emitted `build` directory. Later direct checks of the app URL and custom domain returned the deployed site successfully. The exact platform-side adjustment that resolved the initial upload-path failure was not captured.
+- **After:** the site is reachable over HTTPS at both the generated DigitalOcean app URL and `https://dev.hawp.online/`. The apex `hawp.online` is not configured yet. A dedicated GA4 property/stream and a private HAWP traffic dashboard exist, but no post-deployment opt-in event has been verified.
+
+### What Was Directly Verified
+
+- Local `npm run check` with Node `24.17.0` reported zero errors and warnings; `npm run build` completed and emitted the static site.
+- DigitalOcean's build log for the pushed revision showed SvelteKit's static adapter writing `build` successfully. That deployment attempt then failed during asset upload due to the path mismatch noted above.
+- On 2026-10-13, `https://hawp-website-pg5fj.ondigitalocean.app/` returned HTTP 200 with the HAWP page title. Its `favicon.svg` also returned HTTP 200.
+- DNS for `dev.hawp.online` resolves by CNAME to the generated DigitalOcean app hostname. On 2026-10-13, the custom domain and its favicon both returned HTTP 200 over HTTPS.
+- GitHub PR #45 remains open from `feature/website` to `development`, at head `2d02ab94d2804e6a8d5bdb4eed92af48b087807c`. The Quality and Website build checks succeeded; the GitHub deploy job was skipped. Review decision is empty and merge state is `UNSTABLE`.
+- The feature branch and `origin/feature/website` both read back at `2d02ab94d2804e6a8d5bdb4eed92af48b087807c`; the tree was clean before this checkpoint update.
+- A private Looker Studio report now uses a HAWP GA4 data source and omits the source report's HAWP-inapplicable custom section chart. It currently has no traffic to display.
+
+### What Remains Unproven
+
+- No A/AAAA answer currently exists for apex `hawp.online`; a successful dev subdomain does not prove the apex is configured.
+- GA4 has not shown a production event following an explicit visitor opt-in. Do not treat property/stream setup or a page load without consent as collection proof.
+- The DigitalOcean UI's final deployment record after the later successful live responses was not read back; those responses prove current content delivery but not the precise platform-side change or deployment history.
+- Final owner visual acceptance and the planned full touch, keyboard, responsive, and reduced-motion review of the pentagon/cable work remain open.
+
+### Strategic Impact
+
+The Node runtime blocker is resolved and work item `4b3f1581` is archived as done. The near-term website gates are now apex DNS/custom-domain setup, live consent-to-GA4 verification, and final visual/interaction acceptance. Keep the existing `b4300599`, `96c45719`, and `1607037f` items in progress until their own evidence is complete. Resume the planned MCP lane only after website launch gates are resolved; keep the remote transport and coordination plans separate.
+
+### Constraints
+
+This public repository checkpoint omits private analytics report links, account identifiers, and personal account details. No PR merge, review approval, or apex DNS change is implied. Zacatl is unaffected because Node 24 applies to the separate static website package.
+
+### Continuation State
+
+1. Configure the apex `hawp.online` in DigitalOcean App Platform and its DNS zone; verify HTTPS after the certificate becomes active.
+2. With explicit visitor opt-in on the deployed site, verify the expected GA4 event in Realtime; then confirm the private dashboard populates.
+3. Review and accept the pentagon treatment; finish cable touch/keyboard/reduced-motion checks and close the two visual work items only after evidence.
+4. Re-read PR #45 checks, review state, and merge status before any merge decision.
+5. Continue with HAWP intake guidance `c8d9e1cb`, then resource/prompt discovery `2eea565c`.
+
+### Suggested Resume Point
+
+**Resume from:** `feature/website` at pushed commit `2d02ab94`, with the static site live at `dev.hawp.online`; Node item `4b3f1581` is archived as done, while analytics and visual work remain active.
+
+**Next objective:** configure and verify the apex domain, then confirm one consented production GA4 event without exposing private analytics links in public repository artifacts.
+
+### Memory Delta
+
+The existing local note `2026-10-13-hawp-website-launch-checkpoint.md` is extended by a follow-up memory update for this deployment milestone. The memory keeps the prior visual/analytics context, records the Node 24 push and live dev-domain proof, notes the initial upload-path failure without guessing how it was corrected, and points to this canonical HAWP timeline. Private Analytics IDs, report links, and unrelated project context are not repeated.
