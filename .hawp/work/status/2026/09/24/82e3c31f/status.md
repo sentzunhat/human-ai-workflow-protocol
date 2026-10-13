@@ -13,7 +13,7 @@ date: 2026-09-24
 
 ## Intent
 
-Carry forward the existing HAWP v0.0.24 repository timeline without duplicating the completed PR #41 hardening checkpoint or unrelated GPU, infrastructure, and financial timelines.
+Carry forward the existing HAWP v0.0.24 repository timeline without duplicating the completed PR #41 hardening checkpoint or unrelated project timelines.
 
 ## Current State
 
@@ -45,7 +45,7 @@ The repository now has two active strategic lanes: make the v0.0.24 public surfa
 
 ## Constraints
 
-No merge, external review request, cleanup, or generated-file deletion was authorized by this checkpoint. Preserve unrelated dirty state and keep PR #41, website, GPU, infrastructure, and financial timelines distinct unless new evidence materially connects them.
+No merge, external review request, cleanup, or generated-file deletion was authorized by this checkpoint. Preserve unrelated dirty state and keep the PR #41 and website lanes distinct unless new evidence materially connects them.
 
 ## Suggested Next Step
 
@@ -53,4 +53,34 @@ Run the website’s declared validation/build path and inspect its CI/deployment
 
 ## Memory Delta
 
-Updated the existing repository HAWP v0.0.24 / PR #41 timeline with the material 2026-09-24 change: committed website lane `0db6b673`, its separation from hardening commit `6dface57`, current untracked artifacts, and the revised validation priority. No GPU, infrastructure, or financial checkpoint was duplicated or changed.
+Updated the existing repository HAWP v0.0.24 / PR #41 timeline with the material 2026-09-24 change: committed website lane `0db6b673`, its separation from hardening commit `6dface57`, current untracked artifacts, and the revised validation priority. No unrelated project checkpoint was duplicated or changed.
+
+## 2026-10-13 continuation — website launch polish and MCP adoption
+
+**Event and archive date:** 2026-10-13. This section extends the website timeline above; its current state supersedes the 2026-09-24 branch, verification, and next-step snapshot. This is a documentation checkpoint, not a work-item closure or website release.
+
+### Before
+
+- The public SvelteKit website existed on `feature/website`, with static prerendering, theme controls, release-label loading, and website CI. The 2026-09-24 checkpoint had not proved a deployed site or completed launch.
+- A read-only active-work review found four non-website plans still `plan-ready`: `7394f90c` (parallel coordination), `c8d9e1cb` (remaining MCP intake elicitation and client guidance), `2eea565c` (MCP resource and prompt catalog), and `429e075e` (remote transport and authorization audit). The structured-result subset of `c8d9e1cb` had already landed for v0.0.24, while its remaining scope belongs to the proposed v0.0.25 lane.
+- The user reported that HAWP MCP tools were used inconsistently during ordinary intake. This is an adoption observation, not proof that the tools are unavailable or defective.
+
+### During: decisions and local work
+
+- Priority shifted to finishing the nearly complete website before expanding MCP scope. The near-term sequence is website visual and interaction polish, website PR/release gates, then practical MCP intake guidance and discoverability.
+- Two compoundable website plans were added locally to `.hawp/work/BACKLOG.md` and `.hawp/work/active/`: `96c45719` for one consistent pentagon mark, followed by `1607037f` for responsive, electrically styled hero cables. Both are `in-progress`, not `done`.
+- The first nested, filled pentagon and square-framed treatment was rejected after visual review. The current local revision uses a single upright pentagon outline for the header and favicon, a pentagonal `WORK` hub in the hero, and matching social-card artwork. A responsive header review also moved the full navigation breakpoint to `lg` after the intermediate-width layout looked crowded.
+- The five existing SVG connections gained themed base/current layers and bounded spring-like movement on drag/release. This reuses the existing hero, avoids a physics dependency, and retains reduced-motion handling. The cable plan still calls for touch, keyboard-focus, small-screen, and reduced-motion review before closure.
+
+### After: verified state and limits
+
+- At this checkpoint, local `feature/website` and `origin/feature/website` both resolve to `b12a1960785d002aabf13b52d9feba62ab0b139f` **before this documentation commit**. The revised pentagon, cable, backlog, and two plan changes are uncommitted local work and must be preserved separately from this checkpoint commit.
+- The prior implementation pass reported `npm run check` with zero errors/warnings, `npm run build`, HAWP work validation, and `git diff --check` passing. Local browser review covered desktop and 390-pixel light/dark layouts; it led to the `lg` breakpoint correction. Those checks are prior-pass evidence, not reruns performed for this archival section.
+- Live GitHub readback on 2026-10-13 found public PR #45 (`feature/website` to `development`) open and non-draft at `b12a1960`; `quality` had failed and merge state was `UNSTABLE`. A website build check had succeeded, while deployment was skipped/cancelled in the inspected check rollup. The v0.0.24 GitHub release is labeled **Pre-release**. Recheck these mutable states before acting.
+- No production deployment, final aesthetic acceptance, complete interaction/accessibility review, or website launch was established here. The latest pentagon revision still awaits user visual review; the cable behavior has not yet met its plan's full verification checklist.
+
+### Strategic impact and continuation
+
+The website is the immediate product surface. Complete its two active visual items in order, then diagnose PR #45's failing `quality` check and verify the published workflow, deployment, metadata, and live page before claiming launch. MCP adoption is the next product/workflow slice: start with the existing `c8d9e1cb` plan's no-guessing intake/client guidance, then the `2eea565c` catalog. Keep `429e075e` as a remote-security planning lane and `7394f90c` as coordination work unless a concrete dependency changes that order.
+
+**Resume from:** Inspect the local uncommitted pentagon and cable changes plus their existing plans; get visual acceptance for `96c45719`, finish the interaction and reduced-motion checks for `1607037f`, and update/close each existing work item only after its evidence is complete. Preserve unrelated working-tree changes. Then address PR #45's current `quality` failure and re-read GitHub checks and merge state. No merge or deployment is implied by this checkpoint.
