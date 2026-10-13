@@ -2,7 +2,12 @@
 // record parsers. It deliberately does not know about backlog semantics.
 package table
 
-import "strings"
+import (
+	"regexp"
+	"strings"
+)
+
+var markdownLinkRe = regexp.MustCompile(`\[([^]]+)\]\(([^)]+)\)`)
 
 // Cells splits a pipe-delimited Markdown row and trims each cell.
 func Cells(line string) []string {
@@ -51,3 +56,12 @@ func Cell(cells []string, headers map[string]int, aliases ...string) string {
 
 // StripCodeSpan removes the simple backtick wrapping used in backlog cells.
 func StripCodeSpan(value string) string { return strings.Trim(value, "`") }
+
+// LinkParts returns an explicit Markdown link, if one is present in a cell.
+func LinkParts(value string) (label, target string, ok bool) {
+	match := markdownLinkRe.FindStringSubmatch(value)
+	if match == nil {
+		return "", "", false
+	}
+	return strings.TrimSpace(match[1]), strings.TrimSpace(match[2]), true
+}

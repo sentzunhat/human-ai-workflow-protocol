@@ -232,12 +232,21 @@ func EvaluateRules(repoRoot, workRoot, backlogPath string, backlog *NormalizeBac
 
 func (e *ruleEvaluator) evaluateRow(row NormalizeRow) {
 	candidates := e.scan.ByID[row.ID]
+	if row.Section == SectionBlocked && strings.HasPrefix(filepath.ToSlash(row.PlanPath), "active/") {
+		target := "parked/" + strings.TrimPrefix(filepath.ToSlash(row.PlanPath), "active/")
+		e.blockedFix("B8", row.ID, e.backlogPath, row.LineNumber,
+			"Parked row points into active/: "+row.PlanPath,
+			[]string{target},
+			"Review the item folder, move it to "+target+" if the destination is free, and update the backlog link")
+	}
 
 	if row.Type == "" {
 		if identity.IsNumericID(row.ID) {
 			// Older repositories often use a compact "#" column without a
 			// separate Type column. Keep normalize focused on structural drift
 			// for those rows instead of forcing a speculative type.
+		} else if row.Section == SectionClosed && !row.HasTypeColumn {
+			// A legacy closed table has no type to fill. Do not invent one.
 		} else if inferred := inferTypeFromID(row.ID); inferred != "" {
 			e.autoFix("A1", "add-field", row.ID, e.backlogPath, row.LineNumber,
 				fmt.Sprintf("A1: add missing type field inferred from ID prefix (%s)", inferred))

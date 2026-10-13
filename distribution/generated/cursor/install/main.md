@@ -404,9 +404,9 @@ reconcile_closed_plans_from_backlog() {
       if (substr(s, 1, 1) == "`" && substr(s, length(s), 1) == "`") return substr(s, 2, length(s) - 2)
       return s
     }
-    /^## (Recently Closed|Done)/ { section="done"; clear_headers(); next }
-    /^## Active/                 { section="active"; clear_headers(); next }
-    /^## /                       { section=""; clear_headers(); next }
+    tolower($0) ~ /^##[[:space:]]+(recently[[:space:]]+closed|done)([[:space:]]|$)/ { section="done"; clear_headers(); next }
+    tolower($0) ~ /^##[[:space:]]+active[[:space:]]+work([[:space:]]|$)/ { section="active"; clear_headers(); next }
+    /^##[[:space:]]+/ { section=""; clear_headers(); next }
     section != "" && /^\|/ {
       for (field in fields) delete fields[field]
       count = split_cells($0, fields)
@@ -558,6 +558,7 @@ reconcile_closed_plans_from_backlog
 rm -rf .hawp/kit
 mkdir -p .hawp/kit
 cp "$SRC/.hawp/LICENSE" .hawp/
+copy_file_no_clobber "$SRC/.hawp/.gitignore" ".hawp/.gitignore"
 cp "$SRC/.hawp/kit/README.md"             .hawp/kit/
 cp "$SRC/.hawp/kit/start-here.md"         .hawp/kit/
 cp -R "$SRC/.hawp/kit/instructions" .hawp/kit/
@@ -707,6 +708,8 @@ fi
 
 echo "HAWP install complete (provider: ${PROVIDER})."
 echo "Refreshed: .hawp/LICENSE, .hawp/kit/**, .hawp/bin/hawp (native executable)"
+echo "Seeded if missing: .hawp/.gitignore (bin/ and db/ runtime state)"
+echo "Already tracked binaries or databases must be untracked separately; old hawp-bin and hawp-mcp files are not refreshed."
 echo "Preserved: .hawp/work/** (no-overwrite)"
 echo "Reconciled: Done rows + Active-Work 'done'/'wont-fix' rows moved from .hawp/work/active/ when eligible (see 'reconciled (link):' and 'reconciled (id-fallback):' lines above)"
 ```

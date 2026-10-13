@@ -1,0 +1,3 @@
+# Local HAWP runtime state. These files are recreated by install and search.
+bin/
+db/

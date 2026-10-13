@@ -115,9 +115,9 @@ reconcile_closed_plans_from_backlog() {
       if (substr(s, 1, 1) == "`" && substr(s, length(s), 1) == "`") return substr(s, 2, length(s) - 2)
       return s
     }
-    /^## (Recently Closed|Done)/ { section="done"; clear_headers(); next }
-    /^## Active/                 { section="active"; clear_headers(); next }
-    /^## /                       { section=""; clear_headers(); next }
+    tolower($0) ~ /^##[[:space:]]+(recently[[:space:]]+closed|done)([[:space:]]|$)/ { section="done"; clear_headers(); next }
+    tolower($0) ~ /^##[[:space:]]+active[[:space:]]+work([[:space:]]|$)/ { section="active"; clear_headers(); next }
+    /^##[[:space:]]+/ { section=""; clear_headers(); next }
     section != "" && /^\|/ {
       for (field in fields) delete fields[field]
       count = split_cells($0, fields)
@@ -269,6 +269,7 @@ reconcile_closed_plans_from_backlog
 rm -rf .hawp/kit
 mkdir -p .hawp/kit
 cp "$SRC/.hawp/LICENSE" .hawp/
+copy_file_no_clobber "$SRC/.hawp/.gitignore" ".hawp/.gitignore"
 cp "$SRC/.hawp/kit/README.md"             .hawp/kit/
 cp "$SRC/.hawp/kit/start-here.md"         .hawp/kit/
 cp -R "$SRC/.hawp/kit/instructions" .hawp/kit/

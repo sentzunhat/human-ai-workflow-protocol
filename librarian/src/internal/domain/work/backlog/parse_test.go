@@ -81,3 +81,25 @@ func TestParseBacklogMarkdownDoesNotRequireFilesystem(t *testing.T) {
 		t.Fatalf("table outside a recognized section should be ignored: %+v", backlog)
 	}
 }
+
+func TestParseBacklogLegacyHeadingsAndLinkedID(t *testing.T) {
+	backlog := ParseBacklogMarkdown(`# Backlog
+## Active Work
+| ID | Type | Title | Status |
+| --- | --- | --- | --- |
+## Blocked/parked
+| ID | Type | Title | Detail |
+| --- | --- | --- | --- |
+| 045 | task | parked | [plan](parked/045/plan.md) |
+## Recently closed
+| ID | Work | Closed | Detail | Evidence |
+| --- | --- | --- | --- | --- |
+| [078](closed/2026/10/01/078/plan.md) | Archived work | 2026-10-01 | A prose summary. | [proof](evidence/078.md) |
+`)
+	if len(backlog.Parked) != 1 || len(backlog.Closed) != 1 {
+		t.Fatalf("section rows not recognized: %+v", backlog)
+	}
+	if backlog.Closed[0].ID != "078" || backlog.Closed[0].Title != "Archived work" {
+		t.Fatalf("legacy closed row parsed incorrectly: %+v", backlog.Closed[0])
+	}
+}

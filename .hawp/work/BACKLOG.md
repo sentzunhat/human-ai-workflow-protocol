@@ -38,6 +38,15 @@ elicitation/guidance work from `c8d9e1cb`.
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
+| `236b92e3-e4d4-4882-aae9-20c82ec4642e` | bug | U1: recognize backlog section heading variants | `in-progress` | Codex | [plan](active/236b92e3-e4d4-4882-aae9-20c82ec4642e/plan.md) | 2026-10-11 |
+| `8655c5d6-df73-4155-ba6c-e1fd1a28739f` | bug | U2: resolve legacy closed-row plan links without treating prose as paths | `in-progress` | Codex | [plan](active/8655c5d6-df73-4155-ba6c-e1fd1a28739f/plan.md) | 2026-10-11 |
+| `ec70c29a-2fc4-48ee-965d-6c301df88510` | improvement | U3: handle missing legacy work types without guessing | `in-progress` | Codex | [plan](active/ec70c29a-2fc4-48ee-965d-6c301df88510/plan.md) | 2026-10-11 |
+| `eac495f7-12a0-44a8-ab70-5e07773dd072` | bug | U4: classify inherited closures and supporting files accurately | `in-progress` | Codex | [plan](active/eac495f7-12a0-44a8-ab70-5e07773dd072/plan.md) | 2026-10-11 |
+| `74fd1cca-a80e-472e-ba19-b53a924da0c5` | bug | U5: detect parked rows whose plans remain active | `in-progress` | Codex | [plan](active/74fd1cca-a80e-472e-ba19-b53a924da0c5/plan.md) | 2026-10-11 |
+| `0dbbdcd9-7092-4e01-b46b-4a7d5d40727a` | bug | U6: keep installed runtime artifacts out of Git | `in-progress` | Codex | [plan](active/0dbbdcd9-7092-4e01-b46b-4a7d5d40727a/plan.md) | 2026-10-11 |
+| `7f224fa6-dba2-4caf-8627-e7ab11e3238d` | bug | U7: correct the search index next-step hint | `in-progress` | Codex | [plan](active/7f224fa6-dba2-4caf-8627-e7ab11e3238d/plan.md) | 2026-10-11 |
+| `63700659-6b4f-4707-a4e7-17e3c0887c88` | improvement | U8: show the effective search index scope | `in-progress` | Codex | [plan](active/63700659-6b4f-4707-a4e7-17e3c0887c88/plan.md) | 2026-10-11 |
+| `f833f392-8bab-4014-94a2-453cd8e5026d` | bug | U9: resolve metadata for folder-style work plans | `in-progress` | Codex | [plan](active/f833f392-8bab-4014-94a2-453cd8e5026d/plan.md) | 2026-10-11 |
 | `7394f90c` | improvement | Parallel coordination with isolated `.hawp/.space/` worktree lanes | `plan-ready` | unassigned | [plan](active/7394f90c/plan.md) | 2026-10-01 |
 | `c8d9e1cb` | feature | Interactive MCP intake refinement with structured results (`v0.0.24` subset, remainder `v0.0.25`) | `plan-ready` | Codex | [plan](active/c8d9e1cb/plan.md) | 2026-09-13 |
 | `2eea565c` | improvement | MCP capability catalog for HAWP resources and prompts (`v0.0.25`) | `plan-ready` | Codex | [plan](active/2eea565c/plan.md) | 2026-09-13 |

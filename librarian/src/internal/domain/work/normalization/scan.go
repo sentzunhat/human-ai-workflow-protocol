@@ -32,15 +32,16 @@ const (
 
 // NormalizeRow is a parsed backlog row with position info for rule checks.
 type NormalizeRow struct {
-	Section    NormalizeSection
-	LineNumber int
-	ID         string
-	Type       string
-	Title      string
-	Status     string
-	Updated    string
-	Reason     string
-	PlanPath   string
+	Section       NormalizeSection
+	LineNumber    int
+	ID            string
+	Type          string
+	HasTypeColumn bool
+	Title         string
+	Status        string
+	Updated       string
+	Reason        string
+	PlanPath      string
 }
 
 // NormalizeBacklog is the detection-oriented backlog parse result.
@@ -50,22 +51,47 @@ type NormalizeBacklog struct {
 	SectionPresence map[NormalizeSection]bool
 }
 
-var mdLinkTargetRe = regexp.MustCompile(`\(([^)]+)\)`)
+var normalizeHeaderRe = regexp.MustCompile(`(?i)^##\s+(active\s+work|blocked\s*/\s*parked|recently\s+closed)(?:\s+.*)?$`)
 
-func extractMarkdownLinkTarget(value string) string {
-	if m := mdLinkTargetRe.FindStringSubmatch(value); m != nil {
-		return strings.TrimSpace(m[1])
+func planPathFromCells(cells []string, headers map[string]int) string {
+	for _, name := range []string{"plan file", "detail", "id", "legacy id", "uuid", "evidence"} {
+		if _, target, ok := table.LinkParts(table.Cell(cells, headers, name)); ok {
+			if path := workPlanPath(target); path != "" {
+				return path
+			}
+		}
 	}
-	return strings.TrimSpace(table.StripCodeSpan(value))
+	for _, name := range []string{"plan file", "detail"} {
+		value := strings.TrimSpace(table.StripCodeSpan(table.Cell(cells, headers, name)))
+		if path := workPlanPath(value); path != "" {
+			return path
+		}
+	}
+	return ""
+}
+
+func workPlanPath(value string) string {
+	value = strings.TrimPrefix(strings.TrimSpace(value), "./")
+	value = strings.TrimPrefix(value, ".hawp/work/")
+	value = strings.TrimPrefix(value, "work/")
+	if strings.HasPrefix(value, "active/") || strings.HasPrefix(value, "parked/") || strings.HasPrefix(value, "closed/") {
+		return value
+	}
+	return ""
 }
 
 func normalizeSectionHeader(line string) NormalizeSection {
+	match := normalizeHeaderRe.FindStringSubmatch(strings.TrimSpace(line))
+	if match == nil {
+		return SectionOther
+	}
+	heading := strings.ToLower(match[1])
 	switch {
-	case strings.HasPrefix(line, "## Active Work"):
+	case strings.HasPrefix(heading, "active"):
 		return SectionActive
-	case strings.HasPrefix(line, "## Blocked / Parked"):
+	case strings.HasPrefix(heading, "blocked"):
 		return SectionBlocked
-	case strings.HasPrefix(line, "## Recently Closed"):
+	case strings.HasPrefix(heading, "recently"):
 		return SectionClosed
 	default:
 		return SectionOther
@@ -93,7 +119,7 @@ func ParseNormalizeBacklog(backlogPath string, source ScanSource) (*NormalizeBac
 
 	lines := regexp.MustCompile(`\r?\n`).Split(string(content), -1)
 	for index, line := range lines {
-		if strings.HasPrefix(line, "## ") {
+		if strings.HasPrefix(line, "## ") || strings.HasPrefix(line, "##\t") {
 			section = normalizeSectionHeader(line)
 			headerMap = nil
 			result.SectionPresence[section] = true
@@ -120,6 +146,9 @@ func ParseNormalizeBacklog(backlogPath string, source ScanSource) (*NormalizeBac
 		var candidates []string
 		for _, alias := range []string{"legacy id", "id", "uuid", "#"} {
 			value := table.StripCodeSpan(table.Cell(cells, headerMap, alias))
+			if label, _, ok := table.LinkParts(value); ok {
+				value = table.StripCodeSpan(label)
+			}
 			if value != "" && value != "—" && value != "-" {
 				candidates = append(candidates, value)
 			}
@@ -159,23 +188,21 @@ func ParseNormalizeBacklog(backlogPath string, source ScanSource) (*NormalizeBac
 			LineNumber: index + 1,
 			ID:         id,
 			Type:       table.Cell(cells, headerMap, "type"),
-			Title:      table.Cell(cells, headerMap, "title"),
+			Title:      table.Cell(cells, headerMap, "title", "work"),
 		}
+		_, row.HasTypeColumn = headerMap["type"]
+		row.PlanPath = planPathFromCells(cells, headerMap)
 		switch section {
 		case SectionActive:
 			row.Status = table.Cell(cells, headerMap, "status")
-			row.PlanPath = extractMarkdownLinkTarget(table.Cell(cells, headerMap, "plan file", "detail"))
 			row.Updated = table.Cell(cells, headerMap, "updated")
 		case SectionBlocked:
 			row.Reason = table.Cell(cells, headerMap, "reason", "status")
-			row.PlanPath = extractMarkdownLinkTarget(table.Cell(cells, headerMap, "detail", "plan file"))
 			row.Updated = table.Cell(cells, headerMap, "updated")
 		case SectionClosed:
 			row.Updated = table.Cell(cells, headerMap, "closed", "updated")
-			row.PlanPath = extractMarkdownLinkTarget(table.Cell(cells, headerMap, "detail", "plan file"))
 		default:
 			row.Status = table.Cell(cells, headerMap, "status", "reason", "closed")
-			row.PlanPath = extractMarkdownLinkTarget(table.Cell(cells, headerMap, "detail", "plan file"))
 			row.Updated = table.Cell(cells, headerMap, "updated", "closed")
 		}
 		result.Rows = append(result.Rows, row)

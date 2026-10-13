@@ -111,3 +111,40 @@ func TestNormalizeApplyMigrateFoldersUsesProductionFileCollector(t *testing.T) {
 		t.Fatalf("migrated plan missing: %v", err)
 	}
 }
+
+func TestMigrateFoldersPreviewFlagsParkedStatusDrift(t *testing.T) {
+	root := t.TempDir()
+	files := map[string]string{
+		".hawp/work/BACKLOG.md": `## Active Work
+| ID | Type | Title | Status | Plan File |
+| --- | --- | --- | --- | --- |
+## Blocked / Parked
+| ID | Type | Title | Reason | Detail | Updated |
+| --- | --- | --- | --- | --- | --- |
+| 045 | task | parked | waiting | [plan](active/045/plan.md) | 2026-10-11 |
+## Recently Closed
+| ID | Type | Title | Closed | Detail |
+| --- | --- | --- | --- | --- |
+`,
+		".hawp/work/active/045/plan.md": "# parked plan\n",
+	}
+	for rel, content := range files {
+		path := filepath.Join(root, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	var out, errOut bytes.Buffer
+	if code := Normalize(&out, &errOut, NormalizeOptions{RepoRoot: root, MigrateFolders: true}); code != 0 {
+		t.Fatalf("preview returned %d: %s", code, errOut.String())
+	}
+	if !strings.Contains(out.String(), "Assessment: review-needed") || !strings.Contains(out.String(), "active/045/plan.md -> parked/045/plan.md") {
+		t.Fatalf("status drift missing from preview: %s", out.String())
+	}
+	if _, err := os.Stat(filepath.Join(root, ".hawp/work/active/045/plan.md")); err != nil {
+		t.Fatal("preview moved the plan")
+	}
+}

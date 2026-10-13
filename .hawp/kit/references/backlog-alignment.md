@@ -75,6 +75,14 @@ Each active row stays short and operational:
 
 ## Closed and Archive Rules
 
+For a closure inherited from an older workflow, add `**Inherited closure:** true`
+to the closed plan when its Outcome, Verification, or Close Checklist was never
+recorded. Validation keeps missing sections visible as warnings; the marker does
+not claim those checks occurred. Files beside `plan.md` in a closed item folder
+are supporting artifacts. For a flat supporting Markdown file under a dated
+closed folder, add `**Supporting artifact:** true` so validation does not treat
+it as an incomplete plan. Do not add invented verification evidence.
+
 When work is completed:
 
 1. Update the detail file with outcome, verification, evidence links, final status, and close date.

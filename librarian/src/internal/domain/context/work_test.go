@@ -99,6 +99,26 @@ func TestEnrichWorkResolvesBacklogMetadata(t *testing.T) {
 	}
 }
 
+func TestEnrichWorkUsesFolderIDForPlanMarkdown(t *testing.T) {
+	root := t.TempDir()
+	writeFixture(t, root, map[string]string{
+		".hawp/work/BACKLOG.md": `## Active Work
+| ID | Type | Title | Status | Plan File |
+| --- | --- | --- | --- | --- |
+| 078 | task | Legacy item | in-progress | [plan](active/078/plan.md) |
+`,
+		".hawp/work/active/078/plan.md": "# plan",
+	})
+	src := ContextSource{FileLister: &testFileLister{}, BacklogParser: &testBacklogParser{}}
+	docs, err := EnrichWork(root, filepath.Join(root, ".hawp", "work"), os.ReadFile, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(docs) != 1 || docs[0].ID != "078" || docs[0].Type != "task" {
+		t.Fatalf("folder-style plan metadata = %+v", docs)
+	}
+}
+
 func TestClosedDateFromPath(t *testing.T) {
 	if got := closedDateFromPath("/x/.hawp/work/closed/2026/07/05/TASK-003.md"); got != "2026-07-05" {
 		t.Errorf("closedDateFromPath = %q", got)

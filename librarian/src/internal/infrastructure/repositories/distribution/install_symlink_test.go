@@ -88,6 +88,15 @@ func TestReconciliationParsesCanonicalAndLegacyBacklogs(t *testing.T) {
 			closedPath: "2026/09/21/7b58eb7d/plan.md",
 		},
 		{
+			name: "lowercase recently closed row",
+			backlog: "## Recently closed\n\n" +
+				"| ID | Type | Title | Closed | Detail |\n" +
+				"| -- | ---- | ----- | ------ | ------ |\n" +
+				"| `7b58eb7d` | bug | Complete | 2026-09-21 | [plan](closed/2026/09/21/7b58eb7d/plan.md) |\n",
+			activePath: "7b58eb7d/plan.md",
+			closedPath: "2026/09/21/7b58eb7d/plan.md",
+		},
+		{
 			name: "legacy done row",
 			backlog: "## Done\n\n" +
 				"| ID | Type | Title | Closed | Detail |\n" +

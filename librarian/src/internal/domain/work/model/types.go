@@ -21,6 +21,7 @@ type SectionCount struct {
 type BacklogCheck struct {
 	ActiveWork, RecentlyClosed, ParkedWork                 SectionCount
 	OrphanedFiles, OrphanedParked, NonCanonicalActiveItems []string
+	MisplacedParked                                        []string
 	Status                                                 CheckStatus
 }
 type FileFinding struct {
@@ -74,7 +75,7 @@ func (r *Report) Summarize() {
 			r.Failed++
 		}
 	}
-	for _, status := range []CheckStatus{r.Completeness.Status, r.Evidence.Status, r.Clarity.Status} {
+	for _, status := range []CheckStatus{r.Backlog.Status, r.Completeness.Status, r.Evidence.Status, r.Clarity.Status} {
 		if status == StatusWarn {
 			r.Warnings++
 		}

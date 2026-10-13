@@ -69,6 +69,45 @@ func TestBacklogConsistencyPassAndFail(t *testing.T) {
 	}
 }
 
+func TestBacklogConsistencyWarnsOnParkedActiveLink(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"active/045/plan.md": "# parked work",
+	})
+	backlog := &Backlog{Parked: []BacklogRow{{ID: "045", Detail: "[plan](active/045/plan.md)"}}}
+	result := CheckBacklogConsistency(workDir, backlog)
+	if result.Status != StatusWarn || result.ParkedWork.Found != 1 || len(result.MisplacedParked) != 1 {
+		t.Fatalf("parked status drift not reported: %+v", result)
+	}
+}
+
+func TestBacklogConsistencyFindsLinkedLegacyClosedID(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"closed/2026/10/01/078/plan.md": closedPlanComplete,
+	})
+	backlog := ParseBacklogMarkdown(`## Recently closed
+| ID | Work | Closed | Detail | Evidence |
+| --- | --- | --- | --- | --- |
+| [078](closed/2026/10/01/078/plan.md) | Legacy work | 2026-10-01 | Summary prose. | [proof](evidence/078.md) |
+`)
+	result := CheckBacklogConsistency(workDir, backlog)
+	if result.Status != StatusPass || result.RecentlyClosed.Found != 1 {
+		t.Fatalf("linked ID did not resolve closed plan: %+v", result)
+	}
+}
+
+func TestInheritedClosureAndSupportingArtifacts(t *testing.T) {
+	workDir := buildWorkDir(t, map[string]string{
+		"closed/2026/09/06/043.md":                    "# old plan\n\n**Inherited closure:** true\n",
+		"closed/2026/09/06/043-original-plan.md":      "# old draft\n\n**Supporting artifact:** true\n",
+		"closed/2026/09/06/28450bab/plan.md":          closedPlanComplete,
+		"closed/2026/09/06/28450bab/investigation.md": "# investigation",
+	})
+	result := CheckClosedTaskCompleteness(workDir)
+	if result.Status != StatusWarn || len(result.Warnings) != 1 || result.Skipped != 2 {
+		t.Fatalf("inherited closure classification = %+v", result)
+	}
+}
+
 func TestBacklogConsistencyFailsNonCanonicalActiveNewWorkID(t *testing.T) {
 	workDir := buildWorkDir(t, map[string]string{
 		"active/cleanup-docs-work-items-2026-09-02/plan.md": "# plan",
