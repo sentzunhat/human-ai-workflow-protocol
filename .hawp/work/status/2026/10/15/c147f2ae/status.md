@@ -146,3 +146,65 @@ The existing compact HAWP MCP troubleshooting note records the 2026-10-15 startu
 **Resume from:** review the remaining local HAWP backlog/plan-move changes before syncing them to GitHub, then explicitly resume parked item `c8d9e1cb`.
 
 **Next objective:** research current MCP elicitation/client support and define a concise manual-question fallback for structured HAWP intake.
+
+---
+
+## Continuation checkpoint — 2026-10-16: MCP catalog and active-work reconciliation
+
+**Checkpoint title:** 2026-10-16 — HAWP MCP catalog, intake, and usage-metering continuation
+
+**Event date:** 2026-10-16
+**Archive date:** 2026-10-16
+
+### Before
+
+The prior continuation recorded `c147f2ae` as closed locally and identified `c8d9e1cb` as a parked resume candidate. The capability catalog `2eea565c` was subsequently resumed, while its existing tools/resources/prompts/workflows scope was still being clarified. Resources and prompts had been proposed, but no MCP implementation existed. The parked usage record described metering work that partly existed in the product.
+
+### During
+
+- Reviewed all seven current MCP tools against their source handlers and worker guidance. `hawp_work_intake` composes retrieval and reshape with structured readiness states; standalone `hawp_search` and `hawp_work_reshape` remain distinct useful operations, so no tools should be merged or removed.
+- The maintainer decided to keep existing tool names and group them in documentation/client guidance as **Discover**, **Shape**, **Create**, and **Verify**. These are descriptive categories, not wrappers or new tool namespaces.
+- The catalog now records workflows, proposed read-only resources and prompt templates, create/update/delete boundaries, and a privacy finding: ordinary opt-in usage logging stores query/title summaries up to 256 characters, while `--log-bodies` stores full request/response bodies.
+- Created separate post-`v0.1.0` planning items for resources (`3cf52223`) and prompts (`9dce1d95`); both are parked. The existing catalog remains the active design record, without resources/prompts implementation in this slice.
+- Compared the parked `c8d9e1cb` item to current intake implementation. Structured results, tests, and manual-question fallback already exist. The remaining work is deciding whether to implement MCP elicitation, verifying target-client support, and defining capability-present/absent/decline/fallback tests. The official protocol and Go SDK support elicitation, but HAWP's handwritten stdio server currently advertises protocol `2024-11-05` and has no elicitation support. See the [MCP elicitation specification](https://modelcontextprotocol.io/specification/2026-07-28/client/elicitation) and [official Go SDK client guide](https://github.com/modelcontextprotocol/go-sdk/blob/main/docs/client.md).
+- Compared the legacy `usage-tracking` plan with current implementation and the already-closed `usage-log` record. Basic opt-in local logging, CLI reporting, and `hawp_usage` exist; remaining gaps include provider/model token counts, elapsed call duration, model/backend metadata, and a retention review. Resumed the same item as canonical UUID `e1dc28ac` and preserved `usage-tracking` as its legacy ID.
+- Updated the local backlog and plans so `2eea565c`, `c8d9e1cb`, and `e1dc28ac` are active; `3cf52223` and `9dce1d95` remain parked. `429e075e` remains closed and is a prerequisite for any future HTTP MCP plan if a remote listener, shared service, or multiple clients need one server. The recorded direction is external OAuth authorization with HAWP acting as the protected resource server.
+
+### After
+
+The current local work direction is tool catalog and grouping guidance (`2eea565c`), intake elicitation/client support review (`c8d9e1cb`), and accurate local usage metering/retention follow-up (`e1dc28ac`). MCP resources and prompts are deferred until after `v0.1.0`. There is no decision to remove, rename, or wrap current tools, and no HTTP transport implementation is underway.
+
+Directly observed source facts are distinguished above from proposed resource/prompt candidates and future implementation work. Client elicitation support and the value of resources/prompts remain unverified until concrete target clients are checked.
+
+### Strategic impact
+
+The MCP direction remains local stdio-first and backward compatible. Near-term work can improve capability discoverability and client interaction without expanding the server protocol surface. The usage feature should be treated as an accuracy/privacy follow-up, not reimplemented. HTTP work remains gated by a real remote/shared/multi-client need and the completed `429e075e` security audit.
+
+### Continuation state
+
+- **Active locally:** `2eea565c` capability catalog; `c8d9e1cb` elicitation/client follow-up; `e1dc28ac` usage metering accuracy and retention.
+- **Parked locally until after `v0.1.0`:** `3cf52223` repository-scoped resources; `9dce1d95` reusable prompts. Other unrelated parked items retain their existing status.
+- **Latest completed MCP audit:** `c147f2ae` closed locally and pushed in the prior continuation. Remote transport/authorization audit `429e075e` is closed.
+- **Recommended resume order:** finish the catalog's guidance grouping/privacy notes, then research supported-client elicitation and settle the manual fallback; keep metering gaps separately scoped and avoid duplicate implementation of current opt-in logging.
+- **Open questions:** Which clients should HAWP support for elicitation? Which backends/clients can provide reliable actual token counts and elapsed duration? What retention period or default query-text policy should usage logging use?
+- **Working-tree boundary:** the work-item/backlog changes described here remain local and uncommitted. This archival commit contains only this status timeline; do not treat GitHub's backlog/plans as synchronized until those separate changes are reviewed and pushed.
+- **Repository state before archival:** branch `feature/website`; local HEAD and remote branch both pointed to `203619f215d3b7082c54374238dcefd4ecf4e3ed` before this checkpoint commit.
+
+### Memory delta
+
+The earlier compact HAWP note records the tool-availability audit closure and search readiness. This continuation adds the capability catalog decision, post-`v0.1.0` resource/prompt deferral, resumption and gap assessment for `c8d9e1cb`, and the distinction between existing usage logging and unmet accurate metering/retention goals. Private machine paths, user identity details, and local model inventory are excluded.
+
+### GitHub archival
+
+- **Related repository found:** Yes
+- **Organization:** `sentzunhat`
+- **Repository:** `sentzunhat/human-ai-workflow-protocol`
+- **Branch:** `feature/website`
+- **Checkpoint file:** `.hawp/work/status/2026/10/15/c147f2ae/status.md` (extended in place)
+- **Commit/push receipt:** exact commit SHA and confirmed push status are recorded in the archival completion message for this continuation.
+
+### Resume summary
+
+**Resume from:** active HAWP item `2eea565c` and the updated local backlog; first review/sync local backlog and plan changes before treating GitHub as the record.
+
+**Next objective:** finish the MCP tool guidance grouping/privacy note, then continue `c8d9e1cb` client elicitation research while preserving the manual-question fallback.
