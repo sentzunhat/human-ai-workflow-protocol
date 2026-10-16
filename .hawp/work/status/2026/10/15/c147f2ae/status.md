@@ -208,3 +208,55 @@ The earlier compact HAWP note records the tool-availability audit closure and se
 **Resume from:** active HAWP item `2eea565c` and the updated local backlog; first review/sync local backlog and plan changes before treating GitHub as the record.
 
 **Next objective:** finish the MCP tool guidance grouping/privacy note, then continue `c8d9e1cb` client elicitation research while preserving the manual-question fallback.
+
+---
+
+## Continuation checkpoint — 2026-10-16: release sequencing and provider verification
+
+**Checkpoint title:** 2026-10-16 — HAWP MCP releases, provider access, and client-verification sequence
+
+### Before
+
+The previous checkpoint treated the MCP catalog, provider propagation, resources, prompts, elicitation, and usage metering as separate local plans. Provider configuration work had advanced, but release ordering and cross-item dependencies had not yet been captured together. Existing work-item and provider/distribution changes in the working tree were already local and uncommitted.
+
+### During
+
+- Reconciled the release sequence in the user’s local planning workspace with the HAWP plans. It now has three draft releases: `v0.0.25 — MCP capabilities and provider setup`; `v0.1.0 — provider parity and usage evidence`; and `Post-v0.1.0 — intake elicitation decision`.
+- `v0.0.25` groups the existing seven tools under **Discover, Shape, Create, Verify**, while retaining tool names and behavior. It links the catalog (`2eea565c`), resources (`3cf52223`), prompt (`9dce1d95`), and provider setup (`b152c56c`) work. Implemented resource/prompt capabilities and provider-call setup are recorded as done items; separate client-discovery/read, prompt-discovery/argument, and Copilot custom-agent scope checks remain open.
+- `v0.1.0` groups provider/distribution guidance propagation (`3c137bad`), live MCP resource/prompt client verification, and privacy-minimal accurate local usage metering (`e1dc28ac`). The source guidance propagation item is marked done in the release workspace; client smoke and all metering tasks remain open. The live-client verification explicitly requires observed `resources/list` and `resources/read`, and `prompts/list` and `prompts/get`; tool calls alone do not prove those capabilities.
+- The post-`v0.1.0` lane retains `c8d9e1cb` for client elicitation research and a decision, with manual questions remaining the fallback. No elicitation implementation is implied.
+- Dependencies connect the catalog to the v0.0.25 capability work and provider guidance propagation to v0.1.0 client verification. The usage-metering lane remains independent. No release dates or release locks were set.
+- The release workspace displayed “Saved on this device.” Its project and release content were visible in the user’s Chrome session; this does not establish cloud synchronization or repository archival.
+
+### After
+
+The three-release map is available for continuation and separates source implementation from client proof. Existing work-item IDs remain the source of truth for implementation detail. No HAWP backlog or plan records were edited as part of this release-plan reconciliation.
+
+### Strategic impact
+
+The sequence keeps HAWP’s existing tool surface backward compatible, groups guidance without merging or removing tools, and moves resources/prompts through explicit implementation and client-verification gates. Provider configuration success is distinct from verified provider behavior. The local usage logger should not be duplicated; its accuracy and retention gaps remain separately scoped. Elicitation stays a post-`v0.1.0` decision with a manual-question fallback.
+
+### Continuation state
+
+- **`v0.0.25` draft:** catalog/grouping, resource/prompt capabilities, and Codex/Copilot provider setup. Remaining gates: supported-client resource and prompt discovery/interaction, generated Copilot custom-agent tool scope, and final catalog privacy/compatibility notes.
+- **`v0.1.0` draft:** provider/distribution propagation is marked complete in the release workspace; run a bounded live Copilot resource/read and prompt/get smoke and record client/version/results. Complete usage-data-source, retention/privacy, implementation, and end-to-end evidence items.
+- **Post-`v0.1.0` draft:** complete `c8d9e1cb` elicitation/client research and decide whether manual questions remain sufficient or elicitation should be proposed.
+- **Local HAWP work:** `2eea565c`, `c8d9e1cb`, `e1dc28ac`, `3c137bad`, `3cf52223`, `9dce1d95`, and `b152c56c` remain in their existing local states. The repository has substantial unrelated-to-this-checkpoint local source, guidance, backlog, and plan changes. They are not part of this checkpoint commit.
+- **Unproven:** release-workspace device-local persistence across devices; live resource/prompt client behavior; custom Copilot agent scope; actual provider token counts/duration/metadata and retention behavior; elicitation support in target clients; release readiness or shipment.
+
+### Memory delta
+
+A compact private memory note records the three-release sequence, the HAWP provider-verification result, open client gates, and the next review order. This public checkpoint omits the private planning workspace’s name and unrelated project names, machine-local paths, and user identity details.
+
+### GitHub archival
+
+- **Related repository:** `sentzunhat/human-ai-workflow-protocol` (confirmed public).
+- **Branch:** `feature/website`.
+- **Checkpoint file:** `.hawp/work/status/2026/10/15/c147f2ae/status.md` (existing timeline extended in place).
+- **Commit and push:** recorded with this checkpoint’s archival completion message. Only this status file is intended for the checkpoint commit; existing local backlog, plan, source, and generated-guidance changes remain outside it.
+
+### Resume summary
+
+**Resume from:** the open client-verification gates in the `v0.0.25` and `v0.1.0` drafts, keeping the existing HAWP plan IDs and local working changes intact.
+
+**Next objective:** verify Copilot’s generated HAWP agent tool scope, then run a bounded Copilot MCP resource/read and prompt/get smoke and record the exact client/version/results. Afterward, continue usage-metering evidence and the post-release elicitation decision.
