@@ -139,7 +139,7 @@ The existing compact HAWP MCP troubleshooting note records the 2026-10-15 startu
 - **Repository:** `sentzunhat/human-ai-workflow-protocol`
 - **Branch:** `feature/website`
 - **Checkpoint file:** `.hawp/work/status/2026/10/15/c147f2ae/status.md` (this continuation extends the existing checkpoint)
-- **Commit and push:** to be recorded after the checkpoint-only archival commit is verified.
+- **Initial checkpoint commit:** `0a14e6a41f67566d79cbf17f5e3643a2c6db7291` was pushed to `origin/feature/website`; the remote ref matched after push. This archive record is itself extended by the follow-up commit reported with the checkpoint.
 
 ### Resume summary
 
