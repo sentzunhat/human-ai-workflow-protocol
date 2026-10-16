@@ -87,3 +87,62 @@ Checkpoint: `.hawp/work/status/2026/10/15/c147f2ae/status.md`
 ### Resume Summary
 
 Resume work item `c147f2ae` from its plan-ready state. Review the allowlist recommendation, then verify tool exposure from a fresh trusted task before claiming the tool-first availability issue is fully resolved.
+
+---
+
+## Continuation checkpoint — 2026-10-16
+
+**Checkpoint title:** 2026-10-16 — HAWP Codex MCP audit closure and search readiness
+
+**Conversation/event date:** 2026-10-15 to 2026-10-16
+**Archive date:** 2026-10-16
+
+### Before
+
+At the 2026-10-15 checkpoint, the project-local HAWP binary had been restored and its MCP endpoint advertised seven tools, but the Codex allowlist exposed only four. Fresh-task exposure, repository scope, and useful read-only search had not yet been confirmed. Work item `c147f2ae` remained plan-ready.
+
+### During
+
+- The repository-scoped Codex configuration was synchronized using the installed HAWP CLI's `mcp configure --provider all`. It enabled all seven Codex tools and wrote or merged repo-local MCP entries for Claude Code, Cursor, and VS Code/Copilot. The CLI printed a manual Continue configuration block but did not write a Continue config.
+- The working-tree `.gitignore` was extended for Claude local settings and the suggested repo-local Continue configuration. The generated MCP client configuration files remain ignored and machine-local.
+- A fresh trusted Codex task reported all seven HAWP tools. Repository validation passed, and the initial distinctive search returned no results.
+- Diagnosis found the ignored local search database predated the October work-item updates. With user approval, `hawp search index` rebuilt it from the configured corpus: 597 documents, 5,001 chunks, and 118 work-item metadata records.
+- Follow-up read-only searches returned the archived `c147f2ae` plan for its distinctive phrase and relevant setup/verification guidance in `.hawp/kit/usage/mcp/install-agent.md` and `.hawp/kit/usage/mcp/verification.md`.
+- Work item `c147f2ae` was closed in the local worktree and its backlog row moved to Recently Closed. Other parked item statuses were preserved.
+
+### After
+
+The server binary, repo-scoped Codex configuration, fresh-task tool exposure, repository validation, and useful search have all been verified. The local search index is current as of this rebuild. `c147f2ae` is closed locally at `.hawp/work/closed/2026/10/16/c147f2ae/plan.md`.
+
+The recommended next work item is `c8d9e1cb` (interactive MCP intake refinement), which remains parked pending explicit resumption. Its remaining scope is MCP elicitation/client support research and clear fallback questions for agents.
+
+### Strategic impact
+
+The audit distinguished three separate states: a registered server, tools exposed in a fresh client task, and a usable repository-scoped search. The latter two now have evidence, with the local index rebuild resolving the observed search gap. The HAWP CLI configures four client families directly and prints instructions for Continue; it does not fully write every provider's client config.
+
+### Continuation state
+
+- **Latest completed milestone:** `c147f2ae` closed after fresh-task exposure, repository validation, and useful search passed.
+- **Next logical milestone:** resume `c8d9e1cb`, beginning with remaining elicitation/client support research and its manual-question fallback.
+- **Other parked work:** `7394f90c`, `2eea565c`, `429e075e`, `96c45719`, `1607037f`, and `b4300599` remain parked; website sequence remains pentagon before cable motion.
+- **Working-tree boundary:** this checkpoint update is being archived separately. Existing `.gitignore`, backlog, and plan-move changes are not included in the checkpoint commit; review and synchronize them separately before relying on the GitHub copy of those local states.
+- **Not carried into this public checkpoint:** host-specific Ollama/model inventory and machine-local paths, because they do not change HAWP's repository continuation state.
+
+### Memory delta
+
+The existing compact HAWP MCP troubleshooting note records the 2026-10-15 startup failure and the then-open fresh-task gate. A small follow-up note records the verified allowlist synchronization, successful index rebuild/search, closure of `c147f2ae`, and next resume point. No private project details, local absolute paths, or host model inventory were added to the public checkpoint.
+
+### GitHub archival
+
+- **Related repository found:** Yes
+- **Organization:** `sentzunhat`
+- **Repository:** `sentzunhat/human-ai-workflow-protocol`
+- **Branch:** `feature/website`
+- **Checkpoint file:** `.hawp/work/status/2026/10/15/c147f2ae/status.md` (this continuation extends the existing checkpoint)
+- **Commit and push:** to be recorded after the checkpoint-only archival commit is verified.
+
+### Resume summary
+
+**Resume from:** review the remaining local HAWP backlog/plan-move changes before syncing them to GitHub, then explicitly resume parked item `c8d9e1cb`.
+
+**Next objective:** research current MCP elicitation/client support and define a concise manual-question fallback for structured HAWP intake.
