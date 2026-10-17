@@ -228,6 +228,25 @@ The previous checkpoint treated the MCP catalog, provider propagation, resources
 - Dependencies connect the catalog to the v0.0.25 capability work and provider guidance propagation to v0.1.0 client verification. The usage-metering lane remains independent. No release dates or release locks were set.
 - The release workspace displayed “Saved on this device.” Its project and release content were visible in the user’s Chrome session; this does not establish cloud synchronization or repository archival.
 
+#### Proposed next patch lanes (planning draft)
+
+These are scope proposals to keep pull requests reviewable. They do not change
+work-item statuses, assign dates, or lock releases. Confirm each lane against
+the backlog immediately before implementation because parked work may change.
+
+| Draft release | Candidate work | Why it fits | Boundary / gate |
+| --- | --- | --- | --- |
+| `v0.0.26` — MCP client proof and catalog closeout | Finish the remaining `v0.0.25` client checks for the fixed resources and intake prompt; verify the generated Copilot HAWP agent scope; complete the catalog inventory/classification and final privacy/compatibility notes (`2eea565c`, `3cf52223`, `9dce1d95`, `b152c56c`). | Completes a bounded client-facing MCP capability slice and closes the evidence gap before broader provider claims. | Keep existing tool names and the manual intake fallback. Record client/surface/version and observed calls. Do not claim live client support from protocol tests or vendor documentation alone. |
+| `v0.0.27` — usage measurement and retention | Continue the independent usage accuracy/privacy work (`e1dc28ac`): determine reliable duration/model/backend/token sources; define privacy-minimal defaults and retention; implement only supported measurements; verify migration, opt-in, clear/retention, reports, and end-to-end evidence. | Isolates local metering changes and their data semantics from client compatibility work. | Keep local-only and opt-in behavior; label payload estimates as estimates; do not claim provider billing or actual tokens without authoritative counters. |
+| `v0.0.28` — HAWP site and workflow polish (optional candidate) | Reconsider parked site/workflow tasks `96c45719`, `1607037f`, `b4300599`, and `7394f90c` only if they are resumed and still desired. | Groups non-MCP polish separately, preventing unrelated changes from enlarging MCP pull requests. | Not committed release scope. Respect website sequence (pentagon before cable motion); analytics remains privacy-first and separately reviewable. |
+
+The prior post-`v0.1.0` elicitation lane (`c8d9e1cb`) remains a separate decision
+after client research; do not fold elicitation into `v0.0.26` or imply its
+implementation. The proposed `v0.0.27` and `v0.0.28` numbers are sequencing
+placeholders, not approved versions. An alternative is to keep `v0.1.0` as the
+metering milestone and use only one of the later patch drafts for eligible
+parked work.
+
 ### After
 
 The three-release map is available for continuation and separates source implementation from client proof. Existing work-item IDs remain the source of truth for implementation detail. No HAWP backlog or plan records were edited as part of this release-plan reconciliation.
@@ -238,9 +257,10 @@ The sequence keeps HAWP’s existing tool surface backward compatible, groups gu
 
 ### Continuation state
 
-- **`v0.0.25` draft:** catalog/grouping, resource/prompt capabilities, and Codex/Copilot provider setup. Remaining gates: supported-client resource and prompt discovery/interaction, generated Copilot custom-agent tool scope, and final catalog privacy/compatibility notes.
+- **`v0.0.25` draft:** catalog/grouping, resource/prompt capabilities, and Codex/Copilot provider setup. Remaining gates: complete the capability/workflow inventory and classify every operation; finish the resource/prompt client discovery and interaction smoke; verify generated Copilot custom-agent scope; close remaining catalog privacy/compatibility notes. The resource/prompt server implementations and focused protocol tests are present; those do not prove client support. Provider propagation (`3c137bad`) has generated guidance and validation evidence, with live client proof still open.
 - **`v0.1.0` draft:** provider/distribution propagation is marked complete in the release workspace; run a bounded live Copilot resource/read and prompt/get smoke and record client/version/results. Complete usage-data-source, retention/privacy, implementation, and end-to-end evidence items.
 - **Post-`v0.1.0` draft:** complete `c8d9e1cb` elicitation/client research and decide whether manual questions remain sufficient or elicitation should be proposed.
+- **Proposed PR-size follow-ups:** `v0.0.26` for remaining MCP client evidence/catalog closeout; `v0.0.27` for usage measurement and retention; optional `v0.0.28` for resumed website/workflow polish. These are planning candidates only; see the table above for boundaries.
 - **Local HAWP work:** `2eea565c`, `c8d9e1cb`, `e1dc28ac`, `3c137bad`, `3cf52223`, `9dce1d95`, and `b152c56c` remain in their existing local states. The repository has substantial unrelated-to-this-checkpoint local source, guidance, backlog, and plan changes. They are not part of this checkpoint commit.
 - **Unproven:** release-workspace device-local persistence across devices; live resource/prompt client behavior; custom Copilot agent scope; actual provider token counts/duration/metadata and retention behavior; elicitation support in target clients; release readiness or shipment.
 
