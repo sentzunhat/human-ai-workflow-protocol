@@ -11,9 +11,11 @@ preserve unrelated work on the existing source branch.
 
 The user confirmed `feature/website-improvements` and
 `feature/mcp-providers`, both based on `origin/main`. The existing
-`feature/website` branch ref remains the source/reference and stays at
-`e2237b480c01e3707d618685e4f8e6f913d5a263`; its pre-existing dirty worktree
-is preserved and contains the updated split/client-gate records.
+`feature/website` checkout remains the source/reference. Its local tip is
+`6e6fbacc08830a1915a92d9259ab4a55562f7f79`, one commit ahead of
+`origin/feature/website` at `e2237b480c01e3707d618685e4f8e6f913d5a263`;
+the worktree is clean. That separate local commit remains outside both PRs
+and was not changed or pushed during this PR operation.
 Both local branches and their worktrees now exist at
 `178fde6ebcb57f3e8100710c72ae71f06e62fb6d`, the recorded `origin/main` tip.
 The selected website and provider/MCP paths have been populated into their
@@ -281,10 +283,20 @@ The 39 website paths were committed on `feature/website-improvements` as
 search-index Option A paths, were committed on `feature/mcp-providers` as
 `a35dd925a04c397e0a8ce363b3066e7a1edc085b` and pushed to
 `origin/feature/mcp-providers`. Both remote refs matched their local commits
-after push.
+after push. The post-push record update was committed as
+`dfb9f6f13c816d8472f59c808ea4bd7730bf58c8` and pushed before PR creation.
 
-The existing `feature/website` checkout remains out of scope and unchanged;
-its pre-existing dirty files are preserved. No PRs were opened.
+PR #47, `Add the HAWP website and Pages deployment`, is open from
+`feature/website-improvements` to `main`:
+https://github.com/sentzunhat/human-ai-workflow-protocol/pull/47
+
+PR #46, `Expand HAWP MCP tooling and provider setup`, is open from
+`feature/mcp-providers` to `main`:
+https://github.com/sentzunhat/human-ai-workflow-protocol/pull/46
+
+At PR creation, GitHub reported both PRs mergeable. Website build checks
+passed and deploy was skipped; the code PR's `quality` and
+`validate-generated` checks were pending.
 
 ## Verification Notes
 

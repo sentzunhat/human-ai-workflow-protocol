@@ -247,7 +247,8 @@ authorization and the verified publication below.
 
 **Implementation coordination:** The approved search/index item `09ee9986`
 is implemented and tested on `feature/mcp-providers`; the persistent local
-index was not modified. PR creation remains pending.
+index was not modified. The implementation is included in the open PR #46;
+PR #47 contains the separate website/Pages changes.
 
 ### Branch preparation result (2026-10-22)
 
@@ -284,10 +285,11 @@ index was not modified. PR creation remains pending.
 - At the branch-preparation checkpoint, no files were staged or committed;
   neither branch had been pushed and no PR had been created.
 
-**Next:** The two prepared branches have been committed and pushed while
-preserving `feature/website`. The approved `09ee9986` Option A implementation
-is included in `feature/mcp-providers`. Keep the unverified live client
-checks and VS Code migration decision separate. PR creation remains pending.
+**Next:** PR #47 contains the website/Pages changes and PR #46 contains the
+Librarian/MCP/provider changes; both target `main`. The approved `09ee9986`
+Option A implementation is included in PR #46. Keep the unverified live
+client checks and VS Code migration decision separate while the PR checks
+and review proceed.
 
 ### Search-index Option A validation (2026-10-22)
 
@@ -309,11 +311,23 @@ checks and VS Code migration decision separate. PR creation remains pending.
 - `feature/mcp-providers` was committed as
   `a35dd925a04c397e0a8ce363b3066e7a1edc085b` and pushed to
   `origin/feature/mcp-providers`.
-- Both remote refs matched their local commits after push. The existing
-  `feature/website` local and remote refs remain at
-  `e2237b480c01e3707d618685e4f8e6f913d5a263`; its dirty worktree was not
-  changed.
-- No PRs were opened. The code-branch worktree is clean after publication.
+- Both remote refs matched their local commits after push. The follow-up
+  work-record commit `dfb9f6f13c816d8472f59c808ea4bd7730bf58c8` is also
+  pushed on `feature/mcp-providers`.
+- The preserved source checkout is on `feature/website` at local commit
+  `6e6fbacc08830a1915a92d9259ab4a55562f7f79`, one commit ahead of
+  `origin/feature/website` at
+  `e2237b480c01e3707d618685e4f8e6f913d5a263`; its worktree is clean. It was
+  not changed or pushed during this PR operation.
+- PR #47, `Add the HAWP website and Pages deployment`, is open from
+  `feature/website-improvements` to `main`:
+  https://github.com/sentzunhat/human-ai-workflow-protocol/pull/47
+- PR #46, `Expand HAWP MCP tooling and provider setup`, is open from
+  `feature/mcp-providers` to `main`:
+  https://github.com/sentzunhat/human-ai-workflow-protocol/pull/46
+- At PR creation, GitHub reported both PRs mergeable. Website build checks
+  passed and deploy was skipped as expected; the code PR's `quality` and
+  `validate-generated` checks were pending.
 - After updating these records, `cd librarian/src && go run ./cmd/hawp check`
   passed all 3 validations with 0 issues, 0 warnings, and 147 valid Markdown
   files.
@@ -322,14 +336,15 @@ checks and VS Code migration decision separate. PR creation remains pending.
   to `active/2eea565c/plan.md` and `active/429e075e/plan.md`. The separate
   code-branch validation passed.
 
-### Proposed PR summaries
+### Opened PR summaries
 
-- Website title: `Add the HAWP website and Pages deployment`
-- Librarian title: `Expand HAWP MCP tooling and provider setup`
+- Website PR #47: `Add the HAWP website and Pages deployment`.
+- Librarian/MCP PR #46: `Expand HAWP MCP tooling and provider setup`.
 
-Draft PR bodies should list only changes present in each filtered branch and
-report branch-specific validation. Add the search-index sync work to the
-Librarian PR summary only after Option A is implemented and verified.
+Both descriptions categorize their branch changes and list the validation
+commands already run on the corresponding worktree. The website description
+distinguishes preview artifacts from deployment on `main`; the code
+description includes the implemented search-index sync and regression tests.
 
 ### Verification sequence after branch selection
 
@@ -357,4 +372,6 @@ Librarian PR summary only after Option A is implemented and verified.
 - [x] Create both isolated worktrees from `origin/main`
 - [x] Reconstruct the selected code-branch backlog and verify both manifests
 - [x] Implement approved search-index Option A on the Librarian branch
-- [ ] Create and verify two PRs targeting `main`
+- [x] Create and verify two PRs targeting `main`; PR #47 and PR #46 are open
+  and mergeable. Website checks passed; code checks were pending at the last
+  check.
