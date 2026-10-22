@@ -133,6 +133,10 @@ core/providers/.github/  →  .github/instructions/
 
 Provider-specific proof is in the **Update Contract** section in this guide.
 
+The refreshed kit includes `.hawp/kit/usage/mcp/README.md`, which documents
+HAWP tool groups and the client-dependent resource/prompt fallback. A client
+must list those capabilities before relying on its UI support.
+
 ## Explicit dispatch
 
 See the provider **Install Contract** **Guide fetch (review-first)** block — it selects update when `.hawp/` exists and writes a script to `/tmp` for review before execution.

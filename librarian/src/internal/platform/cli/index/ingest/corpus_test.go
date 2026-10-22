@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	appindex "github.com/sentzunhat/hawp/librarian/src/internal/application/index"
+	sqlite "github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/repositories/index"
 	_ "modernc.org/sqlite"
 )
 
@@ -229,5 +230,82 @@ func TestWorkCorpusPersistsCanonicalUUIDMetadata(t *testing.T) {
 		if got[i] != want[i] {
 			t.Fatalf("metadata rows = %v, want %v", got, want)
 		}
+	}
+}
+
+func TestFreshConfiguredCorpusSyncSearchesKitAndWorkAndRemovesMovedPath(t *testing.T) {
+	root := t.TempDir()
+	oldWorkPath := ".hawp/work/active/12345678/plan.md"
+	newWorkPath := ".hawp/work/active/87654321/plan.md"
+	files := map[string]string{
+		".hawp/kit/references/search-fixture.md": "# Kit fixture\n\nkitfreshmarker is searchable.",
+		oldWorkPath:                              "# Work fixture\n\nworkfreshmarker is searchable.",
+	}
+	for rel, content := range files {
+		path := filepath.Join(root, filepath.FromSlash(rel))
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	dbPath := filepath.Join(root, ".hawp", "db", "index.sqlite")
+	service := appindex.NewIngestService(dbPath)
+	syncConfiguredCorpus := func() {
+		t.Helper()
+		corpus, err := buildCorpusFromRepo(root, []string{".hawp/kit", ".hawp/work"})
+		if err != nil {
+			t.Fatalf("build configured corpus: %v", err)
+		}
+		if _, err := service.Sync(corpus); err != nil {
+			t.Fatalf("sync configured corpus: %v", err)
+		}
+	}
+	searchPaths := func(query string) []string {
+		t.Helper()
+		db, err := sqlite.Open(dbPath)
+		if err != nil {
+			t.Fatalf("open index: %v", err)
+		}
+		defer db.Close()
+		results, err := db.QueryChunksLexical(query, 10)
+		if err != nil {
+			t.Fatalf("search %q: %v", query, err)
+		}
+		paths := make([]string, 0, len(results))
+		for _, result := range results {
+			path, ok := result["path"].(*string)
+			if !ok || path == nil {
+				t.Fatalf("search result has invalid path: %#v", result["path"])
+			}
+			paths = append(paths, *path)
+		}
+		return paths
+	}
+
+	syncConfiguredCorpus()
+	if got := searchPaths("kitfreshmarker"); len(got) != 1 || got[0] != ".hawp/kit/references/search-fixture.md" {
+		t.Fatalf("kit search paths = %v", got)
+	}
+	if got := searchPaths("workfreshmarker"); len(got) != 1 || got[0] != oldWorkPath {
+		t.Fatalf("initial work search paths = %v", got)
+	}
+
+	movedPath := filepath.Join(root, filepath.FromSlash(newWorkPath))
+	if err := os.MkdirAll(filepath.Dir(movedPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Rename(filepath.Join(root, filepath.FromSlash(oldWorkPath)), movedPath); err != nil {
+		t.Fatalf("move work fixture: %v", err)
+	}
+
+	syncConfiguredCorpus()
+	if got := searchPaths("workfreshmarker"); len(got) != 1 || got[0] != newWorkPath {
+		t.Fatalf("work search paths after move = %v, want only %s", got, newWorkPath)
+	}
+	if got := searchPaths("kitfreshmarker"); len(got) != 1 || got[0] != ".hawp/kit/references/search-fixture.md" {
+		t.Fatalf("kit search paths after work move = %v", got)
 	}
 }

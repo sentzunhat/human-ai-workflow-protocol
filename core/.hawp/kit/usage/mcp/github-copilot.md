@@ -7,8 +7,12 @@ Copilot CLI, or remote containers. Those require host-specific setup.
 ## Setup
 
 `hawp init --provider github` syncs the GitHub instruction overlay and writes
-the repo-local MCP configuration. Use `hawp mcp configure --provider github`
-when you want MCP configuration without provisioning or kit sync.
+the repo-local MCP configuration plus a HAWP custom agent. Use
+`hawp mcp configure --provider github` when you want MCP configuration without
+provisioning or kit sync. It generates `.github/agents/hawp.agent.md` with the
+seven HAWP MCP tools and VS Code workspace `read`, `search`, `edit`, and
+`execute` tools. The custom agent scopes availability only; verify Copilot's
+client-managed trust and confirmation behavior separately.
 
 Merge this entry into `.vscode/mcp.json`; retain other servers and settings:
 

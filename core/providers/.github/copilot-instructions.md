@@ -13,6 +13,8 @@ HAWP kit templates (`.hawp/kit/`) are always the canonical policy source; instru
 
 This repository uses HAWP as a lightweight workflow method.
 
+When HAWP MCP tools are available, use the existing workflow groups: **Discover** (`hawp_search`, `hawp_usage`), **Shape** (`hawp_work_reshape`, `hawp_work_intake`), **Create** (`hawp_work_new`, `hawp_work_doc`), and **Verify** (`hawp_work_validate`). These labels do not change tool names or add wrappers. See `.hawp/kit/usage/mcp/README.md` for side effects and usage logging privacy. Use HAWP resources and the `hawp_intake_request` prompt only if the connected client lists them; otherwise follow the manual guide and use available tools. Create tools are explicit writes.
+
 Follow the repo-local HAWP guidance in:
 
 - .hawp/kit/start-here.md

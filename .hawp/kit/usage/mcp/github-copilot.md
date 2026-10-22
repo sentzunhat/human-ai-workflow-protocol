@@ -7,8 +7,14 @@ Copilot CLI, or remote containers. Those require host-specific setup.
 ## Setup
 
 `hawp init --provider github` syncs the GitHub instruction overlay and writes
-the repo-local MCP configuration. Use `hawp mcp configure --provider github`
-when you want MCP configuration without provisioning or kit sync.
+the repo-local MCP configuration plus a HAWP custom agent. Use
+`hawp mcp configure --provider github` when you want MCP configuration without
+provisioning or kit sync. It writes `.vscode/mcp.json` and generates
+`.github/agents/hawp.agent.md` with the seven HAWP MCP tools plus VS Code
+workspace `read`, `search`, `edit`, and `execute` tools in its `tools` list.
+The HAWP agent scopes tool availability only; approval is client-managed and
+must be verified separately. If an unmanaged `.github/agents/hawp.agent.md`
+already exists, setup stops and preserves it for manual review.
 
 Merge this entry into `.vscode/mcp.json`; retain other servers and settings:
 
@@ -47,10 +53,15 @@ also checks kit and links. The CLI supports `--work-root` or `--hawp-root`,
 not `--repo-root`; older builds silently ignored that unsupported flag.
 
 Run VS Code's `MCP: List Servers`, select HAWP, and review/start the server.
-In a tool-enabled Copilot conversation, call `hawp_work_validate` and confirm
-the repository before authorizing writes.
+In a Copilot conversation, select the HAWP agent to apply its configured HAWP
+MCP and workspace-tool allowlist. Call `hawp_work_validate` and confirm the
+repository before authorizing writes. The agent file alone does not establish
+which server trust or tool-call confirmation prompts are active; inspect those
+in the VS Code client.
 
 VS Code uses `servers`, unlike Claude's `mcpServers`. Its Agent Host does
 not read `.vscode/mcp.json` directly; VS Code forwards supported configurations.
-See the [official configuration reference](https://code.visualstudio.com/docs/agents/reference/mcp-configuration).
-A live Copilot connection was not tested in this documentation pass.
+See the [official configuration reference](https://code.visualstudio.com/docs/agents/reference/mcp-configuration)
+and [custom-agent tool configuration](https://code.visualstudio.com/docs/agent-customization/custom-agents).
+This guide describes setup; see [connection verification](verification.md)
+for current client test evidence.

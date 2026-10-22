@@ -61,8 +61,20 @@ text while updating launch values and adding missing defaults. Unsupported
 layouts require manual merge; there is no force-overwrite flag.
 JSON and Codex validation occur before any selected config is
 written, but later filesystem write failures are not an all-or-nothing transaction.
-Continue prints a user-config block; GitHub writes repo-local `.vscode/mcp.json`.
-Exit 0 is not client connection proof.
+Continue prints a user-config block; GitHub writes repo-local
+`.vscode/mcp.json` and generates `.github/agents/hawp.agent.md` with an
+explicit list of the seven HAWP MCP tools plus the VS Code workspace `read`,
+`search`, `edit`, and `execute` tools. Selecting the HAWP agent applies that
+availability scope; it does not configure approval. Verify server trust and
+tool-call confirmation behavior in the client. Setup stops rather than
+replacing an unmanaged agent file at that path. Exit 0 is not client
+connection proof.
+
+Codex's `enabled_tools` and the Copilot HAWP agent are generated tool
+availability allowlists. HAWP does not populate provider permission rules that
+auto-approve MCP calls. See the [provider setup and verification
+guide](verification.md) for the difference between tool availability and call
+approval in each client.
 Both `configure` and `init` now share the preserving Codex merge; `init` still
 performs provisioning and kit sync. See the Codex guide for supported layouts.
 
@@ -124,6 +136,52 @@ a shell invocation was an MCP call.
 The current tool set is `hawp_search`, `hawp_usage`, `hawp_work_intake`,
 `hawp_work_new`, `hawp_work_validate`, `hawp_work_doc`, and
 `hawp_work_reshape`. Client prefixes can vary.
+
+The server also exposes a small read-only resource set for the selected
+repository: `hawp://repo/kit/start-here`, `hawp://repo/work/backlog`, and
+`hawp://repo/kit/usage/mcp`. These URIs resolve only to fixed HAWP Markdown
+files under the selected repository. Arbitrary paths and user-home data are
+not exposed. A missing or unsafe resource returns an error.
+
+The `hawp_intake_request` prompt accepts a required `request` and optional
+`context` argument. It drafts HAWP intake guidance only; it does not create
+work or imply approval. Clients that do not expose MCP prompts can continue to
+use the worker instructions and intake workflow documented here.
+
+### Tool Groups
+
+Use these groups as a workflow index; they describe the existing tools and do
+not add wrapper tools or change tool names:
+
+| Group | Tools | Use |
+| --- | --- | --- |
+| **Discover** | `hawp_search`, `hawp_usage` | Retrieve indexed repository context or inspect optional local usage records. |
+| **Shape** | `hawp_work_reshape`, `hawp_work_intake` | Shape supplied context, or combine indexed retrieval with structured intake. |
+| **Create** | `hawp_work_new`, `hawp_work_doc` | Create a new work item or a secondary HAWP document. These are writes. |
+| **Verify** | `hawp_work_validate` | Check repository HAWP structure and work-record consistency. |
+
+`hawp_work_intake` is the compound entry point when both repository retrieval
+and request shaping are useful. Keep `hawp_search` and `hawp_work_reshape`
+available for targeted retrieval and shaping with caller-supplied context.
+Intake and reshape do not create work items.
+
+### Usage Logging Privacy
+
+Usage logging is opt-in and stored locally under the user's HAWP home. With
+logging enabled, each call records tool name, timestamp, a query hash, and
+estimated input/output token counts. When the request includes a `query` or
+`title`, its text is also stored up to 256 characters even if raw-body capture
+is off. `hawp usage report` and `hawp_usage` report mode include recent query
+summaries. Enabling `--log-bodies` additionally stores raw input and output
+bodies. Treat both query summaries and captured bodies as potentially
+sensitive; use body capture only when needed and disable logging or run
+`hawp usage clear` when the records are no longer needed. The current store has
+no automatic expiry policy, so retention is manual.
+
+`hawp_usage` totals mode returns aggregates; report mode includes the recent
+query list. Review local logging preferences before sharing a report or using
+report mode in a workflow that may expose its response to a wider audience.
+
 Validation needs no search index. If search reports a missing index, review
 `.hawp/config/search.json` and the [search guide](../search.md) before running
 `./.hawp/bin/hawp search index --no-update-check`; indexing writes local state.

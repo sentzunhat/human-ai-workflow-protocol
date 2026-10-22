@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	appindex "github.com/sentzunhat/hawp/librarian/src/internal/application/index"
 	appwork "github.com/sentzunhat/hawp/librarian/src/internal/application/work/intake"
 	"github.com/sentzunhat/hawp/librarian/src/internal/domain/usage"
 	"github.com/sentzunhat/hawp/librarian/src/internal/infrastructure/filesystem"
@@ -198,6 +199,61 @@ func TestToolSearchReturnsStructuredJSON(t *testing.T) {
 	}
 	if r.Context.Window.End < r.Lines.Source {
 		t.Errorf("context.window.end %d < lines.source %d", r.Context.Window.End, r.Lines.Source)
+	}
+}
+
+func TestToolSearchFindsDocumentsAfterFreshCorpusSync(t *testing.T) {
+	root := t.TempDir()
+	corpus := &appindex.EnrichedCorpus{
+		Documents: []appindex.EnrichedDocument{
+			{
+				Path:       ".hawp/kit/fresh.md",
+				Type:       "guide",
+				Category:   "kit",
+				FolderRole: "kit",
+				Content:    "freshkitmarker is indexed from the kit corpus.",
+			},
+			{
+				Path:       ".hawp/work/active/12345678/plan.md",
+				Type:       "plan",
+				Category:   "work",
+				FolderRole: "work/active",
+				Content:    "freshworkmarker is indexed from the work corpus.",
+			},
+		},
+	}
+	dbPath := filepath.Join(root, ".hawp", "db", "index.sqlite")
+	if _, err := appindex.NewIngestService(dbPath).Sync(corpus); err != nil {
+		t.Fatalf("sync fresh corpus: %v", err)
+	}
+
+	for _, tt := range []struct {
+		query  string
+		source string
+	}{
+		{query: "freshkitmarker", source: ".hawp/kit/fresh.md"},
+		{query: "freshworkmarker", source: ".hawp/work/active/12345678/plan.md"},
+	} {
+		t.Run(tt.query, func(t *testing.T) {
+			args, err := json.Marshal(map[string]any{"query": tt.query})
+			must(t, err)
+			response := toolSearch(args, root)
+			result, ok := response.Result.(toolResult)
+			if !ok {
+				t.Fatalf("toolSearch result has type %T", response.Result)
+			}
+			if result.IsError || len(result.Content) == 0 {
+				t.Fatalf("toolSearch returned error: %+v", result)
+			}
+
+			var search SearchResponse
+			if err := json.Unmarshal([]byte(result.Content[0].Text), &search); err != nil {
+				t.Fatalf("decode search response: %v", err)
+			}
+			if len(search.Results) != 1 || search.Results[0].Source != tt.source {
+				t.Fatalf("search results = %+v, want only %s", search.Results, tt.source)
+			}
+		})
 	}
 }
 
