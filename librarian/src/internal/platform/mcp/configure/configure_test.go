@@ -41,6 +41,21 @@ func TestConfigureFreshAndRepeat(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(root, ".hawp/kit")); !os.IsNotExist(err) {
 		t.Fatal("created kit")
 	}
+	agent, err := os.ReadFile(filepath.Join(root, ".github/agents/hawp.agent.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, tool := range hawpCopilotTools {
+		if !strings.Contains(string(agent), "- "+tool) {
+			t.Errorf("Copilot agent missing HAWP tool %q", tool)
+		}
+	}
+	if strings.Contains(string(agent), "hawp/*") || !strings.Contains(string(agent), "target: github-copilot") {
+		t.Fatalf("Copilot agent should enumerate HAWP tools and target GitHub Copilot:\n%s", agent)
+	}
+	if !strings.Contains(string(agent), "normal confirmation prompts") {
+		t.Fatalf("Copilot agent should preserve client approval prompts:\n%s", agent)
+	}
 	ignore, err := os.ReadFile(filepath.Join(root, ".gitignore"))
 	if err != nil {
 		t.Fatal(err)
@@ -49,6 +64,28 @@ func TestConfigureFreshAndRepeat(t *testing.T) {
 		if strings.Count(string(ignore), entry) != 1 {
 			t.Fatalf("gitignore entry %q count = %d, content:\n%s", entry, strings.Count(string(ignore), entry), ignore)
 		}
+	}
+}
+
+func TestConfigureRefusesUnmanagedCopilotAgentBeforeWrites(t *testing.T) {
+	root := configureFixture(t)
+	agentPath := filepath.Join(root, ".github", "agents", "hawp.agent.md")
+	if err := os.MkdirAll(filepath.Dir(agentPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	custom := []byte("---\nname: My HAWP agent\n---\nKeep this custom agent.\n")
+	if err := os.WriteFile(agentPath, custom, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := Configure(root, []string{"claude", "github"}); err == nil {
+		t.Fatal("overwrote an unmanaged Copilot agent")
+	}
+	got, err := os.ReadFile(agentPath)
+	if err != nil || string(got) != string(custom) {
+		t.Fatalf("custom Copilot agent changed: %s, %v", got, err)
+	}
+	if _, err := os.Stat(filepath.Join(root, ".mcp.json")); !os.IsNotExist(err) {
+		t.Fatalf("Claude config was written before Copilot preflight completed: %v", err)
 	}
 }
 

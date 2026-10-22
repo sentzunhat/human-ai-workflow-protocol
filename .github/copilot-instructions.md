@@ -103,6 +103,12 @@ go run ./cmd/hawp work normalize --dry-run --validate
 go run ./cmd/hawp check
 ```
 
+## HAWP Validation Result Reporting
+
+- Report the aggregate status from `hawp check` or the validation tool separately from individual subchecks.
+- If any required check fails, do not label the overall result `PASS`, even when another subcheck passes.
+- List warnings and errors alongside the relevant check, and avoid contradictory `PASS`/`FAIL` summaries.
+
 ## Agent Discipline
 
 **Regex quoting:** Always wrap rg/grep patterns containing `|`, `-`, or shell metacharacters in single quotes. Unquoted alternations split into positional arguments or pipe operators, causing silent failures and wrong matches.

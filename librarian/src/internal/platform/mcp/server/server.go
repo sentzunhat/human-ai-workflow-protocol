@@ -119,13 +119,25 @@ func dispatch(req rpcRequest, repoRoot, version string) rpcResponse {
 	case "initialize":
 		return rpcResponse{Result: map[string]any{
 			"protocolVersion": "2024-11-05",
-			"capabilities":    map[string]any{"tools": map[string]any{}},
-			"serverInfo":      map[string]any{"name": "hawp", "version": version},
+			"capabilities": map[string]any{
+				"tools":     map[string]any{},
+				"resources": map[string]any{},
+				"prompts":   map[string]any{},
+			},
+			"serverInfo": map[string]any{"name": "hawp", "version": version},
 		}}
 	case "tools/list":
 		return rpcResponse{Result: map[string]any{"tools": toolDefs()}}
 	case "tools/call":
 		return callTool(req.Params, repoRoot)
+	case "resources/list":
+		return listResources()
+	case "resources/read":
+		return readResource(req.Params, repoRoot)
+	case "prompts/list":
+		return listPrompts()
+	case "prompts/get":
+		return getPrompt(req.Params)
 	default:
 		return rpcResponse{Error: &rpcError{
 			Code:    -32601,
