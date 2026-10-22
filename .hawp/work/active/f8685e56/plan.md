@@ -373,5 +373,6 @@ description includes the implemented search-index sync and regression tests.
 - [x] Reconstruct the selected code-branch backlog and verify both manifests
 - [x] Implement approved search-index Option A on the Librarian branch
 - [x] Create and verify two PRs targeting `main`; PR #47 and PR #46 are open
-  and mergeable. Website checks passed; code checks were pending at the last
-  check.
+  and mergeable. Website checks passed. PR #46's `quality` and
+  `validate-generated` checks passed on head `b0f048f2` before this
+  status-only work-record update.
