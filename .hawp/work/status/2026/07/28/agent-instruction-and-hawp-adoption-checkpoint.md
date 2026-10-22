@@ -3,7 +3,7 @@
 - **Event date:** 2026-07-28
 - **Archive date:** 2026-09-28
 - **Canonical project:** Human-AI Workflow Protocol (HAWP)
-- **Related projects:** `mode40/mast_infrastructure`, Sunshine Medical Clinic repository
+- **Related projects:** a private infrastructure repository, a client clinic repository
 - **Evidence basis:** archived conversation context, prior HAWP continuity records, and current `sentzunhat/human-ai-workflow-protocol` repository structure
 
 ## What changed
@@ -48,8 +48,8 @@ Reusable digital-agent instructions were created and refined for the following w
    - Consolidated installation guidance for Claude Code, Codex, Continue, Cursor, and GitHub/Copilot.
    - Requires preserving existing project instructions and reconciling the shared `AGENTS.md` surface used by Codex and Cursor.
    - Establishes `sentzunhat/human-ai-workflow-protocol@main` as the HAWP source.
-   - Establishes `mode40/mast_infrastructure@development` as the mast infrastructure base and PR target; installation work must occur on a feature branch created from `origin/development`, with no direct push to the target branch.
-   - Establishes the Sunshine Medical Clinic repository's `main` branch as its base and PR target.
+   - Establishes a private infrastructure repository's `development` branch as its base and PR target; installation work must occur on a feature branch created from `origin/development`, with no direct push to the target branch.
+   - Establishes the client clinic repository's `main` branch as its base and PR target.
    - Adds clinic-specific protections: patient information, PHI, credentials, and production data must not be copied into HAWP records, prompts, commits, or PR evidence.
 
 ### After
@@ -73,8 +73,8 @@ Reusable digital-agent instructions were created and refined for the following w
 
 - Source protocol: `sentzunhat/human-ai-workflow-protocol@main`.
 - Provider set: Claude Code, Codex, Continue, Cursor, GitHub/Copilot.
-- Mast infrastructure target: base and PR target `development`; work on a feature branch from `origin/development`.
-- Sunshine Medical Clinic target: base and PR target `main`; work on a feature branch from `origin/main`.
+- Private infrastructure target: base and PR target `development`; work on a feature branch from `origin/development`.
+- Client clinic target: base and PR target `main`; work on a feature branch from `origin/main`.
 - Terraform review, MES-2806 follow-up, weekly-hours reconstruction, and infrastructure portfolio analysis each have a defined agent workflow.
 - Actual installation and repository-specific verification remain unresolved.
 
@@ -84,7 +84,7 @@ Validate HAWP all-provider installation in one target repository end to end befo
 
 ### Next actions
 
-1. Confirm the exact Sunshine Medical Clinic repository identity before any repository mutation.
+1. Confirm the exact client clinic repository identity before any repository mutation.
 2. Re-read current HAWP `main` installation/provider documentation; do not rely on the July prompt if `main` has changed.
 3. Inspect target repository status, branch protections, existing agent instruction files, and local conventions.
 4. Create a feature branch from the correct target base.
@@ -96,7 +96,7 @@ Validate HAWP all-provider installation in one target repository end to end befo
 
 ### Blockers and unresolved questions
 
-- The exact Sunshine Medical Clinic repository name was not preserved in the archived conversation context.
+- The exact client clinic repository name was not preserved in the archived conversation context.
 - It is unverified whether either target repository already contains a partial or newer HAWP installation.
 - HAWP `main` may have evolved since the July instructions; current installer/provider behavior must be re-verified.
 - The original reusable instruction files were conversation artifacts; their durable repository location was not established by this conversation.
@@ -104,8 +104,8 @@ Validate HAWP all-provider installation in one target repository end to end befo
 ### Decisions not to revisit without new evidence
 
 - HAWP source is `main`.
-- Mast infrastructure base/PR target is `development`, not HAWP's branch and not `mast_infrastructure/main`.
-- Sunshine Medical Clinic base/PR target is `main`.
+- Private infrastructure base/PR target is `development`, not HAWP's branch and not its `main`.
+- Client clinic base/PR target is `main`.
 - Investigation workflows remain read-only unless the user separately authorizes mutation.
 - A green check or merged PR is not evidence that Terraform was safely applied or operationally verified.
 

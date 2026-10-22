@@ -22,25 +22,26 @@ Active coordination index for open work. Closed history is archived under `.hawp
 
 ## Active Work
 
-All v0.1.0 gates passed; feature branch
-`feature/v0.0.24-work-folder-normalization` is near PR-ready after the selected
-`v0.0.24` MCP intake cutoff is verified.
+Active work includes structured MCP validation response design, repository-
+scoped MCP resources, reusable MCP prompts, intake elicitation follow-up, and
+usage metering gaps. Provider/distribution propagation is active documentation work;
+client-specific resource/prompt claims remain bounded by vendor documentation
+and are still subject to live HAWP client verification.
 
-Release-scope note:
+Release-scope history:
 [`v0.0.24` cutoff and `v0.0.25` MCP lane](status/2026/09/13/6059dd4b/status.md).
-
-Recommended `v0.0.24` cutoff: finish verifying `a8797f44`, including the small
-structured-result subset of `c8d9e1cb` that stayed coupled to
-`hawp_work_intake`.
-
-Recommended `v0.0.25` lane: `2eea565c`, `429e075e`, and the remaining
-elicitation/guidance work from `c8d9e1cb`.
 
 | UUID | Type | Title | Status | Owner | Plan File | Updated |
 | ---- | ---- | ----- | ------ | ----- | --------- | ------- |
-| `c8d9e1cb` | feature | Interactive MCP intake refinement with structured results (`v0.0.24` subset, remainder `v0.0.25`) | `plan-ready` | Codex | [plan](active/c8d9e1cb/plan.md) | 2026-09-13 |
-| `2eea565c` | improvement | MCP capability catalog for HAWP resources and prompts (`v0.0.25`) | `plan-ready` | Codex | [plan](active/2eea565c/plan.md) | 2026-09-13 |
-| `429e075e` | improvement | Remote MCP transport and authorization readiness audit (`v0.0.25`) | `plan-ready` | Codex | [plan](active/429e075e/plan.md) | 2026-09-13 |
+| `3cf52223` | improvement | Implement repository-scoped read-only MCP resources | in-progress | maintainer | [plan](active/3cf52223/plan.md) | 2026-10-16 |
+| `9dce1d95` | improvement | Implement reusable MCP prompts for HAWP workflows | in-progress | maintainer | [plan](active/9dce1d95/plan.md) | 2026-10-16 |
+| `3c137bad` | improvement | Propagate MCP tool groups and resource/prompt guidance through provider packs and distributions | in-progress | maintainer | [plan](active/3c137bad/plan.md) | 2026-10-16 |
+| `c8d9e1cb` | feature | Interactive MCP intake refinement with structured results | in-progress | maintainer | [plan](active/c8d9e1cb/plan.md) | 2026-10-16 |
+| `e1dc28ac` | feature | HAWP local usage metering accuracy and retention follow-up | in-progress | maintainer | [plan](active/e1dc28ac/plan.md) | 2026-10-16 |
+| `b152c56c` | improvement | Provider MCP setup and tool availability allowlists | in-progress | maintainer | [plan](active/b152c56c/plan.md) | 2026-10-16 |
+| `9c9f9bed` | improvement | Add structured output to MCP validation responses | plan-ready | maintainer | [plan](active/9c9f9bed/plan.md) | 2026-10-17 |
+| `cb096b6a` | improvement | Reconcile VS Code HAWP MCP config duplicates | plan-ready | unassigned | [plan](active/cb096b6a/plan.md) | 2026-10-21 |
+| `098c8a5c` | improvement | Create a hand-drawn HAWP LinkedIn Featured card | in-progress | unassigned | [plan](active/098c8a5c/plan.md) | 2026-10-21 |
 
 ## Blocked / Parked
 
@@ -48,7 +49,6 @@ elicitation/guidance work from `c8d9e1cb`.
 | ---------------------------- | ----------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------- | ---------- |
 | `89cf7a85`                   | improvement | v0.0.23 legacy work-item UUID canonicalization follow-up               | Older-repo safety and archive-policy follow-up; not a live `v0.0.23` blocker               | [plan](parked/89cf7a85/plan.md)                   | 2026-08-31 |
 | `release-benchmark-backfill` | planning    | Benchmark evidence gate for `v0.0.11` through `v0.0.13`                | Older patch-train backfill, intentionally kept out of the `v0.0.23` release lane           | [plan](parked/release-benchmark-backfill/plan.md) | 2026-08-31 |
-| `usage-tracking`             | feature     | `hawp usage` CLI + `hawp_usage` MCP tool for token/wall-clock metering | Scope too large for v0.0.11; belongs at v0.1.0 token-reduction gate                        | [plan](parked/usage-tracking/plan.md)             | 2026-08-25 |
 | `bee15107`                   | improvement | Defer CLI participant adapters for Codex, Claude, and GitHub           | Not needed yet; provider packs are enough                                                  | [plan](parked/bee15107/plan.md)                   | 2026-07-06 |
 | `v010-3-3a`                  | feature     | ONNX LLM Text2Text models (FLAN-T5-small)                              | Plan ready (FLAN-T5-small feasible via ONNX); deferred per incremental-only patch strategy | [detail](parked/v010-3-3a/plan.md)                | 2026-08-24 |
 | `v010-3-2c`                  | feature     | OpenAI Embeddings (text-embedding-3-small/large)                       | Cloud-API tracks parked; see incremental-only strategy                                     | [detail](parked/v010-3-2c/plan.md)                | 2026-07-27 |
@@ -56,6 +56,11 @@ elicitation/guidance work from `c8d9e1cb`.
 | `v010-3-2d`                  | feature     | Anthropic Embeddings Stub                                              | Cloud-API tracks parked; see incremental-only strategy                                     | [detail](parked/v010-3-2d/plan.md)                | 2026-07-27 |
 | `v010-3-3d`                  | feature     | Anthropic LLM (claude-3-sonnet, claude-3-opus)                         | Cloud-API tracks parked; see incremental-only strategy                                     | [detail](parked/v010-3-3d/plan.md)                | 2026-07-27 |
 | `v010-cost`                  | feature     | Cost Tracking + Rate Limiting (cross-cutting for cloud backends)       | Cloud-API tracks parked; see incremental-only strategy                                     | [detail](parked/v010-cost/plan.md)                | 2026-07-27 |
+| `7394f90c` | improvement | Parallel coordination with isolated `.hawp/.space/` worktree lanes | Paused for immediate HAWP tool-first usage audit; resume after audit plan review | [plan](parked/7394f90c/plan.md) | 2026-10-15 |
+| `96c45719` | improvement | Unify HAWP's pentagon brand mark across the website | Website paused; resume after audit plan review, first in website sequence | [plan](parked/96c45719/plan.md) | 2026-10-15 |
+| `1607037f` | improvement | Give the homepage protocol cables electric, physics-led motion | Website paused; resume after audit plan review and after pentagon item `96c45719` | [plan](parked/1607037f/plan.md) | 2026-10-15 |
+| `b4300599` | feature | Add privacy-first Google Analytics to the HAWP website | Website paused; resume after audit plan review | [plan](parked/b4300599/plan.md) | 2026-10-15 |
+| `70d8112f` | improvement | Audit GitHub Copilot provider install against current VS Code MCP changes | Waiting for config reconciliation item `cb096b6a`; coordinate code overlap with active item `b152c56c` | [plan](parked/70d8112f/plan.md) | 2026-10-21 |
 
 ---
 
@@ -65,18 +70,16 @@ Limited to the last 5–10 items.
 
 | ID                            | Type        | Title                                                                   | Closed     | Detail                                                        |
 | ----------------------------- | ----------- | ----------------------------------------------------------------------- | ---------- | ------------------------------------------------------------- |
+| `e4240a2f` | improvement | Compact BACKLOG.md and archive closed work. | 2026-10-20 | [plan](closed/2026/10/20/e4240a2f/plan.md) |
+| `81d6a35c` | improvement | Consolidating copied agent definitions into the current agent set | 2026-10-20 | [plan](closed/2026/10/20/81d6a35c/plan.md) |
 | `348526a0` | fix | Make v0.0.24 release tagging retry-safe | 2026-10-01 | [plan](closed/2026/10/01/348526a0/plan.md) |
 | `d605db54` | release | Prepare v0.0.24 release without a tracked binary | 2026-09-30 | [plan](closed/2026/09/30/d605db54/plan.md) |
 | `a91cfdbe` | improvement | Restore coordination and harness guidance to the canonical kit | 2026-09-30 | [plan](closed/2026/09/30/a91cfdbe-5a15-4475-b588-ea82d3bec588/plan.md) |
 | `c9e2225a` | bug | Close root ancestry gaps across MCP and filesystem guards | 2026-09-29 | [plan](closed/2026/09/29/c9e2225a/plan.md) |
-| `0fdd9893` | bug | Fix PR 41 context and SQLite review findings | 2026-09-29 | [plan](closed/2026/09/29/0fdd9893/plan.md) |
-| `f5b2c7d1` | fix | Reject symlinked work trees before normalization traversal | 2026-09-25 | [plan](closed/2026/09/25/f5b2c7d1/plan.md) |
-| `a406816d` | bug | Reject symlinked `.hawp` root in install/update shell scripts | 2026-09-25 | [plan](closed/2026/09/25/a406816d/plan.md) |
-| `73bd501c` | fix | Apply MCP configuration preflight before public wrapper writes | 2026-09-25 | [plan](closed/2026/09/25/73bd501c/plan.md) |
-| `2da1adfc` | fix | Guard index corpus roots before build traversal | 2026-09-25 | [plan](closed/2026/09/25/2da1adfc/plan.md) |
-| `d48e1035` | fix | Guard provider materializer output paths | 2026-09-25 | [plan](closed/2026/09/25/d48e1035/plan.md) |
-| `cd4691d7` | bug | Reject symlink ancestors in kitsync repository writes | 2026-09-25 | [plan](closed/2026/09/25/cd4691d7/plan.md) |
-| `984f038a` | bug | Reject Markdown symlinks in `links clean --apply` | 2026-09-25 | [plan](closed/2026/09/25/984f038a/plan.md) |
+| `c147f2ae` | improvement | Audit HAWP tool-first usage, availability, and fallback behavior | 2026-10-16 | [plan](closed/2026/10/16/c147f2ae/plan.md) |
+| `2eea565c` | improvement | MCP capability catalog for HAWP tools, resources, prompts, and workflows | 2026-10-17 | [plan](closed/2026/10/17/2eea565c/plan.md) |
+| `1673de65` | improvement | Design and prioritize improved HAWP MCP tools | 2026-10-17 | [plan](closed/2026/10/17/1673de65/plan.md) |
+| `429e075e` | improvement | Remote MCP transport and authorization readiness audit | 2026-10-16 | [plan](closed/2026/10/16/429e075e/plan.md) |
 ---
 
 ## Archive
@@ -85,6 +88,19 @@ Limited to the last 5–10 items.
 - Status reports: `status/`
 - Evidence: `evidence/`
 - Decisions: `decisions/`
+
+### Archived Recently-Closed (compacted 2026-10-20)
+
+| ID | Type | Title | Closed | Detail |
+| -- | ---- | ----- | ------ | ------ |
+| `0fdd9893` | bug | Fix PR 41 context and SQLite review findings | 2026-09-29 | [plan](closed/2026/09/29/0fdd9893/plan.md) |
+| `f5b2c7d1` | fix | Reject symlinked work trees before normalization traversal | 2026-09-25 | [plan](closed/2026/09/25/f5b2c7d1/plan.md) |
+| `a406816d` | bug | Reject symlinked `.hawp` root in install/update shell scripts | 2026-09-25 | [plan](closed/2026/09/25/a406816d/plan.md) |
+| `73bd501c` | fix | Apply MCP configuration preflight before public wrapper writes | 2026-09-25 | [plan](closed/2026/09/25/73bd501c/plan.md) |
+| `2da1adfc` | fix | Guard index corpus roots before build traversal | 2026-09-25 | [plan](closed/2026/09/25/2da1adfc/plan.md) |
+| `d48e1035` | fix | Guard provider materializer output paths | 2026-09-25 | [plan](closed/2026/09/25/d48e1035/plan.md) |
+| `cd4691d7` | bug | Reject symlink ancestors in kitsync repository writes | 2026-09-25 | [plan](closed/2026/09/25/cd4691d7/plan.md) |
+| `984f038a` | bug | Reject Markdown symlinks in `links clean --apply` | 2026-09-25 | [plan](closed/2026/09/25/984f038a/plan.md) |
 
 ### Archived Recently-Closed (compacted 2026-09-29)
 

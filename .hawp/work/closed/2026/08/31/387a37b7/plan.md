@@ -133,13 +133,13 @@ shows materially negative sparse-query behavior.
 ## Verification
 
 - [x] Shared search/runtime cleanup shipped in the `0.0.23` changelog. Evidence:
-      [CHANGELOG.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/librarian/src/CHANGELOG.md)
+      [CHANGELOG.md](../../../../../../../librarian/src/CHANGELOG.md)
       `shared search execution path` and `sparse context shaping to passthrough`
 - [x] Branch-local benchmark proof is recorded. Evidence:
-      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
+      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](../../../../../evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
       shows `21%` aggregate savings and only a `-1` sparse outlier
 - [x] Source-backed validation is green. Evidence:
-      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
+      [.hawp/work/evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md](../../../../../evidence/2026/08/31/c804eec0-v0-0-23-benchmark-rerun.md)
       records `hawp check` and `work validate` pass results
 
 ## Close Checklist

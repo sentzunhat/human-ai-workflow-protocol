@@ -135,15 +135,15 @@ implies that `librarian/scripts/hawp/` is the primary path.
 ## Verification
 
 - [x] `librarian/src/README.md` already marks the workflow command set as ported
-      to Go. Evidence: [README.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/librarian/src/README.md)
+      to Go. Evidence: [README.md](../../../../../../../librarian/src/README.md)
       command matrix shows `uuid`, `links check`, `kit/work validate`,
       `kit/work normalize`, and `check` as available via Go
 - [x] `librarian/scripts/README.md` now labels `librarian/scripts/hawp/` as a
       deprecated legacy implementation surface. Evidence:
-      [README.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/librarian/scripts/README.md)
+      [README.md](../../../../../../../librarian/scripts/README.md)
       documents Go ownership for user-facing workflow commands
 - [x] `librarian/src/CHANGELOG.md` records the v0.0.23 TypeScript deprecation
-      checkpoint. Evidence: [CHANGELOG.md](/Users/beltrd/Desktop/projects/sentzunhat/human-ai-workflow-protocol/librarian/src/CHANGELOG.md)
+      checkpoint. Evidence: [CHANGELOG.md](../../../../../../../librarian/src/CHANGELOG.md)
       includes the TS script deprecation note under `0.0.23`
 
 ## Close Checklist

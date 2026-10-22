@@ -59,7 +59,8 @@ func vscodeServerEntry(repoRoot string) map[string]any {
 // fields are upgraded; JSON provider-specific settings are preserved.
 //
 // File-writing providers: claude (.mcp.json), cursor (.cursor/mcp.json),
-// codex (.codex/config.toml), and github (.vscode/mcp.json).
+// codex (.codex/config.toml), and github (.vscode/mcp.json plus a generated
+// .github/agents/hawp.agent.md tool allowlist).
 // Continue prints a manual config block because its working config is the
 // user-scoped ~/.continue/config.yaml file.
 // WriteProviderConfigs validates and writes provider configs for each named provider.
@@ -143,9 +144,14 @@ func writeProviderConfigs(repoRoot string, providers []string) error {
 			if err := writeServerJSON(filepath.Join(dir, "mcp.json"), vscodeServerEntry(repoRoot), "servers"); err != nil {
 				return wrapErr("github", err)
 			}
+			agentPath := filepath.Join(repoRoot, ".github", "agents", "hawp.agent.md")
+			if err := writeGitHubCopilotAgent(repoRoot, agentPath); err != nil {
+				return wrapErr("github", err)
+			}
 			written = append(written, "github")
 			fmt.Println("MCP: wrote .vscode/mcp.json (GitHub/Copilot)")
-			fmt.Println("  Open the VS Code MCP panel and enable the workspace server.")
+			fmt.Println("MCP: wrote .github/agents/hawp.agent.md with the seven HAWP tools")
+			fmt.Println("  Select the HAWP agent in Copilot; approve tool calls when prompted.")
 
 		case "codex":
 			if err := ensureGitignoreEntry(repoRoot, ".codex/config.toml"); err != nil {
