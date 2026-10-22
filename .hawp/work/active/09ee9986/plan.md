@@ -364,3 +364,7 @@ still reports 2 work issues and 1 warning, plus the known missing links to
 from the passing code-branch check. Keep this item in progress until the code
 is deployed/restarted and the approved local-index recovery path is run or
 explicitly deferred.
+
+The implementation was committed and pushed on `feature/mcp-providers` as
+`a35dd925a04c397e0a8ce363b3066e7a1edc085b`. The persistent local index
+remains untouched, so live search verification is still pending.

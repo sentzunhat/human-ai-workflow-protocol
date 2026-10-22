@@ -273,15 +273,18 @@ unrelated closed history, parked website work, and records not selected above.
 - `core/providers/shared/behaviors/hawp-core.md` — code PR source of truth for
   provider overlays.
 
-## Pre-commit Status
+## Commit and Push Results
 
-The manifest and plan guided creation of the two local worktrees and
-population of their selected paths. The approved search-index Option A is
-implemented on the code branch and adds the eight paths listed above. The
-user has authorized committing and pushing these two new branches. The
-existing `feature/website` reference checkout remains out of scope; its
-unrelated dirty files are preserved. No files were moved within that
-checkout.
+The 39 website paths were committed on `feature/website-improvements` as
+`f27855b08f0c11d388a22f1700bc124f751a672c` and pushed to
+`origin/feature/website-improvements`. The 76 code paths, including the eight
+search-index Option A paths, were committed on `feature/mcp-providers` as
+`a35dd925a04c397e0a8ce363b3066e7a1edc085b` and pushed to
+`origin/feature/mcp-providers`. Both remote refs matched their local commits
+after push.
+
+The existing `feature/website` checkout remains out of scope and unchanged;
+its pre-existing dirty files are preserved. No PRs were opened.
 
 ## Verification Notes
 

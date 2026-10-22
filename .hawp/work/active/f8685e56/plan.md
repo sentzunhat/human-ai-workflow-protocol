@@ -240,8 +240,10 @@ the selected website paths and the branch-specific workflow update. The
 Librarian worktree contains the selected provider/MCP paths and the current
 code-side working-tree changes, including the minimal selected backlog
 delta. The approved search-index Option A is implemented there; the existing
-`feature/website` branch remains the reference. No changes have been staged,
-committed, pushed, or opened as PRs.
+`feature/website` branch remains the reference. At the initial branch-
+preparation checkpoint, no changes had been staged, committed, pushed, or
+opened as PRs; that state was superseded by the user's later commit/push
+authorization and the verified publication below.
 
 **Implementation coordination:** The approved search/index item `09ee9986`
 is implemented and tested on `feature/mcp-providers`; the persistent local
@@ -282,11 +284,10 @@ index was not modified. PR creation remains pending.
 - At the branch-preparation checkpoint, no files were staged or committed;
   neither branch had been pushed and no PR had been created.
 
-**Next:** The branch split is prepared locally, and the approved `09ee9986`
-Option A implementation on `feature/mcp-providers` is complete. The user has
-now authorized committing and pushing both new branches while preserving
-`feature/website`. Keep the unverified live client checks and VS Code
-migration decision separate. PR creation remains pending.
+**Next:** The two prepared branches have been committed and pushed while
+preserving `feature/website`. The approved `09ee9986` Option A implementation
+is included in `feature/mcp-providers`. Keep the unverified live client
+checks and VS Code migration decision separate. PR creation remains pending.
 
 ### Search-index Option A validation (2026-10-22)
 
@@ -298,7 +299,28 @@ migration decision separate. PR creation remains pending.
 - The separate read-only `hawp/hawp_work_validate` call against the original
   checkout still reports 2 work issues, 1 warning, and the known links to
   `active/2eea565c/plan.md` and `active/429e075e/plan.md`.
-- No local index rebuild, staging, commit, push, or PR creation was performed.
+- No local index rebuild was performed.
+
+### Commit and push result (2026-10-22)
+
+- `feature/website-improvements` was committed as
+  `f27855b08f0c11d388a22f1700bc124f751a672c` and pushed to
+  `origin/feature/website-improvements`.
+- `feature/mcp-providers` was committed as
+  `a35dd925a04c397e0a8ce363b3066e7a1edc085b` and pushed to
+  `origin/feature/mcp-providers`.
+- Both remote refs matched their local commits after push. The existing
+  `feature/website` local and remote refs remain at
+  `e2237b480c01e3707d618685e4f8e6f913d5a263`; its dirty worktree was not
+  changed.
+- No PRs were opened. The code-branch worktree is clean after publication.
+- After updating these records, `cd librarian/src && go run ./cmd/hawp check`
+  passed all 3 validations with 0 issues, 0 warnings, and 147 valid Markdown
+  files.
+- The MCP tool `hawp/hawp_work_validate` ran against the original checkout;
+  its check reported 2 work issues and 1 warning, with broken backlog links
+  to `active/2eea565c/plan.md` and `active/429e075e/plan.md`. The separate
+  code-branch validation passed.
 
 ### Proposed PR summaries
 
@@ -314,8 +336,8 @@ Librarian PR summary only after Option A is implemented and verified.
 1. [x] Preserve `feature/website` and create isolated worktrees from
    `origin/main`; verify each branch starts at the recorded main SHA.
 2. [x] Apply only the paths listed as owned in `files.md`; compare the exact
-   worktree path sets and confirm no overlap. The `origin/main...HEAD` diff
-   remains empty until commits are authorized.
+   worktree and committed path sets and confirm no overlap. The 39 website
+   paths and 76 code paths match the manifest.
 3. [x] Run the website checks/build after confirming generated output was
    absent; the resulting build output remains ignored.
 4. [x] Run Go tests, provider/distribution sync, and HAWP validation on the

@@ -74,7 +74,8 @@ the persistent local index was not rebuilt or modified.
   ambiguous. No new issue was reported for `09ee9986`.
 - The HAWP link check found the same two missing active-plan links in
   `.hawp/work/BACKLOG.md`.
-- `git diff --check` passed. No files were staged or committed.
+- `git diff --check` passed at this investigation checkpoint; branch commits
+  and pushes were not yet authorized.
 
 ## Search-index implementation and verification (2026-10-22)
 
@@ -104,6 +105,9 @@ the persistent local index was not rebuilt or modified.
   canonical code-branch validation passed: `go test ./...`, distribution
   sync (0/40 files changed), and `hawp check` (3/3 checks, 0 work issues or
   warnings, 147 Markdown links valid).
-- No changes were staged or committed. Live search against a restarted MCP
-  server and a rebuilt local index remains unverified and is intentionally
-  deferred.
+- The implementation was committed and pushed on `feature/mcp-providers` as
+  `a35dd925a04c397e0a8ce363b3066e7a1edc085b`. The website branch was also
+  committed and pushed; details are in
+  [`.hawp/work/active/f8685e56/plan.md`](../../../../../active/f8685e56/plan.md).
+- No persistent local index rebuild was performed. Live search against a
+  restarted MCP server and rebuilt index remains unverified and deferred.
