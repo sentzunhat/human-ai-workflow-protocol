@@ -1,7 +1,10 @@
-import tailwindcss from '@tailwindcss/vite';
-import { sveltekit } from '@sveltejs/kit/vite';
-import { defineConfig } from 'vite';
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
 export default defineConfig({
-  plugins: [tailwindcss(), sveltekit()]
+  base: './',
+  plugins: [react(), tailwindcss()],
+  publicDir: "static",
+  build: { outDir: "build", emptyOutDir: true },
 });

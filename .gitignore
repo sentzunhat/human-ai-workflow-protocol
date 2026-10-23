@@ -10,6 +10,8 @@ dist/
 
 # Node.js artifacts
 node_modules/
+website/build/
+website/server-dist/
 librarian/node_modules/
 librarian/build-bin/
 librarian/build-src-esm/

@@ -4,10 +4,9 @@ Static marketing and documentation entry point for `hawp.online`.
 
 ## Stack
 
-- SvelteKit with static adapter
-- Svelte 5 + TypeScript (strict)
+- React 19 + TypeScript (strict)
 - Tailwind CSS 4 through the Vite plugin
-- Full prerendering with a tiny hydrated theme control: the production site is static HTML/CSS/JS and requires no application server
+- React server rendering writes the homepage into the static HTML during the build; the production site is static HTML/CSS/JS and requires no application server
 
 ## Commands
 
@@ -22,7 +21,7 @@ npm run dev
 
 `.github/workflows/website.yml` builds `website/` and deploys `website/build` to GitHub Pages after changes reach `main`. The custom domain is `hawp.online`.
 
-After the workflow is merged and Pages is enabled, set the repository Pages custom domain to `hawp.online` and point the domain's apex DNS records at GitHub Pages. Enable **Enforce HTTPS** after GitHub validates the domain.
+GitHub Pages is configured to use **GitHub Actions**. After PR #47 is merged, confirm the first Pages deployment succeeds. GitHub Actions ignores a repository `CNAME` file, so set `hawp.online` in the repository Pages settings after verifying domain ownership. Then point the apex and `www` DNS records to GitHub Pages and enable **Enforce HTTPS** after GitHub validates the domain.
 
 ## SEO and AI discovery
 
@@ -48,8 +47,8 @@ The first release intentionally stays one page. Future `/docs`, `/mcp`, and
 
 The site supports **Light**, **Dark**, and **System** preferences. The choice
 is stored locally, System follows the OS color scheme live, and the initial
-theme is applied in `app.html` before hydration to avoid a flash of the wrong
-palette.
+theme is applied by a small inline script before React loads to avoid a flash of
+the wrong palette.
 
 ## Analytics baseline
 

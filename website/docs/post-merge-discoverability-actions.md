@@ -9,10 +9,11 @@ external-state changes, so they cannot be proven by the website build alone.
 ## Why these actions are deferred
 
 The website branch can ship the public HTML, metadata, crawl instructions, and
-static assets. It cannot change GitHub repository settings, enable Pages for
-`main`, configure DNS, or submit the site to search engines. Those actions
-should be performed as one post-merge launch step so the discoverability
-baseline has a clear boundary.
+static assets. The repository Pages source is configured for GitHub Actions.
+For this deployment mode, a `CNAME` file is ignored; configure the custom
+domain through repository Pages settings after verifying domain ownership.
+DNS, HTTPS validation, and search engine submissions remain external launch
+steps. Keep those separate from build evidence.
 
 ## GitHub repository settings to apply after merge
 
