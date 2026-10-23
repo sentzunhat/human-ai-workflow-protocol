@@ -74,6 +74,10 @@ duplicating the earlier checkpoint protocol record.
   and `validate-generated` checks passed on head
   `b81ad060f9a61c65899f78c14e79313b6514fd7a` before this checkpoint-only
   update.
+- This checkpoint and its split-plan, manifest, and backlog updates were
+  committed and pushed on `feature/mcp-providers` as
+  `59907e715b4624b2a6fa975d605e120370a9d17f`. Both PR checks passed on that
+  pushed head.
 - PR #47's website build check passed; its deploy check was skipped as
   expected for a pull request.
 - Website `npm run check` and `npm run build` passed. The full Go test suite,
@@ -95,8 +99,6 @@ duplicating the earlier checkpoint protocol record.
   against a restarted server using the new code remains unverified.
 - The actual selected-agent Tools list, VS Code approval behavior, and MCP
   migration-preview effect remain unverified.
-- PR checks on any new documentation-only commit must be checked at that
-  commit's head; the passing results above apply to the recorded PR heads.
 
 ### Strategic Impact
 
