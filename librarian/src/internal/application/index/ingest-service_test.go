@@ -130,3 +130,72 @@ func TestExecuteReingestWithFewerChunksRemovesStaleOnes(t *testing.T) {
 		t.Errorf("chunks table has %d rows after shrinking re-ingest, want 1 (stale chunks should be removed)", chunkCount)
 	}
 }
+
+func TestExecutePreservesDocumentsOutsidePartialCorpus(t *testing.T) {
+	dbPath := filepath.Join(t.TempDir(), "index.sqlite")
+	svc := NewIngestService(dbPath)
+
+	for _, path := range []string{"/repo/first.md", "/repo/second.md"} {
+		corpus := &EnrichedCorpus{
+			Documents: []EnrichedDocument{{
+				Path:       path,
+				Type:       "guide",
+				Category:   "kit",
+				FolderRole: "kit",
+				Content:    "partial ingest keeps unrelated documents",
+			}},
+		}
+		if _, err := svc.Execute(corpus); err != nil {
+			t.Fatalf("Execute(%q) error = %v", path, err)
+		}
+	}
+
+	db, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		t.Fatalf("open db for verification: %v", err)
+	}
+	defer db.Close()
+
+	var documentCount int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM documents`).Scan(&documentCount); err != nil {
+		t.Fatalf("count documents: %v", err)
+	}
+	if documentCount != 2 {
+		t.Fatalf("documents = %d, want 2 after partial ingests", documentCount)
+	}
+}
+
+func TestSyncRejectsEmptyCorpusWithoutDeletingExistingDocuments(t *testing.T) {
+	dbPath := filepath.Join(t.TempDir(), "index.sqlite")
+	svc := NewIngestService(dbPath)
+	corpus := &EnrichedCorpus{
+		Documents: []EnrichedDocument{{
+			Path:       "/repo/kept.md",
+			Type:       "guide",
+			Category:   "kit",
+			FolderRole: "kit",
+			Content:    "kept after rejected empty sync",
+		}},
+	}
+	if _, err := svc.Execute(corpus); err != nil {
+		t.Fatalf("Execute() error = %v", err)
+	}
+
+	if _, err := svc.Sync(&EnrichedCorpus{}); err == nil {
+		t.Fatal("Sync() accepted an empty corpus")
+	}
+
+	db, err := sql.Open("sqlite", dbPath)
+	if err != nil {
+		t.Fatalf("open db for verification: %v", err)
+	}
+	defer db.Close()
+
+	var documentCount int
+	if err := db.QueryRow(`SELECT COUNT(*) FROM documents`).Scan(&documentCount); err != nil {
+		t.Fatalf("count documents: %v", err)
+	}
+	if documentCount != 1 {
+		t.Fatalf("documents = %d after empty sync, want 1", documentCount)
+	}
+}

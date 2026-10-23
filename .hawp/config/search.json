@@ -3,6 +3,8 @@
     "paths": [
       ".hawp/kit",
       ".hawp/work",
+      "core/.hawp",
+      "core/providers",
       "librarian/docs",
       "README.md"
     ]

@@ -23,6 +23,11 @@ Treat this run as a new execution work item for the current repository.
 
 Provider-specific execution proof and optional guide-fetch helpers are in the **Install Contract** section above the branch steps.
 
+After install, see `.hawp/kit/usage/mcp/README.md` for HAWP tool groups,
+resource/prompt availability, and the manual workflow when a client does not
+surface those capabilities. Client UI support varies; do not infer it from the
+server protocol version or an SDK feature list.
+
 ## When to Install
 
 Install when you want HAWP kit plus agent overlays in a repository that does not have `.hawp/` yet (or you are re-running install intentionally).

@@ -70,6 +70,27 @@ func preflightProviderConfigs(root string, names []string) error {
 		default:
 			continue
 		}
+		if name == "github" {
+			agentPath := filepath.Join(root, ".github", "agents", "hawp.agent.md")
+			if err := filesystem.RejectSymlinkAncestors(root, agentPath); err != nil {
+				return fmt.Errorf("unsafe Copilot agent path %s: %w", agentPath, err)
+			}
+			info, err := os.Lstat(agentPath)
+			if err == nil {
+				if !info.Mode().IsRegular() {
+					return fmt.Errorf("refusing non-regular Copilot agent file: %s", agentPath)
+				}
+				data, readErr := os.ReadFile(agentPath)
+				if readErr != nil {
+					return readErr
+				}
+				if !strings.Contains(string(data), hawpAgentMarker) {
+					return fmt.Errorf("Copilot agent already exists and is not HAWP-managed: %s", agentPath)
+				}
+			} else if !os.IsNotExist(err) {
+				return err
+			}
+		}
 		if err := filesystem.RejectSymlinkAncestors(root, path); err != nil {
 			return fmt.Errorf("unsafe configuration %s: %w", path, err)
 		}

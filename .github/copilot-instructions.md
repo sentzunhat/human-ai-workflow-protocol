@@ -27,7 +27,7 @@ Use .hawp/kit/usage/status-report.md when the user asks for a:
 - context transfer summary
 - second-brain review artifact
 
-Use .github/prompts/hawp-change-review-and-reference-sync.prompt.md when the user asks to review recent changes and synchronize HAWP/docs references.
+Use .github/skills/hawp-change-review-and-reference-sync/SKILL.md when the user asks to review recent changes and synchronize HAWP/docs references.
 
 Saved status reports belong in:
 
@@ -102,6 +102,12 @@ go run ./cmd/hawp work validate
 go run ./cmd/hawp work normalize --dry-run --validate
 go run ./cmd/hawp check
 ```
+
+## HAWP Validation Result Reporting
+
+- Report the aggregate status from `hawp check` or the validation tool separately from individual subchecks.
+- If any required check fails, do not label the overall result `PASS`, even when another subcheck passes.
+- List warnings and errors alongside the relevant check, and avoid contradictory `PASS`/`FAIL` summaries.
 
 ## Agent Discipline
 

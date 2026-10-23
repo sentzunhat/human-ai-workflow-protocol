@@ -10,8 +10,10 @@ Recorded 2026-09-06 from HAWP source, configuration tests, and local MCP calls.
 - `init` provisions assets and syncs kit/provider files. It is not a lightweight
   MCP-only command. A later asset failure can coexist with an already-written
   provider config; examine both the error and resulting files.
-- Codex and Claude config writers exist. GitHub currently prints manual MCP
-  setup advice only. Provider instruction overlays are not MCP connections.
+- HAWP writes local MCP configs for Claude, Cursor, Codex, and VS Code GitHub
+  Copilot. Continue remains a printed user-scoped setup block. GitHub Copilot
+  setup also generates a HAWP custom agent with an explicit tool list.
+  Provider instruction overlays are not MCP connections.
 - Preserve custom environment, timeout, policy, and unrelated server settings.
   JSON and explicit Codex TOML table migrations have preservation tests. Codex
   migration uses parsed source ranges rather than replacing the whole table;
@@ -19,7 +21,8 @@ Recorded 2026-09-06 from HAWP source, configuration tests, and local MCP calls.
 - Do not reuse one provider's JSON wrapper key indiscriminately: Claude uses
   `mcpServers`; VS Code workspace MCP configuration uses `servers`.
 - Trust and approval remain user decisions. Do not bypass them to make a
-  connection test pass.
+  connection test pass. Treat tool availability allowlists separately from
+  permission rules that auto-approve selected calls.
 - Local in-place executable replacement produced exit 137 during maintenance.
   Temporary-file replacement restored execution. The Makefile and CI now share
   that install path; the precise OS-level cause was not established.

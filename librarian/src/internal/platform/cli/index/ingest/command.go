@@ -47,9 +47,9 @@ func Run(cwd string) error {
 	}
 
 	service := appindex.NewIngestService(dbPath)
-	result, err := service.Execute(corpus)
+	result, err := service.Sync(corpus)
 	if err != nil {
-		return fmt.Errorf("ingest search index: %w", err)
+		return fmt.Errorf("sync search index: %w", err)
 	}
 
 	fmt.Print(result.String())

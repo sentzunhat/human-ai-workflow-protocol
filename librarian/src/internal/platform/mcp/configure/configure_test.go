@@ -41,6 +41,45 @@ func TestConfigureFreshAndRepeat(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(root, ".hawp/kit")); !os.IsNotExist(err) {
 		t.Fatal("created kit")
 	}
+	agent, err := os.ReadFile(filepath.Join(root, ".github/agents/hawp.agent.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	agentText := string(agent)
+	frontmatterEnd := strings.Index(agentText, "\n---\n")
+	toolsStart := strings.Index(agentText, "tools:\n")
+	if toolsStart < 0 || frontmatterEnd <= toolsStart {
+		t.Fatalf("Copilot agent has no valid tools frontmatter:\n%s", agentText)
+	}
+	var actualTools []string
+	for _, line := range strings.Split(agentText[toolsStart+len("tools:\n"):frontmatterEnd], "\n") {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		if !strings.HasPrefix(line, "- ") {
+			t.Fatalf("unexpected Copilot tool entry %q", line)
+		}
+		actualTools = append(actualTools, strings.TrimPrefix(line, "- "))
+	}
+	expectedTools := append(append([]string{}, hawpCopilotWorkspaceTools...), hawpCopilotTools...)
+	if len(actualTools) != len(expectedTools) {
+		t.Fatalf("Copilot tools = %v, want exactly %v", actualTools, expectedTools)
+	}
+	for i := range expectedTools {
+		if actualTools[i] != expectedTools[i] {
+			t.Fatalf("Copilot tools = %v, want exactly %v", actualTools, expectedTools)
+		}
+	}
+	if strings.Contains(string(agent), "hawp/*") || !strings.Contains(string(agent), "target: github-copilot") {
+		t.Fatalf("Copilot agent should enumerate HAWP tools and target GitHub Copilot:\n%s", agent)
+	}
+	if !strings.Contains(string(agent), "normal confirmation prompts") {
+		t.Fatalf("Copilot agent should preserve client approval prompts:\n%s", agent)
+	}
+	if !strings.Contains(string(agent), "empty results do not prove a file or work record is absent") {
+		t.Fatalf("Copilot agent should treat empty search results as inconclusive:\n%s", agent)
+	}
 	ignore, err := os.ReadFile(filepath.Join(root, ".gitignore"))
 	if err != nil {
 		t.Fatal(err)
@@ -49,6 +88,28 @@ func TestConfigureFreshAndRepeat(t *testing.T) {
 		if strings.Count(string(ignore), entry) != 1 {
 			t.Fatalf("gitignore entry %q count = %d, content:\n%s", entry, strings.Count(string(ignore), entry), ignore)
 		}
+	}
+}
+
+func TestConfigureRefusesUnmanagedCopilotAgentBeforeWrites(t *testing.T) {
+	root := configureFixture(t)
+	agentPath := filepath.Join(root, ".github", "agents", "hawp.agent.md")
+	if err := os.MkdirAll(filepath.Dir(agentPath), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	custom := []byte("---\nname: My HAWP agent\n---\nKeep this custom agent.\n")
+	if err := os.WriteFile(agentPath, custom, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := Configure(root, []string{"claude", "github"}); err == nil {
+		t.Fatal("overwrote an unmanaged Copilot agent")
+	}
+	got, err := os.ReadFile(agentPath)
+	if err != nil || string(got) != string(custom) {
+		t.Fatalf("custom Copilot agent changed: %s, %v", got, err)
+	}
+	if _, err := os.Stat(filepath.Join(root, ".mcp.json")); !os.IsNotExist(err) {
+		t.Fatalf("Claude config was written before Copilot preflight completed: %v", err)
 	}
 }
 
