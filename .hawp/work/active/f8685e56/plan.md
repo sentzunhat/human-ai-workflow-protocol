@@ -325,9 +325,15 @@ and review proceed.
 - PR #46, `Expand HAWP MCP tooling and provider setup`, is open from
   `feature/mcp-providers` to `main`:
   https://github.com/sentzunhat/human-ai-workflow-protocol/pull/46
-- At PR creation, GitHub reported both PRs mergeable. Website build checks
-  passed and deploy was skipped as expected; the code PR's `quality` and
-  `validate-generated` checks were pending.
+- On 2026-10-23, PR #47 was closed without merging at the user's request.
+  `feature/website-improvements` remains pushed at
+  `f27855b08f0c11d388a22f1700bc124f751a672c`; its branch was not deleted.
+- PR #46 remains open against `main`. GitHub reports it mergeable, and its
+  `quality` and `validate-generated` checks passed on head
+  `b81ad060f9a61c65899f78c14e79313b6514fd7a` before the checkpoint-only
+  update. The website build passed and the deploy job was skipped as expected.
+- The canonical continuation report is
+  `.hawp/work/status/2026/10/23/f8685e56/status.md`.
 - After updating these records, `cd librarian/src && go run ./cmd/hawp check`
   passed all 3 validations with 0 issues, 0 warnings, and 147 valid Markdown
   files.
@@ -338,7 +344,8 @@ and review proceed.
 
 ### Opened PR summaries
 
-- Website PR #47: `Add the HAWP website and Pages deployment`.
+- Website PR #47: `Add the HAWP website and Pages deployment` (closed without
+  merge on 2026-10-23; branch retained).
 - Librarian/MCP PR #46: `Expand HAWP MCP tooling and provider setup`.
 
 Both descriptions categorize their branch changes and list the validation
@@ -372,7 +379,9 @@ description includes the implemented search-index sync and regression tests.
 - [x] Create both isolated worktrees from `origin/main`
 - [x] Reconstruct the selected code-branch backlog and verify both manifests
 - [x] Implement approved search-index Option A on the Librarian branch
-- [x] Create and verify two PRs targeting `main`; PR #47 and PR #46 are open
-  and mergeable. Website checks passed. PR #46's `quality` and
-  `validate-generated` checks passed on head `b0f048f2` before this
-  status-only work-record update.
+- [x] Create and verify two PRs targeting `main`. PR #47 was subsequently
+  closed without merge on 2026-10-23; PR #46 remains open and mergeable.
+- [x] Record the closure, PR checks, and resume state in
+  `.hawp/work/status/2026/10/23/f8685e56/status.md`.
+- [ ] Review PR #46 and resolve review feedback; keep the website branch
+  available unless the user asks to reopen or replace PR #47.

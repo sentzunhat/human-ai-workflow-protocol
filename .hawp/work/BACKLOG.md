@@ -43,7 +43,7 @@ elicitation/guidance work from `c8d9e1cb`.
 | `429e075e` | improvement | Remote MCP transport and authorization readiness audit (`v0.0.25`) | `plan-ready` | Codex | [plan](active/429e075e/plan.md) | 2026-09-13 |
 | `b152c56c` | improvement | Provider MCP setup and tool availability allowlists | in-progress | maintainer | [plan](active/b152c56c/plan.md) | 2026-10-22 |
 | `09ee9986` | bug | Diagnose empty HAWP search and add index regression tests | in-progress | maintainer | [plan](active/09ee9986/plan.md) | 2026-10-22 |
-| `f8685e56` | task | Split the website and Librarian changes into separate main-targeted PRs | in-progress | unassigned | [plan](active/f8685e56/plan.md) | 2026-10-22 |
+| `f8685e56` | task | Split the website and Librarian changes into separate main-targeted PRs | in-progress | unassigned | [plan](active/f8685e56/plan.md) | 2026-10-23 |
 
 ## Blocked / Parked
 

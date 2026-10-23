@@ -5,7 +5,7 @@ preserve unrelated work on the existing source branch.
 
 **Work Item:** `.hawp/work/active/f8685e56/plan.md`
 
-**Last Updated:** 2026-10-22
+**Last Updated:** 2026-10-23
 
 ## Boundary and Branches
 
@@ -286,17 +286,20 @@ search-index Option A paths, were committed on `feature/mcp-providers` as
 after push. The post-push record update was committed as
 `dfb9f6f13c816d8472f59c808ea4bd7730bf58c8` and pushed before PR creation.
 
-PR #47, `Add the HAWP website and Pages deployment`, is open from
-`feature/website-improvements` to `main`:
+PR #47, `Add the HAWP website and Pages deployment`, was opened from
+`feature/website-improvements` to `main` and closed without merging on
+2026-10-23. The branch remains pushed at
+`f27855b08f0c11d388a22f1700bc124f751a672c`:
 https://github.com/sentzunhat/human-ai-workflow-protocol/pull/47
 
 PR #46, `Expand HAWP MCP tooling and provider setup`, is open from
 `feature/mcp-providers` to `main`:
 https://github.com/sentzunhat/human-ai-workflow-protocol/pull/46
 
-At PR creation, GitHub reported both PRs mergeable. Website build checks
-passed and deploy was skipped; the code PR's `quality` and
-`validate-generated` checks were pending.
+At PR creation, GitHub reported both PRs mergeable. The website build passed
+and deploy was skipped. PR #46 remains open and its `quality` and
+`validate-generated` checks passed on head
+`b81ad060f9a61c65899f78c14e79313b6514fd7a` before the checkpoint-only update.
 
 ## Verification Notes
 
