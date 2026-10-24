@@ -8,8 +8,8 @@ event-date: 2026-10-20
 
 # 2026-10-20 — Optional Work-Item Tracking Providers
 
-**Event date:** 2026-10-20  
-**Archive date:** 2026-10-22  
+**Event date:** 2026-10-20
+**Archive date:** 2026-10-22
 **State:** Architecture direction agreed in discussion; design and implementation not yet approved or completed.
 
 ## Intent
@@ -81,7 +81,7 @@ The decision changes the design target from **HAWP + one task board** to **HAWP 
 
 **Cross-project effect:** Multiple repositories may independently opt into the same adapter contract. This checkpoint is canonical to HAWP; downstream projects should reference it rather than copy its text.
 
-**Resume from:** Provider-contract design and existing-work-item discovery; no code changes yet.  
+**Resume from:** Provider-contract design and existing-work-item discovery; no code changes yet.
 **Next objective:** Approved, minimal Vikunja-first adapter plan with acceptance criteria.
 
 ## Privacy and scope

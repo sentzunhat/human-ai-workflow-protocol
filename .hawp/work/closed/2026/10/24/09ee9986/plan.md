@@ -4,6 +4,8 @@
 **UUID:** `09ee9986-5d82-4f24-a1bd-0a814eb402a0`
 **Type:** bug
 **Reported:** 2026-10-22
+**Status:** `done`
+**Closed:** 2026-10-24
 
 ---
 
@@ -234,9 +236,9 @@ starts there. Do not rebuild or modify the persistent local index.
 
 ## Backlog + Plan Link
 
-**Status now:** in-progress (Option A implementation on
-`feature/mcp-providers`)
-**Plan file:** work/active/09ee9986/plan.md
+**Status now:** done (implementation, local full sync, and live MCP search
+verified on `feature/mcp-providers`)
+**Plan file:** work/closed/2026/10/24/09ee9986/plan.md
 
 ## Next Step
 
@@ -367,4 +369,54 @@ explicitly deferred.
 
 The implementation was committed and pushed on `feature/mcp-providers` as
 `a35dd925a04c397e0a8ce363b3066e7a1edc085b`. The persistent local index
-remains untouched, so live search verification is still pending.
+remained untouched at this implementation checkpoint; it was later refreshed
+and verified as recorded below.
+
+## Final verification and closeout (2026-10-24)
+
+**Directly verified:**
+
+- Before sync, the local index passed `PRAGMA quick_check` but contained 609
+  documents and 5,109 chunks; the newest chunk timestamp was
+  `2026-10-16 14:07:02`. Connected MCP searches returned stale active paths
+  and did not find newly closed work.
+- A SQLite backup was made outside the repository before running
+  `go run ./cmd/hawp search index` from `librarian/src` on
+  `feature/mcp-providers`. The configured corpus sync completed with 758
+  documents, 5,954 chunks, and 116 work metadata rows. The rebuilt index
+  passed `PRAGMA quick_check`; its newest chunk timestamp was
+  `2026-10-24 19:19:37`.
+- Connected `hawp_search` then returned the newly closed `f8685e56` files
+  under `closed/2026/10/24/` and current content for this plan. Local CLI
+  search returned the same indexed closeout record. This confirms the
+  connected MCP process observed the refreshed local index.
+- A read-only local Ollama reshape smoke using `mistral:latest` returned the
+  expected HAWP fields and created no work item. Index synchronization is
+  deterministic and does not call Ollama.
+- `go test ./...` passed on `feature/mcp-providers`. `go run ./cmd/hawp check`
+  passed kit, work, and link checks with 0 issues and 0 warnings; links were
+  valid across 145 Markdown files.
+
+## Outcome
+
+Full-corpus sync preserves partial-ingest semantics, removes stale
+indexed paths, and the refreshed local MCP search returns current source paths.
+Implementation and local recovery are verified; no remaining work is required
+for this item.
+
+## Verification
+
+- Full Go test suite: passed.
+- Full configured-corpus index synchronization: passed; integrity check passed.
+- Connected MCP search after sync: returned current work records and source paths.
+- Combined HAWP kit/work/link validation: passed with 0 issues and warnings.
+- Local Ollama `mistral:latest` reshape smoke: passed without creating work.
+
+## Close Checklist
+
+- [x] Keep partial ingestion non-pruning and use full sync for configured corpus.
+- [x] Reject empty full sync and remove stale records transactionally.
+- [x] Verify fresh corpus, moved-path, FTS, and MCP search regressions.
+- [x] Refresh the local derived index with a retained backup and confirm live
+  MCP search sees the updated corpus.
+- [x] Validate HAWP records and links after closeout.

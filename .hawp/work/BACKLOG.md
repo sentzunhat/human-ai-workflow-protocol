@@ -41,9 +41,7 @@ elicitation/guidance work from `c8d9e1cb`.
 | `c8d9e1cb` | feature | Interactive MCP intake refinement with structured results (`v0.0.24` subset, remainder `v0.0.25`) | `plan-ready` | Codex | [plan](active/c8d9e1cb/plan.md) | 2026-09-13 |
 | `2eea565c` | improvement | MCP capability catalog for HAWP resources and prompts (`v0.0.25`) | `plan-ready` | Codex | [plan](active/2eea565c/plan.md) | 2026-09-13 |
 | `429e075e` | improvement | Remote MCP transport and authorization readiness audit (`v0.0.25`) | `plan-ready` | Codex | [plan](active/429e075e/plan.md) | 2026-09-13 |
-| `b152c56c` | improvement | Provider MCP setup and tool availability allowlists | in-progress | maintainer | [plan](active/b152c56c/plan.md) | 2026-10-22 |
-| `09ee9986` | bug | Diagnose empty HAWP search and add index regression tests | in-progress | maintainer | [plan](active/09ee9986/plan.md) | 2026-10-22 |
-| `f8685e56` | task | Split the website and Librarian changes into separate main-targeted PRs | in-progress | unassigned | [plan](active/f8685e56/plan.md) | 2026-10-23 |
+| `b152c56c` | improvement | Provider MCP setup and tool availability allowlists | in-progress | maintainer | [plan](active/b152c56c/plan.md) | 2026-10-24 |
 
 ## Blocked / Parked
 
@@ -68,6 +66,8 @@ Limited to the last 5–10 items.
 
 | ID                            | Type        | Title                                                                   | Closed     | Detail                                                        |
 | ----------------------------- | ----------- | ----------------------------------------------------------------------- | ---------- | ------------------------------------------------------------- |
+| `09ee9986` | bug | Diagnose empty HAWP search and add index regression tests | 2026-10-24 | [plan](closed/2026/10/24/09ee9986/plan.md) |
+| `f8685e56` | task | Split the website and Librarian changes into separate main-targeted PRs | 2026-10-24 | [plan](closed/2026/10/24/f8685e56/plan.md) |
 | `348526a0` | fix | Make v0.0.24 release tagging retry-safe | 2026-10-01 | [plan](closed/2026/10/01/348526a0/plan.md) |
 | `d605db54` | release | Prepare v0.0.24 release without a tracked binary | 2026-09-30 | [plan](closed/2026/09/30/d605db54/plan.md) |
 | `a91cfdbe` | improvement | Restore coordination and harness guidance to the canonical kit | 2026-09-30 | [plan](closed/2026/09/30/a91cfdbe-5a15-4475-b588-ea82d3bec588/plan.md) |
@@ -76,10 +76,6 @@ Limited to the last 5–10 items.
 | `f5b2c7d1` | fix | Reject symlinked work trees before normalization traversal | 2026-09-25 | [plan](closed/2026/09/25/f5b2c7d1/plan.md) |
 | `a406816d` | bug | Reject symlinked `.hawp` root in install/update shell scripts | 2026-09-25 | [plan](closed/2026/09/25/a406816d/plan.md) |
 | `73bd501c` | fix | Apply MCP configuration preflight before public wrapper writes | 2026-09-25 | [plan](closed/2026/09/25/73bd501c/plan.md) |
-| `2da1adfc` | fix | Guard index corpus roots before build traversal | 2026-09-25 | [plan](closed/2026/09/25/2da1adfc/plan.md) |
-| `d48e1035` | fix | Guard provider materializer output paths | 2026-09-25 | [plan](closed/2026/09/25/d48e1035/plan.md) |
-| `cd4691d7` | bug | Reject symlink ancestors in kitsync repository writes | 2026-09-25 | [plan](closed/2026/09/25/cd4691d7/plan.md) |
-| `984f038a` | bug | Reject Markdown symlinks in `links clean --apply` | 2026-09-25 | [plan](closed/2026/09/25/984f038a/plan.md) |
 ---
 
 ## Archive

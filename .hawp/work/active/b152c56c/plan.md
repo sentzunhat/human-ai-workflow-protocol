@@ -195,6 +195,35 @@ write-capable tools.
 - The migration preview for the existing `hawp` entry remains unverified.
 - No ignored MCP configuration file or downstream consumer was changed.
 
+## Manager continuation update (2026-10-24)
+
+**Directly verified:**
+
+- `codex mcp get hawp` reports the project-scoped local stdio server enabled
+  with all seven HAWP tools in `enabled_tools`.
+- `hawp_work_validate` through the connected HAWP MCP server passed kit, work,
+  and link validation with 0 issues and 0 warnings; connected search returned
+  indexed results after the local corpus sync.
+- In VS Code, the generated `HAWP` agent is present and selected in the
+  current blank Copilot chat. The workspace `hawp` server is enabled but
+  stopped; VS Code reports it cannot start before the session runtime is
+  created and a message is sent. No post-refresh Copilot MCP call or effective
+  tool list was observed in this pass.
+- VS Code's Migrations view lists ten workspace prompt-to-skill conversions
+  under `.github/prompts/`; it does not show an MCP server migration preview.
+  No migration was applied and no MCP config was changed.
+- This item's live test scope is Codex and VS Code GitHub Copilot. Claude Code
+  and Cursor receive server configuration; Continue receives a user-scoped
+  snippet. Those three are setup-supported, but outside this item's live
+  verification scope.
+
+**Remaining gate:** Complete the Copilot session runtime and observe the
+generated HAWP agent's effective tools and manual approval behavior. If this
+requires a Copilot-hosted model request, confirm it is acceptable alongside
+the local Ollama model preference. Locate the actual same-name MCP server
+migration preview if one exists; the current prompt-to-skill migration is a
+separate operation.
+
 ### Repository proof before edits
 
 ```text

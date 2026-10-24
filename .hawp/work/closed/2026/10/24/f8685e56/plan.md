@@ -4,6 +4,8 @@
 **UUID:** `f8685e56-9bfc-4272-b102-5501bcffae8e`
 **Type:** task
 **Reported:** 2026-10-22
+**Status:** `done`
+**Closed:** 2026-10-24
 
 ---
 
@@ -205,12 +207,12 @@ This planning turn invoked only read-only `hawp/hawp_search` and
 ## Backlog + Plan Link
 
 **Status now:** in-progress (branch strategy confirmed; preparing isolated branches)
-**Plan file:** work/active/f8685e56/plan.md
+**Plan file:** work/closed/2026/10/24/f8685e56/plan.md
 
 ## Split Plan for Review
 
 The exact file ownership, pending/current distinction, and do-not-touch list
-are in [files.md](files.md). Both new branches now exist as worktrees based on
+are in [files](f8685e56-archive.md). Both new branches now exist as worktrees based on
 `origin/main`; the existing `feature/website` reference branch remains
 unchanged. Selected files have been copied into the new worktrees without
 staging or committing.
@@ -325,9 +327,11 @@ and review proceed.
 - PR #46, `Expand HAWP MCP tooling and provider setup`, is open from
   `feature/mcp-providers` to `main`:
   https://github.com/sentzunhat/human-ai-workflow-protocol/pull/46
-- On 2026-10-23, PR #47 was closed without merging at the user's request.
-  `feature/website-improvements` remains pushed at
-  `f27855b08f0c11d388a22f1700bc124f751a672c`; its branch was not deleted.
+- On 2026-10-23, PR #47 was reported closed without merging. A fresh GitHub
+  check on 2026-10-24 found it open again at
+  `aa1fec6f2d215afc78785c666645420fe748c4bf`. The website branch and PR are
+  left untouched and parked for this work; this closeout does not claim the PR
+  is closed or merged.
 - PR #46 remains open against `main`. GitHub reports it mergeable, and its
   `quality` and `validate-generated` checks passed on head
   `b81ad060f9a61c65899f78c14e79313b6514fd7a` before the checkpoint-only
@@ -344,8 +348,8 @@ and review proceed.
 
 ### Opened PR summaries
 
-- Website PR #47: `Add the HAWP website and Pages deployment` (closed without
-  merge on 2026-10-23; branch retained).
+- Website PR #47: `Add the HAWP website and Pages deployment` (currently open;
+  left parked and untouched during this MCP-focused continuation).
 - Librarian/MCP PR #46: `Expand HAWP MCP tooling and provider setup`.
 
 Both descriptions categorize their branch changes and list the validation
@@ -366,8 +370,8 @@ description includes the implemented search-index sync and regression tests.
    code branch. Record the separate original-workspace link issues above.
 5. [x] Prepare the isolated branch worktrees before implementing search
    Option A.
-6. Finalize or defer provider setup claims based on the independent live
-   client checks above; do not change ignored machine-local config files.
+6. Finalize or defer provider setup claims under `b152c56c`; do not change
+   ignored machine-local config files.
 
 ## Next Step
 
@@ -379,9 +383,69 @@ description includes the implemented search-index sync and regression tests.
 - [x] Create both isolated worktrees from `origin/main`
 - [x] Reconstruct the selected code-branch backlog and verify both manifests
 - [x] Implement approved search-index Option A on the Librarian branch
-- [x] Create and verify two PRs targeting `main`. PR #47 was subsequently
-  closed without merge on 2026-10-23; PR #46 remains open and mergeable.
+- [x] Create and verify two PRs targeting `main`; current PR states and checks
+  are recorded below.
 - [x] Record the closure, PR checks, and resume state in
   `.hawp/work/status/2026/10/23/f8685e56/status.md`.
-- [ ] Review PR #46 and resolve review feedback; keep the website branch
-  available unless the user asks to reopen or replace PR #47.
+- [x] Split website and MCP/Librarian work into distinct branches and PRs.
+- [x] Preserve the website work separately while continuing on the MCP branch.
+
+### Split task closeout (2026-10-24)
+
+This work item covers separating website and MCP/Librarian work into distinct
+main-targeted branches and pull requests. That split is complete. Further PR
+#46 readiness and provider/search verification remain with the existing
+`b152c56c` and `09ee9986` work items; they are not prerequisites to closing
+this branch-splitting task.
+
+**Directly verified at closeout:**
+
+- The MCP worktree is clean on `feature/mcp-providers` at
+  `07140b8314675e0aacbb517f6ea7da0c194871b2`, matching
+  `origin/feature/mcp-providers`.
+- The remaining local and remote feature branches are
+  `feature/mcp-providers` and `feature/website-improvements`; the former
+  mixed `feature/website` branch is absent from the current local/remote ref
+  inventory.
+- PR #46 is the MCP/Librarian PR and PR #47 is the separate website PR; both
+  target `main`. PR #46 is open with a failed `quality` check and passing
+  `validate-generated` check. PR #47 is open and its latest website build
+  check passes; deployment is skipped on this PR workflow.
+- The owner reported that the old branches were cleaned up and commits from
+  other branches were cherry-picked into the MCP providers branch. The
+  current branch/ref inventory is consistent with the cleanup report; the
+  exact cherry-pick ancestry is owner-reported and is not independently
+  asserted by this checkout's commit messages.
+
+**Closeout boundary:** PR #47 is not closed by this work-item closeout. The
+user asked to park website work, so its existing branch and open PR remain
+untouched. PR #46's failed check and client verification gates continue under
+their owning active work items.
+
+## Outcome
+
+Website and MCP/Librarian work have separate branches and main-targeted PRs.
+The MCP providers branch is the active delivery path; the website branch and
+PR remain separate and parked. Follow-up readiness gates for PR #46 are owned
+by `b152c56c` and `09ee9986`.
+
+## Verification
+
+- `feature/mcp-providers` is clean and matches its remote at
+  `07140b8314675e0aacbb517f6ea7da0c194871b2`.
+- The active feature refs are `feature/mcp-providers` and
+  `feature/website-improvements`; `feature/website` is absent from the current
+  ref inventory.
+- PR #46 and PR #47 are separate and target `main`. Their current state and
+  checks are recorded in the closeout evidence above; neither PR was modified.
+- `git diff --check` passed for the closeout edits.
+
+## Close Checklist
+
+- [x] Separate website and MCP/Librarian ownership into distinct branches.
+- [x] Open separate main-targeted PRs and record their current states truthfully.
+- [x] Preserve the website work separately without changing its branch or PR.
+- [x] Hand off outstanding MCP/provider and search-index gates to their existing
+  work items.
+- [x] Move this completed split task from `active/` to `closed/` and update the
+  backlog index.
