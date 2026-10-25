@@ -1,6 +1,13 @@
 ---
 name: hawp-change-review-and-reference-sync
 description: Review recent repo changes and update HAWP/documentation references when evidence supports it
+tools:
+  - read
+  - search
+  - edit
+  - execute
+  - hawp/hawp_search
+  - hawp/hawp_work_validate
 ---
 
 # HAWP Change Review and Reference Sync Prompt
@@ -50,6 +57,17 @@ Process:
    - renamed section headings
    - wording that restores factual consistency
 6. Do not refactor unrelated prose or reorganize documents.
+
+HAWP tool use:
+
+- Use `hawp_search` for indexed discovery and `hawp_work_validate` for HAWP
+  structure and link checks. Verify findings against source files; empty
+  results do not prove that a file or record is absent.
+- Use the available VS Code workspace tools for direct reads, reference edits,
+  and local checks.
+- Do not create work items or change backlog status unless the user explicitly
+  requests those work-record changes. Tool availability does not grant
+  approval.
 
 Hard constraints:
 

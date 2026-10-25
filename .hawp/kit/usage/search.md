@@ -5,7 +5,7 @@
 ## Quick start (CLI)
 
 ```bash
-# 1. Index documents (run once, re-run after content changes)
+# 1. Sync configured source files (re-run after content changes)
 hawp search index
 
 # 2. Embed documents for semantic/hybrid search (--backend is required)
@@ -16,6 +16,10 @@ hawp search embed --backend onnx     # offline fallback, no Ollama needed
 hawp search "how do I write a status report"
 hawp search "backlog alignment rules" --hybrid-ratio 0.3
 ```
+
+`hawp search index` uses the paths in `.hawp/config/search.json`. It updates
+current source files and removes indexed paths that have been moved or deleted.
+It refuses an empty corpus rather than clearing the existing index.
 
 ## Embedding backends
 
@@ -42,6 +46,13 @@ hawp search embed --backend onnx   --model all-MiniLM-L6-v2
 
 Hybrid is recommended once vectors are built.
 
+### Lexical query matching
+
+Lexical terms are combined with FTS5's implicit `AND`: every term must match
+within the same chunk. Use short, focused queries; a long query can return no
+matches even when related source files are indexed. Empty results do not prove
+that a source file or work item is absent.
+
 ## Context packing
 
 ```bash
@@ -63,7 +74,7 @@ hawp search <query>
   --hybrid-ratio <f>      lexical fraction for hybrid blend, 0.0 to 1.0 (default: 0.3)
   --verbose | -v          print token accounting summary to stderr (chunks, ~tokens, saved via dedup)
 
-hawp search index         ingest configured paths into SQLite (reads .hawp/config/search.json)
+hawp search index         sync configured paths into SQLite (reads .hawp/config/search.json)
 hawp search embed         generate and store embedding vectors
   --backend onnx|ollama   required: embedding backend to use
   --model <name>          override default model for the backend
@@ -136,4 +147,6 @@ hawp search index && hawp search embed --backend ollama
 hawp search "backlog alignment rules" --context --max-tokens 2000
 ```
 
-The index is idempotent — re-running after content changes upserts new chunks. Vectors persist across sessions.
+Each index run rebuilds chunks for current source documents and removes stale
+paths. Re-run `hawp search embed` after indexing if semantic or hybrid search
+needs vectors; lexical search works without embeddings.

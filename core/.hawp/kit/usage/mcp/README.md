@@ -61,8 +61,12 @@ text while updating launch values and adding missing defaults. Unsupported
 layouts require manual merge; there is no force-overwrite flag.
 JSON and Codex validation occur before any selected config is
 written, but later filesystem write failures are not an all-or-nothing transaction.
-Continue prints a user-config block; GitHub writes repo-local `.vscode/mcp.json`.
-Exit 0 is not client connection proof.
+Continue prints a user-config block; GitHub writes repo-local
+`.vscode/mcp.json` and generates `.github/agents/hawp.agent.md` with the seven
+HAWP MCP tools plus VS Code workspace `read`, `search`, `edit`, and `execute`
+tools in its allowlist. This scopes availability only and does not configure
+approval; verify trust and confirmation behavior in the client. Exit 0 is not
+client connection proof.
 Both `configure` and `init` now share the preserving Codex merge; `init` still
 performs provisioning and kit sync. See the Codex guide for supported layouts.
 

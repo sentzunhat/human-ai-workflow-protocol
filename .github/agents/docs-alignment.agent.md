@@ -45,6 +45,8 @@ tools:
     web/fetch,
     web/githubRepo,
     browser/openBrowserPage,
+    hawp/hawp_search,
+    hawp/hawp_work_validate,
     todo,
   ]
 user-invocable: true
@@ -74,6 +76,14 @@ Detect documentation drift between implementation and docs without changing code
 - Do not present inferred drift as confirmed fact.
 - Always cite exact file paths and line references for substantive findings.
 - Prefer the smallest relevant audit scope first.
+
+## HAWP Tool Use
+
+For HAWP-scoped audits, use `hawp_search` for indexed discovery and
+`hawp_work_validate` for kit, work-record, and link checks. Verify search
+findings against source files; empty results do not prove a file or record is
+absent. Do not create HAWP work records or change backlog status during an
+audit unless the user specifically requests it.
 
 ## Audit Workflow
 

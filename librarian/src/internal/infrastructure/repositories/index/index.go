@@ -220,6 +220,61 @@ func (ix *IndexDB) DeleteChunksForDocument(documentID int64) error {
 	return err
 }
 
+// DeleteDocumentsNotInPaths removes documents outside a complete source corpus.
+func (ix *IndexDB) DeleteDocumentsNotInPaths(paths []string) error {
+	keep := make(map[string]struct{}, len(paths))
+	for _, path := range paths {
+		keep[path] = struct{}{}
+	}
+
+	tx, err := ix.db.Begin()
+	if err != nil {
+		return fmt.Errorf("begin stale-document cleanup: %w", err)
+	}
+	defer tx.Rollback()
+
+	rows, err := tx.Query(`SELECT id, path FROM documents`)
+	if err != nil {
+		return fmt.Errorf("list indexed documents: %w", err)
+	}
+	defer rows.Close()
+
+	var staleIDs []int64
+	for rows.Next() {
+		var id int64
+		var path string
+		if err := rows.Scan(&id, &path); err != nil {
+			return fmt.Errorf("read indexed document: %w", err)
+		}
+		if _, ok := keep[path]; !ok {
+			staleIDs = append(staleIDs, id)
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return fmt.Errorf("read indexed documents: %w", err)
+	}
+	if err := rows.Close(); err != nil {
+		return fmt.Errorf("close indexed documents: %w", err)
+	}
+
+	for _, id := range staleIDs {
+		if _, err := tx.Exec(`DELETE FROM chunks WHERE document_id = ?`, id); err != nil {
+			return fmt.Errorf("delete chunks for stale document %d: %w", id, err)
+		}
+		if _, err := tx.Exec(`DELETE FROM documents_metadata WHERE document_id = ?`, id); err != nil {
+			return fmt.Errorf("delete metadata for stale document %d: %w", id, err)
+		}
+		if _, err := tx.Exec(`DELETE FROM documents WHERE id = ?`, id); err != nil {
+			return fmt.Errorf("delete stale document %d: %w", id, err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit stale-document cleanup: %w", err)
+	}
+	return nil
+}
+
 // Close closes the database connection.
 func (ix *IndexDB) Close() error {
 	return ix.db.Close()

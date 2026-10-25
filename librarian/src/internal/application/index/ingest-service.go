@@ -66,6 +66,18 @@ func NewIngestService(dbPath string) *IngestService {
 
 // Execute ingests documents from a corpus into the index database.
 func (s *IngestService) Execute(corpus *EnrichedCorpus) (IngestResult, error) {
+	return s.ingest(corpus, false)
+}
+
+// Sync ingests a complete corpus and removes documents absent from it.
+func (s *IngestService) Sync(corpus *EnrichedCorpus) (IngestResult, error) {
+	if corpus == nil || len(corpus.Documents) == 0 {
+		return IngestResult{}, fmt.Errorf("refusing to sync an empty corpus")
+	}
+	return s.ingest(corpus, true)
+}
+
+func (s *IngestService) ingest(corpus *EnrichedCorpus, syncCorpus bool) (IngestResult, error) {
 	result := IngestResult{}
 	start := time.Now()
 
@@ -160,6 +172,16 @@ func (s *IngestService) Execute(corpus *EnrichedCorpus) (IngestResult, error) {
 			}
 			result.ChunksCreated++
 			result.BytesIndexed += int64(len(cr.Text))
+		}
+	}
+
+	if syncCorpus {
+		paths := make([]string, 0, len(corpus.Documents))
+		for _, document := range corpus.Documents {
+			paths = append(paths, document.Path)
+		}
+		if err := db.DeleteDocumentsNotInPaths(paths); err != nil {
+			return result, fmt.Errorf("remove stale documents: %w", err)
 		}
 	}
 

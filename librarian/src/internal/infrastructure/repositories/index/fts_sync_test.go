@@ -78,3 +78,75 @@ func TestFTS5TriggersExist(t *testing.T) {
 		}
 	}
 }
+
+func TestFTS5RemovesPrunedDocumentsFromSearch(t *testing.T) {
+	dbPath := filepath.Join(t.TempDir(), "test.db")
+	db, err := Open(dbPath)
+	if err != nil {
+		t.Fatalf("Open() error = %v", err)
+	}
+	defer db.Close()
+	if err := db.InitSchema(); err != nil {
+		t.Fatalf("InitSchema() error = %v", err)
+	}
+
+	stalePath := ".hawp/work/active/deadbeef/plan.md"
+	staleID, err := db.InsertDocument("work", "plan", stalePath, "work/active")
+	if err != nil {
+		t.Fatalf("InsertDocument(stale) error = %v", err)
+	}
+	if err := db.InsertMetadata(DocumentMetadata{
+		DocumentID: staleID,
+		WorkUUID:   "deadbeef",
+		Status:     "active",
+	}); err != nil {
+		t.Fatalf("InsertMetadata() error = %v", err)
+	}
+	if err := db.InsertChunk(Chunk{
+		DocumentID: staleID,
+		ChunkIdx:   0,
+		Text:       "staleindexmarker must disappear after pruning",
+	}); err != nil {
+		t.Fatalf("InsertChunk(stale) error = %v", err)
+	}
+
+	keptPath := ".hawp/kit/keep.md"
+	keptID, err := db.InsertDocument("kit", "guide", keptPath, "kit")
+	if err != nil {
+		t.Fatalf("InsertDocument(kept) error = %v", err)
+	}
+	if err := db.InsertChunk(Chunk{
+		DocumentID: keptID,
+		ChunkIdx:   0,
+		Text:       "keptindexmarker remains searchable",
+	}); err != nil {
+		t.Fatalf("InsertChunk(kept) error = %v", err)
+	}
+
+	if err := db.DeleteDocumentsNotInPaths([]string{keptPath}); err != nil {
+		t.Fatalf("DeleteDocumentsNotInPaths() error = %v", err)
+	}
+
+	staleResults, err := db.QueryChunksLexical("staleindexmarker", 10)
+	if err != nil {
+		t.Fatalf("QueryChunksLexical(stale) error = %v", err)
+	}
+	if len(staleResults) != 0 {
+		t.Fatalf("stale results = %d, want 0", len(staleResults))
+	}
+	keptResults, err := db.QueryChunksLexical("keptindexmarker", 10)
+	if err != nil {
+		t.Fatalf("QueryChunksLexical(kept) error = %v", err)
+	}
+	if len(keptResults) != 1 {
+		t.Fatalf("kept results = %d, want 1", len(keptResults))
+	}
+
+	var metadataCount int
+	if err := db.db.QueryRow(`SELECT COUNT(*) FROM documents_metadata`).Scan(&metadataCount); err != nil {
+		t.Fatalf("count metadata: %v", err)
+	}
+	if metadataCount != 0 {
+		t.Fatalf("metadata rows = %d, want 0 after pruning", metadataCount)
+	}
+}

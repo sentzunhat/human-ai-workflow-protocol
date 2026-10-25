@@ -112,6 +112,12 @@ Do not claim success from typecheck or lint alone. Observe the actual behavior.
 
 This repository uses HAWP as a lightweight task-shaping protocol.
 
+- Use `hawp_search` for indexed HAWP discovery and `hawp_work_validate` before
+  and after work-record changes when those MCP tools are available. Verify
+  search findings against source files; empty results do not prove absence.
+- Use the VS Code workspace tools for direct file inspection, edits, and local
+  checks. Tool availability does not grant approval; preserve the client's
+  normal confirmation prompts for write-capable HAWP calls.
 - Read `.hawp/kit/start-here.md` before starting any non-trivial task
 - Track bugs and tasks in `.hawp/work/BACKLOG.md`
 - Write active plans to `.hawp/work/active/<id>.md`
